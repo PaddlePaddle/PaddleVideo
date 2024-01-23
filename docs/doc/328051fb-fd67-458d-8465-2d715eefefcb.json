@@ -1,0 +1,15 @@
+{
+    "summary": "This code defines the TransNetV2Head class, a type of head used in computer vision models, inheriting from BaseHead with arguments for number of classes, input channels, and loss configuration. It also includes TransNetV2Loss class registered as HEADS registry, and two methods (loss and get_score) for calculating loss and F1 score between predictions and ground truth.",
+    "details": [
+        {
+            "comment": "This code defines the TransNetV2Head class, which is a type of head used in computer vision models. It inherits from BaseHead and takes arguments for number of classes, input channels, and loss configuration. The TransNetV2Loss class is registered with the HEADS registry to be used by this head. Additionally, the code provides comments about licensing and copyright information.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/heads/transnetv2_head.py\":0-28",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .base import BaseHead\nfrom ..registry import HEADS\nfrom ..losses import TransNetV2Loss\nfrom ...metrics.transnetv2_metric import create_scene_based_summaries\n@HEADS.register()\nclass TransNetV2Head(BaseHead):\n    \"\"\"TransNetV2 Head.\n    \"\"\"\n    def __init__(self,\n                 num_classes,\n                 in_channels,\n                 loss_cfg=dict(name=\"TransNetV2Loss\")\n                 ):\n        super().__init__(num_classes,"
+        },
+        {
+            "comment": "This code defines a class with two methods, `loss` and `get_score`. The `loss` method calculates the loss between predictions and ground truth, while `get_score` method calculates an F1 score based on one-hot predictions and ground truth. The calculated losses are stored in a dictionary for further use.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/heads/transnetv2_head.py\":29-44",
+            "content": "                         in_channels,\n                         loss_cfg)\n    def loss(self, one_hot_pred, one_hot_gt,\n                many_hot_pred=None, many_hot_gt=None, reg_losses=None):\n        losses = dict()\n        loss = self.loss_func(scores, labels, **kwargs)\n        f1 = self.get_score(one_hot_pred, one_hot_gt)\n        losses['f1'] = f1\n        losses['loss'] = loss\n        return losses\n    def get_score(self, one_hot_pred, one_hot_gt):\n        f1 = create_scene_based_summaries(one_hot_pred, one_hot_gt)\n        return f1"
+        }
+    ]
+}

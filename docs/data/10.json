@@ -1,0 +1,542 @@
+{
+    "1000": {
+        "file_id": 91,
+        "content": "                {\n                    \"label\": 6,\n                    \"norm_iou\": 0.7575757575757576,\n                    \"norm_ioa\": 0.7575757575757576,\n                    \"norm_start\": -0.32,\n                    \"proposal\": {\n                        \"start\": 5011,\n                        \"end\": 5036,\n                        \"score\": 0.7723643666324231\n                    },\n                    \"hit_gts\": {\n                        \"label_ids\": [\n                            6\n                        ],\n                        \"label_names\": [\n                            \"换人\"\n                        ],\n                        \"start_id\": 5003,\n                        \"end_id\": 5036\n                    }\n                },\n                ...\n        },\n        ...\n}\n```\n- LSTM训练所需要的feature数据格式如下:\n```\n{\n    'features': np.array(feature_hit, dtype=np.float32),    # iamge和audio 特征\n    'feature_fps': 5,                                       # fps = 5\n    'label_info': {'norm_iou': 0.5, 'label': 3, ...},       # 数据格式1中的'proposal_actions'",
+        "type": "code",
+        "location": "/applications/FootballAction/README.md:409-441"
+    },
+    "1001": {
+        "file_id": 91,
+        "content": "This code snippet represents the structure of a single data sample used in training an LSTM model for action recognition. The data includes image and audio features, frame-level labels, and metrics like IOU (Intersection over Union) and IOA (Intersection over Area). The \"proposal\" field contains start, end, and score values to define the segment of interest. The \"hit_gts\" field provides ground truth information about the labeled action segments within the sample.",
+        "type": "comment"
+    },
+    "1002": {
+        "file_id": 91,
+        "content": "    'video_name': 'c9516c903de3416c97dae91a59e968d7'        # video_name\n}\n```\n- LSTM训练所需文件列表数据格式如下：\n```\n'{} {}'.format(filename, label)\n```\n##### step3.2  LSTM训练\n训练启动命令如下:\n```bash\npython -B -m paddle.distributed.launch \\\n     --gpus=\"0,1,2,3\" \\\n     --log_dir=./football/logs_lstm \\\n     main.py  \\\n     --validate \\\n     -c applications/FootballAction/train_proposal/configs/lstm_football.yaml \\\n     -o output_dir=./football/lstm\n```\n##### step3.3 导出LSTM推理模型\n模型导出命令如下:\n```bash\npython tools/export_model.py -c applications/FootballAction/train_proposal/configs/lstm_football.yaml \\\n                              -p ./football/lstm/AttentionLSTM_best.pdparams  \\\n                               -o ./football/inference_model\n```\n<a name=\"模型推理\"></a>\n### 5.2 模型推理\n运行预测代码\n```\ncd predict && python predict.py\n```\n- 默认使用我们提供的于训练文件进行预测，如使用个人训练的模型文件，请对应修改[配置文件](./predict/configs/configs.yaml)中的参数路径\n- 产出文件：results.json\n<a name=\"模型评估\"></a>\n### 5.3 模型评估\n```\n# 包括bmn proposal 评估和最终action评估\ncd predict && python eval.py results.json\n```\n<a name=\"模型优化\"></a>",
+        "type": "code",
+        "location": "/applications/FootballAction/README.md:442-493"
+    },
+    "1003": {
+        "file_id": 91,
+        "content": "This code represents the data format for listing necessary files for LSTM training, and provides commands for launching LSTM training, exporting the trained model for inference, running predictions with default or custom models, and evaluating the model's performance.",
+        "type": "comment"
+    },
+    "1004": {
+        "file_id": 91,
+        "content": "### 5.4 模型优化\n- 基础特征模型（图像）替换为PP-TSM，准确率由84%提升到94%\n- 基础特征模型（音频）没变动\n- 准确率提升，precision和recall均有大幅提升，F1-score从0.57提升到0.82\n<a name=\"模型部署\"></a>\n### 5.5 模型部署\n本代码解决方案在动作的检测和召回指标F1-score=82%\n<a name=\"参考论文\"></a>\n### 6. 参考论文\n- [TSM: Temporal Shift Module for Efficient Video Understanding](https://arxiv.org/pdf/1811.08383.pdf), Ji Lin, Chuang Gan, Song Han\n- [BMN: Boundary-Matching Network for Temporal Action Proposal Generation](https://arxiv.org/abs/1907.09702), Tianwei Lin, Xiao Liu, Xin Li, Errui Ding, Shilei Wen.\n- [Attention Clusters: Purely Attention Based Local Feature Integration for Video Classification](https://arxiv.org/abs/1711.09550), Xiang Long, Chuang Gan, Gerard de Melo, Jiajun Wu, Xiao Liu, Shilei Wen\n- [YouTube-8M: A Large-Scale Video Classification Benchmark](https://arxiv.org/abs/1609.08675), Sami Abu-El-Haija, Nisarg Kothari, Joonseok Lee, Paul Natsev, George Toderici, Balakrishnan Varadarajan, Sudheendra Vijayanarasimhan",
+        "type": "code",
+        "location": "/applications/FootballAction/README.md:494-513"
+    },
+    "1005": {
+        "file_id": 91,
+        "content": "The code discusses model optimization, where the base feature model (image) is replaced with PP-TSM, resulting in a 94% accuracy improvement. The audio base feature remains unchanged. This leads to an F1-score increase from 0.57 to 0.82. It also mentions model deployment and provides references for related papers.",
+        "type": "comment"
+    },
+    "1006": {
+        "file_id": 92,
+        "content": "/applications/FootballAction/checkpoints/download.sh",
+        "type": "filepath"
+    },
+    "1007": {
+        "file_id": 92,
+        "content": "This script downloads and extracts four tar files (audio, pptsm, bmn, lstm) related to the FootballAction application within PaddleVideo. The tar files are then deleted after extraction.",
+        "type": "summary"
+    },
+    "1008": {
+        "file_id": 92,
+        "content": "# audio\nwget https://videotag.bj.bcebos.com/PaddleVideo-release2.1/FootballAction/audio.tar\n# pptsm\nwget https://videotag.bj.bcebos.com/PaddleVideo-release2.1/FootballAction/pptsm.tar\n# bmn\nwget https://videotag.bj.bcebos.com/PaddleVideo-release2.1/FootballAction/bmn.tar\n# lstm\nwget https://videotag.bj.bcebos.com/PaddleVideo-release2.1/FootballAction/lstm.tar\ntar -xvf audio.tar\ntar -xvf pptsm.tar\ntar -xvf bmn.tar\ntar -xvf lstm.tar\nrm -f audio.tar\nrm -f pptsm.tar\nrm -f bmn.tar\nrm -f lstm.tar",
+        "type": "code",
+        "location": "/applications/FootballAction/checkpoints/download.sh:1-18"
+    },
+    "1009": {
+        "file_id": 92,
+        "content": "This script downloads and extracts four tar files (audio, pptsm, bmn, lstm) related to the FootballAction application within PaddleVideo. The tar files are then deleted after extraction.",
+        "type": "comment"
+    },
+    "1010": {
+        "file_id": 93,
+        "content": "/applications/FootballAction/datasets/EuroCup2016/dataset_url.list",
+        "type": "filepath"
+    },
+    "1011": {
+        "file_id": 93,
+        "content": "This code provides URLs to download 13 EuroCup2016 video files from BCEBOS cloud storage for potential analysis or training data.",
+        "type": "summary"
+    },
+    "1012": {
+        "file_id": 93,
+        "content": "https://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/63e51df254d2402fac703b6c4fdb4ea9.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/76b5f7ee28d942988c6b224bfac136bd.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/250b88724acf40dbb6d7e8ccb400ef38.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/c9516c903de3416c97dae91a59e968d7.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/e1982c90cdd74abaacc4d0692070b400.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/1be705a8f67648da8ec4b4296fa80895.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/de23c0b2be3a4eb1990c5c657061fb29.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/2754615de6e64c4fb95ce1a8095dc1c1.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/299fe30d8f3b4a45b89313fe31f9f3c0.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/6cc7db52c5ef4e70b401a5e00d8dd67a.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/22e89747689e4f7e83e3620620c93269.mp4",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/EuroCup2016/dataset_url.list:1-11"
+    },
+    "1013": {
+        "file_id": 93,
+        "content": "List of EuroCup2016 dataset video URLs for download.",
+        "type": "comment"
+    },
+    "1014": {
+        "file_id": 93,
+        "content": "https://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/2ceb6c549fc64305a06a75acb355642b.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/719b0a4bcb1f461eabb152298406b861.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/259856b769044b4d8dc94076deb356bf.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/d0bd3eab1e794f0f9501c353a6d37827.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/19eb47cc736240d6b2dd930ab69da839.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/4435b708af6d48519a6b726144147d51.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/ea16ad2a020643529e257bd6cb11b3c3.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/eeebffbd4ec74222a9c2d0775d79b689.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/8cfb4e605af44055b1576c37eb0e3209.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/6bca62b57cc449c6935f0b17f28d06be.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/70cfc31e520840b2afca458f93a01ce4.mp4",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/EuroCup2016/dataset_url.list:12-22"
+    },
+    "1015": {
+        "file_id": 93,
+        "content": "This code provides URLs to download various video files from a specified location for the EuroCup2016 dataset.",
+        "type": "comment"
+    },
+    "1016": {
+        "file_id": 93,
+        "content": "https://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/6496960935e845578e391a5916739752.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/d6d25403a4bb4784aecff5f21fd00dc5.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/3e23d452a082403391f8abfb87bf2fb4.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/4c5d9d9af4f044c4a68d134061dc264f.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/6994844c64b44c26b935cee9604bef0a.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/d6322cb95f6a4402ac80432b561abd5d.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/2c8b5587083a4784a51622e4fec87ccd.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/5faa60d70ed141de8560110e840f2048.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/45d08bc5cb0f424f9ed9d7874eb561cd.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/6630aaf0e32146088d0b624e9288f071.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/f2edbee29c1b4966b3a410260f78fbe3.mp4",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/EuroCup2016/dataset_url.list:23-33"
+    },
+    "1017": {
+        "file_id": 93,
+        "content": "Lists URLs of 13 EuroCup2016 .mp4 video files hosted on BCEBOS cloud storage.",
+        "type": "comment"
+    },
+    "1018": {
+        "file_id": 93,
+        "content": "https://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/f24116fdd6a54214991db32f7dddef67.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/0265731a0c6f4a9398c88db8e3d4a3bc.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/02d2de09997f4215b06e3b00ff0502a0.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/9c231896c56a43f291a5e190949f4333.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/4afbbf9afcd44dfea45b044117cccb48.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/745db97a080d4f44b450dc17a2bcf069.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/5933d0ce17854483b81a318d7d45a34e.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/d2cfef2da9f84237a6950c7f6659655c.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/5572686cb90f440988ded956a60e555d.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/8962ac5a332346e180c79d701ae0a175.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/f6e64ee9b13a4088b24c45c257894c1e.mp4",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/EuroCup2016/dataset_url.list:34-44"
+    },
+    "1019": {
+        "file_id": 93,
+        "content": "This code lists URLs for video files belonging to the EuroCup2016 dataset, stored on a specific BCEBOS server.",
+        "type": "comment"
+    },
+    "1020": {
+        "file_id": 93,
+        "content": "https://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/f6ed2b612b3d43baa0726be8b14ebe7c.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/8ab7b0cba5744eb3b6fb10003dfda383.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/1f0a0698e38d493988fe42a50f7e8723.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/737fdb054ca141f2a45013c1740dd0a0.mp4\nhttps://paddle-model-ecology.bj.bcebos.com/data/EuroCup2016/bab63a9bcf204e4b99c4a887a01bfd60.mp4",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/EuroCup2016/dataset_url.list:45-49"
+    },
+    "1021": {
+        "file_id": 93,
+        "content": "This code contains a list of URLs for EuroCup2016 video files stored in \"paddle-model-ecology.bj.bcebos.com/data/EuroCup2016\". Each URL represents an MP4 file related to the event, potentially used for analysis or training data.",
+        "type": "comment"
+    },
+    "1022": {
+        "file_id": 94,
+        "content": "/applications/FootballAction/datasets/EuroCup2016/download_dataset.sh",
+        "type": "filepath"
+    },
+    "1023": {
+        "file_id": 94,
+        "content": "The script downloads 12 EuroCup2016 dataset videos using 'wget' command, creating a \"mp4\" directory and accessing bj.bcebos.com server under tmt-pub/datasets/EuroCup2016 directory.",
+        "type": "summary"
+    },
+    "1024": {
+        "file_id": 94,
+        "content": "mkdir mp4\ncd mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/63e51df254d2402fac703b6c4fdb4ea9.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/76b5f7ee28d942988c6b224bfac136bd.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/250b88724acf40dbb6d7e8ccb400ef38.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/c9516c903de3416c97dae91a59e968d7.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/e1982c90cdd74abaacc4d0692070b400.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/1be705a8f67648da8ec4b4296fa80895.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/de23c0b2be3a4eb1990c5c657061fb29.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/2754615de6e64c4fb95ce1a8095dc1c1.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/299fe30d8f3b4a45b89313fe31f9f3c0.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/6cc7db52c5ef4e70b401a5e00d8dd67a.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/22e89747689e4f7e83e3620620c93269.mp4",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/EuroCup2016/download_dataset.sh:1-13"
+    },
+    "1025": {
+        "file_id": 94,
+        "content": "This script creates a new directory called \"mp4\" and then changes into it. It then uses the wget command to download 12 MP4 video files from a specified URL, one after another. The purpose of this script is likely to download all the videos in the EuroCup2016 dataset for further use or processing.",
+        "type": "comment"
+    },
+    "1026": {
+        "file_id": 94,
+        "content": "wget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/2ceb6c549fc64305a06a75acb355642b.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/719b0a4bcb1f461eabb152298406b861.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/259856b769044b4d8dc94076deb356bf.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/d0bd3eab1e794f0f9501c353a6d37827.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/19eb47cc736240d6b2dd930ab69da839.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/4435b708af6d48519a6b726144147d51.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/ea16ad2a020643529e257bd6cb11b3c3.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/eeebffbd4ec74222a9c2d0775d79b689.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/8cfb4e605af44055b1576c37eb0e3209.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/6bca62b57cc449c6935f0b17f28d06be.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/70cfc31e520840b2afca458f93a01ce4.mp4",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/EuroCup2016/download_dataset.sh:14-24"
+    },
+    "1027": {
+        "file_id": 94,
+        "content": "This code is using wget to download multiple video files from a specified URL. The videos are part of the EuroCup2016 dataset, and each file has a unique identifier.",
+        "type": "comment"
+    },
+    "1028": {
+        "file_id": 94,
+        "content": "wget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/6496960935e845578e391a5916739752.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/d6d25403a4bb4784aecff5f21fd00dc5.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/3e23d452a082403391f8abfb87bf2fb4.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/4c5d9d9af4f044c4a68d134061dc264f.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/6994844c64b44c26b935cee9604bef0a.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/d6322cb95f6a4402ac80432b561abd5d.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/2c8b5587083a4784a51622e4fec87ccd.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/5faa60d70ed141de8560110e840f2048.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/45d08bc5cb0f424f9ed9d7874eb561cd.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/6630aaf0e32146088d0b624e9288f071.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/f2edbee29c1b4966b3a410260f78fbe3.mp4",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/EuroCup2016/download_dataset.sh:25-35"
+    },
+    "1029": {
+        "file_id": 94,
+        "content": "This code is using the wget command to download multiple video files from a specific URL. The videos are part of the EuroCup2016 dataset.",
+        "type": "comment"
+    },
+    "1030": {
+        "file_id": 94,
+        "content": "wget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/f24116fdd6a54214991db32f7dddef67.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/0265731a0c6f4a9398c88db8e3d4a3bc.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/02d2de09997f4215b06e3b00ff0502a0.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/9c231896c56a43f291a5e190949f4333.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/4afbbf9afcd44dfea45b044117cccb48.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/745db97a080d4f44b450dc17a2bcf069.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/5933d0ce17854483b81a318d7d45a34e.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/d2cfef2da9f84237a6950c7f6659655c.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/5572686cb90f440988ded956a60e555d.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/8962ac5a332346e180c79d701ae0a175.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/f6e64ee9b13a4088b24c45c257894c1e.mp4",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/EuroCup2016/download_dataset.sh:36-46"
+    },
+    "1031": {
+        "file_id": 94,
+        "content": "The code is using the 'wget' command to download multiple MP4 video files from different URLs, presumably to create or expand a local dataset of EuroCup2016 videos.",
+        "type": "comment"
+    },
+    "1032": {
+        "file_id": 94,
+        "content": "wget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/f6ed2b612b3d43baa0726be8b14ebe7c.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/8ab7b0cba5744eb3b6fb10003dfda383.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/1f0a0698e38d493988fe42a50f7e8723.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/737fdb054ca141f2a45013c1740dd0a0.mp4\nwget https://bj.bcebos.com/v1/tmt-pub/datasets/EuroCup2016/bab63a9bcf204e4b99c4a887a01bfd60.mp4",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/EuroCup2016/download_dataset.sh:47-51"
+    },
+    "1033": {
+        "file_id": 94,
+        "content": "This code uses the wget command to download multiple mp4 files from a specific URL related to EuroCup2016 dataset. It downloads each file one by one, indicated by the different file names. The files are being downloaded from the bj.bcebos.com server under tmt-pub/datasets/EuroCup2016 directory.",
+        "type": "comment"
+    },
+    "1034": {
+        "file_id": 95,
+        "content": "/applications/FootballAction/datasets/EuroCup2016/url.list",
+        "type": "filepath"
+    },
+    "1035": {
+        "file_id": 95,
+        "content": "The given code contains a list of unique URLs for MP4 video files from the \"EuroCup2016\" dataset in the \"FootballAction\" application, which can be used for training or testing purposes.",
+        "type": "summary"
+    },
+    "1036": {
+        "file_id": 95,
+        "content": "mp4/63e51df254d2402fac703b6c4fdb4ea9.mp4\nmp4/76b5f7ee28d942988c6b224bfac136bd.mp4\nmp4/250b88724acf40dbb6d7e8ccb400ef38.mp4\nmp4/c9516c903de3416c97dae91a59e968d7.mp4\nmp4/e1982c90cdd74abaacc4d0692070b400.mp4\nmp4/1be705a8f67648da8ec4b4296fa80895.mp4\nmp4/de23c0b2be3a4eb1990c5c657061fb29.mp4\nmp4/2754615de6e64c4fb95ce1a8095dc1c1.mp4\nmp4/299fe30d8f3b4a45b89313fe31f9f3c0.mp4\nmp4/6cc7db52c5ef4e70b401a5e00d8dd67a.mp4\nmp4/22e89747689e4f7e83e3620620c93269.mp4\nmp4/2ceb6c549fc64305a06a75acb355642b.mp4\nmp4/719b0a4bcb1f461eabb152298406b861.mp4\nmp4/259856b769044b4d8dc94076deb356bf.mp4\nmp4/d0bd3eab1e794f0f9501c353a6d37827.mp4\nmp4/19eb47cc736240d6b2dd930ab69da839.mp4\nmp4/4435b708af6d48519a6b726144147d51.mp4\nmp4/ea16ad2a020643529e257bd6cb11b3c3.mp4\nmp4/eeebffbd4ec74222a9c2d0775d79b689.mp4\nmp4/8cfb4e605af44055b1576c37eb0e3209.mp4\nmp4/6bca62b57cc449c6935f0b17f28d06be.mp4\nmp4/70cfc31e520840b2afca458f93a01ce4.mp4\nmp4/6496960935e845578e391a5916739752.mp4\nmp4/d6d25403a4bb4784aecff5f21fd00dc5.mp4\nmp4/3e23d452a082403391f8abfb87bf2fb4.mp4\nmp4/4c5d9d9af4f044c4a68d134061dc264f.mp4",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/EuroCup2016/url.list:1-26"
+    },
+    "1037": {
+        "file_id": 95,
+        "content": "This code contains a list of URLs to mp4 video files from the \"EuroCup2016\" dataset in the \"FootballAction\" application. These videos may be used for training or testing purposes.",
+        "type": "comment"
+    },
+    "1038": {
+        "file_id": 95,
+        "content": "mp4/6994844c64b44c26b935cee9604bef0a.mp4\nmp4/d6322cb95f6a4402ac80432b561abd5d.mp4\nmp4/2c8b5587083a4784a51622e4fec87ccd.mp4\nmp4/5faa60d70ed141de8560110e840f2048.mp4\nmp4/45d08bc5cb0f424f9ed9d7874eb561cd.mp4\nmp4/6630aaf0e32146088d0b624e9288f071.mp4\nmp4/f2edbee29c1b4966b3a410260f78fbe3.mp4\nmp4/f24116fdd6a54214991db32f7dddef67.mp4\nmp4/0265731a0c6f4a9398c88db8e3d4a3bc.mp4\nmp4/02d2de09997f4215b06e3b00ff0502a0.mp4\nmp4/9c231896c56a43f291a5e190949f4333.mp4\nmp4/4afbbf9afcd44dfea45b044117cccb48.mp4\nmp4/745db97a080d4f44b450dc17a2bcf069.mp4\nmp4/5933d0ce17854483b81a318d7d45a34e.mp4\nmp4/d2cfef2da9f84237a6950c7f6659655c.mp4\nmp4/5572686cb90f440988ded956a60e555d.mp4\nmp4/8962ac5a332346e180c79d701ae0a175.mp4\nmp4/f6e64ee9b13a4088b24c45c257894c1e.mp4\nmp4/f6ed2b612b3d43baa0726be8b14ebe7c.mp4\nmp4/8ab7b0cba5744eb3b6fb10003dfda383.mp4\nmp4/1f0a0698e38d493988fe42a50f7e8723.mp4\nmp4/737fdb054ca141f2a45013c1740dd0a0.mp4\nmp4/bab63a9bcf204e4b99c4a887a01bfd60.mp4",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/EuroCup2016/url.list:27-49"
+    },
+    "1039": {
+        "file_id": 95,
+        "content": "This code contains a list of URLs pointing to MP4 video files from the \"EuroCup2016\" dataset in the \"FootballAction\" application of the PaddleVideo library. The URLs are unique identifiers for each video file, allowing for easy access and retrieval.",
+        "type": "comment"
+    },
+    "1040": {
+        "file_id": 96,
+        "content": "/applications/FootballAction/datasets/EuroCup2016/url_val.list",
+        "type": "filepath"
+    },
+    "1041": {
+        "file_id": 96,
+        "content": "This code snippet appears to be a list of URLs pointing to various MP4 video files. The file names are hashed strings, indicating that the videos may have been previously used for storage or identification purposes.",
+        "type": "summary"
+    },
+    "1042": {
+        "file_id": 96,
+        "content": "mp4/5572686cb90f440988ded956a60e555d.mp4\nmp4/f6e64ee9b13a4088b24c45c257894c1e.mp4\nmp4/259856b769044b4d8dc94076deb356bf.mp4\nmp4/1f0a0698e38d493988fe42a50f7e8723.mp4\nmp4/8cfb4e605af44055b1576c37eb0e3209.mp4",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/EuroCup2016/url_val.list:1-5"
+    },
+    "1043": {
+        "file_id": 96,
+        "content": "This code snippet appears to be a list of URLs pointing to various MP4 video files. The file names are hashed strings, indicating that the videos may have been previously used for storage or identification purposes.",
+        "type": "comment"
+    },
+    "1044": {
+        "file_id": 97,
+        "content": "/applications/FootballAction/datasets/script/get_frames_pcm.py",
+        "type": "filepath"
+    },
+    "1045": {
+        "file_id": 97,
+        "content": "This code utilizes ffmpeg to extract frames and PCM audio from video files, creating folders if necessary. It can process multiple MP4 files in parallel with up to 10 workers using the \"extract_frames\", \"extract_pcm\", and \"process\" functions.",
+        "type": "summary"
+    },
+    "1046": {
+        "file_id": 97,
+        "content": "\"\"\"\nget frames and pcm from video\n\"\"\"\nimport os\nfrom concurrent import futures\ndataset = \"../EuroCup2016\"\nurl_list = os.path.join(dataset, 'url.list')\ndst_frames = os.path.join(dataset, 'frames')\ndst_pcm = os.path.join(dataset, 'pcm')\nif not os.path.exists(dst_frames):\n    os.mkdir(dst_frames)\nif not os.path.exists(dst_pcm):\n    os.mkdir(dst_pcm)\ndef extract_frames(video_name, out_folder, fps=5):\n    if os.path.exists(out_folder):\n        os.system('rm -rf ' + out_folder + '/*')\n        os.system('rm -rf ' + out_folder)\n    os.makedirs(out_folder)\n    cmd = 'ffmpeg -v 0 -i %s -r %d -q 0 %s/%s.jpg' % (video_name, fps,\n                                                      out_folder, '%08d')\n    os.system(cmd)\ndef extract_pcm(video_name, file_name_pcm):\n    cmd = 'ffmpeg -y -i %s -acodec pcm_s16le -f s16le -ac 1 -ar 16000 %s -v 0' % (\n        video_name, file_name_pcm)\n    os.system(cmd)\ndef process(line):\n    print(line)\n    mp4_name = os.path.join(dataset, line)\n    basename = os.path.basename(line).split('.')[0]\n    folder_frame = os.path.join(dst_frames, basename)",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/script/get_frames_pcm.py:1-37"
+    },
+    "1047": {
+        "file_id": 97,
+        "content": "This code retrieves frames and Pulse Code Modulation (PCM) audio from video files. It uses the ffmpeg tool for extraction, creating folders if they don't exist already, and removes existing files before processing new ones. The \"extract_frames\" function takes a video name and output folder to extract frames at a specified frame rate. The \"extract_pcm\" function converts audio from a video file to PCM format using ffmpeg. The \"process\" function prints each line, presumably for tracking progress or errors.",
+        "type": "comment"
+    },
+    "1048": {
+        "file_id": 97,
+        "content": "    filename_pcm = os.path.join(dst_pcm, basename + '.pcm')\n    # extract\n    extract_frames(mp4_name, folder_frame)\n    extract_pcm(mp4_name, filename_pcm)\nif __name__ == \"__main__\":\n    with open(url_list, 'r') as f:\n        lines = f.readlines()\n    lines = [k.strip() for k in lines]\n    # multi thread\n    with futures.ProcessPoolExecutor(max_workers=10) as executer:\n        fs = [executer.submit(process, line) for line in lines]\n    #for line in lines:\n    #    process(line)\n    print(\"done\")",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/script/get_frames_pcm.py:38-54"
+    },
+    "1049": {
+        "file_id": 97,
+        "content": "Code is reading a list of URLs, extracting frames and audio from each MP4 file, then executing the process in multiple threads with up to 10 workers.",
+        "type": "comment"
+    },
+    "1050": {
+        "file_id": 98,
+        "content": "/applications/FootballAction/datasets/script/get_instance_for_bmn.py",
+        "type": "filepath"
+    },
+    "1051": {
+        "file_id": 98,
+        "content": "The code processes ground truth data, generates output for bmn, and combines GT data for each frame. It selects video segments, defines instance parameters, converts label data to BMN format, and saves as a numpy array and JSON labeled file.",
+        "type": "summary"
+    },
+    "1052": {
+        "file_id": 98,
+        "content": "\"\"\"\nget instance for bmn\n使用winds=40的滑窗，将所有子窗口的长度之和小于winds的进行合并\n合并后，父窗口代表bmn训练数据，子窗口代表tsn训练数据\n\"\"\"\nimport os\nimport sys\nimport json\nimport random\nimport pickle\nimport numpy as np\nbmn_window = 40\ndataset = \"../EuroCup2016\"\nfeat_dir = dataset + '/features'\nout_dir = dataset + '/input_for_bmn'\nlabel_files = {\n    'train': 'label_cls8_train.json',\n    'validation': 'label_cls8_val.json'\n}\nglobal fps\ndef gen_gts_for_bmn(gts_data):\n    \"\"\"\n    @param, gts_data, original gts for action detection\n    @return, gts_bmn, output gts dict for bmn\n    \"\"\"\n    fps = gts_data['fps']\n    gts_bmn = {'fps': fps, 'gts': []}\n    for sub_item in gts_data['gts']:\n        url = sub_item['url']\n        max_length = sub_item['total_frames']\n        # 特征提取没有获取所有帧特征，这里load feature获取准确max_length\n        #feat_path = feat_dir + '/' + os.path.basename(url).replace('.mp4', '.pkl')\n        #feature_video = pickle.load(open(feat_path, 'rb'))['features']\n        #max_length = int(len(feature_video) * 1.0 / fps)\n        gts_bmn['gts'].append({\n            'url': url,",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/script/get_instance_for_bmn.py:1-42"
+    },
+    "1053": {
+        "file_id": 98,
+        "content": "This code reads original ground truth (gts) data for action detection, sets the frame per second (fps), and generates output gts dict for bmn. It processes each sub-item in the gts_data['gts'], extracts the URL, maximum video length, and load features if not already present. The code then creates a new dictionary with fps and gts list as output gts data for bmn.",
+        "type": "comment"
+    },
+    "1054": {
+        "file_id": 98,
+        "content": "            'total_frames': max_length,\n            'root_actions': []\n        })\n        sub_actions = sub_item['actions']\n        # duration > bmn_window， 直接删除\n        for idx, sub_action in enumerate(sub_actions):\n            if sub_action['end_id'] - sub_action['start_id'] > bmn_window:\n                sub_actions.pop(idx)\n        root_actions = [sub_actions[0]]\n        # before_id, 前一动作的最后一帧\n        # after_id, 后一动作的第一帧\n        before_id = 0\n        for idx in range(1, len(sub_actions)):\n            cur_action = sub_actions[idx]\n            duration = (cur_action['end_id'] - root_actions[0]['start_id'])\n            if duration > bmn_window:\n                after_id = cur_action['start_id']\n                gts_bmn['gts'][-1]['root_actions'].append({\n                    'before_id':\n                    before_id,\n                    'after_id':\n                    after_id,\n                    'actions':\n                    root_actions\n                })\n                before_id = root_actions[-1]['end_id']",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/script/get_instance_for_bmn.py:43-69"
+    },
+    "1055": {
+        "file_id": 98,
+        "content": "This code is filtering out sub-actions that exceed a specified duration (bmn_window). It then creates a root_action list from the remaining sub-actions. The code also keeps track of the before_id and after_id to create 'gts' dictionary entries, which include the before_id, after_id, and root_actions for each group of actions that do not exceed the bmn_window duration.",
+        "type": "comment"
+    },
+    "1056": {
+        "file_id": 98,
+        "content": "                root_actions = [cur_action]\n            else:\n                root_actions.append(cur_action)\n            if idx == len(sub_actions) - 1:\n                after_id = max_length\n                gts_bmn['gts'][-1]['root_actions'].append({\n                    'before_id':\n                    before_id,\n                    'after_id':\n                    after_id,\n                    'actions':\n                    root_actions\n                })\n    return gts_bmn\ndef combile_gts(gts_bmn, gts_process, mode):\n    \"\"\"\n    1、bmn_window 范围内只有一个动作，只取一个目标框\n    2、bmn_window 范围内有多个动作，取三个目标框(第一个动作、最后一个动作、所有动作)\n    \"\"\"\n    global fps\n    fps = gts_process['fps']\n    duration_second = bmn_window * 1.0\n    duration_frame = bmn_window * fps\n    feature_frame = duration_frame\n    for item in gts_process['gts']:\n        url = item['url']\n        basename = os.path.basename(url).split('.')[0]\n        root_actions = item['root_actions']\n        for root_action in root_actions:\n            segments = []\n            # all actions",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/script/get_instance_for_bmn.py:70-102"
+    },
+    "1057": {
+        "file_id": 98,
+        "content": "This function combines ground truth (GT) data for each frame within a bmn_window range. If there is only one action in the bmn_window, it takes that action; otherwise, it considers three actions: first, last, and all. It then creates segments based on these actions and returns the combined GT data.",
+        "type": "comment"
+    },
+    "1058": {
+        "file_id": 98,
+        "content": "            segments.append({\n                'actions': root_action['actions'],\n                'before_id': root_action['before_id'],\n                'after_id': root_action['after_id']\n            })\n            if len(root_action['actions']) > 1:\n                # first action\n                segments.append({\n                    'actions': [root_action['actions'][0]],\n                    'before_id':\n                    root_action['before_id'],\n                    'after_id':\n                    root_action['actions'][1]['start_id']\n                })\n                # last action\n                segments.append({\n                    'actions': [root_action['actions'][-1]],\n                    'before_id':\n                    root_action['actions'][-2]['end_id'],\n                    'after_id':\n                    root_action['after_id']\n                })\n            for segment in segments:\n                before_id = segment['before_id']\n                after_id = segment['after_id']\n                actions = segment['actions']",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/script/get_instance_for_bmn.py:103-128"
+    },
+    "1059": {
+        "file_id": 98,
+        "content": "This code appends segments to a list based on the number of actions in root_action. If there is more than one action, it separates the first and last action into their own segments using before_id and after_id values. Finally, it loops through the segments list using a for loop to assign before_id, after_id, and actions to each segment.",
+        "type": "comment"
+    },
+    "1060": {
+        "file_id": 98,
+        "content": "                box0 = int(max(actions[-1]['end_id'] - bmn_window, before_id))\n                box1 = int(min(actions[0]['start_id'], after_id - bmn_window))\n                if box0 <= box1:\n                    cur_start = random.randint(box0, box1)\n                    cur_end = cur_start + bmn_window\n                    name = '{}_{}_{}'.format(basename, cur_start, cur_end)\n                    annotations = []\n                    for action in actions:\n                        label = str(1.0 * action['label_ids'][0])\n                        label_name = action['label_names'][0]\n                        seg0 = 1.0 * (action['start_id'] - cur_start)\n                        seg1 = 1.0 * (action['end_id'] - cur_start)\n                        annotations.append({\n                            'segment': [seg0, seg1],\n                            'label': label,\n                            'label_name': label_name\n                        })\n                    gts_bmn[name] = {\n                        'duration_second': duration_second,",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/script/get_instance_for_bmn.py:129-147"
+    },
+    "1061": {
+        "file_id": 98,
+        "content": "This code selects a random segment of video from a list of actions, assigns a label to it, and stores the segment information in a dictionary. It uses the start and end IDs of each action to determine the range for the random start point and calculates the segment's position relative to the cur_start value. The code also handles edge cases where the box0 is less than or equal to box1 and creates the annotation dictionary with label and label_name information, as well as the segment duration in seconds.",
+        "type": "comment"
+    },
+    "1062": {
+        "file_id": 98,
+        "content": "                        'duration_frame': duration_frame,\n                        'feature_frame': feature_frame,\n                        'subset': mode,\n                        'annotations': annotations\n                    }\n    return gts_bmn\ndef save_feature_to_numpy(gts_bmn, folder):\n    global fps\n    print('save feature for bmn ...')\n    if not os.path.exists(folder):\n        os.mkdir(folder)\n    process_gts_bmn = {}\n    for item, value in gts_bmn.items():\n        basename, start_id, end_id = item.split('_')\n        if not basename in process_gts_bmn:\n            process_gts_bmn[basename] = []\n        process_gts_bmn[basename].append({\n            'name': item,\n            'start': int(start_id),\n            'end': int(end_id)\n        })\n    for item, values in process_gts_bmn.items():\n        feat_path = os.path.join(feat_dir, item + '.pkl')\n        print(feat_path)\n        feature = pickle.load(open(feat_path, 'rb'))\n        image_feature = feature['image_feature']\n        pcm_feature = feature['pcm_feature']",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/script/get_instance_for_bmn.py:148-178"
+    },
+    "1063": {
+        "file_id": 98,
+        "content": "The code defines a function `get_instance_for_bmn` that returns a dictionary containing various parameters for an instance, and another function `save_feature_to_numpy` which saves feature data to a file. The features are split into two types: image and pcm, stored in a dictionary named \"feature\" with keys 'image_feature' and 'pcm_feature'. The code then loops through the dictionaries, creating sub-dictionaries for each item with their corresponding start and end indexes, before saving them to a file.",
+        "type": "comment"
+    },
+    "1064": {
+        "file_id": 98,
+        "content": "        pcm_feature = pcm_feature.reshape((pcm_feature.shape[0] * 5, 640))\n        min_length = min(image_feature.shape[0], pcm_feature.shape[0])\n        if min_length == 0:\n            continue\n        image_feature = image_feature[:min_length, :]\n        pcm_feature = pcm_feature[:min_length, :]\n        feature_video = np.concatenate((image_feature, pcm_feature), axis=1)\n        for value in values:\n            save_cut_name = os.path.join(folder, value['name'])\n            start_frame = (value['start']) * fps\n            end_frame = (value['end']) * fps\n            if end_frame > len(feature_video):\n                del gts_bmn[value['name']]\n                continue\n            feature_cut = [\n                feature_video[i] for i in range(start_frame, end_frame)\n            ]\n            np_feature_cut = np.array(feature_cut, dtype=np.float32)\n            np.save(save_cut_name, np_feature_cut)\n    return gts_bmn\nif __name__ == \"__main__\":\n    if not os.path.exists(out_dir):\n        os.mkdir(out_dir)\n    gts_bmn = {}",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/script/get_instance_for_bmn.py:180-205"
+    },
+    "1065": {
+        "file_id": 98,
+        "content": "Reshapes pcm_feature for concatenation, sets min_length based on shorter of two feature arrays, continues if min_length is 0, slices image_feature and pcm_feature to match min_length, concatenates along axis 1 to create feature_video, iterates through values dictionary, creates save_cut_name path, calculates start and end frames in seconds, checks if end frame exceeds length of feature_video, removes key from gts_bmn if end_frame is greater than feature_video length, generates list of feature_video slices within range of start and end frames, converts to numpy array for floating point numbers, saves np_feature_cut as .npy file with name derived from value's 'name'. Returns gts_bmn dictionary.",
+        "type": "comment"
+    },
+    "1066": {
+        "file_id": 98,
+        "content": "    for item, value in label_files.items():\n        label_file = os.path.join(dataset, value)\n        gts_data = json.load(open(label_file, 'rb'))\n        gts_process = gen_gts_for_bmn(gts_data)\n        gts_bmn = combile_gts(gts_bmn, gts_process, item)\n    gts_bmn = save_feature_to_numpy(gts_bmn, out_dir + '/feature')\n    with open(out_dir + '/label.json', 'w', encoding='utf-8') as f:\n        data = json.dumps(gts_bmn, indent=4, ensure_ascii=False)\n        f.write(data)",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/script/get_instance_for_bmn.py:206-216"
+    },
+    "1067": {
+        "file_id": 98,
+        "content": "The code is iterating over the label_files, loading JSON data from each file, processing it for BMN format, combining it with existing gts_bmn, and saving the final result as a numpy array and JSON formatted label.",
+        "type": "comment"
+    },
+    "1068": {
+        "file_id": 99,
+        "content": "/applications/FootballAction/datasets/script/get_instance_for_lstm.py",
+        "type": "filepath"
+    },
+    "1069": {
+        "file_id": 99,
+        "content": "This code calculates IoU and IOA, checks hits, stores relevant info in a dictionary, prints URLs for each video using gts data, and splits video features into training and validation datasets for handling football actions. It also separates video features and labels into training and validation sets, storing the data in .pkl files for later use.",
+        "type": "summary"
+    },
+    "1070": {
+        "file_id": 99,
+        "content": "\"\"\"\nget instance for lstm\n根据gts计算每个proposal_bmn的iou、ioa、label等信息\n\"\"\"\nimport os\nimport sys\nimport json\nimport random\nimport pickle\nimport numpy as np\ndataset = \"../EuroCup2016\"\nfeat_dir = dataset + '/features'\nprop_file = dataset + '/feature_bmn/prop.json'\nout_dir = dataset + '/input_for_lstm'\nlabel_files = {\n    'train': 'label_cls8_train.json',\n    'validation': 'label_cls8_val.json'\n}\ndef IoU(e1, e2):\n    \"\"\"\n    clc iou and ioa\n    \"\"\"\n    area1 = e1[\"end\"] - e1[\"start\"]\n    area2 = e2[\"end\"] - e2[\"start\"]\n    x1 = np.maximum(e1[\"start\"], e2[\"start\"])\n    x2 = np.minimum(e1[\"end\"], e2[\"end\"])\n    inter = np.maximum(0.0, x2 - x1)\n    iou = 0.0 if (area1 + area2 -\n                  inter) == 0 else inter * 1.0 / (area1 + area2 - inter)\n    ioa = 0.0 if area2 == 0 else inter * 1.0 / area2\n    return iou, ioa\ndef clc_iou_of_proposal(proposal, gts):\n    hit_gts = {}\n    label = 0\n    norm_start = 0.\n    hit = False\n    for gt in gts:\n        e1 = {'start': proposal['start'], 'end': proposal['end']}\n        e2 = {'start': gt['start_id'], 'end': gt['end_id']}",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/script/get_instance_for_lstm.py:1-44"
+    },
+    "1071": {
+        "file_id": 99,
+        "content": "This code computes the IoU (intersection over union) and IOA (intersection over area) for proposals and ground truths in a dataset. It takes proposal bounding boxes and ground truth bounding boxes as inputs, calculates their intersections and unions, and outputs the resulting IoUs and IOAs. The calculated IoU and IOA values will be used to determine the labels for the LSTM model's input data.",
+        "type": "comment"
+    },
+    "1072": {
+        "file_id": 99,
+        "content": "        iou, ioa = IoU(e1, e2)\n        if iou > 0:\n            hit = True\n            hit_gts = gt\n            label = hit_gts['label_ids'][0]\n            norm_start = (gt['start_id'] - proposal['start']) * 1.0 / (\n                proposal['end'] - proposal['start'])\n            break\n    res = {\n        'label': label,\n        'norm_iou': iou,\n        'norm_ioa': ioa,\n        'norm_start': norm_start,\n        'proposal': proposal,\n        'hit_gts': hit_gts\n    }\n    return res\ndef get_bmn_info(gts_data, proposal_data, res_bmn, mode, score_threshold=0.01):\n    \"\"\"\n    @param, gts_data, original gts for action detection\n    @param, proposal_data, proposal actions from bmn\n    @param, mode, train or validation\n    @return, None.\n    \"\"\"\n    fps = gts_data['fps']\n    res_bmn['fps'] = fps\n    for gts_item in gts_data['gts']:\n        url = gts_item['url']\n        print(url)\n        max_length = gts_item['total_frames']\n        video_name = os.path.basename(url).split('.')[0]\n        if not video_name in proposal_data:\n            continue",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/script/get_instance_for_lstm.py:45-80"
+    },
+    "1073": {
+        "file_id": 99,
+        "content": "This code calculates IoU and IOA between two sets of data, then checks if there is a hit. It stores the label, normalized start, and other relevant information in a dictionary and returns it. The get_bmn_info function takes gts and proposal data and prints the URL for each video, iterating through the gts data.",
+        "type": "comment"
+    },
+    "1074": {
+        "file_id": 99,
+        "content": "        gts_actions = gts_item['actions']\n        prop_actions = proposal_data[video_name]\n        res_bmn['results'].append({\n            'url': url,\n            'mode': mode,\n            'total_frames': max_length,\n            'num_gts': len(gts_actions),\n            'num_proposals': len(prop_actions),\n            'proposal_actions': []\n        })\n        for proposal in prop_actions:\n            if proposal['score'] < score_threshold:\n                continue\n            proposal['start'] = int(proposal['start'] * 1.0 / fps)\n            proposal['end'] = int(proposal['end'] * 1.0 / fps)\n            gts_info = clc_iou_of_proposal(proposal, gts_actions)\n            res_bmn['results'][-1]['proposal_actions'].append(gts_info)\n    return res_bmn\ndef save_feature(label_info, out_dir):\n    print('save feature ...')\n    fps = label_info['fps']\n    out_feature_dir = out_dir + '/feature'\n    out_feature_dir = os.path.abspath(out_feature_dir)\n    if not os.path.exists(out_feature_dir):\n        os.mkdir(out_feature_dir)",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/script/get_instance_for_lstm.py:82-110"
+    },
+    "1075": {
+        "file_id": 99,
+        "content": "The code retrieves ground truth (GT) actions and proposal actions from a dataset, then evaluates the Intersection over Union (IoU) of each proposal with the GT actions. If a proposal's score is below a threshold, it is skipped. The IoU values are appended to the 'results' list within a dictionary, along with other information such as URL, mode, total frames, number of GT and proposal actions. Finally, the function returns the dictionary. A separate function saves features in an output directory, creating one if necessary.",
+        "type": "comment"
+    },
+    "1076": {
+        "file_id": 99,
+        "content": "    fid_train = open(out_dir + '/train.txt', 'w')\n    fid_val = open(out_dir + '/val.txt', 'w')\n    for res in label_info['results']:\n        basename = os.path.basename(res['url']).split('.')[0]\n        print(basename, res['num_proposals'])\n        mode = res['mode']\n        fid = fid_train if mode == 'train' else fid_val\n        feature_path = os.path.join(feat_dir, basename + '.pkl')\n        feature_data = pickle.load(open(feature_path, 'rb'))\n        image_feature = feature_data['image_feature']\n        audio_feature = feature_data['audio_feature']\n        max_len_audio = len(audio_feature)\n        for proposal in res['proposal_actions']:\n            label = proposal['label']\n            start_id = proposal['proposal']['start']\n            end_id = proposal['proposal']['end']\n            # get hit feature\n            image_feature_hit = image_feature[start_id * fps:end_id * fps]\n            audio_feature_hit = audio_feature[min(start_id, max_len_audio\n                                                  ):min(end_id, max_len_audio)]",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/script/get_instance_for_lstm.py:111-130"
+    },
+    "1077": {
+        "file_id": 99,
+        "content": "This code is splitting video features into training and validation datasets, handling audio-visual data for football actions. It reads the results from label_info and writes image and audio feature segments to train.txt or val.txt files based on mode (train/val). The code iterates through proposal actions, extracting the corresponding image and audio features.",
+        "type": "comment"
+    },
+    "1078": {
+        "file_id": 99,
+        "content": "            # save\n            anno_info = {\n                'image_feature': np.array(image_feature_hit, dtype=np.float32),\n                'audio_feature': np.array(audio_feature_hit, dtype=np.float32),\n                'feature_fps': fps,\n                'label_info': proposal,\n                'video_name': basename\n            }\n            save_name = '{}/{}_{}_{}.pkl'.format(out_feature_dir, basename,\n                                                 start_id, end_id)\n            with open(save_name, 'wb') as f:\n                pickle.dump(anno_info, f, protocol=pickle.HIGHEST_PROTOCOL)\n            fid.write('{} {}\\n'.format(save_name, label))\n    fid_train.close()\n    fid_val.close()\n    print('done!')\nif __name__ == \"__main__\":\n    if not os.path.exists(out_dir):\n        os.mkdir(out_dir)\n    prop_data = json.load(open(prop_file, 'rb'))\n    proposal_data = {}\n    for item in prop_data:\n        proposal_data[os.path.basename(\n            item['video_name'])] = item['bmn_results']\n    # get label info\n    res_bmn = {'fps': 0, 'results': []}",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/script/get_instance_for_lstm.py:132-161"
+    },
+    "1079": {
+        "file_id": 99,
+        "content": "This code saves video features and labels into separate files for training and validation sets. It creates a dictionary of feature information and label, then dumps this data into a .pkl file with the appropriate naming format. Finally, it writes the file name and corresponding label into another file.",
+        "type": "comment"
+    },
+    "1080": {
+        "file_id": 99,
+        "content": "    for item, value in label_files.items():\n        label_file = os.path.join(dataset, value)\n        gts_data = json.load(open(label_file, 'rb'))\n        res_bmn = get_bmn_info(gts_data, proposal_data, res_bmn, item)\n    with open(out_dir + '/label_info.json', 'w', encoding='utf-8') as f:\n        data = json.dumps(res_bmn, indent=4, ensure_ascii=False)\n        f.write(data)\n    # save feature\n    save_feature(res_bmn, out_dir)",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/script/get_instance_for_lstm.py:162-172"
+    },
+    "1081": {
+        "file_id": 99,
+        "content": "This code reads label files, loads and processes the data, then saves the processed data (label information) and optional features to specific directories.",
+        "type": "comment"
+    },
+    "1082": {
+        "file_id": 100,
+        "content": "/applications/FootballAction/datasets/script/get_instance_for_pptsm.py",
+        "type": "filepath"
+    },
+    "1083": {
+        "file_id": 100,
+        "content": "The code processes video data, extracts action instances, creates frames and stores them as pickle files for a dataset, with potential data splitting for training and validation.",
+        "type": "summary"
+    },
+    "1084": {
+        "file_id": 100,
+        "content": "\"\"\"\nget instance for tsn\npositive: 标注后的动作区间，一个区间所有frames生成一个pkl\nnegative: 标注后的非动作区间，随机取N个区间生成N个pkl，每个区间长度等于最近的前一个动作区间的长度\n\"\"\"\nimport os\nimport json\nimport numpy as np\nimport random\nimport pickle\nfrom concurrent import futures\ndataset = \"../EuroCup2016\"\nframes_dir = dataset + '/frames'\nlabel_files = {'train': 'label_cls8_train.json', 'val': 'label_cls8_val.json'}\ndef process(item, fps, save_folder):\n    actions_pos = []\n    actions_neg = []\n    url = item['url']\n    print(url)\n    basename = os.path.basename(url).split('.')[0]\n    actions = item['actions']\n    # pos\n    for action in actions:\n        actions_pos.append({\n            'label': action['label_ids'],\n            'start': action['start_id'] * fps,\n            'end': action['end_id'] * fps\n        })\n    # neg\n    for idx, pos in enumerate(actions_pos):\n        if idx == len(actions_pos) - 1:\n            break\n        len_pos = pos['end'] - pos['start']\n        duration_start = [pos['end'], actions_pos[idx + 1]['start'] - len_pos]\n        if duration_start[1] - duration_start[0] < 3:",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/script/get_instance_for_pptsm.py:1-38"
+    },
+    "1085": {
+        "file_id": 100,
+        "content": "This code is processing video data by extracting positive and negative action instances. Positive action instances are frames corresponding to annotated action intervals, while negative action instances are randomly selected frames from non-action intervals. The code reads JSON files containing labels and frame information, then processes each item by appending the start and end times of the action intervals. The length of positive action intervals is used to determine the start time for negative action intervals, with a minimum duration constraint between them.",
+        "type": "comment"
+    },
+    "1086": {
+        "file_id": 100,
+        "content": "            continue\n        for k in range(1, 3):\n            start_frame = random.randint(duration_start[0], duration_start[1])\n            end_frame = start_frame + len_pos\n            actions_neg.append({\n                'label': [0],\n                'start': start_frame,\n                'end': end_frame\n            })\n    # save pkl\n    for item in np.concatenate((actions_pos, actions_neg), axis=0):\n        start = item['start']\n        end = item['end']\n        label = item['label']\n        label_str = str(label[0])\n        if len(item['label']) == 2:\n            label_str = label_str + '-' + str(label[1])\n        frames = []\n        for ii in range(start, end + 1):\n            img = os.path.join(frames_dir, basename, '%08d.jpg' % ii)\n            with open(img, 'rb') as f:\n                data = f.read()\n            frames.append(data)\n        # print(label_str)\n        outname = '%s/%s_%08d_%08d_%s.pkl' % (save_folder, basename, start, end,\n                                              label_str)\n        with open(outname, 'wb') as f:",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/script/get_instance_for_pptsm.py:39-65"
+    },
+    "1087": {
+        "file_id": 100,
+        "content": "Code is iterating over frames and creating positive (label=1) and negative (label=0) action instances. It randomly sets the start frame, calculates end frame, appends to 'actions_pos' or 'actions_neg'. Then concatenates both lists, loops through items in the list, extracts start/end frames, label, and iterates over frames range to read images and store them in 'frames'. It forms an output file name using base name, start and end frame numbers, and labels, then writes frames to a .pkl file.",
+        "type": "comment"
+    },
+    "1088": {
+        "file_id": 100,
+        "content": "            pickle.dump((basename, label, frames), f, -1)\ndef gen_instance_pkl(label_data, save_folder):\n    fps = label_data['fps']\n    gts = label_data['gts']\n    with futures.ProcessPoolExecutor(max_workers=10) as executer:\n        fs = [executer.submit(process, gt, fps, save_folder) for gt in gts]\n    #for gt in gts:\n    #    process(gt, fps, save_folder)\nif __name__ == \"__main__\":\n    for item, value in label_files.items():\n        save_folder = os.path.join(dataset, 'input_for_pptsm', item)\n        if not os.path.exists(save_folder):\n            os.makedirs(save_folder)\n        label_file = os.path.join(dataset, value)\n        label_data = json.load(open(label_file, 'rb'))\n        gen_instance_pkl(label_data, save_folder)\n    # gen train val list\n    #data_dir = '../EuroCup2016/input_for_pptsm/'\n    data_dir = os.path.abspath(os.path.join(dataset, 'input_for_pptsm'))\n    os.system('find ' + data_dir + '/train -name \"*.pkl\" > ' + data_dir +\n              '/train.list')\n    os.system('find ' + data_dir + '/val -name \"*.pkl\" > ' + data_dir +",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/script/get_instance_for_pptsm.py:66-96"
+    },
+    "1089": {
+        "file_id": 100,
+        "content": "The code is creating instances for a dataset, processing data using multiprocessing, and saving them as pickle files. It also generates train and val lists of pickle files for further usage.",
+        "type": "comment"
+    },
+    "1090": {
+        "file_id": 100,
+        "content": "              '/val.list')",
+        "type": "code",
+        "location": "/applications/FootballAction/datasets/script/get_instance_for_pptsm.py:97-97"
+    },
+    "1091": {
+        "file_id": 100,
+        "content": "This line of code is likely specifying a file path for a validation list ('val.list') which could be used in the context of data splitting or model evaluation on a separate dataset subset.",
+        "type": "comment"
+    },
+    "1092": {
+        "file_id": 101,
+        "content": "/applications/FootballAction/extractor/extract_bmn.py",
+        "type": "filepath"
+    },
+    "1093": {
+        "file_id": 101,
+        "content": "This code utilizes the BAIDU CLOUD action to classify videos, extracts features, and performs prediction using a pre-trained model. It saves proposal counts and bounding box results in a JSON file with UTF-8 encoding and indentation.",
+        "type": "summary"
+    },
+    "1094": {
+        "file_id": 101,
+        "content": "#!./python27-gcc482/bin/python\n# coding: utf-8\n\"\"\"\nBAIDU CLOUD action\n\"\"\"\nimport os\nimport sys\nimport pickle\nimport json\nimport time\nimport shutil\nimport numpy as np\nsys.path.append(\"../predict/action_detect\")\nimport models.bmn_infer as prop_model\nfrom utils.preprocess import get_images\nfrom utils.config_utils import parse_config, print_configs\nimport utils.config_utils as config_utils\nimport logger\nlogger = logger.Logger()\ndef load_model(cfg_file=\"configs/configs.yaml\"):\n    \"\"\"\n    load_model\n    \"\"\"\n    logger.info(\"load model ... \")\n    global infer_configs\n    infer_configs = parse_config(cfg_file)\n    print_configs(infer_configs, \"Infer\")\n    t0 = time.time()\n    global prop_model\n    prop_model = prop_model.InferModel(infer_configs)\n    t1 = time.time()\n    logger.info(\"step0: load model time: {} min\\n\".format((t1 - t0) * 1.0 / 60))\ndef video_classify(video_name):\n    \"\"\"\n    extract_feature\n    \"\"\"\n    logger.info('predict ... ')\n    logger.info(video_name)\n    imgs_path = video_name.replace(\".mp4\", \"\").replace(\"mp4\", \"frames\")",
+        "type": "code",
+        "location": "/applications/FootballAction/extractor/extract_bmn.py:1-49"
+    },
+    "1095": {
+        "file_id": 101,
+        "content": "This code is loading a model for video classification using the BAIDU CLOUD action. It first loads the configuration file, then prints the configurations, and finally initializes the InferModel class with the loaded configurations. The `video_classify` function takes a video name as input, likely to perform feature extraction or prediction on that video.",
+        "type": "comment"
+    },
+    "1096": {
+        "file_id": 101,
+        "content": "    pcm_path = video_name.replace(\".mp4\", \".pcm\").replace(\"mp4\", \"pcm\")\n    # step 1: extract feature\n    feature_path = video_name.replace(\".mp4\", \".pkl\").replace(\"mp4\", \"features\")\n    video_features = pickle.load(open(feature_path, 'rb'))\n    # step2: get proposal\n    t0 = time.time()\n    bmn_results = prop_model.predict(infer_configs, material=video_features)\n    t1 = time.time()\n    logger.info(np.array(bmn_results).shape)\n    logger.info(\"step2: proposal time: {} min\".format((t1 - t0) * 1.0 / 60))\n    return bmn_results\nif __name__ == '__main__':\n    dataset_dir = \"../datasets/EuroCup2016\"\n    if not os.path.exists(dataset_dir + '/feature_bmn'):\n        os.mkdir(dataset_dir + '/feature_bmn')\n    results = []\n    load_model()\n    video_url = os.path.join(dataset_dir, 'url.list')\n    with open(video_url, 'r') as f:\n        lines = f.readlines()\n    lines = [os.path.join(dataset_dir, k.strip()) for k in lines]\n    for line in lines:\n        bmn_results = video_classify(line)\n        results.append({\n            'video_name': os.path.basename(line).split('.')[0],",
+        "type": "code",
+        "location": "/applications/FootballAction/extractor/extract_bmn.py:50-83"
+    },
+    "1097": {
+        "file_id": 101,
+        "content": "This code extracts features from videos and predicts proposals using a pre-trained model. It loads the necessary configurations, creates feature directories if they don't exist, reads video URLs from a file, processes each video to obtain bounding box results, and saves these results into a list of dictionaries for further analysis or processing.",
+        "type": "comment"
+    },
+    "1098": {
+        "file_id": 101,
+        "content": "            'num_proposal': len(bmn_results),\n            'bmn_results': bmn_results\n        })\n    with open(dataset_dir + '/feature_bmn/prop.json', 'w',\n              encoding='utf-8') as f:\n        data = json.dumps(results, indent=4, ensure_ascii=False)\n        f.write(data)",
+        "type": "code",
+        "location": "/applications/FootballAction/extractor/extract_bmn.py:84-91"
+    },
+    "1099": {
+        "file_id": 101,
+        "content": "This code saves the number of proposals and a list of bounding box results for each proposal in a JSON file, formatting it with indentation and using UTF-8 encoding.",
+        "type": "comment"
+    }
+}

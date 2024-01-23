@@ -1,0 +1,10 @@
+{
+    "summary": "This code file contains the initialization for a Video Quality Assessment application. It includes registrar for metrics, builder function for metrics and defines the QualityMetric class. The code is licensed under Apache License, Version 2.0 and distributed as-is without warranties or conditions.",
+    "details": [
+        {
+            "comment": "This code file contains the initialization for a Video Quality Assessment application. It includes registrar for metrics, builder function for metrics and defines the QualityMetric class. The code is licensed under Apache License, Version 2.0 and distributed as-is without warranties or conditions.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/metrics/__init__.py\":0-22",
+            "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom .registry import METRIC\nfrom .build import build_metric\nfrom .quality_metric import QuqlityMetric\n__all__ = [\n    'METRIC', 'build_metric', 'QuqlityMetric'\n]"
+        }
+    ]
+}

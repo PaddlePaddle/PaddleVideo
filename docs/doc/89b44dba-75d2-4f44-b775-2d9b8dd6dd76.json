@@ -1,0 +1,10 @@
+{
+    "summary": "This script downloads the pre-trained ernie model, its corresponding checkpoints, and a test dataset using wget and tar commands for decompression.",
+    "details": [
+        {
+            "comment": "This script downloads the pre-trained ernie model, its corresponding checkpoints, and a test dataset using wget and tar commands for decompression.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/MultimodalVideoTag/download.sh\":0-10",
+            "content": "# download ernie 1.0 model\nwget https://videotag.bj.bcebos.com/Applications/MultimodalVideoTag/model_pretrained_ernie.tar.gz\ntar -xzvf model_pretrained_ernie.tar.gz\n# download pretrain model\nwget https://videotag.bj.bcebos.com/Applications/MultimodalVideoTag/checkpoints_save.tar.gz\ntar -xzvf checkpoints_save.tar.gz\n# download test dataset\nwget https://videotag.bj.bcebos.com/Applications/MultimodalVideoTag/datasets.tar.gz\ntar -xzvf datasets.tar.gz"
+        }
+    ]
+}

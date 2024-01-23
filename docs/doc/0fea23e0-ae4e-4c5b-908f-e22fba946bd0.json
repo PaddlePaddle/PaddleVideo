@@ -1,0 +1,15 @@
+{
+    "summary": "This code imports libraries and defines a test_model function for testing a model without gradient calculation. It sets configuration, updates model's test_step function with updated parameters, and performs multi-card testing.",
+    "details": [
+        {
+            "comment": "This code imports necessary libraries and functions for testing a model. It defines a function called test_model that takes configuration (cfg), weights path (weights), and parallel flag as arguments. The function performs model testing without gradient calculation (paddle.no_grad()) to save computation resources.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/EIVideo/EIVideo/paddlevideo/tasks/test.py\":0-30",
+            "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nfrom EIVideo.paddlevideo.utils import get_logger, load\nfrom ..loader.builder import build_dataloader, build_dataset\nfrom ..metrics import build_metric\nfrom ..modeling.builder import build_model\nfrom ..modeling.framework import Manet\nlogger = get_logger(\"paddlevideo\")\n@paddle.no_grad()\ndef test_model(cfg, weights, parallel=True):\n    \"\"\"Test model entry\n    Args:\n        cfg (dict): configuration.\n        weights (str): weights path to load."
+        },
+        {
+            "comment": "This code sets the configuration for multi-card testing and then calls the Manet model's test_step function with updated configuration, weights, and parallel set to False.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/EIVideo/EIVideo/paddlevideo/tasks/test.py\":31-38",
+            "content": "        parallel (bool): Whether to do multi-cards testing. Default: True.\n    \"\"\"\n    if cfg.MODEL.framework == \"Manet\":\n        cfg_helper = {\"knns\": 1, \"is_save_image\": True}\n        cfg.update(cfg_helper)\n        final = Manet().test_step(**cfg, weights=weights, parallel=False)\n        return final"
+        }
+    ]
+}

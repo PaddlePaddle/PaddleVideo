@@ -1,0 +1,15 @@
+{
+    "summary": "This code imports modules, defines decompressing and downloading functions, ensures directory existence, deletes downloaded files post-decompression, and includes an AttrDict class for attribute access.",
+    "details": [
+        {
+            "comment": "The code imports necessary modules and defines functions for decompressing and downloading files. It also ensures a directory exists before attempting to download a file, then deletes the downloaded file after decompression.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoTag/models/utils.py\":0-35",
+            "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nimport os\nimport wget\nimport tarfile\n__all__ = ['decompress', 'download', 'AttrDict']\ndef decompress(path):\n    t = tarfile.open(path)\n    t.extractall(path=os.path.split(path)[0])\n    t.close()\n    os.remove(path)\ndef download(url, path):\n    weight_dir = os.path.split(path)[0]\n    if not os.path.exists(weight_dir):\n        os.makedirs(weight_dir)\n    path = path + \".tar.gz\"\n    wget.download(url, path)\n    decompress(path)"
+        },
+        {
+            "comment": "This code defines an AttrDict class, which is a subclass of dict with additional getattr and setattr methods for accessing and modifying its elements as attributes.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoTag/models/utils.py\":38-46",
+            "content": "class AttrDict(dict):\n    def __getattr__(self, key):\n        return self[key]\n    def __setattr__(self, key, value):\n        if key in self.__dict__:\n            self.__dict__[key] = value\n        else:\n            self[key] = value"
+        }
+    ]
+}

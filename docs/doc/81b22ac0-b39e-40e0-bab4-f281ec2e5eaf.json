@@ -1,0 +1,10 @@
+{
+    "summary": "This code imports various functions and classes from different modules within the PaddleVideo library. It also sets up logger and profiler functionality, provides a build function for creating objects, and handles saving and loading data.",
+    "details": [
+        {
+            "comment": "This code imports various functions and classes from different modules within the PaddleVideo library. It also sets up logger and profiler functionality, provides a build function for creating objects, and handles saving and loading data.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/EIVideo/EIVideo/paddlevideo/utils/__init__.py\":0-23",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .registry import Registry\nfrom .build_utils import build\nfrom .config import *\nfrom .logger import setup_logger, coloring, get_logger\nfrom .record import AverageMeter, build_record, log_batch, log_epoch\nfrom .dist_utils import get_dist_info, main_only\nfrom .save_load import save, load, load_ckpt, mkdir\nfrom .precise_bn import do_preciseBN\nfrom .profiler import add_profiler_step\n__all__ = ['Registry', 'build']"
+        }
+    ]
+}

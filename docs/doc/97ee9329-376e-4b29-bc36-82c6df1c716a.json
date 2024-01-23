@@ -1,0 +1,10 @@
+{
+    "summary": "The code outlines six different tasks in action recognition and detection using various algorithms, including TSN (Two-Stream Convolutional Networks), TSM (Temporal Shift Module), SlowFast Networks, LSTM (Long Short-Term Memory), and BNM (Boundary-aware Multi-scale Network). The tasks include single-class action recognition, multi-class action recognition, action localization, spatio-temporal action detection, 3000-class tagging application, and highlights detection application.",
+    "details": [
+        {
+            "comment": "The code outlines six different tasks in action recognition and detection using various algorithms, including TSN (Two-Stream Convolutional Networks), TSM (Temporal Shift Module), SlowFast Networks, LSTM (Long Short-Term Memory), and BNM (Boundary-aware Multi-scale Network). The tasks include single-class action recognition, multi-class action recognition, action localization, spatio-temporal action detection, 3000-class tagging application, and highlights detection application.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/english_documents/tutorials/demos\":0-7",
+            "content": "some useful demo todo.  \n1\u3001single-class action recognition\uff0c tsn/tsm/slowfast  \n2\u3001multi-class action recognition\uff0clstm  \n3\u3001action localization\uff0cbmn  \n4\u3001spatio temporal action detection\uff0ctodo  \n5\u30013000-class tagging application(videotag)\uff1atsn+lstm  \n6\u3001Highlights detection application\uff1abmn+tsn+lstm  "
+        }
+    ]
+}

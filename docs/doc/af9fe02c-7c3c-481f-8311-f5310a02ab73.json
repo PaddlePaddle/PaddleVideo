@@ -1,0 +1,20 @@
+{
+    "summary": "The code defines functions for converting tensors to images, applying masks, normalizing images, and constructing model names. It also includes functions for computing foreground and nocare area using OpenCV's dilation operation with optional parameters, returning the 'nocare' along with the original foreground image.",
+    "details": [
+        {
+            "comment": "ens2image: Converts a tensor to an image by removing dimensions and transposing if necessary.\n\noverlay_mask: Applies a mask on top of an image, allowing for color overlay and background adjustment.\n\nim_normalize: Normalizes an image by scaling pixel values between 0 and 1 based on the range of values.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/Ma-Net/dataloaders/helpers.py\":0-45",
+            "content": "import numpy as np\nimport cv2\ndef tens2image(im):\n    tmp = np.squeeze(im.numpy())\n    if tmp.ndim == 2:\n        return tmp\n    else:\n        return tmp.transpose((1, 2, 0))\ndef overlay_mask(im, ma, color=np.array([255, 0, 0]) / 255.0):\n    assert np.max(im) <= 1.0\n    ma = ma.astype(np.bool)\n    im = im.astype(np.float32)\n    alpha = 0.5\n    fg = im * alpha + np.ones(\n        im.shape) * (1 - alpha) * color  # np.array([0,0,255])/255.0\n    # Whiten background\n    alpha = 1.0\n    bg = im.copy()\n    bg[ma == 0] = im[ma == 0] * alpha + np.ones(im[ma == 0].shape) * (1 - alpha)\n    bg[ma == 1] = fg[ma == 1]\n    # [-2:] is s trick to be compatible both with opencv 2 and 3\n    contours = cv2.findContours(ma.copy().astype(np.uint8), cv2.RETR_TREE,\n                                cv2.CHAIN_APPROX_SIMPLE)[-2:]\n    cv2.drawContours(bg, contours[0], -1, (0.0, 0.0, 0.0), 1)\n    return bg\ndef im_normalize(im):\n    \"\"\"\n    Normalize image\n    \"\"\"\n    imn = (im - im.min()) / max((im.max() - im.min()), 1e-8)\n    return imn\ndef construct_name(p, prefix):"
+        },
+        {
+            "comment": "The code defines a function to construct the name of a model by concatenating keys and values from the input dictionary. It also includes two additional functions: one for computing foreground based on a given scribble image, and another for computing a nocare area with optional dilation and size parameters.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/Ma-Net/dataloaders/helpers.py\":46-77",
+            "content": "    \"\"\"\n    Construct the name of the model\n    p: dictionary of parameters\n    prefix: the prefix\n    name: the name of the model - manually add \".pth\" to follow the convention\n    \"\"\"\n    name = prefix\n    for key in p.keys():\n        if (type(p[key]) != tuple) and (type(p[key]) != list):\n            name = name + '_' + str(key) + '-' + str(p[key])\n        else:\n            name = name + '_' + str(key) + '-' + str(p[key][0])\n    return name\ndef gt_from_scribble(scr, dilation=11, nocare_area=21):\n    # Compute foreground\n    if scr.max() == 1:\n        kernel_fg = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,\n                                              (dilation, dilation))\n        fg = cv2.dilate(scr.astype(np.uint8),\n                        kernel=kernel_fg).astype(scr.dtype)\n    else:\n        fg = scr\n    # Compute nocare area\n    if nocare_area is None:\n        nocare = None\n    else:\n        kernel_nc = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,\n                                              (nocare_area, nocare_area))"
+        },
+        {
+            "comment": "The code uses OpenCV's dilation operation to enhance the background care region by dilating the foreground image with a given kernel. The resulting 'nocare' is then returned along with the original foreground image.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/Ma-Net/dataloaders/helpers.py\":78-80",
+            "content": "        nocare = cv2.dilate(fg, kernel=kernel_nc) - fg\n    return fg, nocare"
+        }
+    ]
+}

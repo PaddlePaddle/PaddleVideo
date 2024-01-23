@@ -1,0 +1,10 @@
+{
+    "summary": "This code is importing two modules, 'base_model' and 'base_trainer', from the current package's subfolders. These modules likely contain the base model and trainer classes for further use in the application.",
+    "details": [
+        {
+            "comment": "This code is importing two modules, 'base_model' and 'base_trainer', from the current package's subfolders. These modules likely contain the base model and trainer classes for further use in the application.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/T2VLAD/base/__init__.py\":0-1",
+            "content": "from .base_model import *\nfrom .base_trainer import *"
+        }
+    ]
+}

@@ -1,0 +1,15 @@
+{
+    "summary": "This class offers static methods to read dictionary files and perform utility operations related to PaddleVideo, including functions for file handling, image manipulation, value indexing, and frame sampling.",
+    "details": [
+        {
+            "comment": "Utility class for PaddleVideo containing static methods to read dictionary files and perform various utility operations.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/deploy/cpp_infer/include/utility.h\":0-39",
+            "content": "// Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\");\n// you may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n#pragma once\n#include <chrono>\n#include <iomanip>\n#include <iostream>\n#include <ostream>\n#include <stdlib.h>\n#include <vector>\n#include <algorithm>\n#include <cstring>\n#include <fstream>\n#include <numeric>\n#include \"opencv2/core.hpp\"\n#include \"opencv2/imgcodecs.hpp\"\n#include \"opencv2/imgproc.hpp\"\n#include \"opencv2/opencv.hpp\"\nnamespace PaddleVideo\n{\n    class Utility\n    {\n    public:\n        static std::vector<std::string> ReadDict(const std::string &path);"
+        },
+        {
+            "comment": "The code contains several utility functions. It has a function to get all files in a directory, another for rotating and cropping images based on bounding boxes, a template function for finding the index of maximum value in a range, and one for sampling frames from a video file. All these belong to the PaddleVideo namespace.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/deploy/cpp_infer/include/utility.h\":41-53",
+            "content": "        static void GetAllFiles(const char *dir_name, std::vector<std::string> &all_inputs);\n        static cv::Mat GetRotateCropImage(const cv::Mat &srcimage, std::vector<std::vector<int>> box);\n        template <class ForwardIterator> inline static size_t argmax(ForwardIterator first, ForwardIterator last)\n        {\n            return std::distance(first, std::max_element(first, last));\n        }\n        static std::vector<cv::Mat> SampleFramesFromVideo(const std::string &VideoPath, const int &num_seg, const int &seg_len);\n    };\n} // namespace PaddleVideo"
+        }
+    ]
+}

@@ -1,0 +1,548 @@
+{
+    "2000": {
+        "file_id": 160,
+        "content": "# coding=utf-8\n# Copyright 2018 The Google AI Language Team Authors.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#         http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"Tokenization classes.\"\"\"\nfrom __future__ import absolute_import\nfrom __future__ import division\nfrom __future__ import print_function\nfrom __future__ import unicode_literals\nfrom __future__ import absolute_import\nfrom io import open\nimport collections\nimport unicodedata\nimport six\ndef convert_to_unicode(text):\n    \"\"\"Converts `text` to Unicode (if it's not already), assuming utf-8 input.\"\"\"\n    if six.PY3:",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/tokenization.py:1-32"
+    },
+    "2001": {
+        "file_id": 160,
+        "content": "This code block is the first 30 lines of a Python file and includes a comment with license information, a documentation string, and an import section. The function \"convert_to_unicode\" converts text to Unicode, assuming utf-8 input.",
+        "type": "comment"
+    },
+    "2002": {
+        "file_id": 160,
+        "content": "        if isinstance(text, str):\n            return text\n        elif isinstance(text, bytes):\n            return text.decode(\"utf-8\", \"ignore\")\n        else:\n            raise ValueError(\"Unsupported string type: %s\" % (type(text)))\n    elif six.PY2:\n        if isinstance(text, str):\n            return text.decode(\"utf-8\", \"ignore\")\n        elif isinstance(text, unicode):\n            return text\n        else:\n            raise ValueError(\"Unsupported string type: %s\" % (type(text)))\n    else:\n        raise ValueError(\"Not running on Python2 or Python 3?\")\ndef printable_text(text):\n    \"\"\"Returns text encoded in a way suitable for print or `tf.logging`.\"\"\"\n    # These functions want `str` for both Python2 and Python3, but in one case\n    # it's a Unicode string and in the other it's a byte string.\n    if six.PY3:\n        if isinstance(text, str):\n            return text\n        elif isinstance(text, bytes):\n            return text.decode(\"utf-8\", \"ignore\")\n        else:\n            raise ValueError(\"Unsupported string type: %s\" % (type(text)))",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/tokenization.py:33-61"
+    },
+    "2003": {
+        "file_id": 160,
+        "content": "This code is a function named \"printable_text\" that takes a text parameter and returns it encoded in a way suitable for print or tf.logging. It handles both Python 2 and Python 3 by checking the environment using six.PY2 and six.PY3, and converting strings to str format before returning them. The function checks the type of the input text (str or bytes) and decodes it accordingly (from utf-8 encoding \"ignore\"). If the input type is not supported, it raises a ValueError.",
+        "type": "comment"
+    },
+    "2004": {
+        "file_id": 160,
+        "content": "    elif six.PY2:\n        if isinstance(text, str):\n            return text\n        elif isinstance(text, unicode):\n            return text.encode(\"utf-8\")\n        else:\n            raise ValueError(\"Unsupported string type: %s\" % (type(text)))\n    else:\n        raise ValueError(\"Not running on Python2 or Python 3?\")\ndef load_vocab(vocab_file):\n    \"\"\"Loads a vocabulary file into a dictionary.\"\"\"\n    vocab = collections.OrderedDict()\n    with open(vocab_file, encoding='utf8') as fin:\n        for num, line in enumerate(fin):\n            items = convert_to_unicode(line.strip()).split(\"\\t\")\n            if len(items) > 2:\n                break\n            token = items[0]\n            index = items[1] if len(items) == 2 else num\n            token = token.strip()\n            vocab[token] = int(index)\n    return vocab\ndef convert_by_vocab(vocab, items):\n    \"\"\"Converts a sequence of [tokens|ids] using the vocab.\"\"\"\n    output = []\n    for item in items:\n        output.append(vocab[item])\n    return output\ndef convert_tokens_to_ids(vocab, tokens):",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/tokenization.py:62-96"
+    },
+    "2005": {
+        "file_id": 160,
+        "content": "This code handles loading and converting vocabulary files. It checks the Python version, loads a vocabulary file into an ordered dictionary, and defines functions to convert sequences of tokens or IDs using the vocab.",
+        "type": "comment"
+    },
+    "2006": {
+        "file_id": 160,
+        "content": "    \"\"\"convert_tokens_to_ids\n    \"\"\"\n    return convert_by_vocab(vocab, tokens)\ndef convert_ids_to_tokens(inv_vocab, ids):\n    \"\"\"convert_ids_to_tokens\n    \"\"\"\n    return convert_by_vocab(inv_vocab, ids)\ndef whitespace_tokenize(text):\n    \"\"\"Runs basic whitespace cleaning and splitting on a peice of text.\"\"\"\n    text = text.strip()\n    if not text:\n        return []\n    tokens = text.split()\n    return tokens\nclass FullTokenizer(object):\n    \"\"\"Runs end-to-end tokenziation.\"\"\"\n    def __init__(self, vocab_file, do_lower_case=True):\n        \"\"\"init\n        \"\"\"\n        self.vocab = load_vocab(vocab_file)\n        self.inv_vocab = {v: k for k, v in self.vocab.items()}\n        self.basic_tokenizer = BasicTokenizer(do_lower_case=do_lower_case)\n        self.wordpiece_tokenizer = WordpieceTokenizer(vocab=self.vocab)\n    def tokenize(self, text):\n        \"\"\"tokenize\n        \"\"\"\n        split_tokens = []\n        for token in self.basic_tokenizer.tokenize(text):\n            for sub_token in self.wordpiece_tokenizer.tokenize(token):",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/tokenization.py:97-133"
+    },
+    "2007": {
+        "file_id": 160,
+        "content": "This code defines a FullTokenizer class for end-to-end tokenization. It utilizes two other classes, BasicTokenizer and WordpieceTokenizer, to perform basic whitespace cleaning and splitting on text data. The FullTokenizer initializes with a vocab file, load_vocab function, and an optional flag for case sensitivity. The tokenize method processes the input text by iterating over each token produced from both BasicTokenizer and WordpieceTokenizer, resulting in split tokens for further processing or analysis.",
+        "type": "comment"
+    },
+    "2008": {
+        "file_id": 160,
+        "content": "                split_tokens.append(sub_token)\n        return split_tokens\n    def convert_tokens_to_ids(self, tokens):\n        \"\"\"convert_tokens_to_ids\n        \"\"\"\n        return convert_by_vocab(self.vocab, tokens)\n    def convert_ids_to_tokens(self, ids):\n        \"\"\"convert_ids_to_tokens\n        \"\"\"\n        return convert_by_vocab(self.inv_vocab, ids)\nclass CharTokenizer(object):\n    \"\"\"Runs end-to-end tokenziation.\"\"\"\n    def __init__(self, vocab_file, do_lower_case=True):\n        self.vocab = load_vocab(vocab_file)\n        self.inv_vocab = {v: k for k, v in self.vocab.items()}\n        self.wordpiece_tokenizer = WordpieceTokenizer(vocab=self.vocab)\n    def tokenize(self, text):\n        \"\"\"tokenize\n        \"\"\"\n        split_tokens = []\n        for token in text.lower().split(\" \"):\n            for sub_token in self.wordpiece_tokenizer.tokenize(token):\n                split_tokens.append(sub_token)\n        return split_tokens\n    def convert_tokens_to_ids(self, tokens):\n        \"\"\"convert_tokens_to_ids\n        \"\"\"",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/tokenization.py:134-168"
+    },
+    "2009": {
+        "file_id": 160,
+        "content": "The code defines a CharTokenizer class for end-to-end tokenization. It initializes with a vocab_file and do_lower_case parameter. The class has methods to tokenize text, convert tokens to ids, and convert ids to tokens using the vocab file and inverse vocab file. The tokenization process involves lowercasing the input text, splitting it into words, and then tokenizing each word using a WordpieceTokenizer with the same vocab file.",
+        "type": "comment"
+    },
+    "2010": {
+        "file_id": 160,
+        "content": "        return convert_by_vocab(self.vocab, tokens)\n    def convert_ids_to_tokens(self, ids):\n        \"\"\"convert_ids_to_tokens\n        \"\"\"\n        return convert_by_vocab(self.inv_vocab, ids)\nclass BasicTokenizer(object):\n    \"\"\"Runs basic tokenization (punctuation splitting, lower casing, etc.).\"\"\"\n    def __init__(self, do_lower_case=True):\n        \"\"\"Constructs a BasicTokenizer.\n        Args:\n            do_lower_case: Whether to lower case the input.\n        \"\"\"\n        self.do_lower_case = do_lower_case\n    def tokenize(self, text):\n        \"\"\"Tokenizes a piece of text.\"\"\"\n        text = convert_to_unicode(text)\n        text = self._clean_text(text)\n        # This was added on November 1st, 2018 for the multilingual and Chinese\n        # models. This is also applied to the English models now, but it doesn't\n        # matter since the English models were not trained on any Chinese data\n        # and generally don't have any Chinese data in them (there are Chinese\n        # characters in the vocabulary because Wikipedia does have some Chinese",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/tokenization.py:169-197"
+    },
+    "2011": {
+        "file_id": 160,
+        "content": "This code defines a `BasicTokenizer` class that performs basic text tokenization, including punctuation splitting and lower casing. It also includes methods for converting tokens to IDs and vice versa using vocabularies. The class has an optional `do_lower_case` parameter controlling whether the input should be lowercased or not.",
+        "type": "comment"
+    },
+    "2012": {
+        "file_id": 160,
+        "content": "        # words in the English Wikipedia.).\n        text = self._tokenize_chinese_chars(text)\n        orig_tokens = whitespace_tokenize(text)\n        split_tokens = []\n        for token in orig_tokens:\n            if self.do_lower_case:\n                token = token.lower()\n                token = self._run_strip_accents(token)\n            split_tokens.extend(self._run_split_on_punc(token))\n        output_tokens = whitespace_tokenize(\" \".join(split_tokens))\n        return output_tokens\n    def _run_strip_accents(self, text):\n        \"\"\"Strips accents from a piece of text.\"\"\"\n        text = unicodedata.normalize(\"NFD\", text)\n        output = []\n        for char in text:\n            cat = unicodedata.category(char)\n            if cat == \"Mn\":\n                continue\n            output.append(char)\n        return \"\".join(output)\n    def _run_split_on_punc(self, text):\n        \"\"\"Splits punctuation on a piece of text.\"\"\"\n        chars = list(text)\n        i = 0\n        start_new_word = True\n        output = []\n        while i < len(chars):",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/tokenization.py:198-229"
+    },
+    "2013": {
+        "file_id": 160,
+        "content": "The code segment tokenizes Chinese characters, performs lower casing if needed, strips accents from text, and splits the punctuation on a given piece of text. This process is to prepare the text for further processing in the application.",
+        "type": "comment"
+    },
+    "2014": {
+        "file_id": 160,
+        "content": "            char = chars[i]\n            if _is_punctuation(char):\n                output.append([char])\n                start_new_word = True\n            else:\n                if start_new_word:\n                    output.append([])\n                start_new_word = False\n                output[-1].append(char)\n            i += 1\n        return [\"\".join(x) for x in output]\n    def _tokenize_chinese_chars(self, text):\n        \"\"\"Adds whitespace around any CJK character.\"\"\"\n        output = []\n        for char in text:\n            cp = ord(char)\n            if self._is_chinese_char(cp):\n                output.append(\" \")\n                output.append(char)\n                output.append(\" \")\n            else:\n                output.append(char)\n        return \"\".join(output)\n    def _is_chinese_char(self, cp):\n        \"\"\"Checks whether CP is the codepoint of a CJK character.\"\"\"\n        # This defines a \"chinese character\" as anything in the CJK Unicode block:\n        #     https://en.wikipedia.org/wiki/CJK_Unified_Ideographs_(Unicode_block)",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/tokenization.py:230-259"
+    },
+    "2015": {
+        "file_id": 160,
+        "content": "This code defines functions for tokenizing and processing text data. The `_is_punctuation` function identifies punctuation characters, while the `tokenize_text` function separates words by detecting new word starts. The `_tokenize_chinese_chars` function adds whitespace around Chinese characters to separate them from surrounding text.",
+        "type": "comment"
+    },
+    "2016": {
+        "file_id": 160,
+        "content": "        #\n        # Note that the CJK Unicode block is NOT all Japanese and Korean characters,\n        # despite its name. The modern Korean Hangul alphabet is a different block,\n        # as is Japanese Hiragana and Katakana. Those alphabets are used to write\n        # space-separated words, so they are not treated specially and handled\n        # like the all of the other languages.\n        if ((cp >= 0x4E00 and cp <= 0x9FFF) or  #\n            (cp >= 0x3400 and cp <= 0x4DBF) or  #\n            (cp >= 0x20000 and cp <= 0x2A6DF) or  #\n            (cp >= 0x2A700 and cp <= 0x2B73F) or  #\n            (cp >= 0x2B740 and cp <= 0x2B81F) or  #\n            (cp >= 0x2B820 and cp <= 0x2CEAF) or\n            (cp >= 0xF900 and cp <= 0xFAFF) or  #\n            (cp >= 0x2F800 and cp <= 0x2FA1F)):  #\n            return True\n        return False\n    def _clean_text(self, text):\n        \"\"\"Performs invalid character removal and whitespace cleanup on text.\"\"\"\n        output = []\n        for char in text:\n            cp = ord(char)",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/tokenization.py:260-282"
+    },
+    "2017": {
+        "file_id": 160,
+        "content": "The code checks if a character falls within the CJK Unicode block, which includes Japanese and Korean characters. It returns True if any of these characters are found, indicating that the text is in one of these languages. The function also performs invalid character removal and whitespace cleanup on the given text.",
+        "type": "comment"
+    },
+    "2018": {
+        "file_id": 160,
+        "content": "            if cp == 0 or cp == 0xfffd or _is_control(char):\n                continue\n            if _is_whitespace(char):\n                output.append(\" \")\n            else:\n                output.append(char)\n        return \"\".join(output)\nclass WordpieceTokenizer(object):\n    \"\"\"Runs WordPiece tokenziation.\"\"\"\n    def __init__(self, vocab, unk_token=\"[UNK]\", max_input_chars_per_word=100):\n        self.vocab = vocab\n        self.unk_token = unk_token\n        self.max_input_chars_per_word = max_input_chars_per_word\n    def tokenize(self, text):\n        \"\"\"Tokenizes a piece of text into its word pieces.\n        This uses a greedy longest-match-first algorithm to perform tokenization\n        using the given vocabulary.\n        For example:\n            input = \"unaffable\"\n            output = [\"un\", \"##aff\", \"##able\"]\n        Args:\n            text: A single token or whitespace separated tokens. This should have\n                already been passed through `BasicTokenizer.\n        Returns:\n            A list of wordpiece tokens.",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/tokenization.py:283-315"
+    },
+    "2019": {
+        "file_id": 160,
+        "content": "This code defines a WordpieceTokenizer class that tokenizes text into word pieces using a greedy longest-match-first algorithm and a given vocabulary. The tokenize method takes in a text input, performs tokenization by matching the longest possible substrings from the vocabulary, and returns a list of wordpiece tokens.",
+        "type": "comment"
+    },
+    "2020": {
+        "file_id": 160,
+        "content": "        \"\"\"\n        text = convert_to_unicode(text)\n        output_tokens = []\n        for token in whitespace_tokenize(text):\n            chars = list(token)\n            if len(chars) > self.max_input_chars_per_word:\n                output_tokens.append(self.unk_token)\n                continue\n            is_bad = False\n            start = 0\n            sub_tokens = []\n            while start < len(chars):\n                end = len(chars)\n                cur_substr = None\n                while start < end:\n                    substr = \"\".join(chars[start:end])\n                    if start > 0:\n                        substr = \"##\" + substr\n                    if substr in self.vocab:\n                        cur_substr = substr\n                        break\n                    end -= 1\n                if cur_substr is None:\n                    is_bad = True\n                    break\n                sub_tokens.append(cur_substr)\n                start = end\n            if is_bad:\n                output_tokens.append(self.unk_token)",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/tokenization.py:316-348"
+    },
+    "2021": {
+        "file_id": 160,
+        "content": "This code tokenizes text by splitting it into words, checks if each word is in the vocabulary. If not, it adds a special unknown token. It handles long words by splitting them into smaller parts and checking each part separately.",
+        "type": "comment"
+    },
+    "2022": {
+        "file_id": 160,
+        "content": "            else:\n                output_tokens.extend(sub_tokens)\n        return output_tokens\ndef _is_whitespace(char):\n    \"\"\"Checks whether `chars` is a whitespace character.\"\"\"\n    # \\t, \\n, and \\r are technically contorl characters but we treat them\n    # as whitespace since they are generally considered as such.\n    if char == \" \" or char == \"\\t\" or char == \"\\n\" or char == \"\\r\":\n        return True\n    cat = unicodedata.category(char)\n    if cat == \"Zs\":\n        return True\n    return False\ndef _is_control(char):\n    \"\"\"Checks whether `chars` is a control character.\"\"\"\n    # These are technically control characters but we count them as whitespace\n    # characters.\n    if char == \"\\t\" or char == \"\\n\" or char == \"\\r\":\n        return False\n    cat = unicodedata.category(char)\n    if cat.startswith(\"C\"):\n        return True\n    return False\ndef _is_punctuation(char):\n    \"\"\"Checks whether `chars` is a punctuation character.\"\"\"\n    cp = ord(char)\n    # We treat all non-letter/number ASCII as punctuation.\n    # Characters such as \"^\", \"$\", and \"`\" are not in the Unicode",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/tokenization.py:349-382"
+    },
+    "2023": {
+        "file_id": 160,
+        "content": "The code defines several functions for tokenizing a string: _is_whitespace checks if the character is whitespace, _is_control identifies control characters, and _is_punctuation classifies punctuation. The main function extends output tokens based on these character types.",
+        "type": "comment"
+    },
+    "2024": {
+        "file_id": 160,
+        "content": "    # Punctuation class but we treat them as punctuation anyways, for\n    # consistency.\n    if ((cp >= 33 and cp <= 47) or (cp >= 58 and cp <= 64) or\n        (cp >= 91 and cp <= 96) or (cp >= 123 and cp <= 126)):\n        return True\n    cat = unicodedata.category(char)\n    if cat.startswith(\"P\"):\n        return True\n    return False\ndef tokenize_chinese_chars(text):\n    \"\"\"Adds whitespace around any CJK character.\"\"\"\n    def _is_chinese_char(cp):\n        \"\"\"Checks whether CP is the codepoint of a CJK character.\"\"\"\n        # This defines a \"chinese character\" as anything in the CJK Unicode block:\n        #     https://en.wikipedia.org/wiki/CJK_Unified_Ideographs_(Unicode_block)\n        #\n        # Note that the CJK Unicode block is NOT all Japanese and Korean characters,\n        # despite its name. The modern Korean Hangul alphabet is a different block,\n        # as is Japanese Hiragana and Katakana. Those alphabets are used to write\n        # space-separated words, so they are not treated specially and handled",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/tokenization.py:383-405"
+    },
+    "2025": {
+        "file_id": 160,
+        "content": "This code checks if a given character is a punctuation or Chinese character by checking its Unicode category and code point range. It returns True if the character is a punctuation or Chinese character, and False otherwise. The function is used to tokenize Chinese characters in text by adding whitespace around them.",
+        "type": "comment"
+    },
+    "2026": {
+        "file_id": 160,
+        "content": "        # like the all of the other languages.\n        if ((cp >= 0x4E00 and cp <= 0x9FFF) or  #\n            (cp >= 0x3400 and cp <= 0x4DBF) or  #\n            (cp >= 0x20000 and cp <= 0x2A6DF) or  #\n            (cp >= 0x2A700 and cp <= 0x2B73F) or  #\n            (cp >= 0x2B740 and cp <= 0x2B81F) or  #\n            (cp >= 0x2B820 and cp <= 0x2CEAF) or\n            (cp >= 0xF900 and cp <= 0xFAFF) or  #\n            (cp >= 0x2F800 and cp <= 0x2FA1F)):  #\n            return True\n        return False\n    def _is_whitespace(c):\n        \"\"\"_is_whitespace\n        \"\"\"\n        if c == \" \" or c == \"\\t\" or c == \"\\r\" or c == \"\\n\" or ord(c) == 0x202F:\n            return True\n        return False\n    output = []\n    buff = \"\"\n    for char in text:\n        cp = ord(char)\n        if _is_chinese_char(cp) or _is_whitespace(char):\n            if buff != \"\":\n                output.append(buff)\n                buff = \"\"\n            output.append(char)\n        else:\n            buff += char\n    if buff != \"\":\n        output.append(buff)\n    return output",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/datareader/tokenization.py:406-441"
+    },
+    "2027": {
+        "file_id": 160,
+        "content": "This function tokenizes text by detecting Chinese characters and whitespace, appending non-Chinese characters to a buffer and adding the buffer to the output when a space or Chinese character is found. Finally, it appends any remaining buffer content.",
+        "type": "comment"
+    },
+    "2028": {
+        "file_id": 161,
+        "content": "/applications/MultimodalVideoTag/scenario_lib/eval_and_save_model.py",
+        "type": "filepath"
+    },
+    "2029": {
+        "file_id": 161,
+        "content": "This code uses PaddlePaddle and AttentionLstmErnie for multimodal video tagging, including model building, adjusting batch size, calculating metrics, testing, and saving parameters. The main function handles argument parsing and evaluation.",
+        "type": "summary"
+    },
+    "2030": {
+        "file_id": 161,
+        "content": "\"\"\"\neval main\n\"\"\"\n#  Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os\nimport sys\nimport time\nimport argparse\nimport logging\nimport pickle\nimport numpy as np\nimport paddle\npaddle.enable_static()\nimport paddle.static as static\nfrom accuracy_metrics import MetricsCalculator\nfrom datareader import get_reader\nfrom config import parse_config, merge_configs, print_configs\nfrom models.attention_lstm_ernie import AttentionLstmErnie\nfrom utils import test_with_pyreader\ndef parse_args():",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/eval_and_save_model.py:1-37"
+    },
+    "2031": {
+        "file_id": 161,
+        "content": "This code is an evaluation function for a multimodal video tagging application. It imports necessary libraries, disables dynamic memory allocation, sets up the PaddlePaddle environment, and includes functions for reading data, defining the model architecture, and calculating metrics. The code also defines a \"parse_args\" function to handle command line arguments.",
+        "type": "comment"
+    },
+    "2032": {
+        "file_id": 161,
+        "content": "    \"\"\"parse_args\n    \"\"\"\n    parser = argparse.ArgumentParser(\"Paddle Video evaluate script\")\n    parser.add_argument('--model_name',\n                        type=str,\n                        default='BaiduNet',\n                        help='name of model to train.')\n    parser.add_argument('--config',\n                        type=str,\n                        default='configs/conf.txt',\n                        help='path to config file of model')\n    parser.add_argument(\n        '--pretrain',\n        type=str,\n        default=None,\n        help=\n        'path to pretrain weights. None to use default weights path in  ~/.paddle/weights.'\n    )\n    parser.add_argument('--output', type=str, default=None, help='output path')\n    parser.add_argument('--use_gpu',\n                        type=bool,\n                        default=True,\n                        help='default use gpu.')\n    parser.add_argument('--save_model_param_dir',\n                        type=str,\n                        default=None,\n                        help='checkpoint path')",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/eval_and_save_model.py:38-64"
+    },
+    "2033": {
+        "file_id": 161,
+        "content": "This code defines an argument parser for the Paddle Video evaluate script. It allows users to input a model name, config file path, pretrain weights path, output path, use_gpu flag, and save_model_param_dir. The default values are provided for each argument in case they aren't specified by the user.",
+        "type": "comment"
+    },
+    "2034": {
+        "file_id": 161,
+        "content": "    parser.add_argument('--save_inference_model',\n                        type=str,\n                        default=None,\n                        help='save inference path')\n    parser.add_argument('--save_only',\n                        action='store_true',\n                        default=False,\n                        help='only save model, do not evaluate model')\n    args = parser.parse_args()\n    return args\ndef evaluate(args):\n    \"\"\"evaluate\n    \"\"\"\n    # parse config\n    config = parse_config(args.config)\n    valid_config = merge_configs(config, 'valid', vars(args))\n    print_configs(valid_config, 'Valid')\n    # build model\n    valid_model = AttentionLstmErnie(args.model_name,\n                                     valid_config,\n                                     mode='valid')\n    startup = static.Program()\n    valid_prog = static.default_main_program().clone(for_test=True)\n    with static.program_guard(valid_prog, startup):\n        paddle.disable_static()\n        valid_model.build_input(True)\n        valid_model.build_model()",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/eval_and_save_model.py:65-94"
+    },
+    "2035": {
+        "file_id": 161,
+        "content": "This code defines command-line arguments for saving and evaluating an inference model, parses the configuration file, builds a model using AttentionLstmErnie, and sets up static programs for evaluation.",
+        "type": "comment"
+    },
+    "2036": {
+        "file_id": 161,
+        "content": "        valid_feeds = valid_model.feeds()\n        valid_outputs = valid_model.outputs()\n        valid_loss = valid_model.loss()\n        valid_pyreader = valid_model.pyreader()\n        paddle.enable_static()\n    place = paddle.CUDAPlace(0) if args.use_gpu else paddle.CPUPlace()\n    exe = static.Executor(place)\n    exe.run(startup)\n    compiled_valid_prog = static.CompiledProgram(valid_prog)\n    # load weights\n    assert os.path.exists(args.save_model_param_dir), \\\n            \"Given save weight dir {} not exist.\".format(args.save_model_param_dir)\n    valid_model.load_test_weights_file(exe, args.save_model_param_dir,\n                                       valid_prog, place)\n    if args.save_inference_model:\n        save_model_params(exe, valid_prog, valid_model,\n                          args.save_inference_model)\n    if args.save_only is True:\n        print('save model only, exit')\n        return\n    # get reader\n    bs_denominator = 1\n    valid_config.VALID.batch_size = int(valid_config.VALID.batch_size /\n                                        bs_denominator)",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/eval_and_save_model.py:95-123"
+    },
+    "2037": {
+        "file_id": 161,
+        "content": "This code is loading the model from a specified directory, compiling the program and running it. It checks if the save weight directory exists and loads the test weights into the model. If necessary, it saves the inference model and if only saving the model is required, it exits. The batch size is adjusted by dividing it by a denominator.",
+        "type": "comment"
+    },
+    "2038": {
+        "file_id": 161,
+        "content": "    valid_reader = get_reader(args.model_name.upper(), 'valid', valid_config)\n    # get metrics\n    valid_metrics = MetricsCalculator(args.model_name.upper(), 'valid',\n                                      valid_config)\n    valid_fetch_list = [valid_loss.name] + [x.name for x in valid_outputs\n                                            ] + [valid_feeds[-1].name]\n    # get reader\n    exe_places = static.cuda_places() if args.use_gpu else static.cpu_places()\n    valid_pyreader.decorate_sample_list_generator(valid_reader,\n                                                  places=exe_places)\n    test_loss, metrics_dict_test = test_with_pyreader(exe, compiled_valid_prog,\n                                                      valid_pyreader,\n                                                      valid_fetch_list,\n                                                      valid_metrics)\n    test_acc1 = metrics_dict_test['avg_acc1']\n    print(test_loss)\n    print(test_acc1)\ndef save_model_params(exe, program, model_object, save_dir):",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/eval_and_save_model.py:124-145"
+    },
+    "2039": {
+        "file_id": 161,
+        "content": "This code retrieves a valid reader, calculates metrics, and decorates the sample list generator with specified execution places. It then tests the model using the reader, program, and fetch list to obtain test loss and accuracy, which are printed. The function `save_model_params` saves the model parameters in the provided directory.",
+        "type": "comment"
+    },
+    "2040": {
+        "file_id": 161,
+        "content": "    \"\"\"save_model_params\n    \"\"\"\n    feeded_var_names = [var.name for var in model_object.feeds()][:-1]\n    static.save_inference_model(dirname=save_dir,\n                                  feeded_var_names=feeded_var_names,\n                                  main_program=program,\n                                  target_vars=model_object.outputs(),\n                                  executor=exe,\n                                  model_filename='model',\n                                  params_filename='params')\nif __name__ == \"__main__\":\n    args = parse_args()\n    evaluate(args)",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/eval_and_save_model.py:146-159"
+    },
+    "2041": {
+        "file_id": 161,
+        "content": "This code defines a function \"save_model_params\" that takes the directory path, saves the inference model, and specifies the feeded variable names, main program, target variables, executor, and filenames for the model and parameters. It also includes a main function that parses arguments and evaluates them.",
+        "type": "comment"
+    },
+    "2042": {
+        "file_id": 162,
+        "content": "/applications/MultimodalVideoTag/scenario_lib/inference.py",
+        "type": "filepath"
+    },
+    "2043": {
+        "file_id": 162,
+        "content": "The code is a Paddle Video inference script with argparse handling and an \"InferModel\" class for model loading and prediction. It supports GPU usage, multimodal video tagging, and customizable parameters. The inference function takes videos, labels, predicts, and outputs results to a JSON file.",
+        "type": "summary"
+    },
+    "2044": {
+        "file_id": 162,
+        "content": "#!/usr/bin/env python\n# coding=utf-8\n\"\"\"\ninfer model\n\"\"\"\nimport sys\nimport os\nimport numpy as np\nimport json\nimport pickle\nimport argparse\nimport time\nimport numpy as np\nimport paddle\nfrom datareader import get_reader\nfrom config import merge_configs, parse_config, print_configs\ndef parse_args():\n    \"\"\"parse_args\n    \"\"\"\n    parser = argparse.ArgumentParser(\"Paddle Video infer script\")\n    parser.add_argument('--model_name',\n                        type=str,\n                        default='BaiduNet',\n                        help='name of model to train.')\n    parser.add_argument('--config',\n                        type=str,\n                        default='configs/conf.txt',\n                        help='path to config file of model')\n    parser.add_argument('--output', type=str, default=None, help='output path')\n    parser.add_argument('--use_gpu',\n                        type=bool,\n                        default=True,\n                        help='default use gpu.')\n    parser.add_argument('--save_inference_model',",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/inference.py:1-38"
+    },
+    "2045": {
+        "file_id": 162,
+        "content": "This code is a Paddle Video inference script for a specific model. It parses arguments such as the model name, config file path, output path, use_gpu, and save_inference_model flag. The script utilizes argparse to handle these command-line arguments.",
+        "type": "comment"
+    },
+    "2046": {
+        "file_id": 162,
+        "content": "                        type=str,\n                        default=None,\n                        help='save inference path')\n    args = parser.parse_args()\n    return args\nclass InferModel(object):\n    \"\"\"lstm infer\"\"\"\n    def __init__(self, cfg, name='ACTION'): \n        name = name.upper()\n        self.name           = name\n        self.threshold      = cfg.INFER.threshold\n        self.cfg            = cfg\n        self.label_map      = load_class_file(cfg.MODEL.class_name_file)\n    def load_inference_model(self, model_dir, use_gpu=True):\n        \"\"\"model_init\n        \"\"\"\n        model_file = os.path.join(model_dir, \"model\")\n        params_file = os.path.join(model_dir, \"params\")\n        config = paddle.inference.Config(model_file, params_file)\n        if use_gpu:\n            config.enable_use_gpu(1024)\n        else:\n            config.disable_gpu()\n        config.switch_ir_optim(True)  # default true\n        config.enable_memory_optim()\n        # use zero copy\n        config.switch_use_feed_fetch_ops(False)\n        self.predictor = paddle.inference.create_predictor(config)",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/inference.py:39-69"
+    },
+    "2047": {
+        "file_id": 162,
+        "content": "The code is defining a class \"InferModel\" which initializes variables such as name, threshold, and label_map. It also defines a method \"load_inference_model\" that loads the model file, configures GPU usage, and creates a predictor for inference. The code takes input arguments like model_dir, use_gpu, and other configuration parameters.",
+        "type": "comment"
+    },
+    "2048": {
+        "file_id": 162,
+        "content": "        # build input tensor and output tensor\n        self.build_input_output()\n    def build_input_output(self):\n        \"\"\"build_input_output\n        \"\"\"\n        input_names = self.predictor.get_input_names()\n        # input\n        self.input_rgb_tensor = self.predictor.get_input_handle(input_names[0])\n        self.input_audio_tensor = self.predictor.get_input_handle(input_names[1])\n        self.input_text_tensor = self.predictor.get_input_handle(input_names[2])\n        # output\n        output_names = self.predictor.get_output_names()\n        self.output_tensor = self.predictor.get_output_handle(output_names[0])\n    def preprocess_for_lod_data(self, input):\n        \"\"\"pre process\"\"\"\n        input_arr = []\n        input_lod = [0]\n        start_lod = 0\n        end_lod = 0\n        for sub_item in input:\n            end_lod = start_lod + len(sub_item)\n            input_lod.append(end_lod)\n            input_arr.extend(sub_item)\n            start_lod = end_lod\n        input_arr = np.array(input_arr)\n        return input_arr, [input_lod]",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/inference.py:70-98"
+    },
+    "2049": {
+        "file_id": 162,
+        "content": "This code initializes input and output tensors for a multimodal video tagging scenario. It builds the input tensor from RGB frames, audio data, and text data, and retrieves the output tensor. The `preprocess_for_lod_data` function converts input data into a list of arrays with length indicators (LOD) for efficient handling.",
+        "type": "comment"
+    },
+    "2050": {
+        "file_id": 162,
+        "content": "    def predict(self):\n        \"\"\"predict\"\"\"\n        infer_reader = get_reader(self.name, 'infer', self.cfg)\n        probs = []\n        video_ids = []\n        label_map_inverse = {value: key for key, value in self.label_map.items()}\n        for infer_iter, data in enumerate(infer_reader()):\n            # video_id = [[items[-2], items[-1]] for items in data]\n            rgb = [items[0] for items in data]\n            audio = [items[1] for items in data]\n            text = np.array([items[2] for items in data])\n            videos = np.array([items[3] for items in data])\n            rgb_arr, rgb_lod = self.preprocess_for_lod_data(rgb)\n            audio_arr, audio_lod = self.preprocess_for_lod_data(audio)\n            self.input_rgb_tensor.copy_from_cpu(rgb_arr.astype('float32'))\n            self.input_rgb_tensor.set_lod(rgb_lod)\n            self.input_audio_tensor.copy_from_cpu(audio_arr.astype('float32'))\n            self.input_audio_tensor.set_lod(audio_lod)\n            self.input_text_tensor.copy_from_cpu(text.astype('int64'))",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/inference.py:100-122"
+    },
+    "2051": {
+        "file_id": 162,
+        "content": "In this code, a function named \"predict\" is defined. It uses a reader to process data for inference and iterates through each instance of the data. The instances contain RGB images, audio, text, and video IDs. These instances are preprocessed for LOD (Level Of Detail) data using the preprocess_for_lod_data method. The preprocessed data is then copied to corresponding input tensors (RGB, audio, and text) for inference.",
+        "type": "comment"
+    },
+    "2052": {
+        "file_id": 162,
+        "content": "            self.predictor.run()\n            output = self.output_tensor.copy_to_cpu()\n            probs.extend(list(output))\n            video_ids.extend(videos)\n        assert len(video_ids) == len(probs)\n        result = []\n        for video_id, prob in zip(video_ids, probs):\n            label_idx = list(np.where(prob >= self.threshold)[0])\n            result.append({\n                \"video_id\": video_id,\n                \"labels\": [\n                    (label_map_inverse[str(idx)], float(prob[idx])) for idx in label_idx\n                ]\n            })\n        return result\ndef load_class_file(class_file):\n    \"\"\"\n    load_class_file\n    \"\"\"\n    class_lines = open(class_file, 'r', encoding='utf8').readlines()\n    class_dict = {}\n    for i, line in enumerate(class_lines):\n        tmp = line.strip().split('\\t')\n        word = tmp[0]\n        index = str(i)\n        if len(tmp) == 2:\n            index = tmp[1]\n        class_dict[word] = index\n    return class_dict\ndef infer(args):\n    \"\"\"\n    infer main\n    \"\"\"\n    config = parse_config(args.config)",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/inference.py:124-161"
+    },
+    "2053": {
+        "file_id": 162,
+        "content": "The code defines an inference function that takes a set of videos and their associated labels, and returns the predicted labels for each video. It also includes functions to load class information from a file and parse command-line arguments. The inference function first runs the predictor on the input data, then extracts the output probabilities and corresponding video IDs. It checks that the number of video IDs matches the number of probabilities. Then, for each video-probability pair, it identifies the indices where the probability is above a certain threshold and uses these to determine the predicted labels. The resulting dictionary contains the video ID, as well as a list of tuples containing the label name and corresponding probability for each detected label.",
+        "type": "comment"
+    },
+    "2054": {
+        "file_id": 162,
+        "content": "    infer_config = merge_configs(config, 'infer', vars(args))\n    print_configs(infer_config, 'infer')\n    infer_obj = InferModel(infer_config, name=args.model_name)\n    infer_obj.load_inference_model(args.save_inference_model, use_gpu=args.use_gpu)\n    rt = infer_obj.predict()\n    if args.output:\n        with open(args.output, 'w') as f:\n            json.dump(rt, f, ensure_ascii=False, indent=4)\nif __name__ == \"__main__\":\n    args = parse_args()\n    infer(args)",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/inference.py:162-173"
+    },
+    "2055": {
+        "file_id": 162,
+        "content": "This code snippet is from the \"inference.py\" file in the PaddleVideo MultimodalVideoTag application. It defines a function `infer` that performs model inference on input data and outputs the results. The code merges configs for the infer stage, prints them out, creates an InferModel object with those configs, loads the inference model from a given file (if provided), runs inference, and finally saves the results to a JSON file if requested.",
+        "type": "comment"
+    },
+    "2056": {
+        "file_id": 163,
+        "content": "/applications/MultimodalVideoTag/scenario_lib/models/attention_lstm_ernie.py",
+        "type": "filepath"
+    },
+    "2057": {
+        "file_id": 163,
+        "content": "The code introduces an AttentionLstmErnie class for ERNIE-based scenario classification, implementing an LSTM-based attention model for video tagging using text and audio data. It employs dropout, batch normalization, and Neural Machine Translation approach.",
+        "type": "summary"
+    },
+    "2058": {
+        "file_id": 163,
+        "content": "#!/usr/bin/env python\n# coding=utf-8\n\"\"\"\nattention lstm add ernie model\n\"\"\"\n#  Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os\nimport paddle\nimport paddle.static as static\nfrom .ernie import ErnieConfig, ErnieModel\nclass AttentionLstmErnie(object):\n    \"\"\"\n    Base on scenario-classify (image + audio), add text information\n    use ERNIE to extract text feature\n    \"\"\"\n    def __init__(self, name, cfg, mode='train'):\n        self.cfg = cfg\n        self.name = name",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/attention_lstm_ernie.py:1-34"
+    },
+    "2059": {
+        "file_id": 163,
+        "content": "This code defines the AttentionLstmErnie class, which extends the functionality of scenario-classify by incorporating text information. It uses ERNIE to extract text features and operates in either 'train' or 'infer' mode.",
+        "type": "comment"
+    },
+    "2060": {
+        "file_id": 163,
+        "content": "        self.mode = mode\n        self.py_reader = None\n        self.get_config()\n    def get_config(self):\n        \"\"\"get_config\n        \"\"\"\n        # get model configs\n        self.feature_num = self.cfg.MODEL.feature_num\n        self.feature_names = self.cfg.MODEL.feature_names\n        self.feature_dims = self.cfg.MODEL.feature_dims\n        self.feature_dtypes = self.cfg.MODEL.feature_dtypes\n        self.feature_lod_level = self.cfg.MODEL.feature_lod_level\n        self.num_classes = self.cfg.MODEL.num_classes\n        self.embedding_size = self.cfg.MODEL.embedding_size\n        self.lstm_size_img = self.cfg.MODEL.lstm_size_img\n        self.lstm_size_audio = self.cfg.MODEL.lstm_size_audio\n        self.ernie_freeze = self.cfg.MODEL.ernie_freeze\n        self.lstm_pool_mode = self.cfg.MODEL.lstm_pool_mode\n        self.drop_rate = self.cfg.MODEL.drop_rate\n        self.loss_type = self.cfg.TRAIN.loss_type\n        self.ernie_pretrain_dict_path = self.cfg.TRAIN.ernie_pretrain_dict_path\n        # get mode configs\n        self.batch_size = self.get_config_from_sec(self.mode, 'batch_size', 1)",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/attention_lstm_ernie.py:35-59"
+    },
+    "2061": {
+        "file_id": 163,
+        "content": "This code initializes a model by setting attributes from a configuration file and calling the `get_config` function. The `get_config` function retrieves the model's configurations, including feature numbers, dimensions, data types, and more. It also gets mode-specific settings like batch size.",
+        "type": "comment"
+    },
+    "2062": {
+        "file_id": 163,
+        "content": "        self.num_gpus = self.get_config_from_sec(self.mode, 'num_gpus', 1)\n        if self.mode == 'train':\n            self.learning_rate = self.get_config_from_sec(\n                'train', 'learning_rate', 1e-3)\n            self.weight_decay = self.get_config_from_sec(\n                'train', 'weight_decay', 8e-4)\n            self.num_samples = self.get_config_from_sec(\n                'train', 'num_samples', 5000000)\n            self.decay_epochs = self.get_config_from_sec(\n                'train', 'decay_epochs', [5])\n            self.decay_gamma = self.get_config_from_sec(\n                'train', 'decay_gamma', 0.1)\n    def get_config_from_sec(self, sec, item, default=None):\n        \"\"\"get_config_from_sec\"\"\"\n        if sec.upper() not in self.cfg:\n            return default\n        return self.cfg[sec.upper()].get(item, default)\n    def build_input(self, use_pyreader):\n        \"\"\"\n        build input\n        \"\"\"\n        self.feature_input = []\n        for name, dim, dtype, lod_level in zip(self.feature_names,",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/attention_lstm_ernie.py:60-85"
+    },
+    "2063": {
+        "file_id": 163,
+        "content": "This code is a part of the AttentionLSTMERNIE model. It initializes the number of GPUs, learning rate, weight decay, and other parameters for training mode. The function get_config_from_sec retrieves values from a configuration file using section and item names. The build_input function constructs input data by iterating over feature names, dimensions, data types, and lod levels.",
+        "type": "comment"
+    },
+    "2064": {
+        "file_id": 163,
+        "content": "                                               self.feature_dims,\n                                               self.feature_dtypes,\n                                               self.feature_lod_level):\n            self.feature_input.append(\n                static.data(shape=dim,\n                                  lod_level=lod_level,\n                                  dtype=dtype,\n                                  name=name))\n        self.label_input = static.data(shape=[self.num_classes],\n                                             dtype='float32',\n                                             name='label')\n        self.py_reader = paddle.fluid.io.PyReader(feed_list=self.feature_input +\n                                           [self.label_input],\n                                           capacity=1024,\n                                           iterable=True)\n    def ernie_encoder(self):\n        \"\"\"\n        text feature extractor\n        \"\"\"\n        ernie_config = ErnieConfig(\n            os.path.join(self.ernie_pretrain_dict_path, 'ernie_config.json'))",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/attention_lstm_ernie.py:86-108"
+    },
+    "2065": {
+        "file_id": 163,
+        "content": "Code initializes the reader for data feeding into the model, sets the label input, and defines a function \"ernie_encoder\" that extracts text features using the Ernie model.",
+        "type": "comment"
+    },
+    "2066": {
+        "file_id": 163,
+        "content": "        if self.mode != 'train':\n            ernie_config['attention_probs_dropout_prob'] = 0.0\n            ernie_config['hidden_dropout_prob'] = 0.0\n        src_ids = self.feature_input[2][:, 0]\n        sent_ids = self.feature_input[2][:, 1]\n        position_ids = self.feature_input[2][:, 2]\n        task_ids = self.feature_input[2][:, 3]\n        input_mask = self.feature_input[2][:, 4].astype('float32')\n        ernie = ErnieModel(src_ids=src_ids,\n                           position_ids=position_ids,\n                           sentence_ids=sent_ids,\n                           task_ids=task_ids,\n                           input_mask=input_mask,\n                           config=ernie_config)\n        enc_out = ernie.get_sequence_output()\n        # to Freeze ERNIE param\n        if self.ernie_freeze is True:\n            enc_out.stop_gradient = True\n        # ernie cnn\n        enc_out_cnn = ernie.get_sequence_textcnn_output(enc_out, input_mask)\n        enc_out_cnn_drop = paddle.nn.functional.dropout(enc_out_cnn, p=self.drop_rate, training=(self.mode=='train'))",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/attention_lstm_ernie.py:109-131"
+    },
+    "2067": {
+        "file_id": 163,
+        "content": "This code initializes an ErnieModel with features extracted from input data. If self.ernie_freeze is True, it freezes the ERNIE model's parameters to prevent further training. It then retrieves the sequence output and applies a dropout if in train mode.",
+        "type": "comment"
+    },
+    "2068": {
+        "file_id": 163,
+        "content": "        return enc_out_cnn_drop\n    def build_model(self):\n        \"\"\"build_model\n        \"\"\"\n        # ---------------- transfer from old paddle ---------------\n        # get image,audio,text feature\n        video_input_tensor = self.feature_input[0]\n        audio_input_tensor = self.feature_input[1]\n        self.ernie_feature = self.ernie_encoder()\n        # ------image------\n        lstm_forward_fc = static.nn.fc(x=video_input_tensor,\n                                          size=self.lstm_size_img * 4,\n                                          activation=None,\n                                          bias_attr=False)\n        lstm_forward, _ = paddle.fluid.layers.dynamic_lstm(input=lstm_forward_fc,\n                                                    size=self.lstm_size_img *\n                                                    4,\n                                                    is_reverse=False,\n                                                    use_peepholes=True)\n        lsmt_backward_fc = static.nn.fc(x=video_input_tensor,",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/attention_lstm_ernie.py:132-154"
+    },
+    "2069": {
+        "file_id": 163,
+        "content": "This code defines a function called \"build_model\" that creates and returns the model for video tagging. The model takes image, audio, and text features as input to generate attention-based LSTM features from the image. It applies fully connected layers (fc) on the image features and then passes them through dynamic LSTMs to obtain the forward and backward LSTM outputs. These outputs are used in further processing for video tagging.",
+        "type": "comment"
+    },
+    "2070": {
+        "file_id": 163,
+        "content": "                                           size=self.lstm_size_img * 4,\n                                           activation=None,\n                                           bias_attr=None)\n        lstm_backward, _ = paddle.fluid.layers.dynamic_lstm(input=lsmt_backward_fc,\n                                                     size=self.lstm_size_img *\n                                                     4,\n                                                     is_reverse=True,\n                                                     use_peepholes=True)\n        lstm_forward_img = paddle.concat(\n            x=[lstm_forward, lstm_backward], axis=1)\n        lstm_dropout = paddle.nn.functional.dropout(lstm_forward_img, p=self.drop_rate, training=(self.mode=='train'))\n        if self.lstm_pool_mode == 'text_guide':\n            lstm_weight = self.attention_weight_by_feature_seq2seq_attention(\n                self.ernie_feature, lstm_dropout, self.lstm_size_img * 2)\n        else:\n            lstm_weight = static.nn.fc(x=lstm_dropout,",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/attention_lstm_ernie.py:155-172"
+    },
+    "2071": {
+        "file_id": 163,
+        "content": "This code defines a dynamic LSTM layer for image features, concatenates it with the backward pass, and applies dropout if in training mode. If 'text_guide' pooling mode is selected, it computes attention weights between text features and LSTM output using seq2seq attention. Otherwise, it uses an FC layer to reduce the dimensions of the LSTM output.",
+        "type": "comment"
+    },
+    "2072": {
+        "file_id": 163,
+        "content": "                                          size=1,\n                                          activation='sequence_softmax',\n                                          bias_attr=None)\n        scaled = paddle.multiply(x=lstm_dropout,\n                                              y=lstm_weight)\n        self.lstm_pool = paddle.static.nn.sequence_pool(input=scaled,\n                                                    pool_type='sum')\n        # ------audio------\n        lstm_forward_fc_audio = static.nn.fc(\n            x=audio_input_tensor,\n            size=self.lstm_size_audio * 4,\n            activation=None,\n            bias_attr=paddle.ParamAttr(\n                regularizer=paddle.regularizer.L2Decay(coeff=0.0),\n                initializer=paddle.nn.initializer.Normal(std=0.0)))\n        lstm_forward_audio, _ = paddle.fluid.layers.dynamic_lstm(\n            input=lstm_forward_fc_audio,\n            size=self.lstm_size_audio * 4,\n            is_reverse=False,\n            use_peepholes=True)\n        lsmt_backward_fc_audio = static.nn.fc(x=audio_input_tensor,",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/attention_lstm_ernie.py:173-194"
+    },
+    "2073": {
+        "file_id": 163,
+        "content": "This code snippet is defining a LSTM model for processing both visual and audio inputs. It initializes a LSTM layer with dropout, applies element-wise multiplication with weights, performs sequence pooling on the output, and defines FC layers followed by LSTM for processing audio input. Regularization is applied to the audio LSTM layer using an L2 decay regularizer.",
+        "type": "comment"
+    },
+    "2074": {
+        "file_id": 163,
+        "content": "                                                 size=self.lstm_size_audio * 4,\n                                                 activation=None,\n                                                 bias_attr=False)\n        lstm_backward_audio, _ = paddle.fluid.layers.dynamic_lstm(\n            input=lsmt_backward_fc_audio,\n            size=self.lstm_size_audio * 4,\n            is_reverse=True,\n            use_peepholes=True)\n        lstm_forward_audio = paddle.concat(\n            x=[lstm_forward_audio, lstm_backward_audio], axis=1)\n        lstm_dropout_audio = paddle.nn.functional.dropout(lstm_forward_audio, p=self.drop_rate, training=(self.mode=='train'))\n        if self.lstm_pool_mode == 'text_guide':\n            lstm_weight_audio = self.attention_weight_by_feature_seq2seq_attention(\n                self.ernie_feature, lstm_dropout_audio,\n                self.lstm_size_audio * 2)\n        else:\n            lstm_weight_audio = static.nn.fc(x=lstm_dropout_audio,\n                                                size=1,",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/attention_lstm_ernie.py:195-214"
+    },
+    "2075": {
+        "file_id": 163,
+        "content": "This code is creating a dynamic LSTM for audio input, reversing it, concatenating the forward and backward outputs, applying dropout if in training mode, and then performing attention weight calculation based on the pooling mode.",
+        "type": "comment"
+    },
+    "2076": {
+        "file_id": 163,
+        "content": "                                                activation='sequence_softmax',\n                                                bias_attr=None)\n        scaled_audio = paddle.multiply(x=lstm_dropout_audio,\n                                                    y=lstm_weight_audio)\n        self.lstm_pool_audio = paddle.static.nn.sequence_pool(input=scaled_audio,\n                                                          pool_type='sum')\n        lstm_concat = paddle.concat(\n            x=[self.lstm_pool, self.lstm_pool_audio, self.ernie_feature],\n            axis=1,\n            name='final_concat')\n        # lstm_concat = self.add_bn(lstm_concat)\n        if self.loss_type == 'softmax':\n            self.fc = static.nn.fc(x=lstm_concat,\n                                      size=self.num_classes,\n                                      activation='softmax')\n        elif self.loss_type == 'sigmoid':\n            self.fc = static.nn.fc(x=lstm_concat,\n                                      size=self.num_classes,\n                                      activation=None)",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/attention_lstm_ernie.py:215-235"
+    },
+    "2077": {
+        "file_id": 163,
+        "content": "This code implements a LSTM-based attention model that combines audio and text data for video tagging. It consists of three main parts: LSTM layers, attention mechanism, and fully connected (FC) layer. The LSTM layers process the text and audio inputs separately and then concatenate them with the ERNIE feature. The attention mechanism is applied to calculate the weight for each LSTM output sequence. The FC layer has a softmax activation function if loss type is set to 'softmax', otherwise, it uses no activation when loss type is 'sigmoid'.",
+        "type": "comment"
+    },
+    "2078": {
+        "file_id": 163,
+        "content": "            self.logit = self.fc\n            self.fc = paddle.nn.functional.sigmoid(self.fc)\n        self.network_outputs = [self.fc]\n    def attention_weight_by_feature_seq2seq_attention(\n            self,\n            text_feature,\n            sequence_feature,\n            sequence_feature_dim,\n            name_prefix=\"seq2seq_attention\"):\n        \"\"\"\n        caculate weight by feature\n        Neural Machine Translation by Jointly Learning to Align and Translate\n        \"\"\"\n        text_feature_expand = paddle.static.nn.sequence_expand(text_feature,\n                                                           sequence_feature,\n                                                           ref_level=0)\n        sequence_text_concat = paddle.concat(\n            x=[sequence_feature, text_feature_expand],\n            axis=-1,\n            name='video_text_concat')\n        energy = static.nn.fc(x=sequence_text_concat,\n                                 size=sequence_feature_dim,\n                                 activation='tanh',",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/attention_lstm_ernie.py:236-260"
+    },
+    "2079": {
+        "file_id": 163,
+        "content": "This code calculates attention weights for a feature sequence using a Neural Machine Translation approach. It expands the text feature across the sequence, concatenates it with the original sequence feature, and passes it through an FC layer with 'tanh' activation to calculate energy values. The calculated energy is then used to determine attention weights by feature.",
+        "type": "comment"
+    },
+    "2080": {
+        "file_id": 163,
+        "content": "                                 name=name_prefix + \"_tanh_fc\")\n        weight_vector = static.nn.fc(x=energy,\n                                        size=1,\n                                        activation='sequence_softmax',\n                                        bias_attr=None,\n                                        name=name_prefix + \"_softmax_fc\")\n        return weight_vector\n    def add_bn(self, lstm_concat):\n        \"\"\"\n        v2.5 add drop out and batch norm\n        \"\"\"\n        input_fc_proj = static.nn.fc(\n            x=lstm_concat,\n            size=8192,\n            activation=None,\n            bias_attr=paddle.ParamAttr(\n                regularizer=paddle.regularizer.L2Decay(coeff=0.0),\n                initializer=paddle.nn.initializer.Normal(std=0.0)))\n        input_fc_proj_bn = paddle.static.nn.batch_norm(\n            input=input_fc_proj,\n            act=\"relu\",\n            is_test=(not self.mode == 'train'))\n        input_fc_proj_dropout = paddle.nn.functional.dropout(\n            input_fc_proj_bn,",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/attention_lstm_ernie.py:261-285"
+    },
+    "2081": {
+        "file_id": 163,
+        "content": "This function adds dropout and batch normalization to the LSTM concatenation. It projects the input to 8192 dimensions using an FC layer, applies batch normalization, and then applies a relu activation if in training mode. If not in training mode (is_test), it skips the batch normalization step. Finally, it applies dropout to the result.",
+        "type": "comment"
+    },
+    "2082": {
+        "file_id": 163,
+        "content": "            p=self.drop_rate,\n            training=(self.mode=='train'))\n        input_fc_hidden = static.nn.fc(\n            x=input_fc_proj_dropout,\n            size=4096,\n            activation=None,\n            bias_attr=paddle.ParamAttr(\n                regularizer=paddle.regularizer.L2Decay(coeff=0.0),\n                initializer=paddle.nn.initializer.Normal(std=0.0)))\n        input_fc_hidden_bn = paddle.static.nn.batch_norm(\n            input=input_fc_hidden,\n            act=\"relu\",\n            is_test=(not self.mode == 'train'))\n        input_fc_hidden_dropout = paddle.nn.functional.dropout(\n            input_fc_hidden_bn,\n            p=self.drop_rate,\n            training=(self.mode=='train'))\n        return input_fc_hidden_dropout\n    def optimizer(self):\n        \"\"\"\n        optimizer\n        \"\"\"\n        assert self.mode == 'train', \"optimizer only can be get in train mode\"\n        values = [\n            self.learning_rate * (self.decay_gamma ** i)\n            for i in range(len(self.decay_epochs) + 1)",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/attention_lstm_ernie.py:286-312"
+    },
+    "2083": {
+        "file_id": 163,
+        "content": "This code defines an attention LSTM model using Ernie. It applies dropout, fully connected layers with batch normalization and dropout again. The optimizer function sets a learning rate that decays over specified epochs.",
+        "type": "comment"
+    },
+    "2084": {
+        "file_id": 163,
+        "content": "        ]\n        iter_per_epoch = self.num_samples / self.batch_size\n        boundaries = [e * iter_per_epoch for e in self.decay_epochs]\n        return paddle.optimizer.RMSProp(\n            learning_rate=paddle.optimizer.lr.PiecewiseDecay(values=values,\n                                                       boundaries=boundaries),\n            centered=True,\n            weight_decay=paddle.regularizer.L2Decay(\n                coeff=self.weight_decay))\n    def softlabel_cross_entropy_loss(self):\n        \"\"\"\n        softlabel_cross_entropy_loss\n        \"\"\"\n        assert self.mode != 'infer', \"invalid loss calculationg in infer mode\"\n        '''\n        cost = paddle.nn.functional.cross_entropy(input=self.network_outputs[0], \\\n                                          label=self.label_input)\n        '''\n        cost = paddle.nn.functional.cross_entropy(input=self.network_outputs[0], \\\n                                          label=self.label_input,\n                                          soft_label=True)",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/attention_lstm_ernie.py:313-334"
+    },
+    "2085": {
+        "file_id": 163,
+        "content": "This code defines a class that contains two methods: one for initializing an optimizer with piecewise decay learning rate and another for calculating the softlabel cross-entropy loss. The optimizer uses RMSProp algorithm and decays the learning rate based on defined epochs. The loss is calculated using the soft label version of cross entropy, suitable for certain types of neural networks.",
+        "type": "comment"
+    },
+    "2086": {
+        "file_id": 163,
+        "content": "        cost = paddle.sum(x=cost, axis=-1)\n        sum_cost = paddle.sum(x=cost)\n        self.loss_ = paddle.scale(sum_cost,\n                                        scale=self.num_gpus,\n                                        bias_after_scale=False)\n        return self.loss_\n    def sigmoid_cross_entropy_loss(self):\n        \"\"\"\n        sigmoid_cross_entropy_loss\n        \"\"\"\n        assert self.mode != 'infer', \"invalid loss calculationg in infer mode\"\n        cost = paddle.nn.functional.binary_cross_entropy(input=self.logit,\\\n                                          label=self.label_input, reduction=None)\n        cost = paddle.sum(x=cost, axis=-1)\n        sum_cost = paddle.sum(x=cost)\n        self.loss_ = paddle.scale(sum_cost,\n                                        scale=self.num_gpus,\n                                        bias_after_scale=False)\n        return self.loss_\n    def loss(self):\n        \"\"\"\n        loss\n        \"\"\"\n        if self.loss_type == 'sigmoid':\n            return self.sigmoid_cross_entropy_loss()",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/attention_lstm_ernie.py:336-365"
+    },
+    "2087": {
+        "file_id": 163,
+        "content": "The code defines a loss function that takes in a loss type ('sigmoid' or others) and returns the calculated loss value. It includes functions for computing the sum of losses (sum_cost) and scaling it based on the number of GPUs (self.num_gpus). For the 'sigmoid' loss type, it uses binary cross-entropy with a reduction to be none, and calculates the mean loss over all batch elements. The scale operation is used to adjust the loss value for distributed training across multiple GPUs.",
+        "type": "comment"
+    },
+    "2088": {
+        "file_id": 163,
+        "content": "        else:\n            return self.softlabel_cross_entropy_loss()\n    def outputs(self):\n        \"\"\"\n        get outputs\n        \"\"\"\n        return self.network_outputs\n    def feeds(self):\n        \"\"\"\n        get feeds\n        \"\"\"\n        return self.feature_input if self.mode == 'infer' else self.feature_input + [\n            self.label_input\n        ]\n    def pyreader(self):\n        \"\"\"pyreader\"\"\"\n        return self.py_reader\n    def epoch_num(self):\n        \"\"\"get train epoch num\"\"\"\n        return self.cfg.TRAIN.epoch\n    def load_test_weights_file(self, exe, weights, prog, place):\n        \"\"\"\n        load_test_weights_file\n        \"\"\"\n        load_vars = [x for x in prog.list_vars() \\\n                     if isinstance(x, paddle.framework.Parameter)]\n        static.load_vars(exe,\n                           dirname=weights,\n                           vars=load_vars,\n                           filename=\"param\")",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/attention_lstm_ernie.py:366-400"
+    },
+    "2089": {
+        "file_id": 163,
+        "content": "This code defines several methods for a model class. The `softlabel_cross_entropy_loss()` method returns the soft label cross-entropy loss. The `outputs()` method returns the network outputs. The `feeds()` method returns the feature and label inputs based on the current mode. The `pyreader()` method returns the PyReader object. Finally, the `epoch_num()` method returns the number of training epochs.",
+        "type": "comment"
+    },
+    "2090": {
+        "file_id": 164,
+        "content": "/applications/MultimodalVideoTag/scenario_lib/models/ernie.py",
+        "type": "filepath"
+    },
+    "2091": {
+        "file_id": 164,
+        "content": "The code defines an Ernie model configuration and initializes the ERNIE model using Paddle's embedding layer. It also includes a multimodal video tagging model, embeddings, data pre-processing, attention mask creation, encoder usage, and TextCNN for sequence feature extraction. The code creates 1D convolutional layers with specified parameters and returns the output.",
+        "type": "summary"
+    },
+    "2092": {
+        "file_id": 164,
+        "content": "#   Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"Ernie model.\"\"\"\nfrom __future__ import absolute_import\nfrom __future__ import division\nfrom __future__ import print_function\nfrom __future__ import unicode_literals\nfrom __future__ import absolute_import\nimport json\nimport six\nimport logging\nimport paddle\nimport paddle.static as static\nfrom io import open\nfrom .transformer_encoder import encoder, pre_process_layer\nlog = logging.getLogger(__name__)\nclass ErnieConfig(object):",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/ernie.py:1-33"
+    },
+    "2093": {
+        "file_id": 164,
+        "content": "This code snippet contains the Ernie model class definition. It imports necessary modules, defines logging, and initializes a class for configuring the Ernie model. The class inherits from `object` and represents the configuration to be used in the Ernie model architecture.",
+        "type": "comment"
+    },
+    "2094": {
+        "file_id": 164,
+        "content": "    \"\"\"\n    Erine model config\n    \"\"\"\n    def __init__(self, config_path):\n        \"\"\"\n        init\n        \"\"\"\n        self._config_dict = self._parse(config_path)\n    def _parse(self, config_path):\n        \"\"\"\n        parse config\n        \"\"\"\n        try:\n            with open(config_path, 'r', encoding='utf8') as json_file:\n                config_dict = json.load(json_file)\n        except Exception:\n            raise IOError(\"Error in parsing Ernie model config file '%s'\" %\n                          config_path)\n        else:\n            return config_dict\n    def __getitem__(self, key):\n        \"\"\"\n        get item\n        \"\"\"\n        return self._config_dict.get(key, None)\n    def __setitem__(self, key, value):\n        \"\"\"\n        set item\n        \"\"\"\n        self._config_dict[key] = value\n    def print_config(self):\n        \"\"\"\n        print config\n        \"\"\"\n        for arg, value in sorted(six.iteritems(self._config_dict)):\n            log.info('%s: %s' % (arg, value))\n        log.info('------------------------------------------------')",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/ernie.py:34-73"
+    },
+    "2095": {
+        "file_id": 164,
+        "content": "This code defines a class for an Ernie model configuration. It initializes the config with a given path, parses the config file using JSON, allows getting and setting items from/to the configuration dictionary, and provides a print_config method to display the configuration in a readable format.",
+        "type": "comment"
+    },
+    "2096": {
+        "file_id": 164,
+        "content": "class ErnieModel(object):\n    \"\"\"\n    ERINE Model\n    \"\"\"\n    def __init__(self,\n                 src_ids,\n                 position_ids,\n                 sentence_ids,\n                 task_ids,\n                 input_mask,\n                 config,\n                 weight_sharing=True,\n                 use_fp16=False):\n        \"\"\"\n        init model\n        \"\"\"\n        self._emb_size = config['hidden_size']\n        self._n_layer = config['num_hidden_layers']\n        self._n_head = config['num_attention_heads']\n        self._voc_size = config['vocab_size']\n        self._max_position_seq_len = config['max_position_embeddings']\n        if config['sent_type_vocab_size']:\n            self._sent_types = config['sent_type_vocab_size']\n        else:\n            self._sent_types = config['type_vocab_size']\n        self._use_task_id = config['use_task_id']\n        if self._use_task_id:\n            self._task_types = config['task_type_vocab_size']\n        self._hidden_act = config['hidden_act']\n        self._prepostprocess_dropout = config['hidden_dropout_prob']",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/ernie.py:76-106"
+    },
+    "2097": {
+        "file_id": 164,
+        "content": "The code defines the ErnieModel class, which initializes an ERINE model with parameters such as source ids, position ids, sentence ids, task ids, input mask, configuration, weight sharing, and use of fp16. The class attributes are initialized based on the provided configuration.",
+        "type": "comment"
+    },
+    "2098": {
+        "file_id": 164,
+        "content": "        self._attention_dropout = config['attention_probs_dropout_prob']\n        self._weight_sharing = weight_sharing\n        self._word_emb_name = \"word_embedding\"\n        self._pos_emb_name = \"pos_embedding\"\n        self._sent_emb_name = \"sent_embedding\"\n        self._task_emb_name = \"task_embedding\"\n        self._dtype = \"float16\" if use_fp16 else \"float32\"\n        self._emb_dtype = \"float32\"\n        # Initialize all weigths by truncated normal initializer, and all biases\n        # will be initialized by constant zero by default.\n        self._param_initializer = paddle.nn.initializer.TruncatedNormal(\n            std=config['initializer_range'])\n        self._build_model(src_ids, position_ids, sentence_ids, task_ids,\n                          input_mask)\n    def _build_model(self, src_ids, position_ids, sentence_ids, task_ids,\n                     input_mask):\n        \"\"\"\n        build  model\n        \"\"\"\n        # padding id in vocabulary must be set to 0\n        emb_out = static.nn.embedding(\n            input=src_ids,",
+        "type": "code",
+        "location": "/applications/MultimodalVideoTag/scenario_lib/models/ernie.py:107-132"
+    },
+    "2099": {
+        "file_id": 164,
+        "content": "This code initializes the ERNIE model parameters and builds the model. It sets various attributes such as attention dropout probability, embedding names for word, position, sentence, and task, data types, and initializer range. The _build_model function is then called to create the model using Paddle's embedding layer.",
+        "type": "comment"
+    }
+}

@@ -1,0 +1,541 @@
+{
+    "7400": {
+        "file_id": 540,
+        "content": "        return loss_metrics\n    def test_step(self, data_batch):\n        \"\"\"Define how the model is going to test, from input to output.\"\"\"\n        # NOTE: (shipping) when testing, the net won't call head.loss, we deal with the test processing in /paddlevideo/metrics\n        frame_sequence = data_batch[0]\n        one_hot_pred = self.forward_net(frame_sequence)\n        return one_hot_pred\n    def infer_step(self, data_batch):\n        \"\"\"Define how the model is going to test, from input to output.\"\"\"\n        frame_sequence = data_batch[0]\n        one_hot_pred = self.forward_net(frame_sequence)\n        return one_hot_pred",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/partitioners/transnetv2_partitioner.py:55-68"
+    },
+    "7401": {
+        "file_id": 540,
+        "content": "The code defines three methods: \"loss_metrics\" returns loss and metrics for training, \"test_step\" performs testing by forwarding frames through the net without calculating loss, and \"infer_step\" also performs testing with forwarding frames but without specifying if it's for a test or inference phase.",
+        "type": "comment"
+    },
+    "7402": {
+        "file_id": 541,
+        "content": "/paddlevideo/modeling/framework/recognizers/__init__.py",
+        "type": "filepath"
+    },
+    "7403": {
+        "file_id": 541,
+        "content": "This code file in the PaddleVideo library imports various recognizer classes for video recognition tasks, including 1D, 2D, 3D, transformer-based, GCN, MRI, and MoViNet frame-based recognizers. These models are used for action recognition and motion estimation tasks.",
+        "type": "summary"
+    },
+    "7404": {
+        "file_id": 541,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom .base import BaseRecognizer\nfrom .recognizer1d import Recognizer1D, RecognizerAction\nfrom .recognizer2d import Recognizer2D\nfrom .recognizer3d import Recognizer3D\nfrom .recognizer_transformer import RecognizerTransformer\nfrom .recognizer_gcn import RecognizerGCN\nfrom .recognizerMRI import RecognizerMRI\nfrom .recognizer3dMRI import Recognizer3DMRI\nfrom .recognizer_transformer_MRI import RecognizerTransformer_MRI\nfrom .recognizer_movinet_frame import MoViNetRecognizerFrame\nfrom .recognizerDistillation import RecognizerDistillation",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/__init__.py:1-23"
+    },
+    "7405": {
+        "file_id": 541,
+        "content": "This code file imports various recognizer classes from different modules within the PaddleVideo framework for video recognition tasks. These recognizers include 1D, 2D, 3D, transformer-based, GCN, MRI, 3D MRI, and MoViNet frame-based recognizers, as well as a distillation-based recognizer. Each recognizer is designed for specific types of recognition tasks in video analysis.",
+        "type": "comment"
+    },
+    "7406": {
+        "file_id": 541,
+        "content": "__all__ = [\n    'BaseRecognizer', 'Recognizer1D', 'Recognizer2D', 'Recognizer3D',\n    'RecognizerTransformer', 'RecognizerGCN', 'RecognizerMRI',\n    'Recognizer3DMRI', 'RecognizerTransformer_MRI', 'MoViNetRecognizerFrame',\n    'RecognizerAction', 'RecognizerDistillation'\n]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/__init__.py:25-30"
+    },
+    "7407": {
+        "file_id": 541,
+        "content": "This code snippet in the PaddleVideo library defines various recognizer models including BaseRecognizer, Recognizer1D, Recognizer2D, and more. These classes are used for video recognition tasks like action recognition and motion estimation.",
+        "type": "comment"
+    },
+    "7408": {
+        "file_id": 542,
+        "content": "/paddlevideo/modeling/framework/recognizers/base.py",
+        "type": "filepath"
+    },
+    "7409": {
+        "file_id": 542,
+        "content": "This code initializes a model's head, defines modes of operation, and provides abstract methods for training, validation, and inference steps. It serves as a base class for recognizer models in PaddleVideo and raises NotImplementedError if subclasses don't implement these steps.",
+        "type": "summary"
+    },
+    "7410": {
+        "file_id": 542,
+        "content": "from abc import abstractmethod\nfrom ... import builder\nimport paddle.nn as nn\nclass BaseRecognizer(nn.Layer):\n    \"\"\"Base class for recognizers.\n    All recognizers should subclass it.\n    All subclass should overwrite:\n    - Methods:``train_step``, supporting to forward when training.\n    - Methods:``valid_step``, supporting to forward when validating.\n    - Methods:``test_step``, supporting to forward when testing.\n    Args:\n        backbone (dict): Backbone modules to extract feature.\n        head (dict): Classification head to process feature.\n    \"\"\"\n    def __init__(self, backbone=None, head=None, runtime_cfg=None):\n        super().__init__()\n        if backbone is not None:\n            self.backbone = builder.build_backbone(backbone)\n            if hasattr(self.backbone, 'init_weights'):\n                self.backbone.init_weights()\n        else:\n            self.backbone = None\n        if head is not None:\n            self.head_name = head.name\n            self.head = builder.build_head(head)\n            if hasattr(self.head, 'init_weights'):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/base.py:1-33"
+    },
+    "7411": {
+        "file_id": 542,
+        "content": "Base class for recognizers: Subclasses should override train_step, valid_step, and test_step methods. Builds backbone and head using builder if provided.",
+        "type": "comment"
+    },
+    "7412": {
+        "file_id": 542,
+        "content": "                self.head.init_weights()\n        else:\n            self.head = None\n        # Settings when the model is running,\n        # such as 'avg_type'\n        self.runtime_cfg = runtime_cfg\n    def forward(self, data_batch, mode='infer'):\n        \"\"\"\n        1. Define how the model is going to run, from input to output.\n        2. Console of train, valid, test or infer step\n        3. Set mode='infer' is used for saving inference model, refer to tools/export_model.py\n        \"\"\"\n        if mode == 'train':\n            return self.train_step(data_batch)\n        elif mode == 'valid':\n            return self.val_step(data_batch)\n        elif mode == 'test':\n            return self.test_step(data_batch)\n        elif mode == 'infer':\n            return self.infer_step(data_batch)\n        else:\n            raise NotImplementedError\n    @abstractmethod\n    def train_step(self, data_batch, **kwargs):\n        \"\"\"Training step.\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def val_step(self, data_batch, **kwargs):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/base.py:34-66"
+    },
+    "7413": {
+        "file_id": 542,
+        "content": "This code initializes a model's head, defines the mode of operation (train, valid, test, infer), and provides abstract methods for training and validation steps. If the mode is 'infer', it saves the inference model.",
+        "type": "comment"
+    },
+    "7414": {
+        "file_id": 542,
+        "content": "        \"\"\"Validating step.\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def test_step(self, data_batch, **kwargs):\n        \"\"\"Test step.\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def infer_step(self, data_batch, **kwargs):\n        \"\"\"Infer step.\n        \"\"\"\n        raise NotImplementedError",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/base.py:67-81"
+    },
+    "7415": {
+        "file_id": 542,
+        "content": "This code snippet in PaddleVideo defines abstract methods for validating, testing, and inferring steps. It serves as a base class for recognizer models and expects subclasses to implement these methods. The NotImplementedError is raised to ensure that subclasses provide their own implementation for these steps.",
+        "type": "comment"
+    },
+    "7416": {
+        "file_id": 543,
+        "content": "/paddlevideo/modeling/framework/recognizers/recognizer1d.py",
+        "type": "filepath"
+    },
+    "7417": {
+        "file_id": 543,
+        "content": "The code defines a 1D recognizer model in PaddleVideo, processing both image and audio data for training, validation, testing, and inference. It includes forward pass, loss computation, metrics calculations and handles RGB and audio data batches.",
+        "type": "summary"
+    },
+    "7418": {
+        "file_id": 543,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom ...registry import RECOGNIZERS\nfrom .base import BaseRecognizer\n@RECOGNIZERS.register()\nclass Recognizer1D(BaseRecognizer):\n    \"\"\"1D recognizer model framework.\"\"\"\n    def forward_net(self, imgs):\n        \"\"\"Define how the model is going to train, from input to output.\n        \"\"\"\n        lstm_logit, lstm_output = self.head(imgs)\n        return lstm_logit, lstm_output\n    def train_step(self, data_batch):\n        \"\"\"Training step.\n        \"\"\"\n        rgb_data, rgb_len, rgb_mask, audio_data, audio_len, audio_mask, labels = data_batch",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer1d.py:1-29"
+    },
+    "7419": {
+        "file_id": 543,
+        "content": "This code defines a 1D recognizer model framework in PaddleVideo. It includes the forward_net function to define how the model trains from input to output and the train_step function for training steps. The data batch contains rgb_data, rgb_len, rgb_mask, audio_data, audio_len, audio_mask, and labels.",
+        "type": "comment"
+    },
+    "7420": {
+        "file_id": 543,
+        "content": "        imgs = [(rgb_data, rgb_len, rgb_mask),\n                (audio_data, audio_len, audio_mask)]\n        # call forward\n        lstm_logit, lstm_output = self.forward_net(imgs)\n        loss = self.head.loss(lstm_logit, labels)\n        hit_at_one, perr, gap = self.head.metric(lstm_output, labels)\n        loss_metrics = dict()\n        loss_metrics['loss'] = loss\n        loss_metrics['hit_at_one'] = hit_at_one\n        loss_metrics['perr'] = perr\n        loss_metrics['gap'] = gap\n        return loss_metrics\n    def val_step(self, data_batch):\n        \"\"\"Validating setp.\n        \"\"\"\n        return self.train_step(data_batch)\n    def test_step(self, data_batch):\n        \"\"\"Testing setp.\n        \"\"\"\n        return self.train_step(data_batch)\n    def infer_step(self, data_batch):\n        \"\"\"Infering setp.\n        \"\"\"\n        rgb_data, rgb_len, rgb_mask, audio_data, audio_len, audio_mask = data_batch\n        imgs = [(rgb_data, rgb_len, rgb_mask),\n                (audio_data, audio_len, audio_mask)]\n        # call forward",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer1d.py:30-61"
+    },
+    "7421": {
+        "file_id": 543,
+        "content": "The code defines a recognizer1d model that processes both image and audio data. It includes methods for forward pass, validation, testing, and inference steps. In the forward pass, it takes input images and calculates logits and output from the LSTM network. The loss is then computed based on these logits and labels, and metrics such as hit_at_one, perr, and gap are calculated using the output and labels. The validation and testing steps perform similar calculations to those in the training step. In the inference step, only image and audio data are processed to produce output for each input.",
+        "type": "comment"
+    },
+    "7422": {
+        "file_id": 543,
+        "content": "        lstm_logit, _ = self.forward_net(imgs)\n        return lstm_logit\n@RECOGNIZERS.register()\nclass RecognizerAction(BaseRecognizer):\n    \"\"\"1D recognizer model framework.\"\"\"\n    def forward_net(self, imgs):\n        \"\"\"Define how the model is going to train, from input to output.\n        \"\"\"\n        lstm_logit, lstm_output = self.head(imgs)\n        return lstm_logit, lstm_output\n    def train_step(self, data_batch):\n        \"\"\"Training step.\n        \"\"\"\n        rgb_data, rgb_len, rgb_mask, audio_data, audio_len, audio_mask, labels, labels_iou = data_batch\n        imgs = [(rgb_data, rgb_len, rgb_mask),\n                (audio_data, audio_len, audio_mask)]\n        # call forward\n        output_logit, output_iou = self.forward_net(imgs)\n        loss = self.head.loss(output_logit, output_iou, labels, labels_iou)\n        top1, top5 = self.head.metric(output_logit, labels)\n        loss_metrics = dict()\n        loss_metrics['loss'] = loss\n        loss_metrics['top1'] = top1\n        loss_metrics['top5'] = top5\n        return loss_metrics",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer1d.py:62-91"
+    },
+    "7423": {
+        "file_id": 543,
+        "content": "This code defines a 1D recognizer model framework, which includes a forward_net function to define how the model trains from input to output and a train_step function for the training process. It takes in data batches, including both RGB and audio data, and outputs loss metrics including loss, top1, and top5.",
+        "type": "comment"
+    },
+    "7424": {
+        "file_id": 543,
+        "content": "    def val_step(self, data_batch):\n        \"\"\"Validating setp.\n        \"\"\"\n        return self.train_step(data_batch)\n    def test_step(self, data_batch):\n        \"\"\"Testing setp.\n        \"\"\"\n        return self.train_step(data_batch)\n    def infer_step(self, data_batch):\n        \"\"\"Infering setp.\n        \"\"\"\n        rgb_data, rgb_len, rgb_mask, audio_data, audio_len, audio_mask = data_batch\n        imgs = [(rgb_data, rgb_len, rgb_mask),\n                (audio_data, audio_len, audio_mask)]\n        # call forward\n        output_logit, output_iou = self.forward_net(imgs)\n        return output_logit, output_iou",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer1d.py:93-111"
+    },
+    "7425": {
+        "file_id": 543,
+        "content": "The code contains three methods: `val_step`, `test_step`, and `infer_step`. These steps perform validating, testing, and inference, respectively. In all three cases, the data batch is passed to the `train_step` method, suggesting a shared implementation between these steps. The `infer_step` specifically expects certain types of data: RGB data with length and mask, as well as audio data with its respective length and mask, in a tuple format. It then processes this data using `forward_net`, returning output logits and IOU values.",
+        "type": "comment"
+    },
+    "7426": {
+        "file_id": 544,
+        "content": "/paddlevideo/modeling/framework/recognizers/recognizer2d.py",
+        "type": "filepath"
+    },
+    "7427": {
+        "file_id": 544,
+        "content": "Recognizer2D is a 2D model in PaddleVideo for video analysis. It requires num_segs and includes functions for processing, training/validating, and testing the model. The Recognizer2D class defines forward_net and infer_step methods for classification scores.",
+        "type": "summary"
+    },
+    "7428": {
+        "file_id": 544,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom ...registry import RECOGNIZERS\nfrom .base import BaseRecognizer\nimport paddle\nfrom paddlevideo.utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@RECOGNIZERS.register()\nclass Recognizer2D(BaseRecognizer):\n    \"\"\"2D recognizer model framework.\"\"\"\n    def forward_net(self, imgs):\n        # NOTE: As the num_segs is an attribute of dataset phase, and didn't pass to build_head phase, should obtain it from imgs(paddle.Tensor) now, then call self.head method.\n        num_segs = imgs.shape[\n            1]  # imgs.shape=[N,T,C,H,W], for most commonly case",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer2d.py:1-27"
+    },
+    "7429": {
+        "file_id": 544,
+        "content": "Recognizer2D is a 2D recognizer model framework in PaddleVideo, inheriting from BaseRecognizer. It requires the number of segments (num_segs) which can be obtained from the shape of input images. The forward_net function performs image recognition using this model framework.",
+        "type": "comment"
+    },
+    "7430": {
+        "file_id": 544,
+        "content": "        imgs = paddle.reshape_(imgs, [-1] + list(imgs.shape[2:]))\n        if self.backbone is not None:\n            feature = self.backbone(imgs)\n        else:\n            feature = imgs\n        if self.head is not None:\n            cls_score = self.head(feature, num_segs)\n        else:\n            cls_score = None\n        return cls_score\n    def train_step(self, data_batch):\n        \"\"\"Define how the model is going to train, from input to output.\n        \"\"\"\n        imgs = data_batch[0]\n        labels = data_batch[1:]\n        cls_score = self.forward_net(imgs)\n        loss_metrics = self.head.loss(cls_score, labels)\n        return loss_metrics\n    def val_step(self, data_batch):\n        imgs = data_batch[0]\n        labels = data_batch[1:]\n        cls_score = self.forward_net(imgs)\n        loss_metrics = self.head.loss(cls_score, labels, valid_mode=True)\n        return loss_metrics\n    def test_step(self, data_batch):\n        \"\"\"Define how the model is going to test, from input to output.\"\"\"\n        # NOTE: (s",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer2d.py:28-60"
+    },
+    "7431": {
+        "file_id": 544,
+        "content": "The code defines a recognizer2D model for video analysis. It consists of three main parts: the forward_net function that processes images, the train_step function for training the model using input data, and the val_step and test_step functions for validating and testing the trained model respectively. The forward_net function reshapes the images and passes them through a backbone network if one is defined, then to a head network if one is defined as well. It returns the classification scores. The train_step calculates the loss metrics using the provided labels, while the val_step does the same but in validation mode. The test_step computes the loss metrics without providing any labels.",
+        "type": "comment"
+    },
+    "7432": {
+        "file_id": 544,
+        "content": "hipping) when testing, the net won't call head.loss, we deal with the test processing in /paddlevideo/metrics\n        imgs = data_batch[0]\n        cls_score = self.forward_net(imgs)\n        return cls_score\n    def infer_step(self, data_batch):\n        \"\"\"Define how the model is going to test, from input to output.\"\"\"\n        imgs = data_batch[0]\n        cls_score = self.forward_net(imgs)\n        return cls_score",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer2d.py:60-69"
+    },
+    "7433": {
+        "file_id": 544,
+        "content": "The code defines a Recognizer2D class with two methods: forward_net and infer_step. The forward_net method takes in images (imgs) and returns the classification scores (cls_score). The infer_step method is used for testing and follows the same process as forward_net to return cls_score.",
+        "type": "comment"
+    },
+    "7434": {
+        "file_id": 545,
+        "content": "/paddlevideo/modeling/framework/recognizers/recognizer3d.py",
+        "type": "filepath"
+    },
+    "7435": {
+        "file_id": 545,
+        "content": "Recognizer3D defines a model framework with forward_net, train/val_step for training and validation in recognition models. It handles image processing based on backbone and calculates loss metrics. The code defines test_step and infer_step methods for testing and inference.",
+        "type": "summary"
+    },
+    "7436": {
+        "file_id": 545,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom ...registry import RECOGNIZERS\nfrom .base import BaseRecognizer\nfrom paddlevideo.utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@RECOGNIZERS.register()\nclass Recognizer3D(BaseRecognizer):\n    \"\"\"3D Recognizer model framework.\n    \"\"\"\n    def forward_net(self, imgs):\n        \"\"\"Define how the model is going to run, from input to output.\n        \"\"\"\n        feature = self.backbone(imgs)\n        cls_score = self.head(feature)\n        return cls_score\n    def train_step(self, data_batch):\n        \"\"\"Training step.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer3d.py:1-33"
+    },
+    "7437": {
+        "file_id": 545,
+        "content": "Recognizer3D is a 3D Recognizer model framework, which defines how the model runs from input to output. It includes forward_net method for model execution and train_step method for training.",
+        "type": "comment"
+    },
+    "7438": {
+        "file_id": 545,
+        "content": "        \"\"\"\n        if self.backbone.__class__.__name__ == 'ResNet3dSlowOnly':\n            imgs = data_batch[0]\n            labels = data_batch[1:]\n            if imgs.dim() == 6:\n                imgs = imgs.reshape([-1] + imgs.shape[2:])\n        else:\n            imgs = data_batch[0:2]\n            labels = data_batch[2:]\n        # call forward\n        cls_score = self.forward_net(imgs)\n        loss_metrics = self.head.loss(cls_score, labels)\n        return loss_metrics\n    def val_step(self, data_batch):\n        \"\"\"Validating setp.\n        \"\"\"\n        if self.backbone.__class__.__name__ == 'ResNet3dSlowOnly':\n            imgs = data_batch[0]\n            labels = data_batch[1:]\n            if imgs.dim() == 6:\n                imgs = imgs.reshape([-1] + imgs.shape[2:])\n        else:\n            imgs = data_batch[0:2]\n            labels = data_batch[2:]\n        # call forward\n        cls_score = self.forward_net(imgs)\n        loss_metrics = self.head.loss(cls_score, labels, valid_mode=True)\n        return loss_metrics",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer3d.py:34-64"
+    },
+    "7439": {
+        "file_id": 545,
+        "content": "The code is defining two methods, `train_step` and `val_step`, which are used for training and validation steps respectively in a recognition model. If the backbone of the model is 'ResNet3dSlowOnly', it reshapes the images to have a specific dimension before processing. For other backbones, it separates the images and labels from the data batch accordingly. Both methods then forward the images through the `forward_net` and calculate loss metrics with or without validation mode depending on the step type. The final output is the loss metrics.",
+        "type": "comment"
+    },
+    "7440": {
+        "file_id": 545,
+        "content": "    def test_step(self, data_batch):\n        \"\"\"Test step.\n        \"\"\"\n        if self.backbone.__class__.__name__ == 'ResNet3dSlowOnly':\n            imgs = data_batch[0]\n            if imgs.dim() == 6:\n                imgs = imgs.reshape([-1] + imgs.shape[2:])\n        else:\n            imgs = data_batch[0:2]\n        # call forward\n        cls_score = self.forward_net(imgs)\n        return cls_score\n    def infer_step(self, data_batch):\n        \"\"\"Infer step.\n        \"\"\"\n        if self.backbone.__class__.__name__ == 'ResNet3dSlowOnly':\n            imgs = data_batch[0]\n            # call forward\n            imgs = imgs.reshape([-1] + imgs.shape[2:])\n            cls_score = self.forward_net(imgs)\n        else:\n            imgs = data_batch[0:2]\n            # call forward\n            cls_score = self.forward_net(imgs)\n        return cls_score",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer3d.py:66-93"
+    },
+    "7441": {
+        "file_id": 545,
+        "content": "The code defines two methods: `test_step` and `infer_step`. In the `test_step`, if the backbone is a 'ResNet3dSlowOnly', it reshapes the input images, then calls the forward pass to get class scores. Otherwise, it takes the first two elements of the data batch for inference. The `infer_step` follows similar logic but without the condition on backbone type. Both methods return the class scores.",
+        "type": "comment"
+    },
+    "7442": {
+        "file_id": 546,
+        "content": "/paddlevideo/modeling/framework/recognizers/recognizer3dMRI.py",
+        "type": "filepath"
+    },
+    "7443": {
+        "file_id": 546,
+        "content": "The code defines a 3D Recognizer model and framework in PaddleVideo, with classes and methods for training, validation, and testing. It includes two methods, \"test_step\" and \"infer_step\", used for testing or inferring on limited data batches.",
+        "type": "summary"
+    },
+    "7444": {
+        "file_id": 546,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom ...registry import RECOGNIZERS\nfrom .base import BaseRecognizer\nfrom paddlevideo.utils import get_logger\nimport paddle\nlogger = get_logger(\"paddlevideo\")\n@RECOGNIZERS.register()\nclass Recognizer3DMRI(BaseRecognizer):\n    \"\"\"3D Recognizer model framework.\n    \"\"\"\n    def forward_net(self, imgs):\n        \"\"\"Define how the model is going to run, from input to output.\n        \"\"\"\n        imgs[0] = paddle.cast(imgs[0], \"float32\")\n        imgs[1] = paddle.cast(imgs[1], \"float32\")\n        imgs[0] = imgs[0].unsqueeze(1)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer3dMRI.py:1-31"
+    },
+    "7445": {
+        "file_id": 546,
+        "content": "This code defines a 3D Recognizer model framework that takes in input images, casts them to float32 type and unsqueeze the first image for dimension alignment. The Recognizer3DMRI class inherits from BaseRecognizer and has a forward_net method for defining how the model should run from input to output.",
+        "type": "comment"
+    },
+    "7446": {
+        "file_id": 546,
+        "content": "        imgs[1] = imgs[1].unsqueeze(1)\n        feature = self.backbone(imgs)\n        cls_score = self.head(feature)\n        return cls_score\n    def train_step(self, data_batch):\n        \"\"\"Training step.\n        \"\"\"\n        imgs = data_batch[0:2]\n        labels = data_batch[2:]\n        # call forward\n        cls_score = self.forward_net(imgs)\n        cls_score = paddle.nn.functional.sigmoid(cls_score)\n        loss_metrics = self.head.loss(cls_score, labels, if_top5=False)\n        return loss_metrics\n    def val_step(self, data_batch):\n        \"\"\"Validating setp.\n        \"\"\"\n        imgs = data_batch[0:2]\n        labels = data_batch[2:]\n        # call forward\n        cls_score = self.forward_net(imgs)\n        cls_score = paddle.nn.functional.sigmoid(cls_score)\n        loss_metrics = self.head.loss(cls_score,\n                                      labels,\n                                      valid_mode=True,\n                                      if_top5=False)\n        return loss_metrics\n    def test_step(self, data_batch):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer3dMRI.py:32-65"
+    },
+    "7447": {
+        "file_id": 546,
+        "content": "This code defines a recognizer3dMRI model in the PaddleVideo framework. It has three methods: train_step, val_step, and test_step for training, validating, and testing the model, respectively. In each step, it processes image data batches, calls the forward function to generate class scores using a forward_net, applies sigmoid activation, and calculates losses using the head's loss function.",
+        "type": "comment"
+    },
+    "7448": {
+        "file_id": 546,
+        "content": "        \"\"\"Test step.\n        \"\"\"\n        imgs = data_batch[0:2]\n        # call forward\n        cls_score = self.forward_net(imgs)\n        return cls_score\n    def infer_step(self, data_batch):\n        \"\"\"Infer step.\n        \"\"\"\n        imgs = data_batch[0:2]\n        # call forward\n        cls_score = self.forward_net(imgs)\n        return cls_score",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer3dMRI.py:66-81"
+    },
+    "7449": {
+        "file_id": 546,
+        "content": "This code defines two methods, \"test_step\" and \"infer_step\", which both take a data batch as input and return the class score after calling the forward function in the forward_net object. These steps seem to be used for testing or inferring on a limited subset of the data batch (the first two images).",
+        "type": "comment"
+    },
+    "7450": {
+        "file_id": 547,
+        "content": "/paddlevideo/modeling/framework/recognizers/recognizerDistillation.py",
+        "type": "filepath"
+    },
+    "7451": {
+        "file_id": 547,
+        "content": "The code introduces a RecognizerDistillation class for recognizer distillation in PaddleVideo's framework, and includes model selection, modes like training and validation, loss functions, accuracy functions, and forward pass capabilities.",
+        "type": "summary"
+    },
+    "7452": {
+        "file_id": 547,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom abc import abstractmethod\nimport paddle\nimport paddle.nn as nn\nfrom ...registry import RECOGNIZERS\nfrom ... import builder\nfrom paddlevideo.utils import get_logger, get_dist_info\nlogger = get_logger(\"paddlevideo\")\n@RECOGNIZERS.register()\nclass RecognizerDistillation(nn.Layer):\n    \"\"\"recognizer Distillation framework.\"\"\"\n    def __init__(self,\n                 freeze_params_list=None,\n                 models=None,\n                 loss=None,\n                 **kargs):\n        \"\"\"\n        Args:\n            freeze_params_list: list, set each model is trainable or not",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizerDistillation.py:1-34"
+    },
+    "7453": {
+        "file_id": 547,
+        "content": "This code defines a RecognizerDistillation class that inherits from nn.Layer in PaddleVideo's framework. It implements recognizer distillation, which is a machine learning framework for object recognition tasks. The class takes optional arguments such as freeze_params_list (a list to set models trainable/not), models, and loss. It is registered under RECOGNIZERS and uses logger from paddlevideo's utils.",
+        "type": "comment"
+    },
+    "7454": {
+        "file_id": 547,
+        "content": "            models: config of distillaciton model.\n            loss: config of loss list\n        \"\"\"\n        super().__init__()\n        self.model_list = []\n        self.model_name_list = []\n        self.loss_cfgs = loss\n        if freeze_params_list is None:\n            freeze_params_list = [False] * len(models)\n        assert len(freeze_params_list) == len(models)\n        # build Teacher and Student model\n        for idx, model_config in enumerate(models):\n            assert len(model_config) == 1\n            key = list(model_config.keys())[0]  #Teacher or Student\n            model_config = model_config[key]\n            model_name = model_config['backbone']['name']\n            backbone, head = None, None\n            if model_config.get('backbone'):\n                backbone = builder.build_backbone(model_config['backbone'])\n                if hasattr(backbone, 'init_weights'):\n                    backbone.init_weights()\n            if model_config.get('head'):\n                head = builder.build_head(model_config['head'])",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizerDistillation.py:35-60"
+    },
+    "7455": {
+        "file_id": 547,
+        "content": "This code initializes an instance of a distillation model. It takes in a list of models and loss configurations, as well as a freeze_params_list (optional). It checks the lengths of the input lists, builds teacher and student models, and initializes backbone and head if they exist in the configurations.",
+        "type": "comment"
+    },
+    "7456": {
+        "file_id": 547,
+        "content": "                if hasattr(head, 'init_weights'):\n                    head.init_weights()\n            model = nn.Sequential(backbone, head)\n            logger.info('build distillation {} model done'.format(key))\n            # for add all parameters in nn.Layer class\n            self.model_list.append(self.add_sublayer(key, model))\n            self.model_name_list.append({model_name: key})\n            # set model trainable or not\n            if freeze_params_list[idx]:\n                for param in model.parameters():\n                    param.trainable = False\n        # build loss: support for loss list\n        self.loss_func_list = []\n        mode_keys = list(loss.keys())\n        for mode in mode_keys:\n            loss_cfgs = loss[mode]\n            for loss_cfg in loss_cfgs:\n                loss_func_dict = {}\n                model_name_pairs = loss_cfg.pop('model_name_pairs')\n                loss_func = builder.build_loss(loss_cfg)\n                loss_func_dict['mode'] = mode\n                loss_func_dict['loss_func'] = loss_func",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizerDistillation.py:61-85"
+    },
+    "7457": {
+        "file_id": 547,
+        "content": "Builds a distillation model by appending a head to the backbone, initializes weights for the head if possible, and sets trainable parameters based on freeze_params_list. Constructs loss functions using builder.build_loss().",
+        "type": "comment"
+    },
+    "7458": {
+        "file_id": 547,
+        "content": "                loss_func_dict['model_name_pairs'] = model_name_pairs\n                self.loss_func_list.append(loss_func_dict)\n    def forward(self, data_batch, mode='infer'):\n        \"\"\"\n        1. Define how the model is going to run, from input to output.\n        2. Console of train, valid, test or infer step\n        3. Set mode='infer' is used for saving inference model, refer to tools/export_model.py\n        \"\"\"\n        if mode == 'train':\n            return self.train_step(data_batch)\n        elif mode == 'valid':\n            return self.val_step(data_batch)\n        elif mode == 'test':\n            return self.test_step(data_batch)\n        elif mode == 'infer':\n            return self.infer_step(data_batch)\n        else:\n            raise NotImplementedError\n    def get_loss(self, output, labels, mode):\n        \"\"\"\n        Args:\n            output: dict, output name and its value\n            labels: label of data\n            mode: str, 'Train' or 'Val'\n        \"\"\"\n        output['GroundTruth'] = labels\n        loss_list = []",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizerDistillation.py:86-114"
+    },
+    "7459": {
+        "file_id": 547,
+        "content": "This code defines a class for handling different modes of operation (train, valid, test, infer) and includes methods to handle each mode. It also contains a method to calculate the loss based on output and labels in 'Train' or 'Val' mode. The code is likely used in a model framework and the class might be used to control the flow and operations of the model depending on the mode it runs in.",
+        "type": "comment"
+    },
+    "7460": {
+        "file_id": 547,
+        "content": "        for loss_func_dict in self.loss_func_list:\n            if mode == loss_func_dict['mode']:\n                model_name_pairs = loss_func_dict['model_name_pairs']\n                loss_func = loss_func_dict['loss_func']\n                loss_val = loss_func(output[model_name_pairs[0]],\n                                     output[model_name_pairs[1]])\n                loss_list.append(loss_val)\n        total_loss = paddle.add_n(loss_list)\n        return total_loss\n    def get_acc(self, scores, labels, mode='Train'):\n        def _get_acc(score, label, mode='Train'):\n            top1 = paddle.metric.accuracy(input=score, label=label, k=1)\n            top5 = paddle.metric.accuracy(input=score, label=label, k=5)\n            _, world_size = get_dist_info()\n            # Deal with multi cards validate\n            if world_size > 1 and mode == 'Val':  #reduce sum when valid\n                top1 = paddle.distributed.all_reduce(\n                    top1, op=paddle.distributed.ReduceOp.SUM) / world_size\n                top5 = paddle.distributed.all_reduce(",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizerDistillation.py:116-136"
+    },
+    "7461": {
+        "file_id": 547,
+        "content": "This code is iterating over a list of loss function dictionaries to find the appropriate loss function based on the input mode. It then calculates the loss value and appends it to a list. Finally, it adds up all the loss values to get the total loss. In the `get_acc` method, it defines an inner function that calculates top-1 and top-5 accuracy scores using PaddlePaddle's `metric.accuracy` function. It also handles multi-card validation by reducing the sum of top-1 and top-5 accuracy scores across multiple cards.",
+        "type": "comment"
+    },
+    "7462": {
+        "file_id": 547,
+        "content": "                    top5, op=paddle.distributed.ReduceOp.SUM) / world_size\n            return top1, top5\n        if len(labels) == 1:\n            label = labels[0]\n            return _get_acc(scores, label)\n        # Deal with VideoMix\n        elif len(labels) == 3:\n            label_a, label_b, lam = labels\n            top1a, top5a = _get_acc(scores, label_a, mode)\n            top1b, top5b = _get_acc(scores, label_b, mode)\n            top1 = lam * top1a + (1 - lam) * top1b\n            top5 = lam * top5a + (1 - lam) * top5b\n            return top1, top5\n    def forward_model(self, imgs, model_name, model):\n        if model_name in ['PPTSM_v2', 'ResNetTweaksTSM']:\n            # [N,T,C,H,W] -> [N*T,C,H,W]\n            imgs = paddle.reshape(imgs, [-1] + list(imgs.shape[2:]))\n        return model(imgs)\n    def train_step(self, data_batch):\n        \"\"\"Define how the model is going to train, from input to output.\n        \"\"\"\n        out = {}\n        loss_metrics = {}\n        imgs = data_batch[0]\n        labels = data_batch[1:]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizerDistillation.py:137-165"
+    },
+    "7463": {
+        "file_id": 547,
+        "content": "The code snippet contains a recognizerDistillation function, which calculates accuracy based on given scores and labels. It also includes a forward_model function for reshaping images and applying model operations. The train_step function defines the training process from input to output, including loss metrics calculation.",
+        "type": "comment"
+    },
+    "7464": {
+        "file_id": 547,
+        "content": "        for idx, item in enumerate(self.model_name_list):\n            model = self.model_list[idx]\n            model_name = list(item.keys())[0]\n            model_type = item[model_name]  # Teacher or Student\n            out[model_type] = self.forward_model(imgs, model_name, model)\n        # out_student, out_teacher\n        loss = self.get_loss(out, labels, 'Train')\n        loss_metrics['loss'] = loss\n        # calculate acc with student output\n        top1, top5 = self.get_acc(out['Student'], labels)\n        loss_metrics['top1'] = top1\n        loss_metrics['top5'] = top5\n        return loss_metrics\n    def val_step(self, data_batch):\n        out = {}\n        loss_metrics = {}\n        imgs = data_batch[0]\n        labels = data_batch[1:]\n        for idx, item in enumerate(self.model_name_list):\n            model = self.model_list[idx]\n            model_name = list(item.keys())[0]\n            model_type = item[model_name]  # Teacher or Student\n            out[model_type] = self.forward_model(imgs, model_name, model)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizerDistillation.py:167-193"
+    },
+    "7465": {
+        "file_id": 547,
+        "content": "This code defines a class that implements a recognizer for distillation. The model takes in an image and a model name, and returns the output from both the student and teacher models. It calculates loss using the student and teacher outputs, as well as top-1 and top-5 accuracy metrics from the student's output only. This is used for both training (train_step) and validation (val_step). The class utilizes a list of model names and corresponding models for both types, student and teacher, and iterates over them to apply the forward pass and calculate loss and metrics.",
+        "type": "comment"
+    },
+    "7466": {
+        "file_id": 547,
+        "content": "        # Loss of student with gt:  out_student, label\n        loss = self.get_loss(out, labels, 'Val')\n        loss_metrics['loss'] = loss\n        top1, top5 = self.get_acc(out['Student'], labels, 'Val')\n        loss_metrics['top1'] = top1\n        loss_metrics['top5'] = top5\n        return loss_metrics\n    def test_step(self, data_batch):\n        \"\"\"Define how the model is going to test, from input to output.\"\"\"\n        imgs = data_batch[0]\n        # Use Student to test\n        for idx, item in enumerate(self.model_name_list):\n            model = self.model_list[idx]\n            model_name = list(item.keys())[0]\n            model_type = item[model_name]  # Teacher or Student\n            if model_type == \"Student\":\n                out = self.forward_model(imgs, model_name, model)\n        return out\n    def infer_step(self, data_batch):\n        \"\"\"Define how the model is going to test, from input to output.\"\"\"\n        imgs = data_batch[0]\n        # Use Student to infer\n        for idx, item in enumerate(self.model_name_list):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizerDistillation.py:195-224"
+    },
+    "7467": {
+        "file_id": 547,
+        "content": "In this code snippet, the get_loss and get_acc functions are used to calculate loss and accuracy metrics for a \"Student\" model. The test_step function tests the Student model using forward_model function, and the infer_step function is not implemented here. This code seems related to evaluating the performance of a student model in image recognition tasks.",
+        "type": "comment"
+    },
+    "7468": {
+        "file_id": 547,
+        "content": "            model = self.model_list[idx]\n            model_name = list(item.keys())[0]\n            model_type = item[model_name]  # Teacher or Student\n            if model_type == \"Student\":\n                out = self.forward_model(imgs, model_name, model)\n        return out",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizerDistillation.py:225-231"
+    },
+    "7469": {
+        "file_id": 547,
+        "content": "The code selects a model from the model_list based on the idx, and assigns its name to model_name. If the model type is \"Student\", it calls forward_model function passing imgs, model_name, and model as parameters, and returns the output.",
+        "type": "comment"
+    },
+    "7470": {
+        "file_id": 548,
+        "content": "/paddlevideo/modeling/framework/recognizers/recognizerMRI.py",
+        "type": "filepath"
+    },
+    "7471": {
+        "file_id": 548,
+        "content": "The code creates a 2D image classifier model using PaddleVideo's RecognizerMRI, with train_step and val_step calculating loss metrics, and test_step for testing without calling head.loss during inference.",
+        "type": "summary"
+    },
+    "7472": {
+        "file_id": 548,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom ...registry import RECOGNIZERS\nfrom .base import BaseRecognizer\nimport paddle\nfrom paddlevideo.utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@RECOGNIZERS.register()\nclass RecognizerMRI(BaseRecognizer):\n    \"\"\"2D recognizer model framework.\"\"\"\n    def forward_net(self, imgs):\n        # NOTE: As the num_segs is an attribute of dataset phase, and didn't pass to build_head phase, should obtain it from imgs(paddle.Tensor) now, then call self.head method.\n        num_segs = imgs.shape[\n            1]  # imgs.shape=[N,T,C,H,W], for most commonly case",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizerMRI.py:1-27"
+    },
+    "7473": {
+        "file_id": 548,
+        "content": "Code is from PaddleVideo's RecognizerMRI class, a 2D recognizer model framework. It has a forward_net method that takes imgs as input and returns the output of the network. The number of segments is obtained from the image shape and used to call the self.head method.",
+        "type": "comment"
+    },
+    "7474": {
+        "file_id": 548,
+        "content": "        imgs = paddle.reshape_(imgs, [-1] + list(imgs.shape[2:]))\n        imgs = paddle.cast(imgs, \"float32\")  #############\n        imgs = imgs.unsqueeze(1)\n        if self.backbone != None:\n            feature = self.backbone(imgs)\n        else:\n            feature = imgs\n        if self.head != None:\n            cls_score = self.head(feature, num_segs)\n        else:\n            cls_score = None\n        return cls_score\n    def train_step(self, data_batch):\n        \"\"\"Define how the model is going to train, from input to output.\n        \"\"\"\n        imgs = data_batch[0]\n        labels = data_batch[1:]\n        cls_score = self.forward_net(imgs)\n        cls_score = paddle.nn.functional.sigmoid(cls_score)\n        loss_metrics = self.head.loss(cls_score, labels, if_top5=False)\n        return loss_metrics\n    def val_step(self, data_batch):\n        imgs = data_batch[0]\n        labels = data_batch[1:]\n        cls_score = self.forward_net(imgs)\n        cls_score = paddle.nn.functional.sigmoid(cls_score)\n        loss_metrics = self.head.loss(cls_score,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizerMRI.py:28-59"
+    },
+    "7475": {
+        "file_id": 548,
+        "content": "This code defines a model for image classification. It first reshapes and casts the input images to float32 type, then passes them through a backbone network if one is defined. After that, it sends the resulting feature map through a head network (if defined) to produce class scores. The train_step function uses these class scores to calculate loss metrics during training, while the val_step function performs similar operations but does not compute losses.",
+        "type": "comment"
+    },
+    "7476": {
+        "file_id": 548,
+        "content": "                                      labels,\n                                      valid_mode=True,\n                                      if_top5=False)\n        return loss_metrics\n    def test_step(self, data_batch):\n        \"\"\"Define how the model is going to test, from input to output.\"\"\"\n        # NOTE: (shipping) when testing, the net won't call head.loss, we deal with the test processing in /paddlevideo/metrics\n        imgs = data_batch[0]\n        cls_score = self.forward_net(imgs)\n        return cls_score\n    def infer_step(self, data_batch):\n        \"\"\"Define how the model is going to test, from input to output.\"\"\"\n        imgs = data_batch[0]\n        cls_score = self.forward_net(imgs)\n        return cls_score",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizerMRI.py:60-76"
+    },
+    "7477": {
+        "file_id": 548,
+        "content": "The code defines a test_step and infer_step function for a model, which takes in data_batch as input and returns the classification scores from the forward_net function. The test_step specifically mentions that during testing, the net won't call head.loss.",
+        "type": "comment"
+    },
+    "7478": {
+        "file_id": 549,
+        "content": "/paddlevideo/modeling/framework/recognizers/recognizer_gcn.py",
+        "type": "filepath"
+    },
+    "7479": {
+        "file_id": 549,
+        "content": "The code introduces a GCN Recognizer model framework for PaddleVideo, classifying images through forward pass definition, training step loss calculation, and validation. A RecognizerGCN model is defined with test_step and infer_step functions.",
+        "type": "summary"
+    },
+    "7480": {
+        "file_id": 549,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom ...registry import RECOGNIZERS\nfrom .base import BaseRecognizer\nfrom paddlevideo.utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@RECOGNIZERS.register()\nclass RecognizerGCN(BaseRecognizer):\n    \"\"\"GCN Recognizer model framework.\n    \"\"\"\n    def __init__(self,\n                 backbone=None,\n                 head=None,\n                 runtime_cfg=None,\n                 if_top5=True):\n        \"\"\"\n        Args:\n            backbone (dict): Backbone modules to extract feature.\n            head (dict): Classification head to process feature.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer_gcn.py:1-33"
+    },
+    "7481": {
+        "file_id": 549,
+        "content": "This code defines a GCN Recognizer model framework for PaddleVideo. It has an initialization method that takes arguments for backbone, head, runtime_cfg, and if_top5. The GCN Recognizer is registered with the RECOGNIZERS registry and extends BaseRecognizer class.",
+        "type": "comment"
+    },
+    "7482": {
+        "file_id": 549,
+        "content": "            is_top5 (bool): Whether to display top-5 accuracy during training/validation steps.\n        \"\"\"\n        super(RecognizerGCN, self).__init__(backbone, head, runtime_cfg)\n        self.if_top5 = if_top5\n    def forward_net(self, data):\n        \"\"\"Define how the model is going to run, from input to output.\n        \"\"\"\n        feature = self.backbone(data)\n        cls_score = self.head(feature)\n        return cls_score\n    def train_step(self, data_batch):\n        \"\"\"Training step.\n        \"\"\"\n        data = data_batch[0]\n        label = data_batch[1:]\n        # call forward\n        cls_score = self.forward_net(data)\n        loss_metrics = self.head.loss(cls_score, label, if_top5=self.if_top5)\n        return loss_metrics\n    def val_step(self, data_batch):\n        \"\"\"Validating setp.\n        \"\"\"\n        data = data_batch[0]\n        label = data_batch[1:]\n        # call forward\n        cls_score = self.forward_net(data)\n        loss_metrics = self.head.loss(cls_score,\n                                      label,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer_gcn.py:34-66"
+    },
+    "7483": {
+        "file_id": 549,
+        "content": "RecognizerGCN is a model that performs image classification. It has a backbone for feature extraction and a head for classification. Forward_net defines the forward pass. Train_step calculates loss and metrics during training, taking into account if_top5 flag. Val_step performs validation by forward pass and loss calculation.",
+        "type": "comment"
+    },
+    "7484": {
+        "file_id": 549,
+        "content": "                                      valid_mode=True,\n                                      if_top5=self.if_top5)\n        return loss_metrics\n    def test_step(self, data_batch):\n        \"\"\"Test step.\n        \"\"\"\n        data = data_batch[0]\n        # call forward\n        cls_score = self.forward_net(data)\n        return cls_score\n    def infer_step(self, data_batch):\n        \"\"\"Infer step.\n        \"\"\"\n        data = data_batch[0]\n        # call forward\n        cls_score = self.forward_net(data)\n        return cls_score",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer_gcn.py:67-87"
+    },
+    "7485": {
+        "file_id": 549,
+        "content": "The code defines a RecognizerGCN model and provides test_step and infer_step functions to classify data by forwarding it through the network and returning class scores.",
+        "type": "comment"
+    },
+    "7486": {
+        "file_id": 550,
+        "content": "/paddlevideo/modeling/framework/recognizers/recognizer_movinet_frame.py",
+        "type": "filepath"
+    },
+    "7487": {
+        "file_id": 550,
+        "content": "The MoViNetRecognizerFrame class, extending BaseRecognizer, has forward_net and train_step methods for training steps. Three functions - forward_net, test_step, and infer_step are defined for model's testing or inference process.",
+        "type": "summary"
+    },
+    "7488": {
+        "file_id": 550,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport paddle\nfrom paddlevideo.utils import get_logger\nfrom .base import BaseRecognizer\nfrom ...registry import RECOGNIZERS\nlogger = get_logger(\"paddlevideo\")\n@RECOGNIZERS.register()\nclass MoViNetRecognizerFrame(BaseRecognizer):\n    def forward_net(self, imgs):\n        \"\"\"Define how the model is going to run, from input to output.\n        \"\"\"\n        self.backbone.clean_activation_buffers()\n        outputs = self.backbone(imgs)\n        cls_score = self.head(outputs)\n        return cls_score\n    def train_step(self, data_batch):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer_movinet_frame.py:1-33"
+    },
+    "7489": {
+        "file_id": 550,
+        "content": "The code is defining a class named \"MoViNetRecognizerFrame\" which extends the BaseRecognizer class. It has two methods, forward_net and train_step. The forward_net method defines how the model will run from input to output by first cleaning activation buffers in the backbone and then passing the inputs through it to get outputs. Finally, the head is applied on these outputs to get class scores. The train_step method defines a training step for this model.",
+        "type": "comment"
+    },
+    "7490": {
+        "file_id": 550,
+        "content": "        \"\"\"Training step.\n        \"\"\"\n        imgs = data_batch[0]\n        labels = data_batch[1]  #.astype(\"int64\")\n        data = paddle.transpose(imgs, perm=[0, 2, 1, 3, 4])\n        # call forward\n        cls_score = self.forward_net(data)\n        loss_metrics = self.head.loss_func(cls_score, labels)\n        top1 = paddle.metric.accuracy(input=cls_score, label=labels, k=1)\n        top5 = paddle.metric.accuracy(input=cls_score, label=labels, k=5)\n        output = {'loss': loss_metrics, 'top1': top1, 'top5': top5}\n        return output\n    def val_step(self, data_batch):\n        \"\"\"Validating setp.\n        \"\"\"\n        imgs = data_batch[0]\n        labels = data_batch[1]  #.astype(\"int64\")\n        data = paddle.transpose(imgs, perm=[0, 2, 1, 3, 4])\n        # call forward\n        cls_score = self.forward_net(data)\n        loss_metrics = self.head.loss_func(cls_score, labels)\n        top1 = paddle.metric.accuracy(input=cls_score, label=labels, k=1)\n        top5 = paddle.metric.accuracy(input=cls_score, label=labels, k=5)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer_movinet_frame.py:34-57"
+    },
+    "7491": {
+        "file_id": 550,
+        "content": "Training step: Implements a training step for the model, taking data_batch as input. Extracts images and labels, transposes data, applies forward pass in the network, calculates loss metrics, and computes top-1 and top-5 accuracy scores. Returns output with 'loss', 'top1', and 'top5' keys.\nValidating step: Implements a validating step for the model, similar to training step but used to validate the model on unseen data. Computes top-1 and top-5 accuracy scores along with loss metrics.",
+        "type": "comment"
+    },
+    "7492": {
+        "file_id": 550,
+        "content": "        output = {'loss': loss_metrics, 'top1': top1, 'top5': top5}\n        return output\n    def test_step(self, data_batch):\n        \"\"\"Test step.\n        \"\"\"\n        imgs = data_batch[0]\n        data = paddle.transpose(imgs, perm=[0, 2, 1, 3, 4])\n        # call forward\n        cls_score = self.forward_net(data)\n        return cls_score\n    def infer_step(self, data_batch):\n        \"\"\"Infer step.\n        \"\"\"\n        imgs = data_batch[0]\n        # call forward\n        data = paddle.transpose(imgs, perm=[0, 2, 1, 3, 4])\n        cls_score = self.forward_net(data)\n        return cls_score",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer_movinet_frame.py:58-78"
+    },
+    "7493": {
+        "file_id": 550,
+        "content": "This code defines three functions: `forward_net`, `test_step`, and `infer_step`. The `forward_net` function is the core of the model, responsible for forward propagation. The `test_step` and `infer_step` functions both take in a data batch, transpose the images, call the `forward_net` function to get class scores, and return these scores. These steps are likely part of a deep learning model's testing or inference process.",
+        "type": "comment"
+    },
+    "7494": {
+        "file_id": 551,
+        "content": "/paddlevideo/modeling/framework/recognizers/recognizer_transformer.py",
+        "type": "filepath"
+    },
+    "7495": {
+        "file_id": 551,
+        "content": "The code defines a RecognizerTransformer class for implementing a transformer-based recognizer model, which includes feature extraction, training, validation, and testing steps. It also defines a model for inferring image results from multiple views using forward_net function and averaging based on 'avg_type'.",
+        "type": "summary"
+    },
+    "7496": {
+        "file_id": 551,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport paddle\nimport paddle.nn.functional as F\nfrom paddlevideo.utils import get_logger\nfrom ...registry import RECOGNIZERS\nfrom .base import BaseRecognizer\nlogger = get_logger(\"paddlevideo\")\n@RECOGNIZERS.register()\nclass RecognizerTransformer(BaseRecognizer):\n    \"\"\"Transformer's recognizer model framework.\"\"\"\n    def forward_net(self, imgs):\n        # imgs.shape=[N,C,T,H,W], for transformer case\n        if self.backbone is not None:\n            feature = self.backbone(imgs)\n        else:\n            feature = imgs",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer_transformer.py:1-31"
+    },
+    "7497": {
+        "file_id": 551,
+        "content": "This code defines a RecognizerTransformer class that inherits from BaseRecognizer and implements a transformer-based recognizer model framework. It takes in an input tensor imgs of shape [N,C,T,H,W] where N is the batch size, C is the number of channels, T is the temporal length, H is the height, and W is the width. If a backbone is specified, it applies the backbone to the images for feature extraction; otherwise, it uses the input images directly. The resulting feature tensor is returned.",
+        "type": "comment"
+    },
+    "7498": {
+        "file_id": 551,
+        "content": "        if self.head is not None:\n            cls_score = self.head(feature)\n        else:\n            cls_score = None\n        return cls_score\n    def train_step(self, data_batch):\n        \"\"\"Define how the model is going to train, from input to output.\n        \"\"\"\n        imgs = data_batch[0]\n        labels = data_batch[1:]\n        cls_score = self.forward_net(imgs)\n        loss_metrics = self.head.loss(cls_score, labels)\n        return loss_metrics\n    def val_step(self, data_batch):\n        imgs = data_batch[0]\n        labels = data_batch[1:]\n        cls_score = self.forward_net(imgs)\n        loss_metrics = self.head.loss(cls_score, labels, valid_mode=True)\n        return loss_metrics\n    def test_step(self, data_batch):\n        \"\"\"Define how the model is going to infer, from input to output.\"\"\"\n        imgs = data_batch[0]\n        num_views = imgs.shape[2] // self.runtime_cfg.test.num_seg\n        cls_score = []\n        for i in range(num_views):\n            view = imgs[:, :, i * self.runtime_cfg.test.num_seg:(i + 1) *",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer_transformer.py:33-62"
+    },
+    "7499": {
+        "file_id": 551,
+        "content": "The code defines a model's training, validation, and testing steps. The train_step calculates the loss between predicted class scores and actual labels. The val_step is similar but marks some samples as valid in validation mode. The test_step infers by processing views of images and stores class scores in a list.",
+        "type": "comment"
+    }
+}

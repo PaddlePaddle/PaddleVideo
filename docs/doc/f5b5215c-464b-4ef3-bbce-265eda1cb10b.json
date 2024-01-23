@@ -1,0 +1,15 @@
+{
+    "summary": "This is a shell script for PaddlePaddle, setting CUDA_VISIBLE_DEVICES and executing commands like training, testing, and exporting models using tsm architecture. It also mentions running predict.py on example.avi with model files and disabling benchmarking for \"example\" model with 8 segments.",
+    "details": [
+        {
+            "comment": "The code is a shell script that sets the CUDA_VISIBLE_DEVICES environment variable and executes PaddlePaddle commands for training, testing, finetuning, resuming and exporting/predicting models. The commands use specific configurations (yaml files) for recognition tasks using tsm architecture. It mentions the file paths where necessary, such as the log directory, model weights, and output directories.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/run.sh\":0-18",
+            "content": "export CUDA_VISIBLE_DEVICES=0\n# run  training\npython3.7 -B -m paddle.distributed.launch --gpus=\"0\"  --log_dir=log_pptsm  main.py --amp  --validate -c configs/recognition/tsm/pptsm_regression.yaml\n# run testing\n#python3.7 -m paddle.distributed.launch --gpus=\"0,1,2,3\" --log_dir=log_pptsm main.py -c configs/recognition/tsm/pptsm_regression.yaml --test --weights=output/model_name/ppTSM_best.pdparams\n#finetune\n#python3 -m paddle.distributed.launch --gpus=\"0,1,2,3\" main.py --amp -c ./configs/recognition/tsm/pptsm_regression.yaml --validate --weights=./output/model_name/ppTSM_best.pdparams\n#resume\n#python3 -m paddle.distributed.launch --gpus=\"0,1,2,3\" main.py --amp -c ./configs/recognition/tsm/pptsm_regression.yaml --validate -o resume_epoch=2\n# export_models script\n# just use `example` as example, please replace to real name.\n#python3.7 tools/export_model.py -c configs/example.yaml -p output/model_name/ppTSM_best.pdparams -o ./inference\n# predict script\n# just use `example` as example, please replace to real name."
+        },
+        {
+            "comment": "Running predict.py script on example.avi with specified model files and disabling benchmarking for the \"example\" model with 8 segments.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/run.sh\":19-19",
+            "content": "#python3.7 tools/predict.py -v example.avi --model_file \"./inference/example.pdmodel\" --params_file \"./inference/example.pdiparams\" --enable_benchmark=False --model=\"example\" --num_seg=8"
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "summary": "The code reads files from a directory, retrieves their names without extensions, checks if the names exist in another set of labels, and deletes any mismatched labels. It then writes the fixed label file with updated sizes.",
+    "details": [
+        {
+            "comment": "The code reads files from a directory, retrieves their names without extensions, checks if the names exist in another set of labels, and deletes any mismatched labels. It then writes the fixed label file with updated sizes.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/TableTennis/fix_bad_label.py\":0-36",
+            "content": "import copy\nimport json\nimport re\nimport os\nurl = '/home/aistudio/work/BMN/Input_for_bmn/feature/'\ndirectory = os.fsencode(url)\ncount = 0\ntarget_set = []\nfor file in os.listdir(directory):\n    filename = os.fsdecode(file)\n    target_name = filename.split('.npy')[0]\n    target_set.append(target_name)\n    count += 1\nprint('Feature size:', len(target_set))\nwith open('/home/aistudio/work/BMN/Input_for_bmn/label.json') as f:\n    data = json.load(f)\ndelet_set = []\nfor key in data.keys():\n    if not key in target_set:\n        delet_set.append(key)\nprint('(Label) Original size:', len(data))\nprint('(Label) Deleted size:', len(delet_set))\nfor item in delet_set:\n    data.pop(item, None)\nprint('(Label) Fixed size:', len(data))\njsonString = json.dumps(data, indent=4, ensure_ascii=False)\njsonFile = open('/home/aistudio/work/BMN/Input_for_bmn/label_fixed.json', 'w')\njsonFile.write(jsonString)\njsonFile.close()"
+        }
+    ]
+}

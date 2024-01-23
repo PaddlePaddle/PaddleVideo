@@ -1,0 +1,546 @@
+{
+    "1500": {
+        "file_id": 132,
+        "content": "                    paddle.nn.functional.sigmoid(prev_frame_nn_features_n) -\n                    0.5) * 2\n#             print(prev_frame_nn_features_n.mean().item(), prev_frame_nn_features_n.shape, interaction_num)  # o\n#############\n            if local_map_dics is not None:  ##When testing, use local map memory\n                local_map_tmp_dic, local_map_dist_dic = local_map_dics\n                if seq_names[n] not in local_map_dist_dic:\n                    print(seq_names[n], 'not in local_map_dist_dic')\n                    local_map_dist_dic[seq_names[n]] = paddle.zeros(104, 9)\n                if seq_names[n] not in local_map_tmp_dic:\n                    print(seq_names[n], 'not in local_map_tmp_dic')\n                    local_map_tmp_dic[seq_names[n]] = paddle.zeros_like(\n                        prev_frame_nn_features_n).unsqueeze(0).tile(\n                            [104, 9, 1, 1, 1, 1])\n                local_map_dist_dic[seq_names[n]][\n                    frame_num[n], interaction_num -\n                    1] = 1.0 / (abs(frame_num[n] - start_annotated_frame)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:746-764"
+    },
+    "1501": {
+        "file_id": 132,
+        "content": "This code segment is checking if the current sequence name is present in the local map dictionaries for distance and temporary maps. If it's not, it creates new entries with zeros initialized. The local map distance value is then updated based on the frame number and interaction number, using the absolute difference from a start annotated frame to determine the distance. This could be used in a video sequence processing context where local map dictionaries store temporary and distance maps for different sequences.",
+        "type": "comment"
+    },
+    "1502": {
+        "file_id": 132,
+        "content": "                                )  # bugs fixed.\n                local_map_tmp_dic[seq_names[n]][\n                    frame_num[n],\n                    interaction_num - 1] = prev_frame_nn_features_n.squeeze(\n                        0).detach()  # bugs fixed.\n                if interaction_num == 1:\n                    prev_frame_nn_features_n = local_map_tmp_dic[seq_names[n]][\n                        frame_num[n]][interaction_num - 1]\n                    prev_frame_nn_features_n = prev_frame_nn_features_n.unsqueeze(\n                        0)\n                else:\n                    if local_map_dist_dic[seq_names[n]][frame_num[n]][interaction_num - 1] > \\\n                            local_map_dist_dic[seq_names[n]][frame_num[n]][interaction_num - 2]:\n                        prev_frame_nn_features_n = local_map_tmp_dic[\n                            seq_names[n]][frame_num[n]][interaction_num - 1]\n                        prev_frame_nn_features_n = prev_frame_nn_features_n.unsqueeze(\n                            0)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:765-781"
+    },
+    "1503": {
+        "file_id": 132,
+        "content": "This code block appears to be part of a larger function. It seems to store and update the features of previous frames for a given sequence, based on the interaction number and frame number. If the current interaction's distance is greater than the previous one, it updates the previous frame features. The code uses dictionaries to store these features, with the frame number and interaction number as keys. The detach() function seems to remove the feature tensor from the computation graph for memory efficiency, while unsqueeze(0) reshapes the tensor to have a batch dimension.",
+        "type": "comment"
+    },
+    "1504": {
+        "file_id": 132,
+        "content": "                    else:\n                        prev_frame_nn_features_n = local_map_tmp_dic[\n                            seq_names[n]][frame_num[n]][interaction_num - 2]\n                        prev_frame_nn_features_n = prev_frame_nn_features_n.unsqueeze(\n                            0)\n                local_map_dics = (local_map_tmp_dic, local_map_dist_dic)\n            to_cat_previous_frame = (\n                float_(seq_previous_frame_label) == float_(ref_obj_ids)\n            )  # float comparision?\n            to_cat_current_frame_embedding = current_frame_embedding[\n                n].unsqueeze(0).tile((ref_obj_ids.shape[0], 1, 1, 1))\n            to_cat_nn_feature_n = nn_features_n.squeeze(0).transpose(\n                [2, 3, 0, 1])\n            to_cat_previous_frame = float_(\n                to_cat_previous_frame.unsqueeze(-1).transpose([2, 3, 0, 1]))\n            to_cat_prev_frame_nn_feature_n = prev_frame_nn_features_n.squeeze(\n                0).transpose([2, 3, 0, 1])\n            to_cat = paddle.concat(",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:782-803"
+    },
+    "1505": {
+        "file_id": 132,
+        "content": "This code snippet is part of a neural network model for video object detection. It deals with handling previous frame features, categorizing frames based on the reference object IDs, and concatenating different tensor inputs together. The code checks if the current frame's label matches the reference object ID, unsqueezes and tiles the tensors accordingly, transposes them, and finally concatenates these transformed tensors using `paddle.concat`.",
+        "type": "comment"
+    },
+    "1506": {
+        "file_id": 132,
+        "content": "                (to_cat_current_frame_embedding, to_cat_nn_feature_n,\n                 to_cat_prev_frame_nn_feature_n, to_cat_previous_frame), 1)\n            pred_ = dynamic_seghead(to_cat)\n            pred_ = pred_.transpose([1, 0, 2, 3])\n            dic_tmp[seq_names[n]] = pred_\n        if global_map_tmp_dic is None:\n            return dic_tmp\n        else:\n            if local_map_dics is None:\n                return dic_tmp, global_map_tmp_dic\n            else:\n                return dic_tmp, global_map_tmp_dic, local_map_dics\n    def int_seghead(self,\n                    ref_frame_embedding=None,\n                    ref_scribble_label=None,\n                    prev_round_label=None,\n                    normalize_nearest_neighbor_distances=True,\n                    global_map_tmp_dic=None,\n                    local_map_dics=None,\n                    interaction_num=None,\n                    seq_names=None,\n                    gt_ids=None,\n                    k_nearest_neighbors=1,\n                    frame_num=None,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:804-829"
+    },
+    "1507": {
+        "file_id": 132,
+        "content": "This function, int_seghead, takes various inputs such as reference frame embedding, scribble label, previous round label etc. It normalizes nearest neighbor distances if specified and returns the dictionary temporary (dic_tmp) containing predicted results for each sequence, along with optional global map temporary dictionary (global_map_tmp_dic) and local map dictionaries (local_map_dics). The interaction number (interaction_num), frame number (frame_num) and list of sequence names (seq_names) are also used.",
+        "type": "comment"
+    },
+    "1508": {
+        "file_id": 132,
+        "content": "                    first_inter=True):\n        dic_tmp = {}\n        bs, c, h, w = ref_frame_embedding.shape\n        scale_ref_scribble_label = paddle.nn.functional.interpolate(\n            float_(ref_scribble_label), size=(h, w), mode='nearest')\n        scale_ref_scribble_label = int_(scale_ref_scribble_label)\n        if not first_inter:\n            scale_prev_round_label = paddle.nn.functional.interpolate(\n                float_(prev_round_label), size=(h, w), mode='nearest')\n            scale_prev_round_label = int_(scale_prev_round_label)\n        n_chunks = 500\n        for n in range(bs):\n            gt_id = paddle.arange(0, gt_ids[n] + 1)\n            gt_id = int_(gt_id)\n            seq_ref_frame_embedding = ref_frame_embedding[n]\n            ########################Local dist map\n            seq_ref_frame_embedding = paddle.transpose(seq_ref_frame_embedding,\n                                                       [1, 2, 0])\n            seq_ref_scribble_label = paddle.transpose(\n                scale_ref_scribble_label[n], [1, 2, 0])",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:830-853"
+    },
+    "1509": {
+        "file_id": 132,
+        "content": "This code segment is part of the Ma-Net network in PaddleVideo. It interpolates the reference scribble label and previous round label images, assigns ground truth IDs, and performs local distance map calculations on a sequence of frames for a batch of videos.",
+        "type": "comment"
+    },
+    "1510": {
+        "file_id": 132,
+        "content": "            nn_features_n = local_previous_frame_nearest_neighbor_features_per_object(\n                prev_frame_embedding=seq_ref_frame_embedding,\n                query_embedding=seq_ref_frame_embedding,\n                prev_frame_labels=seq_ref_scribble_label,\n                gt_ids=gt_id,\n                max_distance=cfg.MODEL_MAX_LOCAL_DISTANCE)\n            #######\n            ######################Global map update\n            if seq_names[n] not in global_map_tmp_dic:\n                global_map_tmp_dic[seq_names[n]] = paddle.ones_like(\n                    nn_features_n).tile([104, 1, 1, 1, 1])\n            nn_features_n_ = paddle.where(\n                nn_features_n <=\n                global_map_tmp_dic[seq_names[n]][frame_num[n]].unsqueeze(0),\n                nn_features_n,\n                global_map_tmp_dic[seq_names[n]][frame_num[n]].unsqueeze(0))\n            ###\n            ###\n            global_map_tmp_dic[seq_names[n]][\n                frame_num[n]] = nn_features_n_.detach()[0]\n            ##################Local map update",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:854-877"
+    },
+    "1511": {
+        "file_id": 132,
+        "content": "This code segment is updating the global and local maps for a given sequence of frames. It first calculates the nearest neighbor features (nn_features_n) using the previous frame embedding, query embedding, previous frame labels, and ground truth IDs. Then it checks if this current sequence name exists in the global map temporary dictionary (global_map_tmp_dic). If not, it initializes a one-tensor for that sequence and tiles it to match the shape of nn_features_n. It then applies a where statement to compare nn_features_n with the global map tensor, selecting either nn_features_n or the global map tensor depending on which is smaller. Finally, it updates the global map temporary dictionary entry for this sequence at the current frame number with the selected tensor from the where statement.",
+        "type": "comment"
+    },
+    "1512": {
+        "file_id": 132,
+        "content": "            if local_map_dics is not None:\n                local_map_tmp_dic, local_map_dist_dic = local_map_dics\n                if seq_names[n] not in local_map_dist_dic:\n                    local_map_dist_dic[seq_names[n]] = paddle.zeros([104, 9])\n                if seq_names[n] not in local_map_tmp_dic:\n                    local_map_tmp_dic[seq_names[n]] = paddle.ones_like(\n                        nn_features_n).unsqueeze(0).tile([104, 9, 1, 1, 1, 1])\n                local_map_dist_dic[seq_names[n]][frame_num[n]][interaction_num -\n                                                               1] = 0\n                local_map_dics = (local_map_tmp_dic, local_map_dist_dic)\n            ##################\n            to_cat_current_frame_embedding = ref_frame_embedding[n].unsqueeze(\n                0).tile((gt_id.shape[0], 1, 1, 1))\n            to_cat_nn_feature_n = nn_features_n.squeeze(0).transpose(\n                [2, 3, 0, 1])\n            to_cat_scribble_mask_to_cat = (\n                float_(seq_ref_scribble_label) == float_(gt_id)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:878-897"
+    },
+    "1513": {
+        "file_id": 132,
+        "content": "The code checks if a dictionary of local maps is provided. If so, it retrieves the temporary and distance dictionaries from it. It then updates these dictionaries for the current sequence name (seq_names[n]), adding a 0 to a specific element if the sequence name is not already in the distance dictionary. Finally, it creates embedding tensors for frame and feature comparison and prepares them for concatenation.",
+        "type": "comment"
+    },
+    "1514": {
+        "file_id": 132,
+        "content": "            )  # float comparision?\n            to_cat_scribble_mask_to_cat = float_(\n                to_cat_scribble_mask_to_cat.unsqueeze(-1).transpose(\n                    [2, 3, 0, 1]))\n            if not first_inter:\n                seq_prev_round_label = scale_prev_round_label[n].transpose(\n                    [1, 2, 0])\n                to_cat_prev_round_to_cat = (\n                    float_(seq_prev_round_label) == float_(gt_id)\n                )  # float comparision?\n                to_cat_prev_round_to_cat = float_(\n                    to_cat_prev_round_to_cat.unsqueeze(-1).transpose(\n                        [2, 3, 0, 1]))\n            else:\n                to_cat_prev_round_to_cat = paddle.zeros_like(\n                    to_cat_scribble_mask_to_cat)\n                to_cat_prev_round_to_cat[0] = 1.\n            to_cat = paddle.concat(\n                (to_cat_current_frame_embedding, to_cat_scribble_mask_to_cat,\n                 to_cat_prev_round_to_cat), 1)\n            pred_ = self.inter_seghead(to_cat)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:898-921"
+    },
+    "1515": {
+        "file_id": 132,
+        "content": "This code is performing a series of operations on tensors to create the 'to_cat' tensor for use in the model. It checks if it's the first iteration and adjusts the previous round label accordingly. Then, it concatenates three different tensor inputs along the 1st axis (channel dimension) and passes the result through a segmentation head network to get the final prediction 'pred_'. This code seems to be part of a larger neural network for video object segmentation.",
+        "type": "comment"
+    },
+    "1516": {
+        "file_id": 132,
+        "content": "            pred_ = pred_.transpose([1, 0, 2, 3])\n            dic_tmp[seq_names[n]] = pred_\n        if local_map_dics is None:\n            return dic_tmp\n        else:\n            return dic_tmp, local_map_dics",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/IntVOS.py:922-927"
+    },
+    "1517": {
+        "file_id": 132,
+        "content": "This code is transposing the tensor 'pred_' and storing it in 'dic_tmp' with corresponding sequence name as key. It then checks if 'local\\_map\\_dics' is None, and returns 'dic\\_tmp' or returns both 'dic\\_tmp' and 'local\\_map\\_dics'.",
+        "type": "comment"
+    },
+    "1518": {
+        "file_id": 133,
+        "content": "/applications/Ma-Net/networks/aspp.py",
+        "type": "filepath"
+    },
+    "1519": {
+        "file_id": 133,
+        "content": "ASPPModule is a CNN layer for ASPP modules in Ma-Net, implementing atrous spatial pyramid pooling with Conv2D, BatchNorm, and ReLU activation. The class initializes instance parameters and sets dilations for ASPP modules using _ASPPModule class.",
+        "type": "summary"
+    },
+    "1520": {
+        "file_id": 133,
+        "content": "import math\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nfrom utils.api import kaiming_normal_\nclass _ASPPModule(nn.Layer):\n    def __init__(self, inplanes, planes, kernel_size, padding, dilation,\n                 BatchNorm):\n        super(_ASPPModule, self).__init__()\n        self.atrous_conv = nn.Conv2D(inplanes,\n                                     planes,\n                                     kernel_size=kernel_size,\n                                     stride=1,\n                                     padding=padding,\n                                     dilation=dilation,\n                                     bias_attr=False)\n        self.bn = BatchNorm(planes)\n        self.relu = nn.ReLU(True)\n        self._init_weight()\n    def forward(self, x):\n        x = self.atrous_conv(x)\n        x = self.bn(x)\n        return self.relu(x)\n    def _init_weight(self):\n        for m in self.sublayers():\n            if isinstance(m, nn.Conv2D):\n                kaiming_normal_(m.weight)\n            elif isinstance(m, nn.BatchNorm2D):",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/aspp.py:1-34"
+    },
+    "1521": {
+        "file_id": 133,
+        "content": "ASPPModule is a convolutional neural network layer that performs atrous spatial pyramid pooling. It consists of a Conv2D layer, BatchNorm layer, and ReLU activation function for feature extraction and normalization in a hierarchical manner. The weight initialization follows the Kaiming normal distribution.",
+        "type": "comment"
+    },
+    "1522": {
+        "file_id": 133,
+        "content": "                from utils.api import fill_\n                fill_(m.weight, 1)\n                from utils.api import zero_\n                zero_(m.bias)\nclass ASPP(nn.Layer):\n    def __init__(self, backbone, output_stride, BatchNorm):\n        super(ASPP, self).__init__()\n        if backbone == 'drn':\n            inplanes = 512\n        elif backbone == 'mobilenet':\n            inplanes = 320\n        else:\n            inplanes = 2048\n        if output_stride == 16:\n            dilations = [1, 6, 12, 18]\n        elif output_stride == 8:\n            dilations = [1, 12, 24, 36]\n        else:\n            raise NotImplementedError\n        self.aspp1 = _ASPPModule(inplanes,\n                                 256,\n                                 1,\n                                 padding=0,\n                                 dilation=dilations[0],\n                                 BatchNorm=BatchNorm)\n        self.aspp2 = _ASPPModule(inplanes,\n                                 256,\n                                 3,\n                                 padding=dilations[1],",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/aspp.py:35-66"
+    },
+    "1523": {
+        "file_id": 133,
+        "content": "The code defines a class \"ASPP\" that inherits from \"nn.Layer\". It initializes the instance with parameters such as backbone, output_stride, and BatchNorm. Depending on these inputs, it sets the dilations for the ASPP modules. These ASPP modules are instances of _ASPPModule class with specified input size, output size, kernel size, and dilation rate.",
+        "type": "comment"
+    },
+    "1524": {
+        "file_id": 133,
+        "content": "                                 dilation=dilations[1],\n                                 BatchNorm=BatchNorm)\n        self.aspp3 = _ASPPModule(inplanes,\n                                 256,\n                                 3,\n                                 padding=dilations[2],\n                                 dilation=dilations[2],\n                                 BatchNorm=BatchNorm)\n        self.aspp4 = _ASPPModule(inplanes,\n                                 256,\n                                 3,\n                                 padding=dilations[3],\n                                 dilation=dilations[3],\n                                 BatchNorm=BatchNorm)\n        self.global_avg_pool = nn.Sequential(\n            nn.AdaptiveAvgPool2D((1, 1)),\n            nn.Conv2D(inplanes, 256, 1, stride=1, bias_attr=False),\n            BatchNorm(256), nn.ReLU())\n        self.conv1 = nn.Conv2D(1280, 256, 1, bias_attr=False)\n        self.bn1 = BatchNorm(256)\n        self.relu = nn.ReLU(True)\n        self.dropout = nn.Dropout(0.1)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/aspp.py:67-89"
+    },
+    "1525": {
+        "file_id": 133,
+        "content": "This code defines three ASPP modules and a global average pooling layer for a neural network, with batch normalization and ReLU activations applied. The convolutional layers have specific dilations and padding values.",
+        "type": "comment"
+    },
+    "1526": {
+        "file_id": 133,
+        "content": "        self._init_weight()\n    def forward(self, x):\n        x1 = self.aspp1(x)\n        x2 = self.aspp2(x)\n        x3 = self.aspp3(x)\n        x4 = self.aspp4(x)\n        x5 = self.global_avg_pool(x)\n        x5 = F.interpolate(x5,\n                           size=x4.shape[2:],\n                           mode='bilinear',\n                           align_corners=True)\n        x = paddle.concat((x1, x2, x3, x4, x5), axis=1)\n        x = self.conv1(x)\n        x = self.bn1(x)\n        x = self.relu(x)\n        return x\n        return self.dropout(x)\n    def _init_weight(self):\n        for m in self.sublayers():\n            if isinstance(m, nn.Conv2D):\n                kaiming_normal_(m.weight)\n            elif isinstance(m, nn.BatchNorm2D):\n                from utils.api import fill_\n                fill_(m.weight, 1)\n                from utils.api import zero_\n                zero_(m.bias)\ndef build_aspp(backbone, output_stride, BatchNorm):\n    return ASPP(backbone, output_stride, BatchNorm)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/aspp.py:90-123"
+    },
+    "1527": {
+        "file_id": 133,
+        "content": "The code defines a convolutional neural network (CNN) for the ASPP (Aggregated Spatial Pyramid Pooling) module in PaddleVideo's Ma-Net. It includes an initialization function, forward pass computation, and a builder function to create the ASPP module with specified parameters.",
+        "type": "comment"
+    },
+    "1528": {
+        "file_id": 134,
+        "content": "/applications/Ma-Net/networks/backbone/__init__.py",
+        "type": "filepath"
+    },
+    "1529": {
+        "file_id": 134,
+        "content": "This function builds a backbone network for the specified model (resnet, xception, drn, or mobilenet) with the given output stride and BatchNorm implementation.",
+        "type": "summary"
+    },
+    "1530": {
+        "file_id": 134,
+        "content": "from networks.backbone import resnet, xception, drn, mobilenet\ndef build_backbone(backbone, output_stride, BatchNorm):\n    if backbone == 'resnet':\n        return resnet.ResNet101(output_stride, BatchNorm)\n    elif backbone == 'xception':\n        return xception.AlignedXception(output_stride, BatchNorm)\n    elif backbone == 'drn':\n        return drn.drn_d_54(BatchNorm)\n    elif backbone == 'mobilenet':\n        return mobilenet.MobileNetV2(output_stride, BatchNorm)\n    else:\n        raise NotImplementedError",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/__init__.py:1-14"
+    },
+    "1531": {
+        "file_id": 134,
+        "content": "This function builds a backbone network for the specified model (resnet, xception, drn, or mobilenet) with the given output stride and BatchNorm implementation.",
+        "type": "comment"
+    },
+    "1532": {
+        "file_id": 135,
+        "content": "/applications/Ma-Net/networks/backbone/drn.py",
+        "type": "filepath"
+    },
+    "1533": {
+        "file_id": 135,
+        "content": "The code defines the Deep Residual Network (DRN) model and MA-Net architecture in PaddlePaddle, with various configurations and optional pre-trained weights. It also includes low-level feature retention through processing inputs and can be tested using examples.",
+        "type": "summary"
+    },
+    "1534": {
+        "file_id": 135,
+        "content": "import paddle.nn as nn\nimport math\nwebroot = 'https://tigress-web.princeton.edu/~fy/drn/models/'\nmodel_urls = {\n    'resnet50': 'https://download.pypaddle.org/models/resnet50-19c8e357.pth',\n    'drn-c-26': webroot + 'drn_c_26-ddedf421.pth',\n    'drn-c-42': webroot + 'drn_c_42-9d336e8c.pth',\n    'drn-c-58': webroot + 'drn_c_58-0a53a92c.pth',\n    'drn-d-22': webroot + 'drn_d_22-4bd2f8ea.pth',\n    'drn-d-38': webroot + 'drn_d_38-eebb45f0.pth',\n    'drn-d-54': webroot + 'drn_d_54-0e0534ff.pth',\n    'drn-d-105': webroot + 'drn_d_105-12b40979.pth'\n}\ndef conv3x3(in_planes, out_planes, stride=1, padding=1, dilation=1):\n    return nn.Conv2D(in_planes, out_planes, kernel_size=3, stride=stride,\n                     padding=padding, bias_attr=False, dilation=dilation)\nclass BasicBlock(nn.Layer):\n    expansion = 1\n    def __init__(self, inplanes, planes, stride=1, downsample=None,\n                 dilation=(1, 1), residual=True, BatchNorm=None):\n        super(BasicBlock, self).__init__()\n        self.conv1 = conv3x3(inplanes, planes, stride,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/drn.py:1-29"
+    },
+    "1535": {
+        "file_id": 135,
+        "content": "This code defines a class BasicBlock, which is an extension of the nn.Layer class in PaddlePaddle's library. It contains a convolution layer with 3x3 kernel size and optional downsampling using a stride greater than 1. The BasicBlock has an expansion parameter set to 1, indicating no change in the input and output channel dimensions. There are pre-trained models available for download from the specified URLs.",
+        "type": "comment"
+    },
+    "1536": {
+        "file_id": 135,
+        "content": "                             padding=dilation[0], dilation=dilation[0])\n        self.bn1 = BatchNorm(planes)\n        self.relu = nn.ReLU()\n        self.conv2 = conv3x3(planes, planes,\n                             padding=dilation[1], dilation=dilation[1])\n        self.bn2 = BatchNorm(planes)\n        self.downsample = downsample\n        self.stride = stride\n        self.residual = residual\n    def forward(self, x):\n        residual = x\n        out = self.conv1(x)\n        out = self.bn1(out)\n        out = self.relu(out)\n        out = self.conv2(out)\n        out = self.bn2(out)\n        if self.downsample is not None:\n            residual = self.downsample(x)\n        if self.residual:\n            out += residual\n        out = self.relu(out)\n        return out\nclass Bottleneck(nn.Layer):\n    expansion = 4\n    def __init__(self, inplanes, planes, stride=1, downsample=None,\n                 dilation=(1, 1), residual=True, BatchNorm=None):\n        super(Bottleneck, self).__init__()\n        self.conv1 = nn.Conv2D(inplanes, planes, kernel_size=1, bias_attr=False)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/drn.py:30-65"
+    },
+    "1537": {
+        "file_id": 135,
+        "content": "This code defines a residual block with BatchNormalization and ReLU activation, using convolutions and optional downsampling. The Bottleneck class also includes a 1x1 convolution and has an expansion factor of 4.",
+        "type": "comment"
+    },
+    "1538": {
+        "file_id": 135,
+        "content": "        self.bn1 = BatchNorm(planes)\n        self.conv2 = nn.Conv2D(planes, planes, kernel_size=3, stride=stride,\n                               padding=dilation[1], bias_attr=False,\n                               dilation=dilation[1])\n        self.bn2 = BatchNorm(planes)\n        self.conv3 = nn.Conv2D(planes, planes * 4, kernel_size=1, bias_attr=False)\n        self.bn3 = BatchNorm(planes * 4)\n        self.relu = nn.ReLU()\n        self.downsample = downsample\n        self.stride = stride\n    def forward(self, x):\n        residual = x\n        out = self.conv1(x)\n        out = self.bn1(out)\n        out = self.relu(out)\n        out = self.conv2(out)\n        out = self.bn2(out)\n        out = self.relu(out)\n        out = self.conv3(out)\n        out = self.bn3(out)\n        if self.downsample is not None:\n            residual = self.downsample(x)\n        out += residual\n        out = self.relu(out)\n        return out\nclass DRN(nn.Layer):\n    def __init__(self, block, layers, arch='D',\n                 channels=(16, 32, 64, 128, 256, 512, 512, 512),",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/drn.py:66-103"
+    },
+    "1539": {
+        "file_id": 135,
+        "content": "This code defines a DRN (Deep Residual Network) model with residual blocks. It includes batch normalization, convolutional layers, and ReLU activation functions. The forward method applies the layers sequentially and performs residual connections if necessary.",
+        "type": "comment"
+    },
+    "1540": {
+        "file_id": 135,
+        "content": "                 BatchNorm=None):\n        super(DRN, self).__init__()\n        self.inplanes = channels[0]\n        self.out_dim = channels[-1]\n        self.arch = arch\n        if arch == 'C':\n            self.conv1 = nn.Conv2D(3, channels[0], kernel_size=7, stride=1,\n                                   padding=3, bias_attr=False)\n            self.bn1 = BatchNorm(channels[0])\n            self.relu = nn.ReLU()\n            self.layer1 = self._make_layer(\n                BasicBlock, channels[0], layers[0], stride=1, BatchNorm=BatchNorm)\n            self.layer2 = self._make_layer(\n                BasicBlock, channels[1], layers[1], stride=2, BatchNorm=BatchNorm)\n        elif arch == 'D':\n            self.layer0 = nn.Sequential(\n                nn.Conv2D(3, channels[0], kernel_size=7, stride=1, padding=3,\n                          bias_attr=False),\n                BatchNorm(channels[0]),\n                nn.ReLU()\n            )\n            self.layer1 = self._make_conv_layers(\n                channels[0], layers[0], stride=1, BatchNorm=BatchNorm)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/drn.py:104-130"
+    },
+    "1541": {
+        "file_id": 135,
+        "content": "This code defines a DRN class that inherits from an unknown base class. It initializes the object with specified number of channels, layers, and architecture type ('C' or 'D'). The constructor creates different layers depending on the architecture: for 'C', it includes convolutional and pooling layers with BatchNorm and ReLU activation; for 'D', it only includes a convolutional layer followed by BatchNorm and ReLU activation, then adds more convolutional layers.",
+        "type": "comment"
+    },
+    "1542": {
+        "file_id": 135,
+        "content": "            self.layer2 = self._make_conv_layers(\n                channels[1], layers[1], stride=2, BatchNorm=BatchNorm)\n        self.layer3 = self._make_layer(block, channels[2], layers[2], stride=2, BatchNorm=BatchNorm)\n        self.layer4 = self._make_layer(block, channels[3], layers[3], stride=2, BatchNorm=BatchNorm)\n        self.layer5 = self._make_layer(block, channels[4], layers[4],\n                                       dilation=2, new_level=False, BatchNorm=BatchNorm)\n        self.layer6 = None if layers[5] == 0 else \\\n            self._make_layer(block, channels[5], layers[5], dilation=4,\n                             new_level=False, BatchNorm=BatchNorm)\n        if arch == 'C':\n            self.layer7 = None if layers[6] == 0 else \\\n                self._make_layer(BasicBlock, channels[6], layers[6], dilation=2,\n                                 new_level=False, residual=False, BatchNorm=BatchNorm)\n            self.layer8 = None if layers[7] == 0 else \\\n                self._make_layer(BasicBlock, channels[7], layers[7], dilation=1,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/drn.py:131-147"
+    },
+    "1543": {
+        "file_id": 135,
+        "content": "The code defines a network architecture with six potential layers (2-6) using the provided block, and two additional layers (7 & 8) if the architecture is 'C'. Each layer has a specific number of channels, layers, and dilation rate. The last three layers can be set to None if their corresponding number of layers is 0. Batch Normalization is applied to each layer.",
+        "type": "comment"
+    },
+    "1544": {
+        "file_id": 135,
+        "content": "                                 new_level=False, residual=False, BatchNorm=BatchNorm)\n        elif arch == 'D':\n            self.layer7 = None if layers[6] == 0 else \\\n                self._make_conv_layers(channels[6], layers[6], dilation=2, BatchNorm=BatchNorm)\n            self.layer8 = None if layers[7] == 0 else \\\n                self._make_conv_layers(channels[7], layers[7], dilation=1, BatchNorm=BatchNorm)\n        self._init_weight()\n    def _init_weight(self):\n        for m in self.sublayers():\n            if isinstance(m, nn.Conv2D):\n                n = m._kernel_size[0] * m._kernel_size[1] * m._out_channels\n                m.weight.normal_(0, math.sqrt(2. / n))\n            elif isinstance(m, nn.BatchNorm2D):\n                from manet_paddle.utils.api import fill_\n                fill_(m.weight, 1)\n                from manet_paddle.utils.api import zero_\n                zero_(m.bias)\n    def _make_layer(self, block, planes, blocks, stride=1, dilation=1,\n                    new_level=True, residual=True, BatchNorm=None):",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/drn.py:148-170"
+    },
+    "1545": {
+        "file_id": 135,
+        "content": "This code defines a network backbone for the MA-Net model in PaddleVideo. It includes layers 1 to 8 with optional activation, residual connections, and batch normalization. The `_init_weight` function initializes weights for convolutional and batch normalization layers, while `_make_layer` creates each layer of the backbone based on the specified parameters.",
+        "type": "comment"
+    },
+    "1546": {
+        "file_id": 135,
+        "content": "        assert dilation == 1 or dilation % 2 == 0\n        downsample = None\n        if stride != 1 or self.inplanes != planes * block.expansion:\n            downsample = nn.Sequential(\n                nn.Conv2D(self.inplanes, planes * block.expansion,\n                          kernel_size=1, stride=stride, bias_attr=False),\n                BatchNorm(planes * block.expansion),\n            )\n        layers = list()\n        layers.append(block(\n            self.inplanes, planes, stride, downsample,\n            dilation=(1, 1) if dilation == 1 else (\n                dilation // 2 if new_level else dilation, dilation),\n            residual=residual, BatchNorm=BatchNorm))\n        self.inplanes = planes * block.expansion\n        for i in range(1, blocks):\n            layers.append(block(self.inplanes, planes, residual=residual,\n                                dilation=(dilation, dilation), BatchNorm=BatchNorm))\n        return nn.Sequential(*layers)\n    def _make_conv_layers(self, channels, convs, stride=1, dilation=1, BatchNorm=None):",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/drn.py:171-193"
+    },
+    "1547": {
+        "file_id": 135,
+        "content": "This code is creating a network layer with multiple blocks. It checks the stride and dilation to determine if downsampling is required, then constructs a Sequential module of convolutional layers using the provided number of blocks, channels, and convolutions. The BatchNorm function is an optional parameter.",
+        "type": "comment"
+    },
+    "1548": {
+        "file_id": 135,
+        "content": "        modules = []\n        for i in range(convs):\n            modules.extend([\n                nn.Conv2D(self.inplanes, channels, kernel_size=3,\n                          stride=stride if i == 0 else 1,\n                          padding=dilation, bias_attr=False, dilation=dilation),\n                BatchNorm(channels),\n                nn.ReLU()])\n            self.inplanes = channels\n        return nn.Sequential(*modules)\n    def forward(self, x):\n        if self.arch == 'C':\n            x = self.conv1(x)\n            x = self.bn1(x)\n            x = self.relu(x)\n        elif self.arch == 'D':\n            x = self.layer0(x)\n        x = self.layer1(x)\n        x = self.layer2(x)\n        x = self.layer3(x)\n        low_level_feat = x\n        x = self.layer4(x)\n        x = self.layer5(x)\n        if self.layer6 is not None:\n            x = self.layer6(x)\n        if self.layer7 is not None:\n            x = self.layer7(x)\n        if self.layer8 is not None:\n            x = self.layer8(x)\n        return x, low_level_feat\nclass DRN_A(nn.Layer):",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/drn.py:194-234"
+    },
+    "1549": {
+        "file_id": 135,
+        "content": "The code defines a DRN (Deep Residual Network) backbone with multiple layers. It first creates a list of modules containing convolutional layers, batch normalization, and ReLU activation. The `forward` function handles different architectures ('C' or 'D') and processes input through various layers while retaining low-level features. The DRN_A class extends the functionality with more layers.",
+        "type": "comment"
+    },
+    "1550": {
+        "file_id": 135,
+        "content": "    def __init__(self, block, layers, BatchNorm=None):\n        self.inplanes = 64\n        super(DRN_A, self).__init__()\n        self.out_dim = 512 * block.expansion\n        self.conv1 = nn.Conv2D(3, 64, kernel_size=7, stride=2, padding=3,\n                               bias_attr=False)\n        self.bn1 = BatchNorm(64)\n        self.relu = nn.ReLU()\n        self.maxpool = nn.MaxPool2D(kernel_size=3, stride=2, padding=1)\n        self.layer1 = self._make_layer(block, 64, layers[0], BatchNorm=BatchNorm)\n        self.layer2 = self._make_layer(block, 128, layers[1], stride=2, BatchNorm=BatchNorm)\n        self.layer3 = self._make_layer(block, 256, layers[2], stride=1,\n                                       dilation=2, BatchNorm=BatchNorm)\n        self.layer4 = self._make_layer(block, 512, layers[3], stride=1,\n                                       dilation=4, BatchNorm=BatchNorm)\n        self._init_weight()\n    def _init_weight(self):\n        for m in self.sublayers():\n            if isinstance(m, nn.Conv2D):\n                n = m._kernel_size[0] * m._kernel_size[1] * m._out_channels",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/drn.py:236-257"
+    },
+    "1551": {
+        "file_id": 135,
+        "content": "The code defines a DRN_A class that is a type of backbone network. It has an __init__ method initializing parameters, and includes a Conv2D layer, BatchNorm layer, ReLU activation, MaxPool2D layer, and several _make_layer methods for creating different layers with varying dimensions and strides. The _init_weight method is used to initialize the weights of the convolution layers.",
+        "type": "comment"
+    },
+    "1552": {
+        "file_id": 135,
+        "content": "                m.weight.normal_(0, math.sqrt(2. / n))\n            elif isinstance(m, nn.BatchNorm2D):\n                from manet_paddle.utils.api import fill_\n                fill_(m.weight, 1)\n                from manet_paddle.utils.api import zero_\n                zero_(m.bias)\n    def _make_layer(self, block, planes, blocks, stride=1, dilation=1, BatchNorm=None):\n        downsample = None\n        if stride != 1 or self.inplanes != planes * block.expansion:\n            downsample = nn.Sequential(\n                nn.Conv2D(self.inplanes, planes * block.expansion,\n                          kernel_size=1, stride=stride, bias_attr=False),\n                BatchNorm(planes * block.expansion),\n            )\n        layers = []\n        layers.append(block(self.inplanes, planes, stride, downsample, BatchNorm=BatchNorm))\n        self.inplanes = planes * block.expansion\n        for i in range(1, blocks):\n            layers.append(block(self.inplanes, planes,\n                                dilation=(dilation, dilation, ), BatchNorm=BatchNorm))",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/drn.py:258-279"
+    },
+    "1553": {
+        "file_id": 135,
+        "content": "The code defines a function _make_layer that creates layers of a specified block with the given number of blocks, planes, and stride. It also handles downsampling if needed and initializes the weights for BatchNorm2D layers.",
+        "type": "comment"
+    },
+    "1554": {
+        "file_id": 135,
+        "content": "        return nn.Sequential(*layers)\n    def forward(self, x):\n        x = self.conv1(x)\n        x = self.bn1(x)\n        x = self.relu(x)\n        x = self.maxpool(x)\n        x = self.layer1(x)\n        x = self.layer2(x)\n        x = self.layer3(x)\n        x = self.layer4(x)\n        return x\ndef drn_a_50(BatchNorm, pretrained=True):\n    model = DRN_A(Bottleneck, [3, 4, 6, 3], BatchNorm=BatchNorm)\n    if pretrained:\n        import paddlehub as hub\n        model.set_state_dict(hub.Module(name=\"resnet50_vd_animals\"))\n    return model\ndef drn_c_26(BatchNorm, pretrained=True):\n    model = DRN(BasicBlock, [1, 1, 2, 2, 2, 2, 1, 1], arch='C', BatchNorm=BatchNorm)\n    if pretrained:\n        pretrained = model_zoo.load_url(model_urls['drn-c-26'])\n        del pretrained['fc.weight']\n        del pretrained['fc.bias']\n        model.set_state_dict(pretrained)\n    return model\ndef drn_c_42(BatchNorm, pretrained=True):\n    model = DRN(BasicBlock, [1, 1, 3, 4, 6, 3, 1, 1], arch='C', BatchNorm=BatchNorm)\n    if pretrained:\n        pretrained = model_zoo.load_url(model_urls['drn-c-42'])",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/drn.py:281-318"
+    },
+    "1555": {
+        "file_id": 135,
+        "content": "This code defines three functions: drn_a_50, drn_c_26, and drn_c_42. Each function takes a BatchNorm argument and an optional pretrained flag. The functions return different types of DRN models based on the input arguments. If pretrained is True, the code sets the model's state dictionary to a pre-trained model's weights.",
+        "type": "comment"
+    },
+    "1556": {
+        "file_id": 135,
+        "content": "        del pretrained['fc.weight']\n        del pretrained['fc.bias']\n        model.set_state_dict(pretrained)\n    return model\ndef drn_c_58(BatchNorm, pretrained=True):\n    model = DRN(Bottleneck, [1, 1, 3, 4, 6, 3, 1, 1], arch='C', BatchNorm=BatchNorm)\n    if pretrained:\n        pretrained = model_zoo.load_url(model_urls['drn-c-58'])\n        del pretrained['fc.weight']\n        del pretrained['fc.bias']\n        model.set_state_dict(pretrained)\n    return model\ndef drn_d_22(BatchNorm, pretrained=True):\n    model = DRN(BasicBlock, [1, 1, 2, 2, 2, 2, 1, 1], arch='D', BatchNorm=BatchNorm)\n    if pretrained:\n        pretrained = model_zoo.load_url(model_urls['drn-d-22'])\n        del pretrained['fc.weight']\n        del pretrained['fc.bias']\n        model.set_state_dict(pretrained)\n    return model\ndef drn_d_24(BatchNorm, pretrained=True):\n    model = DRN(BasicBlock, [1, 1, 2, 2, 2, 2, 2, 2], arch='D', BatchNorm=BatchNorm)\n    if pretrained:\n        pretrained = model_zoo.load_url(model_urls['drn-d-24'])\n        del pretrained['fc.weight']",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/drn.py:319-349"
+    },
+    "1557": {
+        "file_id": 135,
+        "content": "Code defines functions for initializing DRN models with different architectures (C, D) and sizes (58, 22, 24). If `pretrained` is True, it loads pre-trained model weights from a URL and removes the last fully connected layer's weight and bias before setting the state dictionary of the model. This allows for custom downstream tasks.",
+        "type": "comment"
+    },
+    "1558": {
+        "file_id": 135,
+        "content": "        del pretrained['fc.bias']\n        model.set_state_dict(pretrained)\n    return model\ndef drn_d_38(BatchNorm, pretrained=True):\n    model = DRN(BasicBlock, [1, 1, 3, 4, 6, 3, 1, 1], arch='D', BatchNorm=BatchNorm)\n    if pretrained:\n        pretrained = model_zoo.load_url(model_urls['drn-d-38'])\n        del pretrained['fc.weight']\n        del pretrained['fc.bias']\n        model.set_state_dict(pretrained)\n    return model\ndef drn_d_40(BatchNorm, pretrained=True):\n    model = DRN(BasicBlock, [1, 1, 3, 4, 6, 3, 2, 2], arch='D', BatchNorm=BatchNorm)\n    if pretrained:\n        pretrained = model_zoo.load_url(model_urls['drn-d-40'])\n        del pretrained['fc.weight']\n        del pretrained['fc.bias']\n        model.set_state_dict(pretrained)\n    return model\ndef drn_d_54(BatchNorm, pretrained=True):\n    model = DRN(Bottleneck, [1, 1, 3, 4, 6, 3, 1, 1], arch='D', BatchNorm=BatchNorm)\n    if pretrained:\n        pretrained = model_zoo.load_url(model_urls['drn-d-54'])\n        del pretrained['fc.weight']\n        del pretrained['fc.bias']",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/drn.py:350-380"
+    },
+    "1559": {
+        "file_id": 135,
+        "content": "The code defines three functions, drn_d_38, drn_d_40, and drn_d_54, which return instances of the DRN model with different configurations and optional pre-trained weights. If pre-trained weights are specified, it loads them from a URL and deletes 'fc.weight' and 'fc.bias' keys before setting the state dictionary of the model.",
+        "type": "comment"
+    },
+    "1560": {
+        "file_id": 135,
+        "content": "        model.set_state_dict(pretrained)\n    return model\ndef drn_d_105(BatchNorm, pretrained=True):\n    model = DRN(Bottleneck, [1, 1, 3, 4, 23, 3, 1, 1], arch='D', BatchNorm=BatchNorm)\n    if pretrained:\n        pretrained = model_zoo.load_url(model_urls['drn-d-105'])\n        del pretrained['fc.weight']\n        del pretrained['fc.bias']\n        model.set_state_dict(pretrained)\n    return model\nif __name__ == \"__main__\":\n    import paddle\n    model = drn_a_50(BatchNorm=nn.BatchNorm2D, pretrained=True)\n    input = paddle.rand([1, 3, 512, 512])\n    output, low_level_feat = model(input)\n    print(output.shape)\n    print(low_level_feat.shape)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/drn.py:381-400"
+    },
+    "1561": {
+        "file_id": 135,
+        "content": "This code defines a function 'drn_d_105' that returns an instance of the DRN model with specified parameters. It also loads pre-trained weights for the model if 'pretrained' flag is set to True. The example usage at the end creates and tests an instance of the DRN model with specific parameters, using PaddlePaddle library.",
+        "type": "comment"
+    },
+    "1562": {
+        "file_id": 136,
+        "content": "/applications/Ma-Net/networks/backbone/mobilenet.py",
+        "type": "filepath"
+    },
+    "1563": {
+        "file_id": 136,
+        "content": "The code defines a MobileNetV2 model with InvertedResidual blocks for Ma-Net application, initializing the backbone network and preparing it for forward propagation while applying Kaiming normal initialization to certain layers.",
+        "type": "summary"
+    },
+    "1564": {
+        "file_id": 136,
+        "content": "import paddle\nimport paddle.nn.functional as F\nimport paddle.nn as nn\nimport math\nfrom utils.api import kaiming_normal_\ndef conv_bn(inp, oup, stride, BatchNorm):\n    return nn.Sequential(nn.Conv2D(inp, oup, 3, stride, 1, bias_attr=False),\n                         BatchNorm(oup), nn.ReLU6())\ndef fixed_padding(inputs, kernel_size, dilation):\n    kernel_size_effective = kernel_size + (kernel_size - 1) * (dilation - 1)\n    pad_total = kernel_size_effective - 1\n    pad_beg = pad_total // 2\n    pad_end = pad_total - pad_beg\n    padded_inputs = F.pad(inputs, (pad_beg, pad_end, pad_beg, pad_end))\n    return padded_inputs\nclass InvertedResidual(nn.Layer):\n    def __init__(self, inp, oup, stride, dilation, expand_ratio, BatchNorm):\n        super(InvertedResidual, self).__init__()\n        self.stride = stride\n        assert stride in [1, 2]\n        hidden_dim = round(inp * expand_ratio)\n        self.use_res_connect = self.stride == 1 and inp == oup\n        self.kernel_size = 3\n        self.dilation = dilation\n        if expand_ratio == 1:",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/mobilenet.py:1-33"
+    },
+    "1565": {
+        "file_id": 136,
+        "content": "This code defines a network layer for MobileNet, including convolution-batch normalization-ReLU6 operations and an inverted residual block. It utilizes padding and dilation techniques to increase the effective receptive field size of the convolutions. The InvertedResidual class handles stride, dilation, and expand_ratio parameters for the network layer.",
+        "type": "comment"
+    },
+    "1566": {
+        "file_id": 136,
+        "content": "            self.conv = nn.Sequential(\n                # dw\n                nn.Conv2D(hidden_dim,\n                          hidden_dim,\n                          3,\n                          stride,\n                          0,\n                          dilation,\n                          groups=hidden_dim,\n                          bias_attr=False),\n                BatchNorm(hidden_dim),\n                nn.ReLU6(),\n                # pw-linear\n                nn.Conv2D(hidden_dim, oup, 1, 1, 0, 1, 1, bias_attr=False),\n                BatchNorm(oup),\n            )\n        else:\n            self.conv = nn.Sequential(\n                # pw\n                nn.Conv2D(inp, hidden_dim, 1, 1, 0, 1, bias_attr=False),\n                BatchNorm(hidden_dim),\n                nn.ReLU6(),\n                # dw\n                nn.Conv2D(hidden_dim,\n                          hidden_dim,\n                          3,\n                          stride,\n                          0,\n                          dilation,\n                          groups=hidden_dim,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/mobilenet.py:34-63"
+    },
+    "1567": {
+        "file_id": 136,
+        "content": "This code defines a convolutional neural network layer for MobileNet backbone. It includes parameters such as input and output channels (inp, oup), hidden dimension (hidden_dim), stride, dilation, and whether to use pointwise (pw) or depthwise (dw) convolution. The layer is created using nn.Sequential module and includes BatchNorm and ReLU6 activation functions.",
+        "type": "comment"
+    },
+    "1568": {
+        "file_id": 136,
+        "content": "                          bias_attr=False),\n                BatchNorm(hidden_dim),\n                nn.ReLU6(),\n                # pw-linear\n                nn.Conv2D(hidden_dim, oup, 1, 1, 0, 1, bias_attr=False),\n                BatchNorm(oup),\n            )\n    def forward(self, x):\n        x_pad = fixed_padding(x, self.kernel_size, dilation=self.dilation)\n        if self.use_res_connect:\n            x = x + self.conv(x_pad)\n        else:\n            x = self.conv(x_pad)\n        return x\nclass MobileNetV2(nn.Layer):\n    def __init__(self,\n                 output_stride=8,\n                 BatchNorm=None,\n                 width_mult=1.,\n                 pretrained=True):\n        super(MobileNetV2, self).__init__()\n        block = InvertedResidual\n        input_channel = 32\n        current_stride = 1\n        rate = 1\n        interverted_residual_setting = [\n            # t, c, n, s\n            [1, 16, 1, 1],\n            [6, 24, 2, 2],\n            [6, 32, 3, 2],\n            [6, 64, 4, 2],\n            [6, 96, 3, 1],\n            [6, 160, 3, 2],",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/mobilenet.py:64-99"
+    },
+    "1569": {
+        "file_id": 136,
+        "content": "This code defines a MobileNetV2 model with InvertedResidual blocks, including convolutional layers, batch normalization, ReLU activation, and optional residual connection. The model takes in an input image of size 3xHxW and outputs a feature map of size oup x (H/stride) x (W/stride). It also supports variable width multiplier to adjust the number of channels for each block.",
+        "type": "comment"
+    },
+    "1570": {
+        "file_id": 136,
+        "content": "            [6, 320, 1, 1],\n        ]\n        # building first layer\n        input_channel = int(input_channel * width_mult)\n        self.features = [conv_bn(3, input_channel, 2, BatchNorm)]\n        current_stride *= 2\n        # building inverted residual blocks\n        for t, c, n, s in interverted_residual_setting:\n            if current_stride == output_stride:\n                stride = 1\n                dilation = rate\n                rate *= s\n            else:\n                stride = s\n                dilation = 1\n                current_stride *= s\n            output_channel = int(c * width_mult)\n            for i in range(n):\n                if i == 0:\n                    self.features.append(\n                        block(input_channel, output_channel, stride, dilation,\n                              t, BatchNorm))\n                else:\n                    self.features.append(\n                        block(input_channel, output_channel, 1, dilation, t,\n                              BatchNorm))\n                input_channel = output_channel",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/mobilenet.py:100-127"
+    },
+    "1571": {
+        "file_id": 136,
+        "content": "This code builds the MobileNet backbone for Ma-Net application. It initializes the first layer with a specific input channel and then iterates through inverted residual blocks, adjusting stride and dilation rate accordingly. The block function is used to build each block, and input channels are updated accordingly.",
+        "type": "comment"
+    },
+    "1572": {
+        "file_id": 136,
+        "content": "        self.features = nn.Sequential(*self.features)\n        self._initialize_weights()\n        if pretrained:\n            self._load_pretrained_model()\n        self.low_level_features = self.features[0:4]\n        self.high_level_features = self.features[4:]\n    def forward(self, x):\n        low_level_feat = self.low_level_features(x)\n        x = self.high_level_features(low_level_feat)\n        return x, low_level_feat\n    def _load_pretrained_model(self):\n        import paddlehub as hub\n        pretrain_dict = hub.Module(name=\"mobilenet_v2_imagenet\")\n        model_dict = {}\n        state_dict = self.state_dict()\n        for k, v in pretrain_dict.items():\n            if k in state_dict:\n                model_dict[k] = v\n        state_dict.update(model_dict)\n        self.set_state_dict(state_dict)\n    def _initialize_weights(self):\n        for m in self.sublayers():\n            if isinstance(m, nn.Conv2D):\n                # n = m._kernel_size[0] * m._kernel_size[1] * m._out_channels\n                # m.weight.normal_(0, math.sqrt(2. / n))",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/mobilenet.py:128-157"
+    },
+    "1573": {
+        "file_id": 136,
+        "content": "Initializes and prepares the MobileNet backbone network for forward propagation. If pretrained model is specified, loads the pretrained weights from PaddleHub's MobileNet_v2_imagenet. Otherwise, initializes the weights according to the provided configuration. The forward function extracts low-level and high-level features by passing the input through separate subsections of the feature extraction network.",
+        "type": "comment"
+    },
+    "1574": {
+        "file_id": 136,
+        "content": "                kaiming_normal_(m.weight)\n            elif isinstance(m, nn.BatchNorm2D):\n                from utils.api import fill_\n                fill_(m.weight, 1)\n                from utils.api import zero_\n                zero_(m.bias)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/mobilenet.py:158-163"
+    },
+    "1575": {
+        "file_id": 136,
+        "content": "Code applies Kaiming normal initialization to certain layers (m.weight) and performs batch normalization by filling layer weights with 1 and setting bias to zero for nn.BatchNorm2D instances.",
+        "type": "comment"
+    },
+    "1576": {
+        "file_id": 137,
+        "content": "/applications/Ma-Net/networks/backbone/resnet.py",
+        "type": "filepath"
+    },
+    "1577": {
+        "file_id": 137,
+        "content": "This code defines a ResNet architecture with batch normalization and ReLU activation functions, featuring output strides of 16 or 8, multiple blocks, residual connections through convolutional layers, a residual block for ResNet-101, and optional pretrained model loading on ImageNet.",
+        "type": "summary"
+    },
+    "1578": {
+        "file_id": 137,
+        "content": "import math\nimport paddle.nn as nn\n# from reprod_log.utils import paddle2np\nimport paddle\nfrom utils.api import normal_, fill_, zero_\nclass Bottleneck(nn.Layer):\n    expansion = 4\n    def __init__(self,\n                 inplanes,\n                 planes,\n                 stride=1,\n                 dilation=1,\n                 downsample=None,\n                 BatchNorm=None):\n        super(Bottleneck, self).__init__()\n        self.conv1 = nn.Conv2D(inplanes, planes, kernel_size=1, bias_attr=False)\n        self.bn1 = BatchNorm(planes)\n        self.conv2 = nn.Conv2D(planes,\n                               planes,\n                               kernel_size=3,\n                               stride=stride,\n                               dilation=dilation,\n                               padding=dilation,\n                               bias_attr=False)\n        self.bn2 = BatchNorm(planes)\n        self.conv3 = nn.Conv2D(planes,\n                               planes * 4,\n                               kernel_size=1,\n                               bias_attr=False)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/resnet.py:1-33"
+    },
+    "1579": {
+        "file_id": 137,
+        "content": "This code defines a Bottleneck class for ResNet backbone, which contains three 2D convolutional layers and two batch normalization layers. It has an expansion factor of 4. The convolutional layers have configurable parameters such as inplanes, planes, stride, dilation, and downsample.",
+        "type": "comment"
+    },
+    "1580": {
+        "file_id": 137,
+        "content": "        self.bn3 = BatchNorm(planes * 4)\n        self.relu = nn.ReLU()\n        self.downsample = downsample\n        self.stride = stride\n        self.dilation = dilation\n    def forward(self, x):\n        residual = x\n        out = self.conv1(x)\n        out = self.bn1(out)\n        out = self.relu(out)\n        out = self.conv2(out)\n        out = self.bn2(out)\n        out = self.relu(out)\n        out = self.conv3(out)\n        out = self.bn3(out)\n        if self.downsample is not None:\n            residual = self.downsample(x)\n        out += residual\n        out = self.relu(out)\n        return out\nclass ResNet(nn.Layer):\n    def __init__(self,\n                 block,\n                 layers,\n                 output_stride,\n                 BatchNorm,\n                 pretrained=False):\n        self.inplanes = 64\n        super(ResNet, self).__init__()\n        blocks = [1, 2, 4]\n        if output_stride == 16:\n            strides = [1, 2, 2, 1]\n            dilations = [1, 1, 1, 2]\n        elif output_stride == 8:\n            strides = [1, 2, 1, 1]",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/resnet.py:34-77"
+    },
+    "1581": {
+        "file_id": 137,
+        "content": "This code defines a ResNet architecture with BatchNorm, ReLU activation functions, and downsample layers. It allows for different output strides (16 or 8) and has multiple blocks (1, 2, 4). The forward function performs residual connections and applies the appropriate number of convolutional layers based on block specifications.",
+        "type": "comment"
+    },
+    "1582": {
+        "file_id": 137,
+        "content": "            dilations = [1, 1, 2, 4]\n        else:\n            raise NotImplementedError\n        # Modules\n        self.conv1 = nn.Conv2D(3,\n                               64,\n                               kernel_size=7,\n                               stride=2,\n                               padding=3,\n                               bias_attr=False)\n        self.bn1 = BatchNorm(64)\n        self.relu = nn.ReLU()\n        self.maxpool = nn.MaxPool2D(kernel_size=3, stride=2, padding=1)\n        self.layer1 = self._make_layer(block,\n                                       64,\n                                       layers[0],\n                                       stride=strides[0],\n                                       dilation=dilations[0],\n                                       BatchNorm=BatchNorm)\n        self.layer2 = self._make_layer(block,\n                                       128,\n                                       layers[1],\n                                       stride=strides[1],\n                                       dilation=dilations[1],",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/resnet.py:78-103"
+    },
+    "1583": {
+        "file_id": 137,
+        "content": "This code is initializing a ResNet backbone. It defines convolutional layers, batch normalization, and pooling layers followed by multiple residual blocks. Dilation rates are implemented for the blocks. If an unsupported option is chosen, it raises a NotImplementedError.",
+        "type": "comment"
+    },
+    "1584": {
+        "file_id": 137,
+        "content": "                                       BatchNorm=BatchNorm)\n        self.layer3 = self._make_layer(block,\n                                       256,\n                                       layers[2],\n                                       stride=strides[2],\n                                       dilation=dilations[2],\n                                       BatchNorm=BatchNorm)\n        self.layer4 = self._make_MG_unit(block,\n                                         512,\n                                         blocks=blocks,\n                                         stride=strides[3],\n                                         dilation=dilations[3],\n                                         BatchNorm=BatchNorm)\n        # self.layer4 = self._make_layer(block, 512, layers[3], stride=strides[3], dilation=dilations[3], BatchNorm=BatchNorm)\n        self._init_weight()\n        if pretrained:\n            self._load_pretrained_model()\n    def _make_layer(self,\n                    block,\n                    planes,\n                    blocks,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/resnet.py:104-126"
+    },
+    "1585": {
+        "file_id": 137,
+        "content": "This code defines a ResNet network with multiple layers and blocks, using BatchNormalization for normalization. It also includes an optional pretrained model loading functionality.",
+        "type": "comment"
+    },
+    "1586": {
+        "file_id": 137,
+        "content": "                    stride=1,\n                    dilation=1,\n                    BatchNorm=None):\n        downsample = None\n        if stride != 1 or self.inplanes != planes * block.expansion:\n            downsample = nn.Sequential(\n                nn.Conv2D(self.inplanes,\n                          planes * block.expansion,\n                          kernel_size=1,\n                          stride=stride,\n                          bias_attr=False),\n                BatchNorm(planes * block.expansion),\n            )\n        layers = []\n        layers.append(\n            block(self.inplanes, planes, stride, dilation, downsample,\n                  BatchNorm))\n        self.inplanes = planes * block.expansion\n        for i in range(1, blocks):\n            layers.append(\n                block(self.inplanes,\n                      planes,\n                      dilation=dilation,\n                      BatchNorm=BatchNorm))\n        return nn.Sequential(*layers)\n    def _make_MG_unit(self,\n                      block,\n                      planes,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/resnet.py:127-157"
+    },
+    "1587": {
+        "file_id": 137,
+        "content": "This code defines a function to create a residual block for a ResNet network with specific parameters such as number of blocks, stride, dilation rate, and BatchNorm layer. It returns a Sequential model containing the block layers.",
+        "type": "comment"
+    },
+    "1588": {
+        "file_id": 137,
+        "content": "                      blocks,\n                      stride=1,\n                      dilation=1,\n                      BatchNorm=None):\n        downsample = None\n        if stride != 1 or self.inplanes != planes * block.expansion:\n            downsample = nn.Sequential(\n                nn.Conv2D(self.inplanes,\n                          planes * block.expansion,\n                          kernel_size=1,\n                          stride=stride,\n                          bias_attr=False),\n                BatchNorm(planes * block.expansion),\n            )\n        layers = []\n        layers.append(\n            block(self.inplanes,\n                  planes,\n                  stride,\n                  dilation=blocks[0] * dilation,\n                  downsample=downsample,\n                  BatchNorm=BatchNorm))\n        self.inplanes = planes * block.expansion\n        for i in range(1, len(blocks)):\n            layers.append(\n                block(self.inplanes,\n                      planes,\n                      stride=1,",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/resnet.py:158-186"
+    },
+    "1589": {
+        "file_id": 137,
+        "content": "This code defines a residual block for ResNet using the input planes, number of blocks, and other parameters. It creates a downsampling layer if necessary and then appends multiple instances of the given block to form the final residual block.",
+        "type": "comment"
+    },
+    "1590": {
+        "file_id": 137,
+        "content": "                      dilation=blocks[i] * dilation,\n                      BatchNorm=BatchNorm))\n        return nn.Sequential(*layers)\n    def forward(self, input):\n        #         print('input:', input.mean().item())\n        x = self.conv1(input)\n        x = self.bn1(x)\n        x = self.relu(x)\n        x = self.maxpool(x)\n        x = self.layer1(x)\n        low_level_feat = x\n        x = self.layer2(x)\n        x = self.layer3(x)\n        x = self.layer4(x)\n        return x, low_level_feat\n    def _init_weight(self):\n        for m in self.sublayers():\n            if isinstance(m, nn.Conv2D):\n                n = m._kernel_size[0] * m._kernel_size[1] * m._out_channels\n                fill_(m.weight, 1)\n                # normal_(m.weight, 0, math.sqrt(2. / n))\n            elif isinstance(m, nn.BatchNorm2D):\n                fill_(m.weight, 1)\n                zero_(m.bias)\n        return self.sublayers()\n    def _load_pretrained_model(self):\n        # TODO\n        pretrain_dict = paddle.load(\n            '/home/lc/manet/manet_paddle/model_best.pdparams.tar')",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/resnet.py:187-220"
+    },
+    "1591": {
+        "file_id": 137,
+        "content": "The code defines a ResNet network with multiple layers, including convolution, batch normalization, and pooling. The forward function performs inference by passing the input through each layer sequentially. The _init_weight function initializes the weights of the network using either Xavier or Gaussian distribution, depending on the type of the layer. The _load_pretrained_model function loads a pre-trained model from a specified file path, but it is currently empty and marked as TODO.",
+        "type": "comment"
+    },
+    "1592": {
+        "file_id": 137,
+        "content": "        model_dict = {}\n        state_dict = self.state_dict()\n        for k, v in pretrain_dict.items():\n            if k in state_dict:\n                model_dict[k] = v\n        state_dict.update(model_dict)\n        self.set_state_dict(state_dict)\ndef ResNet101(output_stride, BatchNorm, pretrained=False):\n    \"\"\"Constructs a ResNet-101 model.\n    Args:\n        pretrained (bool): If True, returns a model pre-trained on ImageNet\n    \"\"\"\n    model = ResNet(Bottleneck, [3, 4, 23, 3],\n                   output_stride,\n                   BatchNorm,\n                   pretrained=pretrained)\n    return model",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/resnet.py:221-239"
+    },
+    "1593": {
+        "file_id": 137,
+        "content": "This code defines a ResNet-101 model function that takes output stride, BatchNorm flag, and pretrained option as arguments. It creates a ResNet model with Bottleneck blocks, layers, output stride, and BatchNorm implementation. If pretrained is set to True, the function returns a pre-trained model on ImageNet. The code also updates the model's state dictionary by merging pretrain_dict into the state dict.",
+        "type": "comment"
+    },
+    "1594": {
+        "file_id": 138,
+        "content": "/applications/Ma-Net/networks/backbone/xception.py",
+        "type": "filepath"
+    },
+    "1595": {
+        "file_id": 138,
+        "content": "The code defines a SeparableConv2d class and layers for convolutional layers, initializes an AlignedXception network with skip connections, ReLU activations, and separable convolutions for feature extraction in the backbone architecture, and utilizes pre-trained weights for image classification tasks.",
+        "type": "summary"
+    },
+    "1596": {
+        "file_id": 138,
+        "content": "import math\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\ndef fixed_padding(inputs, kernel_size, dilation):\n    kernel_size_effective = kernel_size + (kernel_size - 1) * (dilation - 1)\n    pad_total = kernel_size_effective - 1\n    pad_beg = pad_total // 2\n    pad_end = pad_total - pad_beg\n    padded_inputs = F.pad(inputs, (pad_beg, pad_end, pad_beg, pad_end))\n    return padded_inputs\nclass SeparableConv2d(nn.Layer):\n    def __init__(self,\n                 inplanes,\n                 planes,\n                 kernel_size=3,\n                 stride=1,\n                 dilation=1,\n                 bias=False,\n                 BatchNorm=None):\n        super(SeparableConv2d, self).__init__()\n        self.conv1 = nn.Conv2D(inplanes,\n                               inplanes,\n                               kernel_size,\n                               stride,\n                               0,\n                               dilation,\n                               groups=inplanes,\n                               bias=bias)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/xception.py:1-34"
+    },
+    "1597": {
+        "file_id": 138,
+        "content": "The code defines a `SeparableConv2d` class which extends the `nn.Layer` class and implements a separable convolutional layer with optional batch normalization (`BatchNorm`) and fixed padding applied using the `fixed_padding()` function. It has input channels (`inplanes`), output channels (`planes`), kernel size, stride, dilation rate, whether to use bias or not, and an optional BatchNorm layer as parameters.",
+        "type": "comment"
+    },
+    "1598": {
+        "file_id": 138,
+        "content": "        self.bn = BatchNorm(inplanes)\n        self.pointwise = nn.Conv2D(inplanes, planes, 1, 1, 0, 1, 1, bias=bias)\n    def forward(self, x):\n        x = fixed_padding(x,\n                          self.conv1._kernel_size[0],\n                          dilation=self.conv1.dilation[0])\n        x = self.conv1(x)\n        x = self.bn(x)\n        x = self.pointwise(x)\n        return x\nclass Block(nn.Layer):\n    def __init__(self,\n                 inplanes,\n                 planes,\n                 reps,\n                 stride=1,\n                 dilation=1,\n                 BatchNorm=None,\n                 start_with_relu=True,\n                 grow_first=True,\n                 is_last=False):\n        super(Block, self).__init__()\n        if planes != inplanes or stride != 1:\n            self.skip = nn.Conv2D(inplanes,\n                                  planes,\n                                  1,\n                                  stride=stride,\n                                  bias_attr=False)\n            self.skipbn = BatchNorm(planes)",
+        "type": "code",
+        "location": "/applications/Ma-Net/networks/backbone/xception.py:35-67"
+    },
+    "1599": {
+        "file_id": 138,
+        "content": "The code defines a block layer that consists of convolutional layers, batch normalization, and optional skip connections. It initializes the block layer with specified parameters such as input planes, output planes, number of repetitions, stride, dilation rate, and whether it's the last block or not. The forward method performs fixed padding on the input, applies the convolution operation, batch normalization, and finally the pointwise convolution.",
+        "type": "comment"
+    }
+}

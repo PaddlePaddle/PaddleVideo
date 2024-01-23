@@ -1,0 +1,15 @@
+{
+    "summary": "The \"build\" function takes a config dictionary and registry, constructs an object from the configuration, checks for required keys, retrieves class from the registry, and returns the instance.",
+    "details": [
+        {
+            "comment": "This code defines a function named \"build\" that takes a config dictionary and a registry, builds an object from the given configuration dictionary, and returns it. The function asserts that the input is a valid dictionary and checks if the required key exists. It then retrieves the object type from the dictionary and gets the corresponding class from the registry before returning the constructed object.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/EIVideo/EIVideo/paddlevideo/utils/build_utils.py\":0-30",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\ndef build(cfg, registry, key='name'):\n    \"\"\"Build a module from config dict.\n    Args:\n        cfg (dict): Config dict. It should at least contain the key.\n        registry (XXX): The registry to search the type from.\n        key (str): the key.\n    Returns:\n        obj: The constructed object.\n    \"\"\"\n    assert isinstance(cfg, dict) and key in cfg\n    cfg_copy = cfg.copy()\n    obj_type = cfg_copy.pop(key)\n    obj_cls = registry.get(obj_type)"
+        },
+        {
+            "comment": "Checks if an object class is provided, raises a KeyError if not found in the registry, and returns an instance of the found class with provided configuration.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/EIVideo/EIVideo/paddlevideo/utils/build_utils.py\":31-34",
+            "content": "    if obj_cls is None:\n        raise KeyError('{} is not in the {} registry'.format(\n                obj_type, registry.name))\n    return obj_cls(**cfg_copy)"
+        }
+    ]
+}

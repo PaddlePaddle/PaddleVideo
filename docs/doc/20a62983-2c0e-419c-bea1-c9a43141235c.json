@@ -1,0 +1,20 @@
+{
+    "summary": "This code defines a class \"TransNetV2Loss\" for calculating TransNetV2 model loss with transition_weight and many-hot_loss_weight parameters, using weighted binary cross-entropy loss for one-hot and many-hot predictions. The snippet returns the total loss from TransNetV2 components.",
+    "details": [
+        {
+            "comment": "This code defines a class called \"TransNetV2Loss\" for calculating the loss in TransNetV2 model. It inherits from BaseWeightedLoss and takes transition_weight and many_hot_loss_weight as parameters for customizing the loss calculation.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/losses/transnetv2_loss.py\":0-27",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport paddle.nn.functional as F\nfrom ..registry import LOSSES\nfrom .base import BaseWeightedLoss\n@LOSSES.register()\nclass TransNetV2Loss(BaseWeightedLoss):\n    \"\"\"Loss for TransNetV2 model\n    \"\"\"\n    def __init__(self, transition_weight=5.0, many_hot_loss_weight=0.1):\n        self.transition_weight = transition_weight\n        self.many_hot_loss_weight = many_hot_loss_weight\n        super().__init__()"
+        },
+        {
+            "comment": "This code defines a loss function for the TransNetV2 model, taking in one-hot and many-hot predictions and ground truth labels. It calculates the binary cross-entropy loss for both types of predictions, applies a weighted factor based on transition weight, and averages the losses before summing them together.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/losses/transnetv2_loss.py\":29-53",
+            "content": "    def _forward(self, one_hot_pred, one_hot_gt,\n                many_hot_pred=None, many_hot_gt=None, reg_losses=None):\n        assert transition_weight != 1\n        one_hot_pred = one_hot_pred[:, :, 0]\n        one_hot_gt = one_hot_gt.astype('float32')\n        one_hot_loss = F.binary_cross_entropy_with_logits(logit=one_hot_pred, label=one_hot_gt, reduction='none')\n        one_hot_loss *= 1 + one_hot_gt * (transition_weight - 1)\n        one_hot_loss = paddle.mean(one_hot_loss)\n        many_hot_loss = 0.\n        if many_hot_loss_weight != 0. and many_hot_pred is not None:\n            many_hot_loss = many_hot_loss_weight * paddle.mean(\n                F.binary_cross_entropy_with_logits(logit=many_hot_pred[:, :, 0],\n                                                   label=many_hot_gt.astype('float32'), reduction='none'))\n        total_loss = one_hot_loss + many_hot_loss\n        if reg_losses is not None:\n            for name, value in reg_losses.items():\n                if value is not None:\n                    total_loss += value"
+        },
+        {
+            "comment": "This code snippet is returning the total loss computed from various components of the TransNetV2 model.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/losses/transnetv2_loss.py\":55-55",
+            "content": "        return total_loss"
+        }
+    ]
+}

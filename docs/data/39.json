@@ -1,0 +1,543 @@
+{
+    "3900": {
+        "file_id": 329,
+        "content": "        exit(1);\n    }\n}\nint main(int argc, char **argv)\n{\n    if (argc <= 1 || (strcmp(argv[1], \"rec\") != 0)) //Get user input and check\n    {\n        std::cout << \"Please choose one mode of [rec] !\" << std::endl;\n        return -1;\n    }\n    std::cout << \"mode: \" << argv[1] << endl; // Type of inference task required for output\n    // Parsing command-line\n    google::ParseCommandLineFlags(&argc, &argv, true);\n    check_params(argv[1]);\n    if (!PathExists(FLAGS_video_dir)) // Determine whether the directory where the video exists\n    {\n        std::cerr << \"[ERROR] video path not exist! video_dir: \" << FLAGS_video_dir << endl;\n        exit(1);\n    }\n    std::vector<cv::String> cv_all_video_names; // Store all video paths\n    cv::glob(FLAGS_video_dir, cv_all_video_names); // Search all videos under FLAGS_video_dir, save in cv_all_video_names\n    std::cout << \"total videos num: \" << cv_all_video_names.size() << endl; // 输出搜索到的视频个数\n    if (strcmp(argv[1], \"rec\") == 0)\n    {\n        return main_rec(cv_all_video_names); // Output the number of videos searched",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/main.cpp:139-170"
+    },
+    "3901": {
+        "file_id": 329,
+        "content": "The code checks the user input and ensures the correct mode (\"rec\") is chosen. If not, it outputs an error message and returns -1. It also validates if the video directory exists and displays the total number of videos found. Finally, it calls the main_rec function for recording mode.",
+        "type": "comment"
+    },
+    "3902": {
+        "file_id": 329,
+        "content": "    }\n    return 0;\n}",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/main.cpp:171-173"
+    },
+    "3903": {
+        "file_id": 329,
+        "content": "The code snippet represents the end of the main function where a closing curly brace is followed by a return statement, indicating successful execution and termination of the program.",
+        "type": "comment"
+    },
+    "3904": {
+        "file_id": 330,
+        "content": "/deploy/cpp_infer/src/postprocess_op.cpp",
+        "type": "filepath"
+    },
+    "3905": {
+        "file_id": 330,
+        "content": "The given code implements the Softmax function in-place, calculating exponential elements and normalizing them for PaddleVideo library tasks. The class defines a Run method that performs softmax normalization on vector elements by iteratively computing exponential values and accumulating them for normalization.",
+        "type": "summary"
+    },
+    "3906": {
+        "file_id": 330,
+        "content": "// Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\");\n// you may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n#include <include/postprocess_op.h>\nnamespace PaddleVideo\n{\n    void Softmax::Inplace_Run(const std::vector<float>::iterator &_begin, const std::vector<float>::iterator &_end)\n    {\n        const float max_value = *std::max_element(_begin, _end);\n        float denominator = 0.0f;\n        for (auto it = _begin; it != _end; ++it)\n        {\n            *it = std::exp((*it) - max_value);\n            denominator += (*it);",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/postprocess_op.cpp:1-26"
+    },
+    "3907": {
+        "file_id": 330,
+        "content": "This code is implementing the Softmax function in-place, calculating the exponential of elements and normalizing them by summing up all the elements. This is part of the PaddleVideo library for video analysis tasks.",
+        "type": "comment"
+    },
+    "3908": {
+        "file_id": 330,
+        "content": "        }\n        for (auto it = _begin; it != _end; ++it)\n        {\n            *it /= denominator;\n        }\n    }\n    std::vector<float> Softmax::Run(const std::vector<float>::iterator &_begin, const std::vector<float>::iterator &_end)\n    {\n        std::vector<float> prob(_begin, _end);\n        const float max_value = *std::max_element(prob.begin(), prob.end());\n        float denominator = 0.0f;\n        for (auto it = _begin, it_p = prob.begin(); it != _end; ++it, ++it_p)\n        {\n            (*it_p) = std::exp((*it) - max_value);\n            denominator += (*it_p);\n        }\n        for (auto it = prob.begin(); it != prob.end(); ++it)\n        {\n            (*it) /= denominator;\n        }\n        return prob;\n    }\n} // namespace PaddleVideo",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/postprocess_op.cpp:27-50"
+    },
+    "3909": {
+        "file_id": 330,
+        "content": "This code defines a Softmax class with a Run method that performs softmax normalization on a given range of vector elements. It first calculates the maximum value in the range, then iteratively computes the exponential of each element minus the maximum value and accumulates them into a denominator for normalization. Finally, it returns the normalized probability vector.",
+        "type": "comment"
+    },
+    "3910": {
+        "file_id": 331,
+        "content": "/deploy/cpp_infer/src/preprocess_op.cpp",
+        "type": "filepath"
+    },
+    "3911": {
+        "file_id": 331,
+        "content": "This code normalizes, scales, and converts images for inference using a ten-crop technique within the PaddleVideo library's implementation of pre-processing operations.",
+        "type": "summary"
+    },
+    "3912": {
+        "file_id": 331,
+        "content": "// Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\");\n// you may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n#include \"opencv2/core.hpp\"\n#include \"opencv2/imgcodecs.hpp\"\n#include \"opencv2/imgproc.hpp\"\n#include \"paddle_api.h\"\n#include \"paddle_inference_api.h\"\n#include <chrono>\n#include <iomanip>\n#include <iostream>\n#include <ostream>\n#include <vector>\n#include <cstring>\n#include <fstream>\n#include <numeric>\n#include <include/preprocess_op.h>\nnamespace PaddleVideo\n{\n    void Permute::Run(const cv::Mat *im, float *data)",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/preprocess_op.cpp:1-36"
+    },
+    "3913": {
+        "file_id": 331,
+        "content": "This code includes necessary headers for OpenCV and Paddle API libraries, defines the Permute class which runs a permutation operation on input images and outputs data in float format.",
+        "type": "comment"
+    },
+    "3914": {
+        "file_id": 331,
+        "content": "    {\n        int rh = im->rows;\n        int rw = im->cols;\n        int rc = im->channels();\n        for (int i = 0; i < rc; ++i)\n        {\n            // Extract the i-th channel of im and write it into the array with (data + i * rh * rw) as the starting address\n            cv::extractChannel(*im, cv::Mat(rh, rw, CV_32FC1, data + i * rh * rw), rc - 1 - i);\n        }\n    }\n    void Normalize::Run(cv::Mat *im, const std::vector<float> &mean,\n                        const std::vector<float> &scale, const bool is_scale)\n    {\n        double e = 1.0;\n        if (is_scale)\n        {\n            e /= 255.0;\n        }\n        (*im).convertTo(*im, CV_32FC3, e);\n        std::vector<cv::Mat> bgr_channels(3);\n        cv::split(*im, bgr_channels);\n        for (auto i = 0; i < bgr_channels.size(); i++)\n        {\n            bgr_channels[i].convertTo(bgr_channels[i], CV_32FC1, 1.0 / scale[i], (0.0 - mean[i]) / scale[i]);\n        }\n        cv::merge(bgr_channels, *im);\n    }\n    void Scale::Run(const cv::Mat &img, cv::Mat &resize_img, bool use_tensorrt, const int &short_size)",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/preprocess_op.cpp:37-66"
+    },
+    "3915": {
+        "file_id": 331,
+        "content": "This code block is for preprocessing images before inference. It extracts each channel from the image and performs normalization on them separately, then scales the values and merges them back into a single image. The normalization is done by subtracting the mean and dividing by the scale factor for each channel. If scaling is required, it also converts the image data type to float. Afterwards, it resizes the image if necessary.",
+        "type": "comment"
+    },
+    "3916": {
+        "file_id": 331,
+        "content": "    {\n        int h = img.rows;\n        int w = img.cols;\n        if ((w <= h && w == short_size) || (h <= w && h == short_size))\n        {\n            img.copyTo(resize_img);\n        }\n        else\n        {\n            int oh, ow;\n            if (w < h)\n            {\n                ow = short_size;\n                oh = h * ow / w;\n            }\n            else\n            {\n                oh = short_size;\n                ow = w * oh / h;\n            }\n            cv::resize(img, resize_img, cv::Size(ow, oh), 0.0f, 0.0f, cv::INTER_LINEAR);\n        }\n    }\n    void CenterCrop::Run(const cv::Mat &img, cv::Mat &crop_img, bool use_tensorrt, const int &target_size)\n    {\n        int h = img.rows;\n        int w = img.cols;\n        int crop_h = target_size;\n        int crop_w = target_size;\n        if (w < crop_w || h < crop_h)\n        {\n            printf(\"[Error] image width (%d) and height (%d) should be larger than crop size (%d)\",\n                   w, h, target_size);\n        }\n        else\n        {\n            int x1 = (w - crop_w) / 2;",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/preprocess_op.cpp:67-104"
+    },
+    "3917": {
+        "file_id": 331,
+        "content": "This function performs image resizing and cropping operations based on the input image size and target crop size. If the image size is larger than or equal to the target crop size, it resizes the image to fit within the specified bounds and crops the center of the resized image with dimensions equal to the target crop size. If the image size is smaller than the target crop size, it prints an error message stating that the image width and height should be larger than the crop size.",
+        "type": "comment"
+    },
+    "3918": {
+        "file_id": 331,
+        "content": "            int y1 = (h - crop_h) / 2;\n            crop_img = img(cv::Rect(x1, y1, crop_w, crop_h));\n        }\n    }\n    void TenCrop::Run(const cv::Mat &img, std::vector<cv::Mat> &crop_imgs, const int &begin_index, bool use_tensorrt, const int &target_size)\n    {\n        int h = img.rows;\n        int w = img.cols;\n        int crop_h = target_size;\n        int crop_w = target_size;\n        int w_step = (w - crop_w) / 4;\n        int h_step = (h - crop_h) / 4;\n        pair<int, int>offsets[5] =\n        {\n            {0,          0},\n            {4 * w_step, 0},\n            {0,          4 * h_step},\n            {4 * w_step, 4 * h_step},\n            {2 * w_step, 2 * h_step}\n        };\n        for (int i = 0; i < 5; ++i)\n        {\n            const int &j = i * 2;\n            const int &x1 = offsets[i].first;\n            const int &y1 = offsets[i].second;\n            crop_imgs[begin_index + j] = img(cv::Rect(x1, y1, crop_w, crop_h)); // cropped\n            cv::flip(img(cv::Rect(x1, y1, crop_w, crop_h)), crop_imgs[begin_index + j + 1], 0); // cropped",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/preprocess_op.cpp:105-132"
+    },
+    "3919": {
+        "file_id": 331,
+        "content": "This code applies a ten-crop technique to input image by extracting 5 pairs of horizontally and vertically cropped images from the original one. These cropped images are stored in a vector for further processing.",
+        "type": "comment"
+    },
+    "3920": {
+        "file_id": 331,
+        "content": "        }\n    }\n} // namespace PaddleVideo",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/preprocess_op.cpp:133-135"
+    },
+    "3921": {
+        "file_id": 331,
+        "content": "This code is a part of the PaddleVideo library. It appears to be inside a class called PaddleVideo, and it seems that this code block is responsible for implementing some sort of pre-processing operation or function. This operation might involve processing video frames before they are sent through an AI model for inference. The code also includes namespaces, which are used to organize the code into logical groups or modules.",
+        "type": "comment"
+    },
+    "3922": {
+        "file_id": 332,
+        "content": "/deploy/cpp_infer/src/utility.cpp",
+        "type": "filepath"
+    },
+    "3923": {
+        "file_id": 332,
+        "content": "The PaddleVideo library's code contains a utility function, ReadDict, which reads a dictionary file and performs image cropping, input point adjustment, calculates image size, and converts points to standard format. Another function captures frames from a video at specific indices and releases the video object post-capture.",
+        "type": "summary"
+    },
+    "3924": {
+        "file_id": 332,
+        "content": "// Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\");\n// you may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n#include <dirent.h>\n#include <include/utility.h>\n#include <iostream>\n#include <ostream>\n#include <sys/stat.h>\n#include <sys/types.h>\n#include <vector>\nnamespace PaddleVideo\n{\n    std::vector<std::string> Utility::ReadDict(const std::string &path)\n    {\n        std::ifstream in(path);\n        std::string line;\n        std::vector<std::string> m_vec;\n        if (in)\n        {\n            while (getline(in, line))",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/utility.cpp:1-33"
+    },
+    "3925": {
+        "file_id": 332,
+        "content": "This code is part of the PaddleVideo library, specifically in the cpp_infer/src/utility.cpp file. It includes necessary headers for utility functions, and defines the ReadDict function within the PaddleVideo namespace. The function reads a dictionary file located at the given path, and stores each line into a vector of strings named m_vec.",
+        "type": "comment"
+    },
+    "3926": {
+        "file_id": 332,
+        "content": "            {\n                m_vec.push_back(line);\n            }\n        }\n        else\n        {\n            std::cout << \"no such label file: \" << path << \", exit the program...\"\n                      << std::endl;\n            exit(1);\n        }\n        return m_vec; // Use fstream to read the category list and return with vector\n    }\n    void Utility::GetAllFiles(const char *dir_name, std::vector<std::string> &all_inputs)\n    {\n        if (NULL == dir_name)\n        {\n            std::cout << \" dir_name is null ! \" << std::endl;\n            return;\n        }\n        struct stat s;\n        lstat(dir_name, &s);\n        if (!S_ISDIR(s.st_mode))\n        {\n            std::cout << \"dir_name is not a valid directory !\" << std::endl;\n            all_inputs.push_back(dir_name);\n            return;\n        }\n        else\n        {\n            struct dirent *filename; // return value for readdir()\n            DIR *dir;                // return value for opendir()\n            dir = opendir(dir_name);\n            if (NULL == dir)",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/utility.cpp:34-67"
+    },
+    "3927": {
+        "file_id": 332,
+        "content": "The code reads a label file and returns its contents as a vector. It also retrieves all files in a directory, adding them to a vector if the directory is valid.",
+        "type": "comment"
+    },
+    "3928": {
+        "file_id": 332,
+        "content": "            {\n                std::cout << \"Can not open dir \" << dir_name << std::endl;\n                return;\n            }\n            std::cout << \"Successfully opened the dir !\" << std::endl;\n            while ((filename = readdir(dir)) != NULL)\n            {\n                if (strcmp(filename->d_name, \".\") == 0 ||\n                    strcmp(filename->d_name, \"..\") == 0)\n                    continue;\n                // img_dir + std::string(\"/\") + all_inputs[0];\n                all_inputs.push_back(dir_name + std::string(\"/\") +\n                                     std::string(filename->d_name));\n            }\n        }\n    }\n    cv::Mat Utility::GetRotateCropImage(const cv::Mat &srcimage, std::vector<std::vector<int>> box)\n    {\n        cv::Mat image;\n        srcimage.copyTo(image);\n        std::vector<std::vector<int>> points = box;\n        int x_collect[4] = {box[0][0], box[1][0], box[2][0], box[3][0]};\n        int y_collect[4] = {box[0][1], box[1][1], box[2][1], box[3][1]};\n        int left = int(*std::min_element(x_collect, x_collect + 4));",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/utility.cpp:68-93"
+    },
+    "3929": {
+        "file_id": 332,
+        "content": "The code snippet opens a directory, reads all files except \".\" and \"..\", and adds the file paths to a vector. The GetRotateCropImage function takes an image and a bounding box as input, copies the source image, and stores x and y coordinates of the bounding box in separate arrays.",
+        "type": "comment"
+    },
+    "3930": {
+        "file_id": 332,
+        "content": "        int right = int(*std::max_element(x_collect, x_collect + 4));\n        int top = int(*std::min_element(y_collect, y_collect + 4));\n        int bottom = int(*std::max_element(y_collect, y_collect + 4));\n        cv::Mat img_crop;\n        image(cv::Rect(left, top, right - left, bottom - top)).copyTo(img_crop);\n        for (int i = 0; i < points.size(); i++)\n        {\n            points[i][0] -= left;\n            points[i][1] -= top;\n        }\n        int img_crop_width = int(sqrt(pow(points[0][0] - points[1][0], 2) +\n                                      pow(points[0][1] - points[1][1], 2)));\n        int img_crop_height = int(sqrt(pow(points[0][0] - points[3][0], 2) +\n                                       pow(points[0][1] - points[3][1], 2)));\n        cv::Point2f pts_std[4];\n        pts_std[0] = cv::Point2f(0., 0.);\n        pts_std[1] = cv::Point2f(img_crop_width, 0.);\n        pts_std[2] = cv::Point2f(img_crop_width, img_crop_height);\n        pts_std[3] = cv::Point2f(0.f, img_crop_height);\n        cv::Point2f pointsf[4];",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/utility.cpp:94-118"
+    },
+    "3931": {
+        "file_id": 332,
+        "content": "This code crops an image based on the x and y coordinates of its bounding box, then adjusts the input points accordingly. It calculates the width and height of the cropped image using the Euclidean distance formula, and converts the original input points to a standard format for further processing.",
+        "type": "comment"
+    },
+    "3932": {
+        "file_id": 332,
+        "content": "        pointsf[0] = cv::Point2f(points[0][0], points[0][1]);\n        pointsf[1] = cv::Point2f(points[1][0], points[1][1]);\n        pointsf[2] = cv::Point2f(points[2][0], points[2][1]);\n        pointsf[3] = cv::Point2f(points[3][0], points[3][1]);\n        cv::Mat M = cv::getPerspectiveTransform(pointsf, pts_std);\n        cv::Mat dst_img;\n        cv::warpPerspective(img_crop, dst_img, M,\n                            cv::Size(img_crop_width, img_crop_height),\n                            cv::BORDER_REPLICATE);\n        if (float(dst_img.rows) >= float(dst_img.cols) * 1.5)\n        {\n            cv::Mat srcCopy = cv::Mat(dst_img.rows, dst_img.cols, dst_img.depth());\n            cv::transpose(dst_img, srcCopy);\n            cv::flip(srcCopy, srcCopy, 0);\n            return srcCopy;\n        }\n        else\n        {\n            return dst_img;\n        }\n    }\n    std::vector<cv::Mat> Utility::SampleFramesFromVideo(const std::string &VideoPath, const int &num_seg, const int &seg_len)\n    {\n        cv::VideoCapture capture(VideoPath); // Create a video object",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/utility.cpp:119-146"
+    },
+    "3933": {
+        "file_id": 332,
+        "content": "This code initializes four points using cv::Point2f, gets a perspective transform matrix M using getPerspectiveTransform, warps the image using warpPerspective, checks if the resized image's rows exceed 1.5 times its columns, and if so, transposes and flips the image before returning it; otherwise, returns the resized image directly. This is part of a function that samples frames from a video file.",
+        "type": "comment"
+    },
+    "3934": {
+        "file_id": 332,
+        "content": "        if (!capture.isOpened())\n        {\n            printf(\"[Error] video cannot be opened, please check the video [%s]\\n\", VideoPath.c_str());\n            capture.release();\n            exit(1);\n        }\n        int frames_len = capture.get(cv::CAP_PROP_FRAME_COUNT); // Get the total number of video frames\n        int average_dur = int(frames_len / num_seg);\n        std::vector<int> frames_idx;\n        for (int i = 0; i < num_seg; ++i)\n        {\n            int idx = 0;\n            if (average_dur >= seg_len)\n            {\n                idx = (average_dur - 1) / 2;\n                idx += i * average_dur;\n            }\n            else if (average_dur >= 1)\n            {\n                idx += i * average_dur;\n            }\n            else\n            {\n                idx = i;\n            }\n            for (int j = idx; j < idx + seg_len; ++j)\n            {\n                frames_idx.emplace_back(j % frames_len);\n            }\n        }\n        std::vector<cv::Mat> sampled_frames;\n        cv::Mat frame; // Create an object for storing sampled frames",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/utility.cpp:147-181"
+    },
+    "3935": {
+        "file_id": 332,
+        "content": "This code snippet checks if the video can be opened and exits if it cannot. It then calculates the number of frames in the video, determines the frame indices to sample for each segment based on the length of the segment and average duration between frames, and stores the sampled frames in a vector.",
+        "type": "comment"
+    },
+    "3936": {
+        "file_id": 332,
+        "content": "        for (int i = 0; i < num_seg; ++i)\n        {\n            const int &frame_idx = frames_idx[i];\n            capture.set(cv::CAP_PROP_POS_FRAMES, frame_idx); // Set to frame_idx frame\n            capture >> frame;\n            sampled_frames.push_back(frame);\n        }\n        capture.release(); // Release the video object\n        return sampled_frames;\n    }\n} // namespace PaddleVideo",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/utility.cpp:182-192"
+    },
+    "3937": {
+        "file_id": 332,
+        "content": "This function captures frames from a video at specific indices, stores them in sampled_frames vector, and releases the video object after capture.",
+        "type": "comment"
+    },
+    "3938": {
+        "file_id": 333,
+        "content": "/deploy/cpp_infer/src/video_rec.cpp",
+        "type": "filepath"
+    },
+    "3939": {
+        "file_id": 333,
+        "content": "The code processes video frames, performs inference using an AI model and measures processing times. It preprocesses data in batches and utilizes TensorRT with GPU optimizations and MKLDNN support for efficiency.",
+        "type": "summary"
+    },
+    "3940": {
+        "file_id": 333,
+        "content": "// Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\");\n// you may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n#include <include/video_rec.h>\nnamespace PaddleVideo\n{\n    void VideoRecognizer::Run(const std::vector<string> &frames_batch_path, const std::vector<std::vector<cv::Mat> > &frames_batch, std::vector<double> *times)\n    {\n        // Copy parameters to the function\n        int real_batch_num = frames_batch.size();\n        std::vector<cv::Mat> srcframes(real_batch_num * this->num_seg, cv::Mat());\n        for (int i = 0; i < real_batch_num; ++i)",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/video_rec.cpp:1-26"
+    },
+    "3941": {
+        "file_id": 333,
+        "content": "The code initializes variables and performs batch size operations. It copies the batch of frames and resizes it to accommodate for multiple segments per frame batch. The times vector will store execution time values.",
+        "type": "comment"
+    },
+    "3942": {
+        "file_id": 333,
+        "content": "        {\n            for (int j = 0; j < this->num_seg; ++j)\n            {\n                frames_batch[i][j].copyTo(srcframes[i * this->num_seg + j]);\n            }\n        }\n        auto preprocess_start = std::chrono::steady_clock::now();\n        /* Preprocess */\n        std::vector<cv::Mat> resize_frames;\n        std::vector<cv::Mat> crop_frames;\n        std::vector<float> input;\n        int num_views = 1;\n        if (this->inference_model_name == \"ppTSM\")\n        {\n            num_views = 1;\n            // 1. Scale\n            resize_frames = std::vector<cv::Mat>(real_batch_num * this->num_seg, cv::Mat());\n            for (int i = 0; i < real_batch_num; ++i)\n            {\n                for (int j = 0; j < this->num_seg; ++j)\n                {\n                    this->scale_op_.Run(srcframes[i * this->num_seg + j], resize_frames[i * this->num_seg + j], this->use_tensorrt_, 256);\n                }\n            }\n            // 2. CenterCrop\n            crop_frames = std::vector<cv::Mat>(real_batch_num * num_views * this->num_seg, cv::Mat());",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/video_rec.cpp:27-55"
+    },
+    "3943": {
+        "file_id": 333,
+        "content": "This code preprocesses video frames for model inference. It copies frames from source to destination, resizes them using a scale operation, and performs center cropping. The number of views is set to 1 if the model name is \"ppTSM\". The preprocessing steps include scaling and centering cropping to ensure the frames are properly formatted for inference.",
+        "type": "comment"
+    },
+    "3944": {
+        "file_id": 333,
+        "content": "            for (int i = 0; i < real_batch_num; ++i)\n            {\n                for (int j = 0; j < this->num_seg; ++j)\n                {\n                    this->centercrop_op_.Run(resize_frames[i * this->num_seg + j], crop_frames[i * this->num_seg + j], this->use_tensorrt_, 224);\n                }\n            }\n            // 3. Normalization(inplace operation)\n            for (int i = 0; i < real_batch_num; ++i)\n            {\n                for (int j = 0; j < this->num_seg; ++j)\n                {\n                    for (int k = 0; k < num_views; ++k)\n                    {\n                        this->normalize_op_.Run(&crop_frames[i * num_views * this->num_seg + j * num_views + k], this->mean_, this->scale_, this->is_scale_);\n                    }\n                }\n            }\n            // 4. Image2Array\n            int rh = crop_frames[0].rows;\n            int rw = crop_frames[0].cols;\n            int rc = crop_frames[0].channels();\n            input = std::vector<float>(real_batch_num * num_views * this->num_seg *  crop_frames[0].rows * crop_frames[0].cols * rc, 0.0f);",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/video_rec.cpp:56-80"
+    },
+    "3945": {
+        "file_id": 333,
+        "content": "This code performs image preprocessing and conversion on video frames before feeding them into a neural network. It first resizes, centers, and crops the video frames using `centercrop_op_.Run()`. Then it normalizes the frames in an in-place operation using `normalize_op_.Run()`, with the mean and scale values provided. Finally, it converts the normalized frames into a single array using the dimensions from the first frame, and stores them in the 'input' vector.",
+        "type": "comment"
+    },
+    "3946": {
+        "file_id": 333,
+        "content": "            for (int i = 0; i < real_batch_num; ++i)\n            {\n                for (int j = 0; j < this->num_seg; ++j)\n                {\n                    for (int k = 0; k < num_views; ++k)\n                    {\n                        this->permute_op_.Run(&crop_frames[i * num_views * this->num_seg + j * num_views + k], input.data() + (i * num_views * this->num_seg + j * num_views + k) * (rh * rw * rc));\n                    }\n                }\n            }\n        }\n        else if(this->inference_model_name == \"ppTSN\")\n        {\n            num_views = 10;\n            // 1. Scale\n            resize_frames = std::vector<cv::Mat>(real_batch_num * this->num_seg, cv::Mat());\n            for (int i = 0; i < real_batch_num; ++i)\n            {\n                for (int j = 0; j < this->num_seg; ++j)\n                {\n                    this->scale_op_.Run(srcframes[i * this->num_seg + j], resize_frames[i * this->num_seg + j], this->use_tensorrt_, 256);\n                }\n            }\n            // 2. TenCrop",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/video_rec.cpp:81-105"
+    },
+    "3947": {
+        "file_id": 333,
+        "content": "The code is iterating over real_batch_num number of batches and num_seg segments within each batch. For each segment, it's applying a set of operations (permute, scale, TenCrop) to a series of frames. These operations are used for data preprocessing before inputting into an inference model.",
+        "type": "comment"
+    },
+    "3948": {
+        "file_id": 333,
+        "content": "            crop_frames = std::vector<cv::Mat>(real_batch_num * this->num_seg * num_views, cv::Mat());\n            for (int i = 0; i < real_batch_num; ++i)\n            {\n                for (int j = 0; j < this->num_seg; ++j)\n                {\n                    this->tencrop_op_.Run(resize_frames[i * this->num_seg + j], crop_frames, (i * this->num_seg  + j) * num_views, this->use_tensorrt_, 224);\n                }\n            }\n            // 3. Normalization(inplace operation)\n            for (int i = 0; i < real_batch_num; ++i)\n            {\n                for (int j = 0; j < this->num_seg; ++j)\n                {\n                    for (int k = 0; k < num_views; ++k)\n                    {\n                        this->normalize_op_.Run(&crop_frames[i * this->num_seg * num_views + j * num_views + k], this->mean_, this->scale_, this->is_scale_);\n                    }\n                }\n            }\n            // 4. Image2Array\n            int rh = crop_frames[0].rows;\n            int rw = crop_frames[0].cols;",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/video_rec.cpp:106-129"
+    },
+    "3949": {
+        "file_id": 333,
+        "content": "This code performs image preprocessing for video frames. It initializes a vector of crop_frames, iterates through real_batch_num and num_seg to run resizing and cropping operations on each frame using tencrop_op_. Next, it applies normalization inplace operation on each frame using normalize_op_. Finally, it converts the processed frames into an array by extracting rows and columns size from the first crop_frame.",
+        "type": "comment"
+    },
+    "3950": {
+        "file_id": 333,
+        "content": "            int rc = crop_frames[0].channels();\n            input = std::vector<float>(real_batch_num * this->num_seg * num_views *  crop_frames[0].rows * crop_frames[0].cols * rc, 0.0f);\n            for (int i = 0; i < real_batch_num; ++i)\n            {\n                for (int j = 0; j < this->num_seg; ++j)\n                {\n                    for (int k = 0; k < num_views; ++k)\n                    {\n                        this->permute_op_.Run(&crop_frames[i * this->num_seg * num_views + j * num_views + k], input.data() + (i * this->num_seg * num_views + j * num_views + k) * (rh * rw * rc));\n                    }\n                }\n            }\n        }\n        else\n        {\n            throw \"[Error] Not implemented yet\";\n        }\n        auto preprocess_end = std::chrono::steady_clock::now();\n        /* Inference */\n        auto input_names = this->predictor_->GetInputNames();\n        auto input_t = this->predictor_->GetInputHandle(input_names[0]);\n        input_t->Reshape({real_batch_num * num_views * this->num_seg, 3, crop_frames[0].rows, crop_frames[0].cols});",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/video_rec.cpp:130-152"
+    },
+    "3951": {
+        "file_id": 333,
+        "content": "The code initializes a vector with zeros based on the number of frames, segments, views, and channels. It then iterates over the real batch number, segments, and views to permute and populate the input vector. Finally, it performs inference by reshaping the input tensor for prediction.",
+        "type": "comment"
+    },
+    "3952": {
+        "file_id": 333,
+        "content": "        auto inference_start = std::chrono::steady_clock::now();\n        input_t->CopyFromCpu(input.data());\n        this->predictor_->Run(); // Use the inference library to predict\n        std::vector<float> predict_batch;\n        auto output_names = this->predictor_->GetOutputNames();\n        auto output_t = this->predictor_->GetOutputHandle(output_names[0]);\n        auto predict_shape = output_t->shape();\n        // Get the number of class\n        int class_num = predict_shape[1];\n        int out_numel = std::accumulate(predict_shape.begin(), predict_shape.end(), 1, std::multiplies<int>());\n        predict_batch.resize(out_numel); // NxC\n        output_t->CopyToCpu(predict_batch.data()); // Copy the model output to predict_batch\n        // Convert output (logits) into probabilities\n        for (int i = 0; i < real_batch_num; ++i)\n        {\n            this->softmax_op_.Inplace_Run(predict_batch.begin() + i * class_num, predict_batch.begin() + (i + 1) * class_num);\n        }\n        auto inference_end = std::chrono::steady_clock::now();",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/video_rec.cpp:153-175"
+    },
+    "3953": {
+        "file_id": 333,
+        "content": "This code segment performs inference using an AI model, gathers the output probabilities, and applies softmax operation to convert logits into probabilities.",
+        "type": "comment"
+    },
+    "3954": {
+        "file_id": 333,
+        "content": "        // output decode\n        auto postprocess_start = std::chrono::steady_clock::now();\n        std::vector<std::string> str_res;\n        std::vector<float>scores;\n        for (int i = 0; i < real_batch_num; ++i)\n        {\n            int argmax_idx = int(Utility::argmax(predict_batch.begin() + i * class_num, predict_batch.begin() + (i + 1) * class_num));\n            float score = predict_batch[argmax_idx];\n            scores.push_back(score);\n            str_res.push_back(this->label_list_[argmax_idx]);\n        }\n        auto postprocess_end = std::chrono::steady_clock::now();\n        for (int i = 0; i < str_res.size(); i++)\n        {\n            std::cout << frames_batch_path[i] << \"\\tclass: \" << str_res[i] << \"\\tscore: \" << scores[i] << endl;\n        }\n        std::chrono::duration<float> preprocess_diff = preprocess_end - preprocess_start;\n        times->push_back(double(preprocess_diff.count() * 1000));\n        std::chrono::duration<float> inference_diff = inference_end - inference_start;\n        times->push_back(double(inference_diff.count() * 1000));",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/video_rec.cpp:177-198"
+    },
+    "3955": {
+        "file_id": 333,
+        "content": "This code snippet is responsible for post-processing the results of object detection after model inference. It calculates the class and score for each frame, outputs it, and stores the processing times.",
+        "type": "comment"
+    },
+    "3956": {
+        "file_id": 333,
+        "content": "        std::chrono::duration<float> postprocess_diff = postprocess_end - postprocess_start;\n        times->push_back(double(postprocess_diff.count() * 1000));\n    }\n    void VideoRecognizer::LoadModel(const std::string &model_dir)\n    {\n        //   AnalysisConfig config;\n        paddle_infer::Config config;\n        config.SetModel(model_dir + \"/\" + this->inference_model_name + \".pdmodel\",\n                        model_dir + \"/\" + this->inference_model_name + \".pdiparams\");\n        if (this->use_gpu_)\n        {\n            config.EnableUseGpu(this->gpu_mem_, this->gpu_id_);\n            if (this->use_tensorrt_)\n            {\n                auto precision = paddle_infer::Config::Precision::kFloat32;\n                if (this->precision_ == \"fp16\")\n                {\n                    precision = paddle_infer::Config::Precision::kHalf;\n                }\n                else if (this->precision_ == \"int8\")\n                {\n                    precision = paddle_infer::Config::Precision::kInt8;\n                }",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/video_rec.cpp:199-223"
+    },
+    "3957": {
+        "file_id": 333,
+        "content": "This code initializes a Paddle Video recognizer by loading the model from a given directory. It also sets up GPU and TensorRT configurations if needed, and specifies precision based on the provided string value.",
+        "type": "comment"
+    },
+    "3958": {
+        "file_id": 333,
+        "content": "                if (this->inference_model_name == \"ppTSM\" || this->inference_model_name == \"TSM\")\n                {\n                    config.EnableTensorRtEngine(\n                        1 << 30, // workspaceSize\n                        this->rec_batch_num * this->num_seg * 1, // maxBatchSize\n                        3, // minSubgraphSize\n                        precision, // precision\n                        false,// useStatic\n                        false //useCalibMode\n                    );\n                }\n                else if(this->inference_model_name == \"ppTSN\" || this->inference_model_name == \"TSN\")\n                {\n                    config.EnableTensorRtEngine(\n                        1 << 30,\n                        this->rec_batch_num * this->num_seg * 10,\n                        3, // minSubgraphSize\n                        precision,// precision\n                        false,// useStatic\n                        false //useCalibMode\n                    );\n                }\n                else",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/video_rec.cpp:225-247"
+    },
+    "3959": {
+        "file_id": 333,
+        "content": "This code checks the inference model name and configures TensorRT engine accordingly for different models like ppTSM, TSM, ppTSN, or TSN. It sets workspace size to a large value, maxBatchSize based on number of segments, minSubgraphSize to 3, precision, and disables useStatic and useCalibMode.",
+        "type": "comment"
+    },
+    "3960": {
+        "file_id": 333,
+        "content": "                {\n                    config.EnableTensorRtEngine(\n                        1 << 30, // workspaceSize\n                        this->rec_batch_num, // maxBatchSize\n                        3, // minSubgraphSize\n                        precision,// precision\n                        false,// useStatic\n                        false //useCalibMode\n                    );\n                }\n                std::cout << \"Enable TensorRT is: \" << config.tensorrt_engine_enabled() << std::endl;\n                /* some model dose not suppport dynamic shape with TRT, deactivate it by default */\n                // std::map<std::string, std::vector<int> > min_input_shape =\n                // {\n                //     {\"data_batch_0\", {1, this->num_seg, 3, 1, 1}}\n                // };\n                // std::map<std::string, std::vector<int> > max_input_shape =\n                // {\n                //     {\"data_batch_0\", {1, this->num_seg, 3, 256, 256}}\n                // };\n                // std::map<std::string, std::vector<int> > opt_input_shape =",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/video_rec.cpp:248-271"
+    },
+    "3961": {
+        "file_id": 333,
+        "content": "The code enables the TensorRT engine with specific parameters, such as workspace size, max batch size, minimum subgraph size, and precision. It checks if TensorRT is enabled and deactivates it by default for models that do not support dynamic shape. The code also defines input shape ranges (min, opt) for a particular key (\"data_batch_0\").",
+        "type": "comment"
+    },
+    "3962": {
+        "file_id": 333,
+        "content": "                // {\n                //     {\"data_batch_0\", {this->rec_batch_num,  this->num_seg, 3, 224, 224}}\n                // };\n                // config.SetTRTDynamicShapeInfo(min_input_shape, max_input_shape,\n                //                               opt_input_shape);\n            }\n        }\n        else\n        {\n            config.DisableGpu();\n            if (this->use_mkldnn_)\n            {\n                config.EnableMKLDNN();\n                // cache 10 different shapes for mkldnn to avoid memory leak\n                config.SetMkldnnCacheCapacity(10);\n            }\n            config.SetCpuMathLibraryNumThreads(this->cpu_math_library_num_threads_);\n        }\n        config.SwitchUseFeedFetchOps(false);\n        // true for multiple input\n        config.SwitchSpecifyInputNames(true);\n        config.SwitchIrOptim(true);\n        config.EnableMemoryOptim();\n        config.DisableGlogInfo();\n        this->predictor_ = CreatePredictor(config);\n    }\n} // namespace PaddleVideo",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/video_rec.cpp:272-304"
+    },
+    "3963": {
+        "file_id": 333,
+        "content": "This code initializes a PaddleVideo predictor with TensorRT configuration options. It sets the GPU usage, enables MKLDNN (if needed), specifies input names and optimizations, disables INFO log messages, and creates the predictor.",
+        "type": "comment"
+    },
+    "3964": {
+        "file_id": 334,
+        "content": "/deploy/cpp_infer/tools/build.sh",
+        "type": "filepath"
+    },
+    "3965": {
+        "file_id": 334,
+        "content": "This script sets the paths for OpenCV, PaddlePaddle inference, CUDA, cuDNN, and TensorRT directories. It clears existing build directory, creates a new one, navigates to it, runs cmake with specified options, and then compiles the project using 'make -j' command.",
+        "type": "summary"
+    },
+    "3966": {
+        "file_id": 334,
+        "content": "OPENCV_DIR=your_opencv_dir\nLIB_DIR=your_paddle_inference_dir\nCUDA_LIB_DIR=your_cuda_lib_dir\nCUDNN_LIB_DIR=your_cudnn_lib_dir\nTENSORRT_DIR=your_tensorRT_dir\nBUILD_DIR=build\nrm -rf ${BUILD_DIR}\nmkdir ${BUILD_DIR}\ncd ${BUILD_DIR}\ncmake .. \\\n    -DPADDLE_LIB=${LIB_DIR} \\\n    -DWITH_MKL=ON \\\n    -DWITH_GPU=OFF \\\n    -DWITH_STATIC_LIB=OFF \\\n    -DWITH_TENSORRT=OFF \\\n    -DOPENCV_DIR=${OPENCV_DIR} \\\n    -DCUDNN_LIB=${CUDNN_LIB_DIR} \\\n    -DCUDA_LIB=${CUDA_LIB_DIR} \\\n    -DTENSORRT_DIR=${TENSORRT_DIR} \\\nmake -j",
+        "type": "code",
+        "location": "/deploy/cpp_infer/tools/build.sh:1-22"
+    },
+    "3967": {
+        "file_id": 334,
+        "content": "This script sets the paths for OpenCV, PaddlePaddle inference, CUDA, cuDNN, and TensorRT directories. It clears existing build directory, creates a new one, navigates to it, runs cmake with specified options, and then compiles the project using 'make -j' command.",
+        "type": "comment"
+    },
+    "3968": {
+        "file_id": 335,
+        "content": "/deploy/cpp_serving/paddle_env_install.sh",
+        "type": "filepath"
+    },
+    "3969": {
+        "file_id": 335,
+        "content": "The code installs TensorRT and sets up Go environment for PaddleVideo C++ serving, checking CUDA version, downloading SSL libraries, and installing necessary packages.",
+        "type": "summary"
+    },
+    "3970": {
+        "file_id": 335,
+        "content": "unset GREP_OPTIONS\nfunction install_trt(){\n  CUDA_VERSION=$(nvcc --version | egrep -o \"V[0-9]+.[0-9]+\" | cut -c2-)\n  if [ $CUDA_VERSION == \"10.2\" ]; then\n    wget https://paddle-ci.gz.bcebos.com/TRT/TensorRT6-cuda10.2-cudnn7.tar.gz --no-check-certificate\n    tar -zxf TensorRT6-cuda10.2-cudnn7.tar.gz -C /usr/local\n    cp -rf /usr/local/TensorRT-6.0.1.8/include/*  /usr/include/ && cp -rf /usr/local/TensorRT-6.0.1.8/lib/* /usr/lib/\n    rm -rf TensorRT6-cuda10.2-cudnn7.tar.gz\n  elif [ $CUDA_VERSION == \"11.2\" ]; then\n    wget https://paddle-ci.gz.bcebos.com/TRT/TensorRT-8.0.3.4.Linux.x86_64-gnu.cuda-11.3.cudnn8.2.tar.gz --no-check-certificate\n    tar -zxf TensorRT-8.0.3.4.Linux.x86_64-gnu.cuda-11.3.cudnn8.2.tar.gz -C /usr/local\n    cp -rf /usr/local/TensorRT-8.0.3.4/include/* /usr/include/ && cp -rf /usr/local/TensorRT-8.0.3.4/lib/* /usr/lib/\n    rm -rf TensorRT-8.0.3.4.Linux.x86_64-gnu.cuda-11.3.cudnn8.2.tar.gz\n  else\n    echo \"No Cuda Found, no need to install TensorRT\"\n  fi\n}\nfunction env_install()\n{\n    apt install -y libcurl4-openssl-dev libbz2-dev",
+        "type": "code",
+        "location": "/deploy/cpp_serving/paddle_env_install.sh:1-22"
+    },
+    "3971": {
+        "file_id": 335,
+        "content": "This script installs TensorRT based on the detected CUDA version, and installs necessary libraries for PaddleVideo. It checks the CUDA version, downloads the corresponding TensorRT package, extracts it to /usr/local, and copies relevant include and lib files to their respective directories. If no CUDA version is found, it displays a message stating no Cuda Found and no need to install TensorRT.",
+        "type": "comment"
+    },
+    "3972": {
+        "file_id": 335,
+        "content": "    wget https://paddle-serving.bj.bcebos.com/others/centos_ssl.tar && tar xf centos_ssl.tar && rm -rf centos_ssl.tar && mv libcrypto.so.1.0.2k /usr/lib/libcrypto.so.1.0.2k && mv libssl.so.1.0.2k /usr/lib/libssl.so.1.0.2k && ln -sf /usr/lib/libcrypto.so.1.0.2k /usr/lib/libcrypto.so.10 && ln -sf /usr/lib/libssl.so.1.0.2k /usr/lib/libssl.so.10 && ln -sf /usr/lib/libcrypto.so.10 /usr/lib/libcrypto.so && ln -sf /usr/lib/libssl.so.10 /usr/lib/libssl.so\n    rm -rf /usr/local/go && wget -qO- https://paddle-ci.gz.bcebos.com/go1.15.12.linux-amd64.tar.gz | \\\n    tar -xz -C /usr/local && \\\n    mkdir /root/go && \\\n    mkdir /root/go/bin && \\\n    mkdir /root/go/src && \\\n    echo \"GOROOT=/usr/local/go\" >> /root/.bashrc && \\\n    echo \"GOPATH=/root/go\" >> /root/.bashrc && \\\n    echo \"PATH=/usr/local/go/bin:/root/go/bin:$PATH\" >> /root/.bashrc\n    install_trt\n}\nenv_install",
+        "type": "code",
+        "location": "/deploy/cpp_serving/paddle_env_install.sh:23-35"
+    },
+    "3973": {
+        "file_id": 335,
+        "content": "This code is installing necessary packages and setting up Go environment for PaddleVideo C++ serving. It downloads SSL libraries, installs Go 1.15.12, sets GOROOT and GOPATH variables, and installs the trt package.",
+        "type": "comment"
+    },
+    "3974": {
+        "file_id": 336,
+        "content": "/deploy/cpp_serving/preprocess_ops.py",
+        "type": "filepath"
+    },
+    "3975": {
+        "file_id": 336,
+        "content": "The code defines a Compose class for image processing steps and functions to preprocess video frames, returning input/output variables. The get_preprocess_func function selects the correct preprocessing function based on the model name. Invalid names raise ValueError.",
+        "type": "summary"
+    },
+    "3976": {
+        "file_id": 336,
+        "content": "import os\nimport sys\n__dir__ = os.path.dirname(os.path.abspath(__file__))\nsys.path.append(os.path.abspath(os.path.join(__dir__, \"../../\")))\nfrom paddlevideo.loader.pipelines import (CenterCrop, Image2Array,\n                                          Normalization, Sampler, Scale,\n                                          VideoDecoder, TenCrop)\nimport numpy as np\nfrom typing import Dict, Tuple, List, Callable\nVALID_MODELS = [\"PPTSM\", \"PPTSN\"]\nimport os\nimport sys\n__dir__ = os.path.dirname(os.path.abspath(__file__))\nsys.path.append(os.path.abspath(os.path.join(__dir__, \"../../\")))\nfrom paddlevideo.loader.pipelines import (CenterCrop, Image2Array,\n                                          Normalization, Sampler, Scale,\n                                          VideoDecoder, TenCrop)\nimport numpy as np\nfrom typing import Dict, Tuple, List, Callable\nVALID_MODELS = [\"PPTSM\", \"PPTSN\"]\nclass Compose:\n    def __init__(self, transforms):\n        self.transforms = transforms\n    def __call__(self, img):\n        for t in self.transforms:",
+        "type": "code",
+        "location": "/deploy/cpp_serving/preprocess_ops.py:1-34"
+    },
+    "3977": {
+        "file_id": 336,
+        "content": "This code imports necessary libraries and defines the VALID_MODELS variable. It then creates a Compose class that takes in a list of transforms, allowing for composition of multiple image processing steps to be applied sequentially.",
+        "type": "comment"
+    },
+    "3978": {
+        "file_id": 336,
+        "content": "            img = t(img)\n        return img\ndef np_softmax(x: np.ndarray, axis: int = 0) -> np.ndarray:\n    \"\"\"softmax function\n    Args:\n        x (np.ndarray): logits\n        axis (int): axis\n    Returns:\n        np.ndarray: probs\n    \"\"\"\n    x -= np.max(x, axis=axis, keepdims=True)\n    x = np.exp(x) / np.sum(np.exp(x), axis=axis, keepdims=True)\n    return x\ndef preprocess_PPTSM(video_path: str) -> Tuple[Dict[str, np.ndarray], List]:\n    \"\"\"preprocess\n    Args:\n        video_path (str): input video path\n    Returns:\n        Tuple[Dict[str, np.ndarray], List]: feed and fetch\n    \"\"\"\n    img_mean = [0.485, 0.456, 0.406]\n    img_std = [0.229, 0.224, 0.225]\n    seq = Compose([\n        VideoDecoder(),\n        Sampler(8, 1, valid_mode=True),\n        Scale(256),\n        CenterCrop(224),\n        Image2Array(),\n        Normalization(img_mean, img_std)\n    ])\n    results = {\"filename\": video_path}\n    results = seq(results)\n    tmp_inp = np.expand_dims(results[\"imgs\"], axis=0)  # [b,t,c,h,w]\n    tmp_inp = np.expand_dims(tmp_inp, axis=0)  # [1,b,t,c,h,w]",
+        "type": "code",
+        "location": "/deploy/cpp_serving/preprocess_ops.py:35-76"
+    },
+    "3979": {
+        "file_id": 336,
+        "content": "The code is defining a function `preprocess_PPTSM` that takes a video path as input, and applies several image preprocessing steps before returning the feed and fetch data. These steps include decoding the video frames, sampling, scaling, cropping, converting to array format, and normalization using specific mean and standard deviation values. The resulting processed data is stored in the `results` dictionary, which contains the images and metadata.",
+        "type": "comment"
+    },
+    "3980": {
+        "file_id": 336,
+        "content": "    feed = {\"data_batch_0\": tmp_inp}\n    fetch = [\"outputs\"]\n    return feed, fetch\ndef preprocess_PPTSN(video_path: str) -> Tuple[Dict[str, np.ndarray], List]:\n    \"\"\"preprocess\n    Args:\n        video_path (str): input video path\n    Returns:\n        Tuple[Dict[str, np.ndarray], List]: feed and fetch\n    \"\"\"\n    img_mean = [0.485, 0.456, 0.406]\n    img_std = [0.229, 0.224, 0.225]\n    seq = Compose([\n        VideoDecoder(),\n        Sampler(25, 1, valid_mode=True, select_left=True),\n        Scale(256, fixed_ratio=True, do_round=True, backend='cv2'),\n        TenCrop(224),\n        Image2Array(),\n        Normalization(img_mean, img_std)\n    ])\n    results = {\"filename\": video_path}\n    results = seq(results)\n    tmp_inp = np.expand_dims(results[\"imgs\"], axis=0)  # [b,t,c,h,w]\n    tmp_inp = np.expand_dims(tmp_inp, axis=0)  # [1,b,t,c,h,w]\n    feed = {\"data_batch_0\": tmp_inp}\n    fetch = [\"outputs\"]\n    return feed, fetch\ndef get_preprocess_func(model_name: str) -> Callable:\n    \"\"\"get preprocess function by model_name",
+        "type": "code",
+        "location": "/deploy/cpp_serving/preprocess_ops.py:77-111"
+    },
+    "3981": {
+        "file_id": 336,
+        "content": "The function preprocess_PPTSN takes in a video path, applies a series of image processing steps to the video frames, and returns feed and fetch variables for input and output respectively. The get_preprocess_func function returns a preprocessing function based on the given model name.",
+        "type": "comment"
+    },
+    "3982": {
+        "file_id": 336,
+        "content": "    Args:\n        model_name (str): model's name, must in `VALID_MODELS`\n    Returns:\n        Callable: preprocess function corresponding to model name\n    \"\"\"\n    if model_name == \"PPTSM\":\n        return preprocess_PPTSM\n    elif model_name == \"PPTSN\":\n        return preprocess_PPTSN\n    else:\n        raise ValueError(\n            f\"model_name must in {VALID_MODELS}, but got model_name\")",
+        "type": "code",
+        "location": "/deploy/cpp_serving/preprocess_ops.py:113-126"
+    },
+    "3983": {
+        "file_id": 336,
+        "content": "This function takes a model name as input and returns the corresponding preprocess function based on the conditionals provided. If the model name is \"PPTSM\", it will return the preprocess_PPTSM function, if the model name is \"PPTSN\" it will return preprocess_PPTSN, otherwise it raises a ValueError with an error message stating that the model name must be in VALID_MODELS.",
+        "type": "comment"
+    },
+    "3984": {
+        "file_id": 337,
+        "content": "/deploy/cpp_serving/readme.md",
+        "type": "filepath"
+    },
+    "3985": {
+        "file_id": 337,
+        "content": "The code deploys Paddle Serving, a model serving framework in PaddleVideo, through Docker on Linux with GPU and CPU options. It uses paddle-video-deploy for model conversion and includes client scripts, environment setup, and troubleshooting for missing libraries.",
+        "type": "summary"
+    },
+    "3986": {
+        "file_id": 337,
+        "content": "简体中文 | [English](./readme_en.md)\n# 模型服务化部署\n## 简介\n[Paddle Serving](https://github.com/PaddlePaddle/Serving) 旨在帮助深度学习开发者轻松部署在线预测服务，支持一键部署工业级的服务能力、客户端和服务端之间高并发和高效通信、并支持多种编程语言开发客户端。\n该部分以 HTTP 预测服务部署为例，介绍怎样在 PaddleVideo 中使用 PaddleServing 部署模型服务。目前只支持 Linux 平台部署，暂不支持 Windows 平台。\n## Serving 安装\nServing 官网推荐使用 docker 安装并部署 Serving 环境。首先需要拉取 docker 环境并创建基于 Serving 的 docker。\n```bash\n# 启动GPU docker\ndocker pull paddlepaddle/serving:0.7.0-cuda10.2-cudnn7-devel\nnvidia-docker run -p 9292:9292 --name test -dit paddlepaddle/serving:0.7.0-cuda10.2-cudnn7-devel bash\nnvidia-docker exec -it test bash\n# 启动CPU docker\ndocker pull paddlepaddle/serving:0.7.0-devel\ndocker run -p 9292:9292 --name test -dit paddlepaddle/serving:0.7.0-devel bash\ndocker exec -it test bash\n```\n进入 docker 后，需要安装 Serving 相关的 python 包。\n```bash\npython3.7 -m pip install paddle-serving-client==0.7.0\npython3.7 -m pip install paddle-serving-app==0.7.0\n#若为CPU部署环境:\npython3.7 -m pip install paddle-serving-server==0.7.0  # CPU\npython3.7 -m pip install paddlepaddle==2.2.0           # CPU",
+        "type": "code",
+        "location": "/deploy/cpp_serving/readme.md:1-32"
+    },
+    "3987": {
+        "file_id": 337,
+        "content": "This code snippet provides instructions for deploying Paddle Serving, a model serving framework, as part of the PaddleVideo codebase. It explains that this is done through Docker and covers GPU-accelerated and CPU-based installations, including the necessary package installation commands. The code assumes Linux platform, and does not support Windows at present.",
+        "type": "comment"
+    },
+    "3988": {
+        "file_id": 337,
+        "content": "#若为GPU部署环境\npython3.7 -m pip install paddle-serving-server-gpu==0.7.0.post102  # GPU with CUDA10.2 + TensorRT6\npython3.7 -m pip install paddlepaddle-gpu==2.2.0                   # GPU with CUDA10.2\n#其他GPU环境需要确认环境再选择执行哪一条\npython3.7 -m pip install paddle-serving-server-gpu==0.7.0.post101  # GPU with CUDA10.1 + TensorRT6\npython3.7 -m pip install paddle-serving-server-gpu==0.7.0.post112  # GPU with CUDA11.2 + TensorRT8\n```\n* 如果安装速度太慢，可以通过 `-i https://pypi.tuna.tsinghua.edu.cn/simple` 更换源，加速安装过程。\n* 更多环境和对应的安装包详见：https://github.com/PaddlePaddle/Serving/blob/v0.9.0/doc/Install_Linux_Env_CN.md\n## 行为识别服务部署\n### 模型转换\n使用 PaddleServing 做服务化部署时，需要将保存的 inference 模型转换为 Serving 模型。下面以 PP-TSM 模型为例，介绍如何部署行为识别服务。\n- 下载 PP-TSM 推理模型并转换为 Serving 模型：\n  ```bash\n  # 进入PaddleVideo目录\n  cd PaddleVideo\n  # 下载推理模型并解压到./inference下\n  mkdir ./inference\n  pushd ./inference\n  wget  https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM.zip\n  unzip ppTSM.zip\n  popd\n  # 转换成 Serving 模型\n  pushd deploy/cpp_serving\n  python3.7 -m paddle_serving_client.convert \\",
+        "type": "code",
+        "location": "/deploy/cpp_serving/readme.md:34-64"
+    },
+    "3989": {
+        "file_id": 337,
+        "content": "This code provides instructions for installing different versions of PaddleServing Server with various GPU environments and specifies the required pip commands. It also mentions an alternative method to speed up the installation process by changing the source. Furthermore, it highlights how to convert a PP-TSM inference model into Serving format for deploying behavior recognition service.",
+        "type": "comment"
+    },
+    "3990": {
+        "file_id": 337,
+        "content": "  --dirname ../../inference/ppTSM \\\n  --model_filename ppTSM.pdmodel \\\n  --params_filename ppTSM.pdiparams \\\n  --serving_server ./ppTSM_serving_server \\\n  --serving_client ./ppTSM_serving_client\n  popd\n  ```\n  | 参数              | 类型 | 默认值             | 描述                                                         |\n  | ----------------- | ---- | ------------------ | ------------------------------------------------------------ |\n  | `dirname`         | str  | -                  | 需要转换的模型文件存储路径，Program结构文件和参数文件均保存在此目录。 |\n  | `model_filename`  | str  | None               | 存储需要转换的模型Inference Program结构的文件名称。如果设置为None，则使用 `__model__` 作为默认的文件名 |\n  | `params_filename` | str  | None               | 存储需要转换的模型所有参数的文件名称。当且仅当所有模型参数被保>存在一个单独的二进制文件中，它才需要被指定。如果模型参数是存储在各自分离的文件中，设置它的值为None |\n  | `serving_server`  | str  | `\"serving_server\"` | 转换后的模型文件和配置文件的存储路径。默认值为serving_server |\n  | `serving_client`  | str  | `\"serving_client\"` | 转换后的客户端配置文件存储路径。默认值为serving_client       |\n- 推理模型转换完成后，会在`deploy/cpp_serving`文件夹下生成 `ppTSM_serving_client` 和 `ppTSM_serving_server` 两个文件夹，具备如下格式：",
+        "type": "code",
+        "location": "/deploy/cpp_serving/readme.md:65-81"
+    },
+    "3991": {
+        "file_id": 337,
+        "content": "This code is using PaddleVideo's paddle-video-deploy to convert a model and store it in the \"inference/ppTSM\" directory. It specifies the model filename as \"ppTSM.pdmodel\", the params filename as \"ppTSM.pdiparams\", and generates serving_server and serving_client files in the \"ppTSM\" folder. The converted model will be saved in the \"deploy/cpp_serving\" directory, with the client configuration stored in the \"ppTSM_serving_client\" and server configurations stored in the \"ppTSM_serving_server\".",
+        "type": "comment"
+    },
+    "3992": {
+        "file_id": 337,
+        "content": "  ```bash\n  PaddleVideo/deploy/cpp_serving\n  ├── ppTSM_serving_client\n  │   ├── serving_client_conf.prototxt\n  │   └── serving_client_conf.stream.prototxt\n  └── ppTSM_serving_server\n      ├── ppTSM.pdiparams\n      ├── ppTSM.pdmodel\n      ├── serving_server_conf.prototxt\n      └── serving_server_conf.stream.prototxt\n  ```\n  得到模型文件之后，需要分别修改 `ppTSM_serving_client` 下的 `serving_client_conf.prototxt` 和 `ppTSM_serving_server` 下的 `serving_server_conf.prototxt`，将两份文件中`fetch_var` 下的 `alias_name` 均改为 `outputs`\n  **备注**:  Serving 为了兼容不同模型的部署，提供了输入输出重命名的功能。这样，不同的模型在推理部署时，只需要修改配置文件的`alias_name`即可，无需修改代码即可完成推理部署。\n  修改后的`serving_server_conf.prototxt`如下所示:\n  ```yaml\n  feed_var {\n    name: \"data_batch_0\"\n    alias_name: \"data_batch_0\"\n    is_lod_tensor: false\n    feed_type: 1\n    shape: 8\n    shape: 3\n    shape: 224\n    shape: 224\n  }\n  fetch_var {\n    name: \"linear_2.tmp_1\"\n    alias_name: \"outputs\"\n    is_lod_tensor: false\n    fetch_type: 1\n    shape: 400\n  }\n  ```\n### 服务部署和请求\n`cpp_serving` 目录包含了启动 pipeline 服务、C++ serving服务和发送预测请求的代码，具体包括：",
+        "type": "code",
+        "location": "/deploy/cpp_serving/readme.md:82-118"
+    },
+    "3993": {
+        "file_id": 337,
+        "content": "This code snippet shows the necessary changes to be made in `serving_client_conf.prototxt` and `serving_server_conf.prototxt` files after getting the model file. The purpose is to rename `alias_name` as 'outputs' for `fetch_var`. This allows Serving to support different models without modifying code during deployment.\n\nThe modified `serving_server_conf.prototxt` file shows a feed variable and a fetch variable with their respective names, alias names, shapes, and types.",
+        "type": "comment"
+    },
+    "3994": {
+        "file_id": 337,
+        "content": "  ```bash\n  run_cpp_serving.sh          # 启动C++ serving server端的脚本\n  pipeline_http_client.py     # client端发送数据并获取预测结果的脚本\n  paddle_env_install.sh       # 安装C++ serving环境脚本\n  preprocess_ops.py           # 存放预处理函数的文件\n  ```\n#### C++ Serving\n- 进入工作目录：\n  ```bash\n  cd deploy/cpp_serving\n  ```\n- 启动服务：\n  ```bash\n  # 在后台启动，过程中打印输出的日志会重定向保存到nohup.txt中，可以使用tailf nohup.txt查看输出\n  bash run_cpp_serving.sh\n  ```\n- 发送请求并获取结果：\n  ```bash\n  python3.7 serving_client.py \\\n  -n PPTSM \\\n  -c ./ppTSM_serving_client/serving_client_conf.prototxt \\\n  --input_file=../../data/example.avi\n  ```\n成功运行后，模型预测的结果会打印在 cmd 窗口中，结果如下：\n  ```bash\n  I0510 04:33:00.110025 37097 naming_service_thread.cpp:202] brpc::policy::ListNamingService(\"127.0.0.1:9993\"): added 1\n  I0510 04:33:01.904764 37097 general_model.cpp:490] [client]logid=0,client_cost=1640.96ms,server_cost=1623.21ms.\n  {'class_id': '[5]', 'prob': '[0.9907387495040894]'}\n  ```\n**如果过程中报错显示找不到libnvinfer.so.6，可以执行脚本`paddle_env_install.sh`安装相关环境**\n  ```bash\n  bash paddle_env_install.sh\n  ```\n## FAQ\n**Q1**： 发送请求后没有结果返回或者提示输出解码报错",
+        "type": "code",
+        "location": "/deploy/cpp_serving/readme.md:119-158"
+    },
+    "3995": {
+        "file_id": 337,
+        "content": "This code provides the instructions to set up and run a C++ serving server, send requests from a client script, and interpret the results. It also includes a script to install the required environment and troubleshoot common issues such as missing libraries.",
+        "type": "comment"
+    },
+    "3996": {
+        "file_id": 337,
+        "content": "**A1**： 启动服务和发送请求时不要设置代理，可以在启动服务前和发送请求前关闭代理，关闭代理的命令是：\n```\nunset https_proxy\nunset http_proxy\n```",
+        "type": "code",
+        "location": "/deploy/cpp_serving/readme.md:160-164"
+    },
+    "3997": {
+        "file_id": 337,
+        "content": "Avoid setting proxies when starting the service and sending requests. Disable proxies by using \"unset https_proxy\" and \"unset http_proxy\" commands beforehand.",
+        "type": "comment"
+    },
+    "3998": {
+        "file_id": 338,
+        "content": "/deploy/cpp_serving/readme_en.md",
+        "type": "filepath"
+    },
+    "3999": {
+        "file_id": 338,
+        "content": "This code accelerates PaddleServing installation with Docker, supports Linux and GPU, simplifies action recognition service deployment, and provides a C++ serving environment setup guide.",
+        "type": "summary"
+    }
+}

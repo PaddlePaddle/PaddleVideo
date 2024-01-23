@@ -1,0 +1,10 @@
+{
+    "summary": "This code is a module for the PaddleVideo package that includes various utility functions and classes, such as Registry, build_utils, config, logger, record, dist_utils, save_load, and precise_bn. It also defines __all__ to include Registry and build.",
+    "details": [
+        {
+            "comment": "This code is a module for the PaddleVideo package that includes various utility functions and classes, such as Registry, build_utils, config, logger, record, dist_utils, save_load, and precise_bn. It also defines __all__ to include Registry and build.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/utils/__init__.py\":0-24",
+            "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom .registry import Registry\nfrom .build_utils import build\nfrom .config import *\nfrom .logger import setup_logger, coloring, get_logger\nfrom .record import AverageMeter, build_record, build_rec_record, log_batch, log_epoch\nfrom .dist_utils import get_dist_info, main_only\nfrom .save_load import save, load, load_ckpt, mkdir\nfrom .precise_bn import do_preciseBN\n__all__ = ['Registry', 'build']"
+        }
+    ]
+}

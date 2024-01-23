@@ -1,0 +1,10 @@
+{
+    "summary": "This script changes directory to \"data/ntu-rgb-d\" and downloads a zip file containing skeleton data for frames 1-17. It then unzips the file, deletes the original, and downloads another zip file named \"statistics.zip\". The script creates a new folder named \"statistics\", extracts its contents into it, and removes the downloaded zip file.",
+    "details": [
+        {
+            "comment": "This script changes directory to \"data/ntu-rgb-d\" and downloads a zip file containing skeleton data for frames 1-17. It then unzips the file, deletes the original, and downloads another zip file named \"statistics.zip\". The script creates a new folder named \"statistics\", extracts its contents into it, and removes the downloaded zip file.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/data/ntu-rgb-d/download_dataset.sh\":0-11",
+            "content": "cd data/ntu-rgb-d\n# download\nwget --load-cookies /tmp/cookies.txt \"https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1CUZnBtYwifVXS21yVg62T-vrPVayso5H' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\\1\\n/p')&id=1CUZnBtYwifVXS21yVg62T-vrPVayso5H\" -O nturgbd_skeletons_s001_to_s017.zip && rm -rf /tmp/cookies.txt\nunzip nturgbd_skeletons_s001_to_s017.zip && rm -rf nturgbd_skeletons_s001_to_s017.zip\nwget https://videotag.bj.bcebos.com/Data/statistics.zip\nmkdir statistics\nunzip statistics.zip -d statistics/ && rm -rf statistics.zip"
+        }
+    ]
+}

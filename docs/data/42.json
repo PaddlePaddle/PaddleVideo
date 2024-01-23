@@ -1,0 +1,541 @@
+{
+    "4200": {
+        "file_id": 356,
+        "content": "  journal={The International Journal of Robotics Research},\n  volume={36},\n  number={1},\n  pages={3--15},\n  year={2017},\n  publisher={SAGE Publications Sage UK: London, England}\n}\n```\n```latex\n@inproceedings{liu2021self,\n  title={Self-supervised Monocular Depth Estimation for All Day Images using Domain Separation},\n  author={Liu, Lina and Song, Xibin and Wang, Mengmeng and Liu, Yong and Zhang, Liangjun},\n  booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},\n  pages={12737--12746},\n  year={2021}\n}\n```\n## Download\n1. Download the left eye image of Bumblebee XB3 in the sequence [2014-12-09](https://robotcar-dataset.robots.ox.ac.uk/datasets/2014-12-09-13-21-02/) as For the training set of the daytime scene, the downloaded images are decompressed in the same folder.\n2. Download the left eye image of Bumblebee XB3 in the sequence [2014-12-16](https://robotcar-dataset.robots.ox.ac.uk/datasets/2014-12-16-18-44-24/) as The training set of the night scene, the downloaded images are unzipped in the same folder.",
+        "type": "code",
+        "location": "/english_documents/dataset/Oxford_RobotCar.md:25-46"
+    },
+    "4201": {
+        "file_id": 356,
+        "content": "This code represents the citation for two research papers in the format of BibTeX. The first paper is titled \"Self-supervised Monocular Depth Estimation for All Day Images using Domain Separation\" and was published in 2021 at the IEEE/CVF International Conference on Computer Vision. The second paper is an Oxford RobotCar dataset study published in The International Journal of Robotics Research in 2017. Both papers are cited within a broader document, likely discussing the use or application of these datasets for computer vision tasks.",
+        "type": "comment"
+    },
+    "4202": {
+        "file_id": 356,
+        "content": "3. The images and depth truth values ​​of the validation set are filtered from the original data set and downloaded from the link we gave. (The data download links are below)\n    ```shell\n    https://videotag.bj.bcebos.com/Data/ADDS/1209_all_files.txt\n    https://videotag.bj.bcebos.com/Data/ADDS/1216_all_files.txt\n    https://videotag.bj.bcebos.com/Data/ADDS/day_train_all.7z.001\n    https://videotag.bj.bcebos.com/Data/ADDS/day_train_all.7z.002\n    https://videotag.bj.bcebos.com/Data/ADDS/day_train_all_fake_night.7z.001\n    https://videotag.bj.bcebos.com/Data/ADDS/day_train_all_fake_night.7z.002\n    https://videotag.bj.bcebos.com/Data/ADDS/day_val_451.7z\n    https://videotag.bj.bcebos.com/Data/ADDS/day_val_451_gt.7z\n    https://videotag.bj.bcebos.com/Data/ADDS/night_val_411.7z\n    https://videotag.bj.bcebos.com/Data/ADDS/night_val_411_gt.7z\n    ```\n    the original raw data download links:\n    ```shell\n    # data in day\n    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.001\n    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.002",
+        "type": "code",
+        "location": "/english_documents/dataset/Oxford_RobotCar.md:47-64"
+    },
+    "4203": {
+        "file_id": 356,
+        "content": "The code provides download links for validation and original raw data sets in Oxford RobotCar dataset, used for image and depth truth values.",
+        "type": "comment"
+    },
+    "4204": {
+        "file_id": 356,
+        "content": "    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.003\n    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.004\n    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.005\n    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.006\n    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.007\n    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.008\n    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.009\n    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.010\n    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.011\n    https://videotag.bj.bcebos.com/Data/original-ADDS/day_train_all.7z.012\n    # data in night\n    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.001\n    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.002\n    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.003\n    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.004",
+        "type": "code",
+        "location": "/english_documents/dataset/Oxford_RobotCar.md:65-80"
+    },
+    "4205": {
+        "file_id": 356,
+        "content": "Links to parts of a 7z compressed file containing training data for day and night scenes from the Oxford RobotCar dataset.",
+        "type": "comment"
+    },
+    "4206": {
+        "file_id": 356,
+        "content": "    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.005\n    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.006\n    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.007\n    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.008\n    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.009\n    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.010\n    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.011\n    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.012\n    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.013\n    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.014\n    https://videotag.bj.bcebos.com/Data/original-ADDS/night_train_all.7z.015\n    ```\n## Preprocessing\n### 1-Image-de-distortion\nUse the official toolbox [robotcar-dataset-sdk](https://github.com/ori-mrg/robotcar-dataset-sdk/tree/master/python) to pair the sequence 2014-12-09 and 2014-12- The image of 16 is de-distorted.",
+        "type": "code",
+        "location": "/english_documents/dataset/Oxford_RobotCar.md:81-98"
+    },
+    "4207": {
+        "file_id": 356,
+        "content": "This code provides a list of URLs for various file segments (005 to 015) related to the \"night_train_all.7z\" file. These files are likely part of the Oxford RobotCar dataset and are used in preprocessing steps, such as image de-distortion, which pairs sequences from specific dates. The official toolbox mentioned is necessary for this process.",
+        "type": "comment"
+    },
+    "4208": {
+        "file_id": 356,
+        "content": "### 2-Dynamic-frame-filter\nSince we use the self-supervised method, we need to filter out dynamic frames for training. The filtering principle is that the inter-frame pose change is greater than 0.1m and it is considered a dynamic frame. After filtering, the sequence of the training set is obtained.\n### 3-Image-Rename\nRename the original image timestamp to a continuous number sequence. For daytime scene correspondence, see [1209_all_files.txt](https://videotag.bj.bcebos.com/Data/ADDS/1209_all_files.txt), for night scene correspondence, see [1216_all_files.txt](https://videotag.bj.bcebos.com/Data/ADDS/1216_all_files.txt). The renamed data format is as follows:\n```\n├── oxford_processing\n    ├── day_train_all #Day training image folder (day_train_all.7z.001 ~ day_train_all.7z.012)\n    ├── night_train_all #Night training image folder (night_train_all.7z.001 ~ day_train_all.7z.015)\n    ├── day_val_451 #Daytime verification image folder (day_val_451.7z)\n    ├── day_val_451_gt #Daytime verification depth truth value folder (day_val_451_gt.7z)",
+        "type": "code",
+        "location": "/english_documents/dataset/Oxford_RobotCar.md:101-114"
+    },
+    "4209": {
+        "file_id": 356,
+        "content": "This code segment discusses two main components: 1) dynamic frame filtering for self-supervised training, and 2) renaming of original image timestamps to create continuous number sequences. The dataset contains daytime and nighttime training images, as well as daytime verification images with corresponding depth truth values.",
+        "type": "comment"
+    },
+    "4210": {
+        "file_id": 356,
+        "content": "    ├── night_val_411 #night verification image folder (night_val_411.7z)\n    └── night_val_411_gt #Night verification depth truth value folder (night_val_411_gt.7z)\n```\nannotation files download links are below:\n```shell\nhttps://videotag.bj.bcebos.com/Data/ADDS/train_files.txt\nhttps://videotag.bj.bcebos.com/Data/ADDS/val_day_files.txt\nhttps://videotag.bj.bcebos.com/Data/ADDS/val_night_files.txt\n```\nThe sequence used for training and verification is as follows:\n```\nsplits/oxford_day/train_files.txt # training sequence during the day\nsplits/oxford_night/train_files.txt # training sequence at night\nsplits/oxford_day_451/val_files.txt # verification sequence during the day\nsplits/oxford_night_411/val_files.txt # night verification sequence\n```\n### 4-Day-Pseudo-Night-Image-Pair-Preparation\nIn order to use our framework to extract the common information of day and night images, we use [CycleGAN](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix) to generate day-pseudo-night image pairs, where pseudo-n",
+        "type": "code",
+        "location": "/english_documents/dataset/Oxford_RobotCar.md:115-137"
+    },
+    "4211": {
+        "file_id": 356,
+        "content": "This code provides the location of image folders and annotation files for a robot car dataset, as well as the sequence used for training and verification. It also mentions the usage of CycleGAN to generate day-pseudo-night image pairs.",
+        "type": "comment"
+    },
+    "4212": {
+        "file_id": 356,
+        "content": "ight The night images corresponding to the daytime generated for CycleGAN, all images are scaled to 192x640, the night images are enhanced with histogram equalization, 75 epochs are trained, and the Oxford-RobotCar-for-ADDS is finally obtained. The generated day-pseudo-night image pair The data format is as follows, which can be directly used for training and verification of ADDS-DepthNet:\n```\n├── oxford_processing_forADDS\n    ├── day_train_all #Day training image folder (day_train_all.7z.001 ~ day_train_all.7z.002)\n    ├── night_train_all #Night training image folder (night_train_all.7z.001 ~ day_train_all.7z.002)\n    ├── day_val_451 #Daytime verification image folder (day_val_451.7z)\n    ├── day_val_451_gt #Daytime verification depth truth value folder (day_val_451_gt.7z)\n    ├── night_val_411 #night verification image folder (night_val_411.7z)\n    └── night_val_411_gt #Night verification depth truth value folder (night_val_411_gt.7z)\ndata\n└── oxford\n    ├── splits\n        ├── train_files.txt\n        ├── val_day_files.txt",
+        "type": "code",
+        "location": "/english_documents/dataset/Oxford_RobotCar.md:137-150"
+    },
+    "4213": {
+        "file_id": 356,
+        "content": "This code describes the file structure and data format of the Oxford-RobotCar dataset for ADDS-DepthNet training and verification. It includes daytime and nighttime images, as well as their ground truth depth values, organized into separate folders for training and validation purposes. The data has been preprocessed and scaled, with corresponding pseudo-night images generated using CycleGAN and histogram equalization applied to night images.",
+        "type": "comment"
+    },
+    "4214": {
+        "file_id": 356,
+        "content": "        └── val_night_files.txt\n    └── oxford_processing_forADDS\n        ├── day_train_all/      #Day training image folder (from day_train_all.7z.001 ~ day_train_all.7z.002)\n        ├── night_train_all/    #Night training image folder (from night_train_all.7z.001 ~ day_train_all.7z.002)\n        ├── day_val_451/        #Daytime verification image folder (from day_val_451.7z)\n        ├── day_val_451_gt/     #Daytime verification depth truth value folder (from day_val_451_gt.7z)\n        ├── night_val_411/      #night verification image folder (from night_val_411.7z)\n        └── night_val_411_gt/   #Night verification depth truth value folder (from night_val_411_gt.7z)\n```\nThe sequences used for training and verification are consistent with the foregoing.",
+        "type": "code",
+        "location": "/english_documents/dataset/Oxford_RobotCar.md:151-162"
+    },
+    "4215": {
+        "file_id": 356,
+        "content": "The code represents a directory structure containing day and night training and verification image folders, along with their respective depth truth value folders. The sequences used for both training and verification are consistent.",
+        "type": "comment"
+    },
+    "4216": {
+        "file_id": 357,
+        "content": "/english_documents/dataset/README.md",
+        "type": "filepath"
+    },
+    "4217": {
+        "file_id": 357,
+        "content": "This code presents a comprehensive table of datasets for action recognition, localization, and spatio-temporal action detection, covering various categories like Skeleton-based Action Recognition and Text-Video Retrieval. The table includes dataset names, homepages, and publication years from different conferences like CVPR and ICCV.",
+        "type": "summary"
+    },
+    "4218": {
+        "file_id": 357,
+        "content": "English | [简体中文](../../zh_CN/dataset/README.md)\n# Dataset\n## 1. Dataset List\n<table>\n  <tbody><tr>\n    <td colspan=\"4\">Action Recognition</td>\n  </tr>\n  <tr>\n    <td><a href=\"./k400.md\">Kinetics-400</a> (<a href=\"https://deepmind.com/research/open-source/kinetics/\" rel=\"nofollow\">Homepage</a>) (CVPR'2017)</td>\n    <td><a href=\"./ucf101.md\">UCF101</a> (<a href=\"https://www.crcv.ucf.edu/research/data-sets/ucf101/\" rel=\"nofollow\">Homepage</a>) (CRCV-IR-12-01)</td>\n    <td><a href=\"./ActivityNet.md\">ActivityNet</a> (<a href=\"http://activity-net.org/\" rel=\"nofollow\">Homepage</a>) (CVPR'2015)</td>\n    <td><a href=\"./youtube8m.md\">YouTube-8M</a> (<a href=\"https://research.google.com/youtube8m/\" rel=\"nofollow\">Homepage</a>) (CVPR'2017)</td>\n  </tr>\n  <tr>\n    <td colspan=\"4\">Action Localization</td>\n  </tr>\n  <tr>\n    <td><a href=\"./ActivityNet.md\">ActivityNet</a> (<a href=\"http://activity-net.org/\" rel=\"nofollow\">Homepage</a>) (CVPR'2015)</td>\n    <td></td>\n    <td></td>\n    <td></td>\n  </tr>\n  <tr>\n    <td colspan=\"4\">Spatio-Temporal Action Detection</td>",
+        "type": "code",
+        "location": "/english_documents/dataset/README.md:1-28"
+    },
+    "4219": {
+        "file_id": 357,
+        "content": "The code provides a table listing various datasets for action recognition, action localization, and spatio-temporal action detection. It includes links to dataset homepages and their respective publication years.",
+        "type": "comment"
+    },
+    "4220": {
+        "file_id": 357,
+        "content": "  </tr>\n  <tr>\n    <td><a href=\"./AVA.md\">AVA</a> (<a href=\"https://research.google.com/ava/index.html\" rel=\"nofollow\">Homepage</a>) (CVPR'2018)</td>\n    <td></td>\n    <td></td>\n    <td></td>\n  </tr>\n  <tr>\n    <td colspan=\"4\">Skeleton-based Action Recognition</td>\n  </tr>\n  <tr>\n    <td><a href=\"./ntu-rgbd.md\">NTURGB+D</a> (<a href=\"https://rose1.ntu.edu.sg/dataset/actionRecognition/\" rel=\"nofollow\">Homepage</a>) (IEEE CS'2016)</td>\n    <td><a href=\"./fsd.md\">FSD</a> (<a href=\"https://aistudio.baidu.com/aistudio/competition/detail/115/0/introduction\" rel=\"nofollow\">Homepage</a>)</td>\n    <td></td>\n    <td></td>\n  </tr>\n  <tr>\n    <td colspan=\"4\">Depth Estimation</td>\n  </tr>\n  <tr>\n    <td><a href=\"./Oxford_RobotCar.md\">Oxford-RobotCar</a> (<a href=\"https://robotcar-dataset.robots.ox.ac.uk/\" rel=\"nofollow\">Homepage</a>) (IJRR'2017)</td>\n    <td></td>\n    <td></td>\n    <td></td>\n  </tr>\n  <tr>\n    <td colspan=\"4\">Text-Video Retrieval</td>\n  </tr>\n  <tr>\n    <td><a href=\"docs/zh-CN/dataset/msrvtt.md\">MSR-VTT</a> (<",
+        "type": "code",
+        "location": "/english_documents/dataset/README.md:29-58"
+    },
+    "4221": {
+        "file_id": 357,
+        "content": "This code snippet is a table of datasets. It mentions dataset names, their corresponding homepages, and the year they were published in. The categories include Skeleton-based Action Recognition, Depth Estimation, and Text-Video Retrieval.",
+        "type": "comment"
+    },
+    "4222": {
+        "file_id": 357,
+        "content": "a href=\"https://www.microsoft.com/en-us/research/publication/msr-vtt-a-large-video-description-dataset-for-bridging-video-and-language/\" rel=\"nofollow\">Homepage</a>) (CVPR'2016)</td>\n    <td></td>\n    <td></td>\n    <td></td>\n  </tr>\n  <tr>\n    <td colspan=\"4\">Text-Video Pretrained Model</td>\n  </tr>\n  <tr>\n    <td><a href=\"docs/zh-CN/dataset/howto100m.md\">HowTo100M</a> (<a href=\"https://www.di.ens.fr/willow/research/howto100m/\" rel=\"nofollow\">Homepage</a>) (ICCV'2019)</td>\n    <td></td>\n    <td></td>\n    <td></td>\n  </tr>\n</tbody>\n</table>",
+        "type": "code",
+        "location": "/english_documents/dataset/README.md:58-73"
+    },
+    "4223": {
+        "file_id": 357,
+        "content": "This code appears to be part of a table within an HTML file. The table lists different datasets related to video and text, with their respective names, descriptions, and links to their homepages or documentation. It also provides information on the year of publication for each dataset, which seems to be from various conferences such as CVPR and ICCV.",
+        "type": "comment"
+    },
+    "4224": {
+        "file_id": 358,
+        "content": "/english_documents/dataset/SegmentationDataset.md",
+        "type": "filepath"
+    },
+    "4225": {
+        "file_id": 358,
+        "content": "The code introduces a video action segmentation dataset that utilizes breakfast, 50salads, and gtea datasets. The pre-training model's extracted features are used for the dataset. The dataset tree and data tree structure are provided, along with details of their folder contents.",
+        "type": "summary"
+    },
+    "4226": {
+        "file_id": 358,
+        "content": "English | [简体中文](../../zh-CN/dataset/SegmentationDataset.md)\n# Video Action Segmentation Dataset\nThe video motion segmentation model uses breakfast, 50salads and gtea data sets. The use method is to use the features extracted by the pre training model, which can be obtained from the ms-tcn official code base.[feat](https://zenodo.org/record/3625992#.Xiv9jGhKhPY)\n- Dataset tree\n```txt\n─── gtea\n    ├── features\n    │   ├── S1_Cheese_C1.npy\n    │   ├── S1_Coffee_C1.npy\n    │   ├── S1_CofHoney_C1.npy\n    │   └── ...\n    ├── groundTruth\n    │   ├── S1_Cheese_C1.txt\n    │   ├── S1_Coffee_C1.txt\n    │   ├── S1_CofHoney_C1.txt\n    │   └── ...\n    ├── splits\n    │   ├── test.split1.bundle\n    │   ├── test.split2.bundle\n    │   ├── test.split3.bundle\n    │   └── ...\n    └── mapping.txt\n```\n- data tree\n```txt\n─── data\n    ├── 50salads\n    ├── breakfast\n    ├── gtea\n    └── ...\n```",
+        "type": "code",
+        "location": "/english_documents/dataset/SegmentationDataset.md:1-35"
+    },
+    "4227": {
+        "file_id": 358,
+        "content": "The code introduces a video action segmentation dataset that utilizes breakfast, 50salads, and gtea datasets. The pre-training model's extracted features are used for the dataset. The dataset tree and data tree structure are provided, along with details of their folder contents.",
+        "type": "comment"
+    },
+    "4228": {
+        "file_id": 359,
+        "content": "/english_documents/dataset/fsd.md",
+        "type": "filepath"
+    },
+    "4229": {
+        "file_id": 359,
+        "content": "The Figure Skating Dataset offers 30 fps competition videos with Open Pose key points, and includes train_data, train_label, test_A_data, and test_B_data, downloadable from the competition's homepage. RGB datasets unavailable due to copyright reasons.",
+        "type": "summary"
+    },
+    "4230": {
+        "file_id": 359,
+        "content": "[简体中文](../../zh-CN/dataset/fsd.md) | English\n# Figure Skating Dataset\n- [Introduction](#Introduction)\n- [Download](#Download)\n---\n## Introduction\nIn figure skating, compared with other sports, human posture and trajectory show the characteristics of strong complexity, which is helpful to the research of fine-grained action recognition tasks.\nFor FSD Dataset, all video materials are collected from the Figure Skating Championships from 2017 to 2018. The frame rate of the video is uniformly standardized to 30 frames per second, and the image size is 1080 * 720 to ensure the relative consistency of the dataset. After that, we use the 2D pose estimation algorithm Open Pose to extract frame by frame key points from the video, and finally save the data in `.npy` format.\nThe directory structure of training dataset and test dataset is as follows:\n```txt\ntrain_data.npy        # 2922\ntrain_label.npy       # 2922\ntest_A_data.npy       # 628\ntest_B_data.npy       # 634\n```\n`train_label.npy` can be read using `np.",
+        "type": "code",
+        "location": "/english_documents/dataset/fsd.md:1-26"
+    },
+    "4231": {
+        "file_id": 359,
+        "content": "Figure Skating Dataset provides video materials from Figure Skating Championships (2017-2018) standardized to 30 frames per second and 1080 * 720 image size. It uses Open Pose for key points extraction and saves data in .npy format. The dataset includes train_data, train_label, test_A_data, and test_B_data with respective counts. Train_label can be read using np.",
+        "type": "comment"
+    },
+    "4232": {
+        "file_id": 359,
+        "content": "load()`, each element is an integer variable with a value between 0-29, representing the label of the action. `data.npy` can be read using `np.load()`, return a tensor with the shape of `N×C×T×V×M`, the specific meaning of each dimension is as follows:\n| Dimension | Size | Meaning\t| Notes |\n| :---- | :----: | :----: | :---- |\n| N\t| N\t| Number of samples | - |\n| C | 3\t| The coordinates and confidence of each joint point respectively |\trescale to -1~1 |\n| T\t| 1500 |\t The duration of the action\t| The actual length of some actions may be less than 1500, in such case we will pad 0 to ensure the unity of T dimension. |\n| V |\t25 | Number of joint points |\tSee the skeleton example below for the meaning of specific joint points. |\n| M |\t1\t|  Number of athletes\t| - |\nskeleton example：\n<div align=\"left\">\n  <img src=\"../../images/skeleton_example.png\" width=\"180px\"/><br>\n</div>\n## Download\nYou can get the download link after registering on the [competition homepage](https://www.datafountain.cn/competitions/519).",
+        "type": "code",
+        "location": "/english_documents/dataset/fsd.md:26-47"
+    },
+    "4233": {
+        "file_id": 359,
+        "content": "This code describes the structure and meaning of a tensor in the dataset, with dimensions N (number of samples), C (coordinates and confidence of joint points), T (duration of action), V (number of joint points), and M (number of athletes). It also includes an example image of a skeleton to illustrate the joint points' positions. The data can be downloaded from the competition homepage after registration.",
+        "type": "comment"
+    },
+    "4234": {
+        "file_id": 359,
+        "content": "| Set | Data | Label\t|\n| :---- | :----: | :----: |\n| Train\t| [train_data.npy](https://videotag.bj.bcebos.com/Data/FSD_train_data.npy)\t| [train_label.npy](https://videotag.bj.bcebos.com/Data/FSD_train_label.npy) |\n| TestA\t| comming soon\t| comming soon |\n> RGB datasets would not be provided for copyright reasons.",
+        "type": "code",
+        "location": "/english_documents/dataset/fsd.md:49-55"
+    },
+    "4235": {
+        "file_id": 359,
+        "content": "This code provides dataset information for a PaddleVideo English document. It mentions the Train set with its data and label file URLs, while noting that RGB datasets are not available due to copyright reasons. TestA's data and labels will be provided soon.",
+        "type": "comment"
+    },
+    "4236": {
+        "file_id": 360,
+        "content": "/english_documents/dataset/k400.md",
+        "type": "filepath"
+    },
+    "4237": {
+        "file_id": 360,
+        "content": "This code allows users to download the Kinetics-400 dataset using two methods and provides a script for extracting frames. The training and validation sets require around 135GB and 2TB of storage space, respectively. Two data categories are included with list file links.",
+        "type": "summary"
+    },
+    "4238": {
+        "file_id": 360,
+        "content": "[简体中文](../../zh-CN/dataset/k400.md) | English\n# Kinetics-400 Preparation\n- [Introduction](#Introduction)\n- [Download](#Download)\n- [Frames](#Frames)\n---\n## Introduction\nKinetics-400 is a commonly used benchmark dataset in the video field. Please refer to its official website [Kinetics](https://deepmind.com/research/open-source/kinetics) for details. You can refer to the official address [ActivityNet](https://github.com/activitynet/ActivityNet/tree/master/Crawler/Kinetics), and use the download script provided to download the dataset.\n## Download\nConsidering the difficulty of downloading the K400 data set, we provide two download methods: (1) Baidu network disk download (2) Script download\n### Baidu SkyDrive Download\nNetdisk link: https://pan.baidu.com/s/1S_CGBjWOUAuxL_cCX5kMPg\nExtraction code: `ppvi`\n### Script download\n- Download the training set link list file [train_link.list](https://ai-rank.bj.bcebos.com/Kinetics400/train_link.list) and the validation set link list file [val_link.list](https://ai-rank.bj.bcebos.com/Kinetics400/val_link.list).",
+        "type": "code",
+        "location": "/english_documents/dataset/k400.md:1-27"
+    },
+    "4239": {
+        "file_id": 360,
+        "content": "This code provides information on downloading the Kinetics-400 dataset, which is commonly used in video tasks. It offers two methods for download: Baidu network disk and script download. The code also directs to official resources like the Kinetics website and ActivityNet repository for further details.",
+        "type": "comment"
+    },
+    "4240": {
+        "file_id": 360,
+        "content": "Write the download script `download.sh` as follows:\n```bash\nfile=$1\nwhile read line \ndo\n  wget \"$line\"\ndone <$file\n```\nDownload training set command:\n```bash\nbash download.sh train_link.list\n```\nDownload verification set command:\n```bash\nbash download.sh val_link.list\n```\n---\n|category | Number of data  | list file |\n| :------: | :----------: | :----: |\n|Training set | 234619  |  [train.list](https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/train.list)|\n|Validation set | 19761 |  [val.list](https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/val.list)|\n- After downloading, unzip and add the data path to list file.\n- Due to the failure of some video link, part of original data is missing. This copies need about 135G of storage space.\n> This copies is only used for academic research. If it is helpful to you, welcome to star [our project](https://github.com/PaddlePaddle/PaddleVideo)\n## Frames\nIn order to speed up the training process of the network, we first extract frames from the video file (K4",
+        "type": "code",
+        "location": "/english_documents/dataset/k400.md:29-65"
+    },
+    "4241": {
+        "file_id": 360,
+        "content": "This script downloads training and validation sets from provided links, unzips them, and adds the data paths to respective list files. Due to broken video links, approximately 135GB of storage space is required. The frames extracted from videos help in accelerating network training.",
+        "type": "comment"
+    },
+    "4242": {
+        "file_id": 360,
+        "content": "00 video file is in mp4 format). Compared with the method of network training directly through video files, the method of frames can greatly accelerate the speed of network training。\nEnter the following command to extract the frames of the K400 video file\n```python\npython extract_rawframes.py ./videos/ ./rawframes/ --level 2 --ext mp4\n```\nAfter the video file frames are extracted, they will be stored in the specified `./rawframes` path, and the size is about 2T.\n|category | Number of data  | list file |\n| :------: | :----------: | :----: |\n|Training set | 234619  |  [train_frames.list](https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/train_frames.list)|\n|Validation set | 19761 |  [val_frames.list](https://videotag.bj.bcebos.com/PaddleVideo/Data/Kinetic400/val_frames.list)|",
+        "type": "code",
+        "location": "/english_documents/dataset/k400.md:65-78"
+    },
+    "4243": {
+        "file_id": 360,
+        "content": "This code explains how to extract frames from the K400 video file in mp4 format using the \"extract_rawframes.py\" script, and provides the command to execute it with specified paths for videos and raw frames folders, along with level and ext parameters. The extracted frames will be stored in the ./rawframes path, occupying around 2TB of space. The code also mentions two data categories - training set (234619 files) and validation set (19761 files), along with their respective list file links for easy reference.",
+        "type": "comment"
+    },
+    "4244": {
+        "file_id": 361,
+        "content": "/english_documents/dataset/msrvtt.md",
+        "type": "filepath"
+    },
+    "4245": {
+        "file_id": 361,
+        "content": "The MSR-VTT dataset contains 10K videos available on its website, organized in a \"data\" directory for ActBERT model use. The lock.mdb file is a database used for storing and managing data related to multi-modal transformers for video retrieval as described in a 2020 ECCV paper.",
+        "type": "summary"
+    },
+    "4246": {
+        "file_id": 361,
+        "content": "[简体中文](../../zh-CN/dataset/msrvtt.md) | English\n# MSR-VTT Preparation\n- [Introduction](#1.1)\n- [Download for T2VLAD](#1.2)\n- [Download for ActBERT](#1.3)\n- [Reference](#1.4)\n<a name=\"1.1\"></a>\n## Introduction\nMSR-VTT(Microsoft Research Video to Text) is a large-scale dataset containing videos and subtitles, which is composed of 10000 video clips from 20 categories, and each video clip is annotated with 20 English sentences. We used 9000 video clips for training and 1000 for testing. For more details, please refer to the website: [MSRVTT](https://www.microsoft.com/en-us/research/publication/msr-vtt-a-large-video-description-dataset-for-bridging-video-and-language/)\n<a name=\"1.2\"></a>\n## Download for T2VLAD\n[T2VLAD doc](../../../applications/T2VLAD/README_en.md)\nFor ease of use, we provided extracted features of video.\nFirst, make sure to enter the following command in the `applications/T2VLAD/data` directory to download the dataset.\n```bash\nbash download_features.sh\n```\nAfter downloading, the files in the data directory are organized as follows:",
+        "type": "code",
+        "location": "/english_documents/dataset/msrvtt.md:1-29"
+    },
+    "4247": {
+        "file_id": 361,
+        "content": "This code provides an overview of the MSR-VTT dataset, its download process for T2VLAD and ActBERT applications, and references for more information. It consists of 10K video clips from 20 categories, each with 20 English sentences, and is available on the MSRVTT website.",
+        "type": "comment"
+    },
+    "4248": {
+        "file_id": 361,
+        "content": "```\n├── data\n|   ├── MSR-VTT\n|   │   ├── raw-captions.pkl\n|   │   ├── train_list_jsfusion.txt\n|   │   ├── val_list_jsfusion.txt\n|   │   ├── aggregated_text_feats\n|   |   |   ├── w2v_MSRVTT_openAIGPT.pickle\n|   |   ├── mmt_feats\n|   │   │   ├── features.audio.pkl\n|   │   │   ├── features.face_agg.pkl\n|   │   │   ├── features.flos_agg.pkl\n|   │   │   ├── features.ocr.pkl\n|   │   │   ├── features.rgb_agg.pkl\n|   │   │   ├── features.s3d.pkl\n|   │   │   ├── features.scene.pkl\n|   │   │   ├── features.speech.pkl\n```\n<a name=\"1.3\"></a>\n## Download for ActBERT\n[ActBERT doc](../model_zoo/multimodal/actbert.md)\nDownload data features:\n```\nwget https://videotag.bj.bcebos.com/Data/ActBERT/msrvtt_test.lmdb.tar\nwget https://videotag.bj.bcebos.com/Data/ActBERT/MSRVTT_JSFUSION_test.csv\n```\nDecompress the `msrvtt_test.lmdb.tar`：\n```\ntar -zxvf msrvtt_test.lmdb.tar\n```\nThe files in the data directory are organized as follows:\n```\n├── data\n|   ├── MSR-VTT\n|   │   ├── MSRVTT_JSFUSION_test.csv\n|   │   ├── msrvtt_test.lmdb\n|   │       ├── data.mdb",
+        "type": "code",
+        "location": "/english_documents/dataset/msrvtt.md:31-73"
+    },
+    "4249": {
+        "file_id": 361,
+        "content": "Code provides the instructions to download and decompress data features required for ActBERT model, specifically for MSR-VTT dataset. The data is organized in the \"data\" directory with a .lmdb file and a CSV file containing JSFusion test data.",
+        "type": "comment"
+    },
+    "4250": {
+        "file_id": 361,
+        "content": "|   │       ├── lock.mdb\n```\n<a name=\"1.4\"></a>\n## Reference\n- Valentin Gabeur, Chen Sun, Karteek Alahari, and Cordelia Schmid. Multi-modal transformer for video retrieval. In ECCV, 2020.",
+        "type": "code",
+        "location": "/english_documents/dataset/msrvtt.md:74-79"
+    },
+    "4251": {
+        "file_id": 361,
+        "content": "lock.mdb: Database file used for storing and managing data in codebase related to multi-modal transformer for video retrieval as described in the 2020 ECCV paper by Valentin Gabeur et al.",
+        "type": "comment"
+    },
+    "4252": {
+        "file_id": 362,
+        "content": "/english_documents/dataset/ntu-rgbd.md",
+        "type": "filepath"
+    },
+    "4253": {
+        "file_id": 362,
+        "content": "The code prepares the NTU RGB+D dataset for CTR-GCN through data organization and cleaning, involving obtaining, denoising, and transforming skeleton data using three scripts. The dataset consists of 60 action classes with two splits: Cross-subject and Cross-view.",
+        "type": "summary"
+    },
+    "4254": {
+        "file_id": 362,
+        "content": "[简体中文](../../zh-CN/dataset/ntu-rgbd.md) | English\n# NTU-RGB+D Preparation\n- [Introduction](#Introduction)\n- [ST-GCN Data Prepare](#ST-GCN_Data_Prepare)\n- [CTR-GTCN Data Prepare](#CTR-GCN_Data_Prepare)\n---\n## Introduction\nNTU-RGB+D contains 60 action classes and 56,880 video samples for skeleton-based action recognition. Please refer to its official website[NTU-RGB+D](https://rose1.ntu.edu.sg/dataset/actionRecognition/) for more details.\nThe dataset contains two splits when dividing the training set and test set. For Cross-subject, the dataset is divided according to character id, with 40320 samples in training set and 16560 samples in test set. For Cross-view, the dataset is divided according to camera division. The samples collected by cameras 2 and 3 are training sets, including 37930 samples, and the samples collected by camera 1 are test sets, including 18960 samples.\n## ST-GCN_Data_Prepare\nST-GCN data prepare preceduce are introducted follow.\n### Download\nWe provide the download link of the p",
+        "type": "code",
+        "location": "/english_documents/dataset/ntu-rgbd.md:1-23"
+    },
+    "4255": {
+        "file_id": 362,
+        "content": "NTU-RGB+D dataset contains 60 action classes and 56,880 video samples for skeleton-based action recognition. It has two splits: Cross-subject and Cross-view. ST-GCN data preparation process introduced in the following sections.",
+        "type": "comment"
+    },
+    "4256": {
+        "file_id": 362,
+        "content": "rocessed dataset [NTU-RGB-D.tar](https://videotag.bj.bcebos.com/Data/NTU-RGB-D.tar)(~3.1G). Please download and unzip with ```tar -zxvf NTU-RGB-D.tar ``` , the directory structure is as follows：\n```txt\n─── NTU-RGB-D\n    ├── xsub\n    │   ├── train_data.npy\n    │   ├── train_label.pkl\n    │   ├── val_data.npy\n    │   └── val_label.pkl\n    └── xview\n        ├── train_data.npy\n        ├── train_label.pkl\n        ├── val_data.npy\n        └── val_label.pkl\n```\n> This is a copies from [st-gcn](https://github.com/open-mmlab/mmskeleton/blob/master/doc/SKELETON_DATA.md).\n## CTR-GCN_Data_Prepare\nCTR-GCN data prepare preceduce are introducted follow.\n### Download\nThere is script `download_dataset.sh` to download the dataset from official website [NTU-RGB+D](https://rose1.ntu.edu.sg/dataset/actionRecognition/) in dictory `data\\ntu-rgb-d`.\n```bash\nsh data/ntu-rgb-d/download_dataset.sh\n```\nFile tree:\n```txt\n─── ntu-rgb-d\n    ├── download_dataset.sh\n    ├── nturgb+d_skeletons\n    │   ├── S001C001P001R001A001.skeleton\n    │   ├── S001C001P001R001A002.skeleton",
+        "type": "code",
+        "location": "/english_documents/dataset/ntu-rgbd.md:23-59"
+    },
+    "4257": {
+        "file_id": 362,
+        "content": "This code describes a processed dataset called NTU-RGB-D, which is approximately 3.1GB in size and requires downloading and unzipping using the command \"tar -zxvf NTU-RGB-D.tar\". The resulting directory structure contains train and val data for both xsub and xview. The code also provides a script called download_dataset.sh to facilitate downloading the dataset from the official website, and shows the file tree structure after successful download.",
+        "type": "comment"
+    },
+    "4258": {
+        "file_id": 362,
+        "content": "    │   ├── S001C001P001R001A003.skeleton\n    │   ├── S001C001P001R001A004.skeleton\n    │   ├── S001C001P001R001A005.skeleton\n    │   ├── S001C001P001R001A006.skeleton\n    │   ├── S001C001P001R001A007.skeleton\n    │   ├── ....\n    │   └── S017C003P020R002A060.skeleton\n    ├── get_raw_denoised_data.py\n    ├── get_raw_skes_data.py\n    ├── seq_transformation.py\n    └── statistics\n        ├── camera.txt\n        ├── label.txt\n        ├── performer.txt\n        ├── replication.txt\n        ├── setup.txt\n        └── skes_available_name.txt\n```\n### Prepare\nrun follow script, then data will be precessed to the data format need by CTR-GCN.\n> Note：if make dataset by yourself, please prepare `data/ntu-rgb-d/statistics/skes_available_name.txt`, which is the list of skeletons files that will be precessed.\n```bash\ncd ./data/ntu-rgb-d\n# Get skeleton of each performer\npython get_raw_skes_data.py\n# Remove the bad skeleton\npython get_raw_denoised_data.py\n# Transform the skeleton to the center of the first frame\npython seq_transformation.py",
+        "type": "code",
+        "location": "/english_documents/dataset/ntu-rgbd.md:60-93"
+    },
+    "4259": {
+        "file_id": 362,
+        "content": "The provided code describes the preparation steps for processing the NTU-RGBD dataset to be used by CTR-GCN. It involves running three separate Python scripts in order:\n1. `get_raw_skes_data.py` is responsible for obtaining the skeleton of each performer from the data folders.\n2. `get_raw_denoised_data.py` removes any bad or corrupted skeletons from the dataset.\n3. `seq_transformation.py` transforms the remaining skeletons to the center of the first frame.\nTo follow these steps, navigate to the NTU-RGBD dataset folder and run each script sequentially in your command line interface.",
+        "type": "comment"
+    },
+    "4260": {
+        "file_id": 362,
+        "content": "```\nFile tree:\n```txt\n─── ntu-rgb-d\n    ├── download_dataset.sh\n    ├── nturgb+d_skeletons\n    │   ├── S001C001P001R001A001.skeleton\n    │   ├── S001C001P001R001A002.skeleton\n    │   ├── S001C001P001R001A003.skeleton\n    │   ├── S001C001P001R001A004.skeleton\n    │   ├── S001C001P001R001A005.skeleton\n    │   ├── S001C001P001R001A006.skeleton\n    │   ├── S001C001P001R001A007.skeleton\n    │   ├── ....\n    │   └── S017C003P020R002A060.skeleton\n    ├── denoised_data\n    │   ├── actors_info\n    │   │   ├── S001C001P001R001A024.txt\n    │   │   ├── S001C001P001R001A025.txt\n    │   │   ├── S001C001P001R001A026.txt\n    │   │   ├── ....\n    │   │   ├── S017C003P020R002A059.txt\n    │   │   └── S017C003P020R002A060.txt\n    │   ├── denoised_failed_1.log\n    │   ├── denoised_failed_2.log\n    │   ├── frames_cnt.txt\n    │   ├── missing_skes_1.log\n    │   ├── missing_skes_2.log\n    │   ├── missing_skes.log\n    │   ├── noise_length.log\n    │   ├── noise_motion.log\n    │   ├── noise_spread.log\n    │   ├── raw_denoised_colors.pkl\n    │   ├── raw_denoised_joints.pkl",
+        "type": "code",
+        "location": "/english_documents/dataset/ntu-rgbd.md:94-129"
+    },
+    "4261": {
+        "file_id": 362,
+        "content": "The code represents a dataset called \"ntu-rgb-d\" containing skeleton data and associated files for denoising, logging missing skeletons, and tracking frames. The dataset is organized into folders including 'nturgb+d_skeletons' containing skeleton files per actor and 'denoised_data' with various log and pickle files related to the denoising process.",
+        "type": "comment"
+    },
+    "4262": {
+        "file_id": 362,
+        "content": "    │   └── rgb+ske\n    ├── raw_data\n    │   ├── frames_cnt.txt\n    │   ├── frames_drop.log\n    │   ├── frames_drop_skes.pkl\n    │   └── raw_skes_data.pkl\n    ├── get_raw_denoised_data.py\n    ├── get_raw_skes_data.py\n    ├── seq_transformation.py\n    ├── statistics\n    │   ├── camera.txt\n    │   ├── label.txt\n    │   ├── performer.txt\n    │   ├── replication.txt\n    │   ├── setup.txt\n    │   └── skes_available_name.txt\n    ├── xview\n    │   ├── train_data.npy\n    │   ├── train_label.pkl\n    │   ├── val_data.npy\n    │   └── val_label.pkl\n    └── xsub\n        ├── train_data.npy\n        ├── train_label.pkl\n        ├── val_data.npy\n        └── val_label.pkl\n```\n> Note：dictory `denoised_data`、`raw_data`and`nturgb+d_skeletons`, that are temporal files, can be deleted, if extracted `xview` and `xsub`.",
+        "type": "code",
+        "location": "/english_documents/dataset/ntu-rgbd.md:130-158"
+    },
+    "4263": {
+        "file_id": 362,
+        "content": "This code appears to organize various data files related to a dataset, likely for the NTU RGB+D action recognition benchmark. The directory structure includes raw data, denoised data, and preprocessed data in separate folders (xview and xsub). There are also statistics files and Python scripts for getting raw and denoised data. The notes suggest that some of the temporal files can be deleted if the extracted xview and xsub files are available.",
+        "type": "comment"
+    },
+    "4264": {
+        "file_id": 363,
+        "content": "/english_documents/dataset/ucf101.md",
+        "type": "filepath"
+    },
+    "4265": {
+        "file_id": 363,
+        "content": "This code downloads, extracts, and organizes UCF101 dataset into separate folders with training and validation sets, representing a file hierarchy for easy access.",
+        "type": "summary"
+    },
+    "4266": {
+        "file_id": 363,
+        "content": "# UCF101数据准备\nUCF101数据的相关准备。主要包括UCF101的video文件下载，video文件提取frames，以及生成文件的路径list。\n---\n## 1. 数据下载\nUCF101数据的详细信息可以参考网站[UCF101](https://www.crcv.ucf.edu/data/UCF101.php)。 为了方便用户使用，我们提供了UCF101数据的annotations文件和videos文件的下载脚本。\n### 下载annotations文件\n首先，请确保在`./data/dataset/ucf101/`目录下，输入如下UCF101数据集的标注文件的命令。\n```shell\nbash download_annotations.sh\n```\n### 下载UCF101的视频文件\n同样需要确保在`./data/dataset/ucf101/`目录下，输入下述命令下载视频文件\n```shell\nbash download_videos.sh\n```\n下载完成后视频文件会存储在`./data/dataset/ucf101/videos/`文件夹下，视频文件大小为6.8G。\n---\n## 2. 提取视频文件的frames\n为了加速网络的训练过程，我们首先对视频文件（ucf101视频文件为avi格式）提取帧 (frames)。相对于直接通过视频文件进行网络训练的方式，frames的方式能够加快网络训练的速度。\n直接输入如下命令，即可提取ucf101视频文件的frames\n``` python\npython extract_rawframes.py ./videos/ ./rawframes/ --level 2 --ext avi\n```\n视频文件frames提取完成后，会存储在`./rawframes`文件夹下，大小为56G。\n---\n## 3. 生成frames文件和视频文件的路径list\n生成视频文件的路径list，输入如下命令\n```python\npython build_ucf101_file_list.py videos/ --level 2 --format videos --out_list_path ./\n```\n生成frames文件的路径list，输入如下命令：\n```python\npython build_ucf101_file_list.py rawframes/ --level 2 --format rawframes --out_list_path ./",
+        "type": "code",
+        "location": "/english_documents/dataset/ucf101.md:1-40"
+    },
+    "4267": {
+        "file_id": 363,
+        "content": "This code provides instructions on how to download UCF101 dataset annotations and videos, extract frames from the video files, and generate file path lists for both the original videos and extracted frames. The code also includes commands to execute these steps using provided Python scripts.",
+        "type": "comment"
+    },
+    "4268": {
+        "file_id": 363,
+        "content": "```\n**参数说明**\n`videos/` 或者 `rawframes/` ： 表示视频或者frames文件的存储路径\n`--level 2` ： 表示文件的存储结构\n`--format`： 表示是针对视频还是frames生成路径list\n`--out_list_path `： 表示生的路径list文件存储位置\n# 以上步骤完成后，文件组织形式如下所示\n```\n├── data\n|   ├── dataset\n|   │   ├── ucf101\n|   │   │   ├── ucf101_{train,val}_split_{1,2,3}_rawframes.txt\n|   │   │   ├── ucf101_{train,val}_split_{1,2,3}_videos.txt\n|   │   │   ├── annotations\n|   │   │   ├── videos\n|   │   │   │   ├── ApplyEyeMakeup\n|   │   │   │   │   ├── v_ApplyEyeMakeup_g01_c01.avi\n|  \n|   │   │   │   ├── YoYo\n|   │   │   │   │   ├── v_YoYo_g25_c05.avi\n|   │   │   ├── rawframes\n|   │   │   │   ├── ApplyEyeMakeup\n|   │   │   │   │   ├── v_ApplyEyeMakeup_g01_c01\n|   │   │   │   │   │   ├── img_00001.jpg\n|   │   │   │   │   │   ├── img_00002.jpg\n|   │   │   │   │   │   ├── ...\n|   │   │   │   │   │   ├── flow_x_00001.jpg\n|   │   │   │   │   │   ├── flow_x_00002.jpg\n|   │   │   │   │   │   ├── ...\n|   │   │   │   │   │   ├── flow_y_00001.jpg\n|   │   │   │   │   │   ├── flow_y_00002.jpg\n|   │   │   │   ├── ...\n|   │   │   │   ├── YoYo",
+        "type": "code",
+        "location": "/english_documents/dataset/ucf101.md:41-81"
+    },
+    "4269": {
+        "file_id": 363,
+        "content": "This code is describing the organization of files for UCF101 dataset, specifying paths and formats. It organizes videos or frames into separate folders based on their categories and splits them into training and validation sets. The annotations folder contains information about each video or frame, while the dataset folder stores the generated path lists.",
+        "type": "comment"
+    },
+    "4270": {
+        "file_id": 363,
+        "content": "|   │   │   │   │   ├── v_YoYo_g01_c01\n|   │   │   │   │   ├── ...\n|   │   │   │   │   ├── v_YoYo_g25_c05\n```",
+        "type": "code",
+        "location": "/english_documents/dataset/ucf101.md:82-86"
+    },
+    "4271": {
+        "file_id": 363,
+        "content": "Code represents a file hierarchy in the UCF101 dataset, where each folder inside \"dataset\" corresponds to a video category and contains clips (e.g., v_YoYo_g01_c01).",
+        "type": "comment"
+    },
+    "4272": {
+        "file_id": 364,
+        "content": "/english_documents/dataset/ucf24.md",
+        "type": "filepath"
+    },
+    "4273": {
+        "file_id": 364,
+        "content": "The text outlines the process of preparing UCF24 dataset with PaddleVideo's build_split.py command, installing unrar tool and providing a download script for ease of access. The file structure contains video sequences and split files for training and testing.",
+        "type": "summary"
+    },
+    "4274": {
+        "file_id": 364,
+        "content": "English | [简体中文](../../zh-CN/dataset/ucf24.md)\n# UCF24 Data Preparation\nThis document mainly introduces the preparation process of UCF24 dataset. It mainly includes the download of the RGB frame files, the annotation files and the pathlist of the generated file.\n---\n## 1. Data Download\nDetailed information on UCF24 data can be found on the website [UCF24](http://www.thumos.info/download.html). For ease of use, PaddleVideo provides a download script for the RGB frame, annotation file of the UCF24 data.\nFirst, please ensure access to the [data/ucf24/ directory](../../../data/ucf24) and enter the following command for downloading the RGB frame, annotation file of the UCF24 dataset.\n```shell\nbash download_frames_annotations.sh\n```\n- To run this command you need to install the unrar decompression tool, which can be installed using the pip method.\n- The RGB frame files will be stored in the [data/ucf24/rgb-images/ directory](../../../data/ucf24/rgb-images)\n- The annotation files will be stored in the [data/ucf24/lables/ directory](../../../data/ucf24/labels)",
+        "type": "code",
+        "location": "/english_documents/dataset/ucf24.md:1-20"
+    },
+    "4275": {
+        "file_id": 364,
+        "content": "Introduction to UCF24 dataset preparation process, including download of RGB frame and annotation files. PaddleVideo provides a download script for easier access. Requires unrar tool installation. RGB frames stored in rgb-images directory, annotations in labels directory.",
+        "type": "comment"
+    },
+    "4276": {
+        "file_id": 364,
+        "content": "---\n## 2. File Pathlist Generation\nTo specify the format for dividing the file, enter the following command\n```python\npython build_split.py --raw_path ./splitfiles\n```\n**Description of parameters**\n`--raw_path`： indicates the storage path of the original division file\n# Folder Structure\nAfter the whole data pipeline for UCF24 preparation, the folder structure will look like:\n```\n├── data\n│   ├── ucf24\n│   |   ├── groundtruths_ucf\n│   |   ├── labels\n│   |   |   ├── Basketball\n│   |   |   |   ├── v_Basketball_g01_c01\n│   |   |   |   |   ├── 00009.txt\n│   |   |   |   |   ├── 00010.txt\n│   |   |   |   |   ├── ...\n│   |   |   |   |   ├── 00050.txt\n│   |   |   |   |   ├── 00051.txt\n│   |   |   ├── ...\n│   |   |   ├── WalkingWithDog\n│   |   |   |   ├── v_WalkingWithDog_g01_c01\n│   |   |   |   ├── ...\n│   |   |   |   ├── v_WalkingWithDog_g25_c04\n│   |   ├── rgb-images\n│   |   |   ├── Basketball\n│   |   |   |   ├── v_Basketball_g01_c01\n│   |   |   |   |   ├── 00001.jpg\n│   |   |   |   |   ├── 00002.jpg\n│   |   |   |   |   ├── ...",
+        "type": "code",
+        "location": "/english_documents/dataset/ucf24.md:22-60"
+    },
+    "4277": {
+        "file_id": 364,
+        "content": "This code describes the process of generating file path lists and the resulting folder structure for UCF24 dataset preparation using PaddleVideo's build_split.py command with the raw_path parameter, dividing data into groundtruths_ucf, labels, and rgb-images subfolders containing video clips and corresponding files.",
+        "type": "comment"
+    },
+    "4278": {
+        "file_id": 364,
+        "content": "│   |   |   |   |   ├── 00140.jpg\n│   |   |   |   |   ├── 00141.jpg\n│   |   |   ├── ...\n│   |   |   ├── WalkingWithDog\n│   |   |   |   ├── v_WalkingWithDog_g01_c01\n│   |   |   |   ├── ...\n│   |   |   |   ├── v_WalkingWithDog_g25_c04\n│   |   ├── splitfiles\n│   |   |   ├── trainlist01.txt\n│   |   |   |── testlist01.txt \n│   |   ├── trainlist.txt\n│   |   |── testlist.txt \n```",
+        "type": "code",
+        "location": "/english_documents/dataset/ucf24.md:61-73"
+    },
+    "4279": {
+        "file_id": 364,
+        "content": "The code represents a file structure of the UCF101 dataset, containing various video sequences and split files for training and testing purposes.",
+        "type": "comment"
+    },
+    "4280": {
+        "file_id": 365,
+        "content": "/english_documents/dataset/youtube8m.md",
+        "type": "filepath"
+    },
+    "4281": {
+        "file_id": 365,
+        "content": "YouTube-8M is a large video classification dataset containing over 8 million URLs and covers more than 3800 knowledge graph entities. The code splits the pkl files into smaller files for easier processing.",
+        "type": "summary"
+    },
+    "4282": {
+        "file_id": 365,
+        "content": "English | [简体中文](../../zh-CN/dataset/youtube8m.md)\n# YouTube-8M Data Preparation\n- [Introduction](#Introduction)\n- [Download](#Download)\n- [Conversion](#Conversion)\n## Introduction\nYouTube-8M is a large-scale video classification data set, containing more than 8 million video URLs. The tag system covers more than 3800 knowledge graph entities. One video corresponds to multiple tags (3-4 on average) and is labeled by machine.\n**The length of each video is between 120s and 500s\nDue to the large amount of video data, the image classification model was used to extract frame-level features in advance, and PCA was used to reduce the dimensionality of the features to obtain multi-frame 1024-dimensional features. Similarly, the audio model was used to obtain multi-frame 128-dimensional features. Audio characteristics. **\n> The dataset used here is the updated YouTube-8M data set in 2018 (May 2018 version (current): 6.1M videos, 3862 classes, 3.0 labels/video, 2.6B audio-visual features).\n## Download\n1. Create a new directory for storing features (take the PaddleVideo directory as an example)",
+        "type": "code",
+        "location": "/english_documents/dataset/youtube8m.md:1-20"
+    },
+    "4283": {
+        "file_id": 365,
+        "content": "English | [简体中文](../../zh-CN/dataset/youtube8m.md)\n# YouTube-8M Data Preparation\n- [Introduction](#Introduction)\n- [Download](#Download)\n- [Conversion](#Conversion)\n## Introduction\nYouTube-8M is a large-scale video classification data set, containing more than 8 million video URLs. The tag system covers more than 3800 knowledge graph entities. One video corresponds to multiple tags (3-4 on average) and is labeled by machine.\n**The length of each video is between 120s and 500s\nDue to the large amount of video data, the image classification model was used to extract frame-level features in advance, and PCA was used to reduce the dimensionality of the features to obtain multi-frame 1024-dimensional features. Similarly, the audio model was used to obtain multi-frame 128-dimensional features. Audio characteristics. **\n> The dataset used here is the updated YouTube-8M data set in 2018 (May 2018 version (current): 6.1M videos, 3862 classes, 3.0 labels/video, 2.6B audio-visual features).\n## Download\n1. Create a new directory for storing features (take the PaddleVideo directory as an example)",
+        "type": "comment"
+    },
+    "4284": {
+        "file_id": 365,
+        "content": "    ```bash\n    cd data/yt8m\n    mkdir frame\n    cd frame\n    ```\n2. Download the training and validation set to the frame folder\n    ```bash\n    curl data.yt8m.org/download.py | partition=2/frame/train mirror=asia python\n    curl data.yt8m.org/download.py | partition=2/frame/validate mirror=asia python\n    ```\n    The download process is shown in the figure\n    ![image](https://user-images.githubusercontent.com/23737287/140709613-1e2d6ec0-a82e-474d-b220-7803065b0153.png)\n    After the data download is complete, you will get 3844 training data files and 3844 verification data files (TFRecord format)\n## Conversion\n1. Install tensorflow to read tfrecord data\n    ```bash\n    python3.7 -m pip install tensorflow-gpu==1.14.0\n    ```\n2. Convert the downloaded TFRecord file into a pickle file for PaddlePaddle to use\n    ```bash\n    cd .. # From the frame directory back to the yt8m directory\n    python3.7 tf2pkl.py ./frame ./pkl_frame/ # Convert train*.tfrecord and validate*.tfrecord in the frame folder to pkl format",
+        "type": "code",
+        "location": "/english_documents/dataset/youtube8m.md:21-44"
+    },
+    "4285": {
+        "file_id": 365,
+        "content": "Creates a frame directory, downloads the training and validation sets to it using curl, installs TensorFlow for reading TFRecord data, then converts the TFRecord files to pickle format for PaddlePaddle usage.",
+        "type": "comment"
+    },
+    "4286": {
+        "file_id": 365,
+        "content": "    ```\n3. Generate a single pkl file path set, and split pkl into multiple small pkl files based on this file, and generate the final split pkl file path required\n    ```bash\n    ls pkl_frame/train*.pkl> train.list # Write the path of train*.pkl to train.list\n    ls pkl_frame/validate*.pkl> val.list # Write the path of validate*.pkl into val.list\n    python3.7 split_yt8m.py train.list # Split each train*.pkl into multiple train*_split*.pkl\n    python3.7 split_yt8m.py val.list # Split each validate*.pkl into multiple validate*_split*.pkl\n    ls pkl_frame/train*_split*.pkl> train.list # Rewrite the path of train*_split*.pkl into train.list\n    ls pkl_frame/validate*_split*.pkl> val.list # Rewrite the path of validate*_split*.pkl into val.list\n    ``` ",
+        "type": "code",
+        "location": "/english_documents/dataset/youtube8m.md:45-56"
+    },
+    "4287": {
+        "file_id": 365,
+        "content": "This code generates a single pkl file path set and splits the pkl files into smaller files based on given file lists. It first writes the paths of \"train*.pkl\" and \"validate*.pkl\" to \"train.list\" and \"val.list\" respectively. Then, it uses the \"split_yt8m.py\" script to split each \"train*.pkl\" into multiple \"train*_split*.pkl\" files and each \"validate*.pkl\" into multiple \"validate*_split*.pkl\" files. Finally, it rewrites the paths of the smaller pkl files back into \"train.list\" and \"val.list\".",
+        "type": "comment"
+    },
+    "4288": {
+        "file_id": 366,
+        "content": "/english_documents/install.md",
+        "type": "filepath"
+    },
+    "4289": {
+        "file_id": 366,
+        "content": "This introduction explains how to install PaddlePaddle and PaddleVideo, their requirements like Python 3.7 and CUDA 10.1, enabling distribution feature, setting shared memory in Docker, cloning PaddleVideo repo, upgrading pip and requirements, installing ppvideo package, and usage example specifying model, disabling GPU, and input video file.",
+        "type": "summary"
+    },
+    "4290": {
+        "file_id": 366,
+        "content": "[简体中文](../zh-CN/install.md) | English\n# Installation\n---\n- [Introduction](#Introduction)\n- [Install PaddlePaddle](#Install-PaddlePaddle)\n- [Install PaddleVideo](#Install-PaddleVideo)\n## Introduction\nThis document introduces how to install PaddlePaddle、PaddleVideo and its requirements.\n## Install PaddlePaddle\nPython 3.7, CUDA 10.1, CUDNN7.6.4 nccl2.1.2 and later version are required at first, For now, PaddleVideo only support training on the GPU device. Please follow the instructions in the [Installation](http://www.paddlepaddle.org.cn/install/quick) if the PaddlePaddle on the device is lower than v2.0\n**Install PaddlePaddle**\n```bash\npip3 install paddlepaddle-gpu --upgrade\n```\nor compile from source code, please refer to [Installation](http://www.paddlepaddle.org.cn/install/quick).\nVerify Installation\n```python\nimport paddle\npaddle.utils.run_check()\n```\nCheck PaddlePaddle version：\n```bash\npython3 -c \"import paddle; print(paddle.__version__)\"\n```\nNote:\n- Make sure the compiled version is later than PaddlePaddle2.0.",
+        "type": "code",
+        "location": "/english_documents/install.md:1-41"
+    },
+    "4291": {
+        "file_id": 366,
+        "content": "Introduction: Describes how to install PaddlePaddle, PaddleVideo, and their requirements.\nInstall PaddlePaddle: Requires Python 3.7, CUDA 10.1, CUDNN7.6.4 nccl2.1.2 and supports GPU training only. Follow the instructions on the website if PaddlePaddle on the device is lower than v2.0.\nInstallation commands: Use pip3 to install paddlepaddle-gpu or compile from source code, following instructions on the website.",
+        "type": "comment"
+    },
+    "4292": {
+        "file_id": 366,
+        "content": "- Indicate **WITH_DISTRIBUTE=ON** when compiling, Please refer to [Instruction](https://www.paddlepaddle.org.cn/documentation/docs/zh/develop/install/Tables.html#id3) for more details.\n- When running in the docker, in order to ensure that the container has enough shared memory for data read acceleration of Paddle, please set the parameter `--shm_size=32g` at creating a docker container, if conditions permit, you can set it to a larger value.\n---\n## Install PaddleVideo\n**Clone PaddleVideo:**\n```bash\ncd path_to_clone_PaddleVideo\ngit clone https://github.com/PaddlePaddle/PaddleVideo.git\n```\n**Install requirements**\n```bash\npython3.7 -m pip install --upgrade pip\npip3.7 install --upgrade -r requirements.txt\n```\n**Install python package**\n```bash\npip3.7 install ppvideo==2.3.0\n```\nuse scripts:\n```bash\nppvideo --model_name='ppTSM_v2' --use_gpu=False --video_file='data/example.avi'\n```",
+        "type": "code",
+        "location": "/english_documents/install.md:42-72"
+    },
+    "4293": {
+        "file_id": 366,
+        "content": "WITH_DISTRIBUTE=ON: Enables the distribution feature in PaddleVideo, refer to Instruction for more details.\nDocker shm_size: Set --shm_size=32g when creating a docker container for enough shared memory.\nClone PaddleVideo: Navigate to desired path and clone the repository from GitHub.\nRequirements upgrade: Ensure pip is up-to-date before installing requirements.txt.\nInstall python package: Use pip3.7 to install specific version of ppvideo package.\nUsage example: Specify model, disable GPU usage, and input video file when running ppvideo script.",
+        "type": "comment"
+    },
+    "4294": {
+        "file_id": 367,
+        "content": "/english_documents/model_zoo/README.md",
+        "type": "filepath"
+    },
+    "4295": {
+        "file_id": 367,
+        "content": "The code offers a comprehensive table of action recognition and segmentation models with corresponding links for further details, classified by adaptability and network type. It includes various models like AttentionLSTM, MoViNet, ST-GCN, AGCN, 2s-AGCN, CTR-GCN, BMN, MS-TCN, and ASRF, and serves as a table of contents for PaddleVideo model zoo in HTML format.",
+        "type": "summary"
+    },
+    "4296": {
+        "file_id": 367,
+        "content": "[简体中文](../../zh-CN/model_zoo/README.md) | English\n# Academic algorithms\n## 1. Introduction\nWe implemented action recgonition model and action localization model in this repo.\n## 2. Model list\n<table style=\"margin-left:auto;margin-right:auto;font-size:1.3vw;padding:3px 5px;text-align:center;vertical-align:center;\">\n  <tr>\n    <td colspan=\"5\" style=\"font-weight:bold;\">Action recognition method</td>\n  </tr>\n  <tr>\n    <td><a href=\"./recognition/pp-tsm.md\">PP-TSM</a> (PP series)</td>\n    <td><a href=\"./recognition/pp-tsn.md\">PP-TSN</a> (PP series)</td>\n    <td><a href=\"./recognition/pp-timesformer.md\">PP-TimeSformer</a> (PP series)</td>\n    <td><a href=\"./recognition/tsn.md\">TSN</a> (2D’)</td>\n    <td><a href=\"./recognition/tsm.md\">TSM</a> (2D')</td>\n  <tr>\n    <td><a href=\"./recognition/slowfast.md\">SlowFast</a> (3D’)</td>\n    <td><a href=\"./recognition/timesformer.md\">TimeSformer</a> (Transformer')</td>\n    <td><a href=\"./recognition/videoswin.md\">VideoSwin</a> (Transformer’)</td>\n    <td><a href=\"./recognition/tokenshift_transformer.md\">TokenShift</a> (3D’)</td>",
+        "type": "code",
+        "location": "/english_documents/model_zoo/README.md:1-26"
+    },
+    "4297": {
+        "file_id": 367,
+        "content": "This code provides a table listing action recognition models and their corresponding links for further details. The models listed include PP-TSM, PP-TSN, PP-TimeSformer, TSN, TSM, SlowFast, TimeSformer, VideoSwin, and TokenShift.",
+        "type": "comment"
+    },
+    "4298": {
+        "file_id": 367,
+        "content": "    <td><a href=\"./recognition/attention_lstm.md\">AttentionLSTM</a> (RNN‘)</td>\n  </tr>\n  <tr>\n    <td><a href=\"./recognition/movinet.md\">MoViNet</a> (Lite‘)</td>\n    <td></td>\n    <td></td>\n    <td></td>\n    <td></td>\n  </tr>\n  <tr>\n    <td colspan=\"5\" style=\"font-weight:bold;\">Skeleton based action recognition</td>\n  </tr>\n  <tr>\n    <td><a href=\"./recognition/stgcn.md\">ST-GCN</a> (Custom’)</td>\n    <td><a href=\"./recognition/agcn.md\">AGCN</a> (Adaptive')</td>\n    <td><a href=\"./recognition/agcn2s.md\">2s-AGCN</a> (Adaptive')</td>\n    <td><a href=\"./recognition/ctrgcn.md\">CTR-GCN</a> (GCN‘)</td>\n    <td></td>\n  </tr>\n  <tr>\n    <td colspan=\"5\" style=\"font-weight:bold;\">Sequence action detection method</td>\n  </tr>\n  <tr>\n    <td><a href=\"./localization/bmn.md\">BMN</a> (One-stage')</td>\n    <td></td>\n    <td></td>\n    <td></td>\n    <td></td>\n  </tr>\n  <tr>\n    <td colspan=\"5\" style=\"font-weight:bold;\">temporal segment</td>\n  </tr>\n  <tr>\n    <td><a href=\"./segmentation/mstcn.md\">MS-TCN</a> </td>\n    <td><a href=\"./segmentation/asrf.md\">ASRF</a> </td>",
+        "type": "code",
+        "location": "/english_documents/model_zoo/README.md:27-61"
+    },
+    "4299": {
+        "file_id": 367,
+        "content": "This code is part of a table of contents for an AI model repository. It lists various action recognition and segmentation models, categorized by their features like adaptability, customization, and network type (RNN, Lite, etc.). The models include AttentionLSTM, MoViNet, ST-GCN, AGCN, 2s-AGCN, CTR-GCN, BMN, MS-TCN, and ASRF. Each model is linked to its corresponding documentation file in the repository.",
+        "type": "comment"
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "summary": "This code creates a STGCNHead class in PaddlePaddle's video modeling library, initializing a convolutional layer and applying forward pass for input x to produce N, C shaped output.",
+    "details": [
+        {
+            "comment": "This code snippet is for the STGCNHead class in PaddlePaddle's video modeling library. It's a subclass of BaseHead with 256 input feature channels and 10 number classes as default values, initialized using super(). This model can be customized further by passing additional keyword arguments.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/heads/stgcn_head.py\":0-31",
+            "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport paddle.nn as nn\nfrom .base import BaseHead\nfrom ..registry import HEADS\nfrom ..weight_init import weight_init_\n@HEADS.register()\nclass STGCNHead(BaseHead):\n    \"\"\"\n    Head for ST-GCN model.\n    Args:\n        in_channels: int, input feature channels. Default: 256.\n        num_classes: int, number classes. Default: 10.\n    \"\"\"\n    def __init__(self, in_channels=256, num_classes=10, **kwargs):\n        super().__init__(num_classes, in_channels, **kwargs)"
+        },
+        {
+            "comment": "The code defines a head class with a convolutional layer, initializes its weights using a normal distribution with standard deviation 0.02, and applies the forward pass to input x by passing it through a convolutional layer and reshaping the output to shape N, C (N: number of samples, C: number of classes).",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/heads/stgcn_head.py\":32-49",
+            "content": "        self.fcn = nn.Conv2D(in_channels=in_channels,\n                             out_channels=num_classes,\n                             kernel_size=1)\n    def init_weights(self):\n        \"\"\"Initiate the parameters.\n        \"\"\"\n        for layer in self.sublayers():\n            if isinstance(layer, nn.Conv2D):\n                weight_init_(layer, 'Normal', std=0.02)\n    def forward(self, x):\n        \"\"\"Define how the head is going to run.\n        \"\"\"\n        x = self.fcn(x)\n        x = paddle.reshape_(x, (x.shape[0], -1))  # N,C,1,1 --> N,C\n        return x"
+        }
+    ]
+}

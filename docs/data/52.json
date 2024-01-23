@@ -1,0 +1,545 @@
+{
+    "5200": {
+        "file_id": 437,
+        "content": "@PIPELINES.register()\nclass Normalize:\n    \"\"\"Normalize images with the given mean and std value.\n    Required keys are \"imgs\", \"img_shape\", \"modality\", added or modified\n    keys are \"imgs\" and \"img_norm_cfg\". If modality is 'Flow', additional\n    keys \"scale_factor\" is required\n    Args:\n        mean (Sequence[float]): Mean values of different channels.\n        std (Sequence[float]): Std values of different channels.\n        to_bgr (bool): Whether to convert channels from RGB to BGR.\n            Default: False.\n        adjust_magnitude (bool): Indicate whether to adjust the flow magnitude\n            on 'scale_factor' when modality is 'Flow'. Default: False.\n    \"\"\"\n    def __init__(self, mean, std, to_bgr=False, adjust_magnitude=False):\n        if not isinstance(mean, Sequence):\n            raise TypeError(\n                f'Mean must be list, tuple or np.ndarray, but got {type(mean)}')\n        if not isinstance(std, Sequence):\n            raise TypeError(\n                f'Std must be list, tuple or np.ndarray, but got {type(std)}')",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:696-720"
+    },
+    "5201": {
+        "file_id": 437,
+        "content": "This code defines a class called \"Normalize\" that normalizes images based on given mean and std values. It can also convert channels from RGB to BGR if necessary. Additionally, it adjusts flow magnitude when modality is 'Flow' with an optional adjust_magnitude parameter. The class requires keys \"imgs\", \"img_shape\", \"modality\" with additional keys \"imgs\" and \"img_norm_cfg\" being added or modified.",
+        "type": "comment"
+    },
+    "5202": {
+        "file_id": 437,
+        "content": "        self.mean = np.array(mean, dtype=np.float32)\n        self.std = np.array(std, dtype=np.float32)\n        self.to_bgr = to_bgr\n        self.adjust_magnitude = adjust_magnitude\n    def __call__(self, results):\n        n = len(results['imgs'])\n        h, w, c = results['imgs'][0].shape\n        imgs = np.empty((n, h, w, c), dtype=np.float32)\n        for i, img in enumerate(results['imgs']):\n            imgs[i] = img\n        for img in imgs:\n            imnormalize_(img, self.mean, self.std, self.to_bgr)\n        results['imgs'] = imgs\n        results['img_norm_cfg'] = dict(\n            mean=self.mean, std=self.std, to_bgr=self.to_bgr)\n        return results\n    def __repr__(self):\n        repr_str = (f'{self.__class__.__name__}('\n                    f'mean={self.mean}, '\n                    f'std={self.std}, '\n                    f'to_bgr={self.to_bgr}, '\n                    f'adjust_magnitude={self.adjust_magnitude})')\n        return repr_str",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations_ava.py:722-749"
+    },
+    "5203": {
+        "file_id": 437,
+        "content": "This code defines an augmentation pipeline for image normalization in AVA. It initializes mean, std, and to_bgr values, and then applies the normalization transformation to each input image. The normalized images are stored in 'imgs' and the configuration is saved in 'img_norm_cfg'. The __repr__ method provides a string representation of the object's state.",
+        "type": "comment"
+    },
+    "5204": {
+        "file_id": 438,
+        "content": "/paddlevideo/loader/pipelines/compose.py",
+        "type": "filepath"
+    },
+    "5205": {
+        "file_id": 438,
+        "content": "The Compose class combines registry-based pipeline components like decode functions, sample functions, and transforms to apply transformations flexibly on dictionary or list inputs. It includes a workaround for old format configuration files.",
+        "type": "summary"
+    },
+    "5206": {
+        "file_id": 438,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom collections.abc import Sequence\nfrom ..registry import PIPELINES\nimport traceback\nfrom ...utils import build\nfrom ...utils import get_logger\n@PIPELINES.register()\nclass Compose(object):\n    \"\"\"\n    Composes several pipelines(include decode func, sample func, and transforms) together.\n    Note: To deal with ```list``` type cfg temporaray, like:\n        transform:\n            - Crop: # A list\n                attribute: 10",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/loader/pipelines/compose.py:1-31"
+    },
+    "5207": {
+        "file_id": 438,
+        "content": "This code defines the Compose class, which composes multiple pipelines such as decode functions, sample functions, and transforms. It uses the PIPELINES registry for registration and builds pipelines based on input configurations. The code also handles temporary list-type configuration for flexibility.",
+        "type": "comment"
+    },
+    "5208": {
+        "file_id": 438,
+        "content": "            - Resize: # A list\n                attribute: 20\n    every key of list will pass as the key name to build a module.\n    XXX: will be improved in the future.\n    Args:\n        pipelines (list): List of transforms to compose.\n    Returns:\n        A compose object which is callable, __call__ for this Compose\n        object will call each given :attr:`transforms` sequencely.\n    \"\"\"\n    def __init__(self, pipelines):\n        #assert isinstance(pipelines, Sequence)\n        self.pipelines = []\n        for p in pipelines.values():\n            if isinstance(p, dict):\n                p = build(p, PIPELINES)\n                self.pipelines.append(p)\n            elif isinstance(p, list):\n                for t in p:\n                    #XXX: to deal with old format cfg, ugly code here!\n                    temp_dict = dict(name=list(t.keys())[0])\n                    for all_sub_t in t.values():\n                        if all_sub_t is not None:\n                            temp_dict.update(all_sub_t) \n                    t = build(temp_dict, PIPELINES)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/loader/pipelines/compose.py:32-59"
+    },
+    "5209": {
+        "file_id": 438,
+        "content": "The code defines a Compose class that takes a list of transforms and composes them sequentially. It checks if the input is a dictionary or a list, builds the transform modules using build function from PIPELINES, and appends them to the pipelines list. The code also includes an ugly workaround for dealing with old format configuration files.",
+        "type": "comment"
+    },
+    "5210": {
+        "file_id": 438,
+        "content": "                    self.pipelines.append(t)\n            elif callable(p):\n                self.pipelines.append(p)\n            else:\n                raise TypeError(f'pipelines must be callable or a dict,'\n                                f'but got {type(p)}')\n    def __call__(self, data):\n        for p in self.pipelines:\n            try:\n                data = p(data)\n            except Exception as e:\n                stack_info = traceback.format_exc()\n                logger = get_logger(\"paddlevideo\")\n                logger.info(\"fail to perform transform [{}] with error: \"\n                      \"{} and stack:\\n{}\".format(p, e, str(stack_info)))\n                raise e\n        return data",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/loader/pipelines/compose.py:60-76"
+    },
+    "5211": {
+        "file_id": 438,
+        "content": "The code defines a class with a `__call__` method and an append function for adding pipelines. The `__call__` method applies transformations to input data by iterating over the pipelines. If any pipeline fails, it logs the error and raises an exception. Pipelines can be either callable or dictionaries, but if not, a TypeError is raised.",
+        "type": "comment"
+    },
+    "5212": {
+        "file_id": 439,
+        "content": "/paddlevideo/loader/pipelines/decode.py",
+        "type": "filepath"
+    },
+    "5213": {
+        "file_id": 439,
+        "content": "This code utilizes PaddleVideo's TimeSformer model for video processing, including a VideoDecoder class to decode mp4 files and handle varying durations. The \"ActionFeatureDecoder\" class handles feature decoding, while the function prepares data for model input and normalizes inputs for PaddlePaddle's video pipeline.",
+        "type": "summary"
+    },
+    "5214": {
+        "file_id": 439,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport numpy as np\ntry:\n    import av\nexcept ImportError as e:\n    print(\n        f\"Warning! {e}, [av] package and it's dependencies is required for TimeSformer and other models.\"\n    )\nimport cv2\nimport pickle\nimport decord as de\nimport math\nimport random\nfrom ..registry import PIPELINES\ndef get_start_end_idx(video_size, clip_size, clip_idx, num_clips):\n    delta = max(video_size - clip_size, 0)\n    if clip_idx == -1:  # here",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode.py:1-32"
+    },
+    "5215": {
+        "file_id": 439,
+        "content": "This code snippet is part of the PaddleVideo library and it appears to import various packages, define a function \"get_start_end_idx\", and register something into the PIPELINES registry. It seems to handle video clip processing for TimeSformer and other models. The function calculates start and end indices for video clips based on video size, clip size, clip index, and the total number of clips.",
+        "type": "comment"
+    },
+    "5216": {
+        "file_id": 439,
+        "content": "        # Random temporal sampling.\n        start_idx = random.uniform(0, delta)\n    else:  # ignore\n        # Uniformly sample the clip with the given index.\n        start_idx = delta * clip_idx / num_clips\n    end_idx = start_idx + clip_size - 1\n    return start_idx, end_idx\n@PIPELINES.register()\nclass VideoDecoder(object):\n    \"\"\"\n    Decode mp4 file to frames.\n    Args:\n        filepath: the file path of mp4 file\n    \"\"\"\n    def __init__(self,\n                 backend='cv2',\n                 mode='train',\n                 sampling_rate=32,\n                 num_seg=8,\n                 num_clips=1,\n                 target_fps=30):\n        self.backend = backend\n        # params below only for TimeSformer\n        self.mode = mode\n        self.sampling_rate = sampling_rate\n        self.num_seg = num_seg\n        self.num_clips = num_clips\n        self.target_fps = target_fps\n    def __call__(self, results):\n        \"\"\"\n        Perform mp4 decode operations.\n        return:\n            List where each item is a numpy array after decoder.",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode.py:33-69"
+    },
+    "5217": {
+        "file_id": 439,
+        "content": "This code defines a VideoDecoder class for decoding mp4 files to frames. It takes the file path as input and has additional parameters for time-series applications like TimeSformer. The __call__ method performs the decoding operation, returning a list of numpy arrays representing the decoded frames.",
+        "type": "comment"
+    },
+    "5218": {
+        "file_id": 439,
+        "content": "        \"\"\"\n        file_path = results['filename']\n        results['format'] = 'video'\n        results['backend'] = self.backend\n        if self.backend == 'cv2':\n            cap = cv2.VideoCapture(file_path)\n            videolen = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))\n            sampledFrames = []\n            for i in range(videolen):\n                ret, frame = cap.read()\n                # maybe first frame is empty\n                if ret == False:\n                    continue\n                img = frame[:, :, ::-1]\n                sampledFrames.append(img)\n            results['frames'] = sampledFrames\n            results['frames_len'] = len(sampledFrames)\n        elif self.backend == 'decord':\n            container = de.VideoReader(file_path)\n            frames_len = len(container)\n            results['frames'] = container\n            results['frames_len'] = frames_len\n        elif self.backend == 'pyav':  # for TimeSformer\n            if self.mode in [\"train\", \"valid\"]:\n                clip_idx = -1\n            elif self.mode in [\"test\"]:",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode.py:70-98"
+    },
+    "5219": {
+        "file_id": 439,
+        "content": "This code is part of a video decoding pipeline. It checks the backend and decodes videos using either cv2, decord or pyav depending on the backend specified. It reads frames from the video and stores them in 'results' dictionary for further processing.",
+        "type": "comment"
+    },
+    "5220": {
+        "file_id": 439,
+        "content": "                clip_idx = 0\n            else:\n                raise NotImplementedError\n            container = av.open(file_path)\n            num_clips = 1  # always be 1\n            # decode process\n            fps = float(container.streams.video[0].average_rate)\n            frames_length = container.streams.video[0].frames\n            duration = container.streams.video[0].duration\n            if duration is None:\n                # If failed to fetch the decoding information, decode the entire video.\n                decode_all_video = True\n                video_start_pts, video_end_pts = 0, math.inf\n            else:\n                decode_all_video = False\n                start_idx, end_idx = get_start_end_idx(\n                    frames_length,\n                    self.sampling_rate * self.num_seg / self.target_fps * fps,\n                    clip_idx, num_clips)\n                timebase = duration / frames_length\n                video_start_pts = int(start_idx * timebase)\n                video_end_pts = int(end_idx * timebase)",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode.py:99-125"
+    },
+    "5221": {
+        "file_id": 439,
+        "content": "This code checks if the duration of a video file is None. If it is, it sets decode_all_video to True and calculates video_start_pts and video_end_pts as 0 and infinity respectively. If the duration is not None, it calculates start and end indices for decoding specific clips from the video file.",
+        "type": "comment"
+    },
+    "5222": {
+        "file_id": 439,
+        "content": "            frames = None\n            # If video stream was found, fetch video frames from the video.\n            if container.streams.video:\n                margin = 1024\n                seek_offset = max(video_start_pts - margin, 0)\n                container.seek(seek_offset,\n                               any_frame=False,\n                               backward=True,\n                               stream=container.streams.video[0])\n                tmp_frames = {}\n                buffer_count = 0\n                max_pts = 0\n                for frame in container.decode(**{\"video\": 0}):\n                    max_pts = max(max_pts, frame.pts)\n                    if frame.pts < video_start_pts:\n                        continue\n                    if frame.pts <= video_end_pts:\n                        tmp_frames[frame.pts] = frame\n                    else:\n                        buffer_count += 1\n                        tmp_frames[frame.pts] = frame\n                        if buffer_count >= 0:\n                            break",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode.py:127-150"
+    },
+    "5223": {
+        "file_id": 439,
+        "content": "This code snippet is part of a video decoding pipeline in PaddleVideo. It seeks to a specific start time of the video stream, then decodes and filters frames based on their start and end points. Frames before the start point are skipped, while frames after the end point are buffered. Finally, it stores the relevant frames in the \"tmp\\_frames\" dictionary.",
+        "type": "comment"
+    },
+    "5224": {
+        "file_id": 439,
+        "content": "                video_frames = [tmp_frames[pts] for pts in sorted(tmp_frames)]\n                container.close()\n                frames = [frame.to_rgb().to_ndarray() for frame in video_frames]\n                clip_sz = self.sampling_rate * self.num_seg / self.target_fps * fps\n                start_idx, end_idx = get_start_end_idx(\n                    len(frames),  # frame_len\n                    clip_sz,\n                    clip_idx if decode_all_video else\n                    0,  # If decode all video, -1 in train and valid, 0 in test;\n                    # else, always 0 in train, valid and test, as we has selected clip size frames when decode.\n                    1)\n                results['frames'] = frames\n                results['frames_len'] = len(frames)\n                results['start_idx'] = start_idx\n                results['end_idx'] = end_idx\n        else:\n            raise NotImplementedError\n        return results\n@PIPELINES.register()\nclass FrameDecoder(object):\n    \"\"\"just parse results\n    \"\"\"",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode.py:151-177"
+    },
+    "5225": {
+        "file_id": 439,
+        "content": "This code extracts video frames, sorts them by timestamp, and then converts the frames to RGB format. It calculates the start and end indices for a given clip size based on the number of frames and the selected clip size. The results are stored in a dictionary along with additional information such as frame length and indices. If no code is provided for the \"else\" condition, a NotImplementedError will be raised. This class is registered as a pipeline using @PIPELINES.register().",
+        "type": "comment"
+    },
+    "5226": {
+        "file_id": 439,
+        "content": "    def __init__(self):\n        pass\n    def __call__(self, results):\n        results['format'] = 'frame'\n        return results\n@PIPELINES.register()\nclass MRIDecoder(object):\n    \"\"\"just parse results\n    \"\"\"\n    def __init__(self):\n        pass\n    def __call__(self, results):\n        results['format'] = 'MRI'\n        return results\n@PIPELINES.register()\nclass FeatureDecoder(object):\n    \"\"\"\n        Perform feature decode operations.e.g.youtube8m\n    \"\"\"\n    def __init__(self, num_classes, max_len=512, has_label=True):\n        self.max_len = max_len\n        self.num_classes = num_classes\n        self.has_label = has_label\n    def __call__(self, results):\n        \"\"\"\n        Perform feature decode operations.\n        return:\n            List where each item is a numpy array after decoder.\n        \"\"\"\n        #1. load pkl\n        #2. parse to rgb/audio/\n        #3. padding\n        filepath = results['filename']\n        data = pickle.load(open(filepath, 'rb'), encoding='bytes')\n        record = data\n        nframes = record['nframes'] if 'nframes' in record else record[",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode.py:178-222"
+    },
+    "5227": {
+        "file_id": 439,
+        "content": "The code defines three pipeline classes for decoding different types of data. The MRIDecoder class sets the format to 'MRI'. The FeatureDecoder class initializes with parameters num_classes, max_len and has_label, then performs feature decode operations on loaded pkl files, parsing them into RGB/audio format, padding as necessary, and returning a list of numpy arrays.",
+        "type": "comment"
+    },
+    "5228": {
+        "file_id": 439,
+        "content": "            b'nframes']\n        rgb = record['feature'].astype(\n            float) if 'feature' in record else record[b'feature'].astype(float)\n        audio = record['audio'].astype(\n            float) if 'audio' in record else record[b'audio'].astype(float)\n        if self.has_label:\n            label = record['label'] if 'label' in record else record[b'label']\n            one_hot_label = self.make_one_hot(label, self.num_classes)\n        rgb = rgb[0:nframes, :]\n        audio = audio[0:nframes, :]\n        rgb = self.dequantize(rgb,\n                              max_quantized_value=2.,\n                              min_quantized_value=-2.)\n        audio = self.dequantize(audio,\n                                max_quantized_value=2,\n                                min_quantized_value=-2)\n        if self.has_label:\n            results['labels'] = one_hot_label.astype(\"float32\")\n        feat_pad_list = []\n        feat_len_list = []\n        mask_list = []\n        vitem = [rgb, audio]\n        for vi in range(2):  #rgb and audio",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode.py:223-249"
+    },
+    "5229": {
+        "file_id": 439,
+        "content": "This code is preparing data for a model. It loads the 'feature' and 'audio' from the record if available, converts them to float type, and cuts them up to the specified number of frames (nframes). If labels are present in the record, it makes one-hot encoding out of them. The data is then dequantized using a method, and results are stored into the 'labels' variable. Finally, three lists (feat_pad_list, feat_len_list, mask_list) are initialized for further data processing. The code handles two types of data: 'feature' and 'audio', iterating over them in a range loop.",
+        "type": "comment"
+    },
+    "5230": {
+        "file_id": 439,
+        "content": "            if vi == 0:\n                prefix = \"rgb_\"\n            else:\n                prefix = \"audio_\"\n            feat = vitem[vi]\n            results[prefix + 'len'] = feat.shape[0]\n            #feat pad step 1. padding\n            feat_add = np.zeros((self.max_len - feat.shape[0], feat.shape[1]),\n                                dtype=np.float32)\n            feat_pad = np.concatenate((feat, feat_add), axis=0)\n            results[prefix + 'data'] = feat_pad.astype(\"float32\")\n            #feat pad step 2. mask\n            feat_mask_origin = np.ones(feat.shape, dtype=np.float32)\n            feat_mask_add = feat_add\n            feat_mask = np.concatenate((feat_mask_origin, feat_mask_add),\n                                       axis=0)\n            results[prefix + 'mask'] = feat_mask.astype(\"float32\")\n        return results\n    def dequantize(self,\n                   feat_vector,\n                   max_quantized_value=2.,\n                   min_quantized_value=-2.):\n        \"\"\"\n        Dequantize the feature from the byte format to the float format",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode.py:250-275"
+    },
+    "5231": {
+        "file_id": 439,
+        "content": "This function pads and dequantizes video features for model input. It first checks the type of feature (video or audio) and prepends 'rgb_' or 'audio_' to the result keys accordingly. Then it pads the feature with zeros to match the max length, creates a mask for the padded feature, and dequantizes the feature from byte format to float format.",
+        "type": "comment"
+    },
+    "5232": {
+        "file_id": 439,
+        "content": "        \"\"\"\n        assert max_quantized_value > min_quantized_value\n        quantized_range = max_quantized_value - min_quantized_value\n        scalar = quantized_range / 255.0\n        bias = (quantized_range / 512.0) + min_quantized_value\n        return feat_vector * scalar + bias\n    def make_one_hot(self, label, dim=3862):\n        one_hot_label = np.zeros(dim)\n        one_hot_label = one_hot_label.astype(float)\n        for ind in label:\n            one_hot_label[int(ind)] = 1\n        return one_hot_label\n@PIPELINES.register()\nclass ActionFeatureDecoder(object):\n    \"\"\"\n        Perform feature decode operations on footballaction\n    \"\"\"\n    def __init__(self, num_classes, max_len=512, has_label=True):\n        self.max_len = max_len\n        self.num_classes = num_classes\n        self.has_label = has_label\n    def __call__(self, results):\n        \"\"\"\n        Perform feature decode operations.\n        return:\n            List where each item is a numpy array after decoder.\n        \"\"\"\n        #1. load pkl\n        #2. parse to rgb/audio/",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode.py:276-310"
+    },
+    "5233": {
+        "file_id": 439,
+        "content": "The code defines a class called \"ActionFeatureDecoder\" for feature decoding operations in football actions. It initializes with parameters for the maximum length, number of classes, and whether or not it should handle labels. The __call__ method performs the decoding operation on input results and returns a list of numpy arrays after decoding.",
+        "type": "comment"
+    },
+    "5234": {
+        "file_id": 439,
+        "content": "        #3. padding\n        filepath = results['filename']\n        data = pickle.load(open(filepath, 'rb'), encoding='bytes')\n        pkl_data = data\n        rgb = pkl_data['image_feature'].astype(float)\n        audio = pkl_data['audio_feature'].astype(float)\n        label_id_info = pkl_data['label_info']\n        label_cls = [label_id_info['label']]\n        label_one = int(label_cls[0])\n        if len(label_cls) > 1:\n            label_index = random.randint(0, 1)\n            label_one = int(label_cls[label_index])\n        iou_norm = float(label_id_info['norm_iou'])\n        results['labels'] = np.array([label_one])\n        results['iou_norm'] = float(iou_norm)\n        vitem = [rgb, audio]\n        for vi in range(2):  #rgb and audio\n            if vi == 0:\n                prefix = \"rgb_\"\n            else:\n                prefix = \"audio_\"\n            feat = vitem[vi]\n            results[prefix + 'len'] = feat.shape[0]\n            #feat pad step 1. padding\n            feat_add = np.zeros((self.max_len - feat.shape[0], feat.shape[1]),",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode.py:311-338"
+    },
+    "5235": {
+        "file_id": 439,
+        "content": "The code is reading a pickle file, extracting the rgb image and audio features, label information, and performing some data manipulations. It sets the label to either 0 or 1 randomly if there's more than one in the data, normalizes iou values, and adds padding to the data for further processing. This is used in a video processing pipeline for PaddlePaddle.",
+        "type": "comment"
+    },
+    "5236": {
+        "file_id": 439,
+        "content": "                                dtype=np.float32)\n            feat_pad = np.concatenate((feat, feat_add), axis=0)\n            results[prefix + 'data'] = feat_pad.astype(\"float32\")\n            #feat pad step 2. mask\n            feat_mask_origin = np.ones(feat.shape, dtype=np.float32)\n            feat_mask = np.concatenate((feat_mask_origin, feat_add), axis=0)\n            results[prefix + 'mask'] = feat_mask.astype(\"float32\")\n        return results",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode.py:339-347"
+    },
+    "5237": {
+        "file_id": 439,
+        "content": "This code pads the feature data and its corresponding mask for a PaddleVideo pipeline, concatenating them and casting the results to float32 type before storing in the 'results' dictionary.",
+        "type": "comment"
+    },
+    "5238": {
+        "file_id": 440,
+        "content": "/paddlevideo/loader/pipelines/decode_image.py",
+        "type": "filepath"
+    },
+    "5239": {
+        "file_id": 440,
+        "content": "The PaddleVideo class in PaddlePipelines uses PIL and skimage for image decoding operations. It accepts parameters such as scales, side map, and backend. This class can be used with datasets like KITTI and KITTI ODOM, supporting the retrieval of image paths and resizing of depth images. The code organizes results into a dictionary structure, processes image data based on 'train' or 'val', retrieves color images, adjusts intrinsics for depth estimation, stores results in the 'imgs' dictionary, and adds processed 'imgs' to 'results'.",
+        "type": "summary"
+    },
+    "5240": {
+        "file_id": 440,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os\nimport numpy as np\nimport PIL.Image as pil\ntry:\n    import skimage.transform\nexcept ImportError as e:\n    print(\n        f\"Warning! {e}, [scikit-image] package and it's dependencies is required for ADDS.\"\n    )\nfrom PIL import Image\nfrom ..registry import PIPELINES\n@PIPELINES.register()\nclass ImageDecoder(object):\n    \"\"\"Decode Image\n    \"\"\"\n    def __init__(self,\n                 dataset,\n                 frame_idxs,",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode_image.py:1-37"
+    },
+    "5241": {
+        "file_id": 440,
+        "content": "This code is a Python class for decoding images, registered with the PADDLEPIPELINES module. It uses the PIL and skimage libraries, and is part of the PaddleVideo package in PaddlePaddle. The class takes in a dataset and frame_idxs as parameters for image decoding operations.",
+        "type": "comment"
+    },
+    "5242": {
+        "file_id": 440,
+        "content": "                 num_scales,\n                 side_map,\n                 full_res_shape,\n                 img_ext,\n                 backend='cv2'):\n        self.backend = backend\n        self.dataset = dataset\n        self.frame_idxs = frame_idxs\n        self.num_scales = num_scales\n        self.side_map = side_map\n        self.full_res_shape = full_res_shape\n        self.img_ext = img_ext\n    def _pil_loader(self, path):\n        with open(path, 'rb') as f:\n            with Image.open(f) as img:\n                return img.convert('RGB')\n    def get_color(self, folder, frame_index, side):\n        color = self._pil_loader(\n            self.get_image_path(self.dataset, folder, frame_index, side))\n        return color\n    def get_image_path(self, dataset, folder, frame_index, side):\n        if dataset == \"kitti\":\n            f_str = \"{:010d}{}\".format(frame_index, self.img_ext)\n            image_path = os.path.join(self.data_path, folder, f_str)\n        elif dataset == \"kitti_odom\":\n            f_str = \"{:06d}{}\".format(frame_index, self.img_ext)",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode_image.py:38-66"
+    },
+    "5243": {
+        "file_id": 440,
+        "content": "This code defines a class for image decoding pipelines, accepting parameters such as number of scales, side map, full resolution shape, image extension, and backend. It also includes methods for loading images using the PIL library and retrieving image paths based on the dataset. The class is intended to be used for decoding images from specific datasets like KITTI and KITTI ODOM.",
+        "type": "comment"
+    },
+    "5244": {
+        "file_id": 440,
+        "content": "            image_path = os.path.join(self.data_path,\n                                      \"sequences/{:02d}\".format(int(folder)),\n                                      \"image_{}\".format(self.side_map[side]),\n                                      f_str)\n        elif dataset == \"kitti_depth\":\n            f_str = \"{:010d}{}\".format(frame_index, self.img_ext)\n            image_path = os.path.join(\n                self.data_path, folder,\n                \"image_0{}/data\".format(self.side_map[side]), f_str)\n        return image_path\n    def get_depth(self, dataset, folder, frame_index, side):\n        if dataset == \"kitii_depth\":\n            f_str = \"{:010d}.png\".format(frame_index)\n            depth_path = os.path.join(\n                self.data_path, folder,\n                \"proj_depth/groundtruth/image_0{}\".format(self.side_map[side]),\n                f_str)\n            depth_gt = pil.open(depth_path)\n            depth_gt = depth_gt.resize(self.full_res_shape, pil.NEAREST)\n            depth_gt = np.array(depth_gt).astype(np.float32) / 256",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode_image.py:67-89"
+    },
+    "5245": {
+        "file_id": 440,
+        "content": "This code defines a class with two methods: `get_image_path` and `get_depth`. The first method returns the path of an image based on the dataset, folder, frame index, and side. If the dataset is \"kitti_depth\", it constructs the path using frame index and extension. The second method retrieves depth data for a given dataset, folder, frame index, and side. It uses the \"kitii_depth\" dataset, constructs the path to the depth file, opens the image, resizes it, and converts it into a float32 array divided by 256.",
+        "type": "comment"
+    },
+    "5246": {
+        "file_id": 440,
+        "content": "        else:\n            f_str = \"{:010d}{}\".format(frame_index, self.img_ext)\n            depth_path = os.path.join(self.data_path, folder + '_gt', f_str)\n            img_file = Image.open(depth_path)\n            depth_png = np.array(img_file, dtype=int)\n            img_file.close()\n            # make sure we have a proper 16bit depth map here.. not 8bit!\n            assert np.max(depth_png) > 255, \\\n                \"np.max(depth_png)={}, path={}\".format(np.max(depth_png), depth_path)\n            depth_gt = depth_png.astype(np.float) / 256.\n            depth_gt = depth_gt[160:960 - 160, :]\n            depth_gt = skimage.transform.resize(depth_gt,\n                                                self.full_res_shape[::-1],\n                                                order=0,\n                                                preserve_range=True,\n                                                mode='constant')\n        return depth_gt\n    def __call__(self, results):\n        \"\"\"\n        Perform mp4 decode operations.",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode_image.py:91-116"
+    },
+    "5247": {
+        "file_id": 440,
+        "content": "This function reads the depth image from file and resizes it to the desired shape, ensuring that it is a 16-bit depth map. It also checks if the maximum value exceeds 255, asserting that this is not an 8-bit image. The final output is a resized depth_gt with dimensions self.full_res_shape[::-1]. The function returns this resized depth_gt after performing any necessary operations for mp4 decode operations.",
+        "type": "comment"
+    },
+    "5248": {
+        "file_id": 440,
+        "content": "        return:\n            List where each item is a numpy array after decoder.\n        \"\"\"\n        if results.get('mode', None) == 'infer':\n            imgs = {}\n            imgs[(\"color\", 0,\n                  -1)] = Image.open(results[\"filename\"]).convert(\"RGB\")\n            results['imgs'] = imgs\n            return results\n        self.data_path = results['data_path']\n        results['backend'] = self.backend\n        imgs = {}\n        results['frame_idxs'] = self.frame_idxs\n        results['num_scales'] = self.num_scales\n        file_name = results['filename']\n        folder = results['folder']\n        frame_index = results['frame_index']\n        line = file_name.split('/')\n        istrain = folder.split('_')[1]\n        if 'mode' not in results:\n            results['mode'] = istrain\n        results['day_or_night'] = folder.split('_')[0]\n        if istrain == \"train\":\n            if folder[0] == 'd':\n                folder2 = folder + '_fake_night'\n                flag = 0\n            else:\n                folder2 = folder + '_fake_day'",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode_image.py:117-149"
+    },
+    "5249": {
+        "file_id": 440,
+        "content": "This code handles the decoding of images and organizes the results into a dictionary structure. It checks if the mode is set to 'infer', where it opens an image in RGB format, stores it in the results dictionary under 'imgs' key, and returns the results. If the mode is not set or is 'train', it sets up necessary variables for organizing data based on day or night folders and whether the folder is real or fake.",
+        "type": "comment"
+    },
+    "5250": {
+        "file_id": 440,
+        "content": "                tmp = folder\n                folder = folder2\n                folder2 = tmp\n                flag = 1\n            if len(line) == 3:\n                side = line[2]\n            else:\n                side = None\n            results['side'] = side\n            for i in self.frame_idxs:\n                if i == \"s\":\n                    other_side = {\"r\": \"l\", \"l\": \"r\"}[side]\n                    imgs[(\"color\", i,\n                          -1)] = self.get_color(folder, frame_index, other_side)\n                    imgs[(\"color_n\", i,\n                          -1)] = self.get_color(folder2, frame_index,\n                                                other_side)\n                else:\n                    imgs[(\"color\", i,\n                          -1)] = self.get_color(folder, frame_index + i, side)\n                    imgs[(\"color_n\", i,\n                          -1)] = self.get_color(folder2, frame_index + i, side)\n            istrain = folder.split('_')[1]\n            if istrain != 'train':\n                if flag:",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode_image.py:150-179"
+    },
+    "5251": {
+        "file_id": 440,
+        "content": "This code is setting up image files for decoding from a given folder and folder2 based on the frame indexes. It also considers whether the images are for the left or right side, identified by 'r' and 'l'. The flag variable is used to check if there's a change in side. If the folder name does not contain 'train', it executes something else (not shown in this code snippet).",
+        "type": "comment"
+    },
+    "5252": {
+        "file_id": 440,
+        "content": "                    depth_gt = self.get_depth(folder2, frame_index, side)\n                else:\n                    depth_gt = self.get_depth(folder, frame_index, side)\n                imgs[\"depth_gt\"] = np.expand_dims(depth_gt, 0)\n        elif istrain == 'val':\n            if len(line) == 3:\n                side = line[2]\n            else:\n                side = None\n            for i in self.frame_idxs:\n                if i == \"s\":\n                    other_side = {\"r\": \"l\", \"l\": \"r\"}[side]\n                    imgs[(\"color\", i,\n                          -1)] = self.get_color(folder, frame_index, other_side)\n                else:\n                    imgs[(\"color\", i,\n                          -1)] = self.get_color(folder, frame_index + i, side)\n            # adjusting intrinsics to match each scale in the pyramid\n            depth_gt = self.get_depth(self.dataset, folder, frame_index, side)\n            imgs[\"depth_gt\"] = np.expand_dims(depth_gt, 0)\n        results['imgs'] = imgs\n        return results",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode_image.py:180-206"
+    },
+    "5253": {
+        "file_id": 440,
+        "content": "The code checks the 'train' or 'val' flag and processes image data accordingly. It retrieves color images based on 'frame_idxs', adjusts intrinsics for depth estimation, and stores results in 'imgs' dictionary. The processed 'imgs' is then added to 'results' before returning it.",
+        "type": "comment"
+    },
+    "5254": {
+        "file_id": 441,
+        "content": "/paddlevideo/loader/pipelines/decode_sampler.py",
+        "type": "filepath"
+    },
+    "5255": {
+        "file_id": 441,
+        "content": "The code imports libraries, defines a DecodeSampler class for video decoding, and initializes parameters. It then decodes video frames, clips the index, retrieves frames, converts them to images using PIL library, and stores the images in a list.",
+        "type": "summary"
+    },
+    "5256": {
+        "file_id": 441,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport random\nimport numpy as np\nfrom PIL import Image\nimport decord as de\nfrom ..registry import PIPELINES\n@PIPELINES.register()\nclass DecodeSampler(object):\n    \"\"\"\n    We use 'decord' for decode and sampling, which is faster than opencv.\n    This is used in slowfast model.\n    Args:\n        num_frames(int): the number of frames we want to sample.\n        sampling_rate(int): sampling rate for video data.\n        target_fps(int): desired fps, default 30",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode_sampler.py:1-30"
+    },
+    "5257": {
+        "file_id": 441,
+        "content": "This code imports necessary libraries, defines the DecodeSampler class for faster decoding and sampling of video data using 'decord', and registers it with the PIPELINES registry. It is used in the slowfast model and takes arguments such as num_frames, sampling_rate, and target_fps.",
+        "type": "comment"
+    },
+    "5258": {
+        "file_id": 441,
+        "content": "        test_mode(bool): whether test or train/valid. In slowfast, we use multicrop when test.\n    \"\"\"\n    def __init__(self,\n                 num_frames,\n                 sampling_rate,\n                 default_sampling_rate=2,\n                 target_fps=30,\n                 test_mode=False):\n        self.num_frames = num_frames\n        self.orig_sampling_rate = self.sampling_rate = sampling_rate\n        self.default_sampling_rate = default_sampling_rate\n        self.target_fps = target_fps\n        self.test_mode = test_mode\n    def get_start_end_idx(self, video_size, clip_size, clip_idx,\n                          temporal_num_clips):\n        delta = max(video_size - clip_size, 0)\n        if not self.test_mode:\n            # Random temporal sampling.\n            start_idx = random.uniform(0, delta)\n        else:\n            # Uniformly sample the clip with the given index.\n            start_idx = delta * clip_idx / temporal_num_clips\n        end_idx = start_idx + clip_size - 1\n        return start_idx, end_idx",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode_sampler.py:31-55"
+    },
+    "5259": {
+        "file_id": 441,
+        "content": "This code initializes a class with parameters for sampling video frames, and determines the start and end indices for each clip based on test mode (random or uniform).",
+        "type": "comment"
+    },
+    "5260": {
+        "file_id": 441,
+        "content": "    def __call__(self, results):\n        \"\"\"\n        Perform mp4 decode operations.\n        return:\n            List where each item is a numpy array after decoder.\n        \"\"\"\n        short_cycle_idx = results.get('short_cycle_idx')\n        if short_cycle_idx:\n            self.sampling_rate = random.randint(self.default_sampling_rate,\n                                                self.orig_sampling_rate)\n        filepath = results['filename']\n        temporal_sample_index = results['temporal_sample_index']\n        temporal_num_clips = results['temporal_num_clips']\n        vr = de.VideoReader(filepath)\n        videolen = len(vr)\n        fps = vr.get_avg_fps()\n        clip_size = self.num_frames * self.sampling_rate * fps / self.target_fps\n        start_idx, end_idx = self.get_start_end_idx(videolen, clip_size,\n                                                    temporal_sample_index,\n                                                    temporal_num_clips)\n        index = np.linspace(start_idx, end_idx, self.num_frames).astype(\"int64\")",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode_sampler.py:57-81"
+    },
+    "5261": {
+        "file_id": 441,
+        "content": "This function performs mp4 decode operations and returns a list of numpy arrays after decoding. It considers the short_cycle_idx to adjust the sampling rate, takes the filepath and temporal parameters from results, initializes a VideoReader object, calculates clip size, gets start and end indices for video clipping based on these values, and finally creates an index list for the decoded frames.",
+        "type": "comment"
+    },
+    "5262": {
+        "file_id": 441,
+        "content": "        index = np.clip(index, 0, videolen)\n        frames_select = vr.get_batch(index)  #1 for buffer\n        # dearray_to_img\n        np_frames = frames_select.asnumpy()\n        frames_select_list = []\n        for i in range(np_frames.shape[0]):\n            imgbuf = np_frames[i]\n            frames_select_list.append(Image.fromarray(imgbuf, mode='RGB'))\n        results['imgs'] = frames_select_list\n        return results",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode_sampler.py:82-93"
+    },
+    "5263": {
+        "file_id": 441,
+        "content": "This code segment is responsible for decoding and preparing image frames from a video. It clips the index value to ensure it falls within the valid range, retrieves the corresponding batch of frames using get_batch function, converts these frames into an array, and then loops through the array to convert each frame into an image using the PIL library's Image.fromarray method. The resulting images are stored in a list which is then assigned to 'results'['imgs'] before the function returns the results.",
+        "type": "comment"
+    },
+    "5264": {
+        "file_id": 442,
+        "content": "/paddlevideo/loader/pipelines/decode_sampler_MRI.py",
+        "type": "filepath"
+    },
+    "5265": {
+        "file_id": 442,
+        "content": "The SFMRI_DecodeSampler class is a tool that decodes and samples MRI frames, creating segments based on sampling indices and handling video length constraints. It calculates offsets for 's' and 'f' frame types, determines average durations per segment, and returns an object containing the frame indices.",
+        "type": "summary"
+    },
+    "5266": {
+        "file_id": 442,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os\nimport random\nimport numpy as np\nfrom PIL import Image\ntry:\n    import SimpleITK as sitk\nexcept ImportError as e:\n    print(\n        f\"Warning! {e}, [SimpleITK] package and it's dependencies is required for PP-Care.\"\n    )\nimport cv2\nfrom ..registry import PIPELINES\n@PIPELINES.register()\nclass SFMRI_DecodeSampler(object):\n    \"\"\"\n    Sample frames id.\n    NOTE: Use PIL to read image here, has diff with CV2\n    Args:",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode_sampler_MRI.py:1-36"
+    },
+    "5267": {
+        "file_id": 442,
+        "content": "This code snippet is a Python class for the SFMRI_DecodeSampler pipeline, which decodes and samples MRI frames. It uses PIL and SimpleITK packages to read images and relies on OpenCV for image processing. The class is registered in the PIPELINES module.",
+        "type": "comment"
+    },
+    "5268": {
+        "file_id": 442,
+        "content": "        num_seg(int): number of segments.\n        seg_len(int): number of sampled frames in each segment.\n        valid_mode(bool): True or False.\n        select_left: Whether to select the frame to the left in the middle when the sampling interval is even in the test mode.\n    Returns:\n        frames_idx: the index of sampled #frames.\n    \"\"\"\n    def __init__(self,\n                 num_seg,\n                 seg_len,\n                 valid_mode=False,\n                 select_left=False,\n                 dense_sample=False,\n                 linspace_sample=False):\n        self.num_seg = num_seg\n        self.seg_len = seg_len\n        self.valid_mode = valid_mode\n        self.select_left = select_left\n        self.dense_sample = dense_sample\n        self.linspace_sample = linspace_sample\n    def _get(self, frames_idx_s, frames_idx_f, results):\n        frame_dir = results['frame_dir']\n        imgs_s = []\n        imgs_f = []\n        MRI = sitk.GetArrayFromImage(sitk.ReadImage(frame_dir))\n        for idx in frames_idx_s:",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode_sampler_MRI.py:37-64"
+    },
+    "5269": {
+        "file_id": 442,
+        "content": "This code defines a class with methods for creating segments of frames from an MRI image. The constructor takes arguments for the number of segments, length of each segment, and optional parameters for sampling mode. It returns the indexes of sampled frames in each segment. The class also includes a method for getting images from the MRI and storing them.",
+        "type": "comment"
+    },
+    "5270": {
+        "file_id": 442,
+        "content": "            item = MRI[idx]\n            item = cv2.resize(item, (224, 224))\n            imgs_s.append(item)\n        for idx in frames_idx_f:\n            item = MRI[idx]\n            item = cv2.resize(item, (224, 224))\n            imgs_f.append(item)\n        results['imgs'] = [imgs_s, imgs_f]\n        return results\n    def __call__(self, results):\n        \"\"\"\n        Args:\n            frames_len: length of frames.\n        return:\n            sampling id.\n        \"\"\"\n        frames_len = int(results['frames_len'])\n        average_dur1 = int(frames_len / self.num_seg[0])\n        average_dur2 = int(frames_len / self.num_seg[1])\n        frames_idx_s = []\n        frames_idx_f = []\n        if self.linspace_sample:\n            if 'start_idx' in results and 'end_idx' in results:\n                offsets_s = np.linspace(results['start_idx'],\n                                        results['end_idx'], self.num_seg[0])\n                offsets_f = np.linspace(results['start_idx'],\n                                        results['end_idx'], self.num_seg[1])",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode_sampler_MRI.py:65-94"
+    },
+    "5271": {
+        "file_id": 442,
+        "content": "This code defines a class that takes in MRI data and returns resized images for sampling. It creates two lists, imgs_s and imgs_f, which contain the resized MRI frames. The results dictionary contains these lists under the 'imgs' key. The __call__ method calculates the average duration of each segment based on frames_len, and generates frame indices for each segment using linspace_sample. It does not return any value in this context.",
+        "type": "comment"
+    },
+    "5272": {
+        "file_id": 442,
+        "content": "            else:\n                offsets_s = np.linspace(0, frames_len - 1, self.num_seg[0])\n                offsets_f = np.linspace(0, frames_len - 1, self.num_seg[1])\n            offsets_s = np.clip(offsets_s, 0, frames_len - 1).astype(np.int64)\n            offsets_f = np.clip(offsets_f, 0, frames_len - 1).astype(np.int64)\n            frames_idx_s = list(offsets_s)\n            frames_idx_f = list(offsets_f)\n            return self._get(frames_idx_s, frames_idx_f, results)\n        if not self.select_left:\n            if self.dense_sample:  # For ppTSM\n                if not self.valid_mode:  # train\n                    sample_pos = max(1, 1 + frames_len - 64)\n                    t_stride1 = 64 // self.num_seg[0]\n                    t_stride2 = 64 // self.num_seg[1]\n                    start_idx = 0 if sample_pos == 1 else np.random.randint(\n                        0, sample_pos - 1)\n                    offsets_s = [(idx * t_stride1 + start_idx) % frames_len + 1\n                                 for idx in range(self.num_seg[0])]",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode_sampler_MRI.py:95-115"
+    },
+    "5273": {
+        "file_id": 442,
+        "content": "This code segment handles sampling of frames for video decoding. It sets the offsets for sample positions based on the number of segments specified and ensures they are within the valid frame range. If `select_left` is not set, it further checks if `dense_sample` is enabled in dense sampling mode. For ppTSM, it selects a sample position and calculates the corresponding offsets for each segment using the given formulas.",
+        "type": "comment"
+    },
+    "5274": {
+        "file_id": 442,
+        "content": "                    offsets_f = [(idx * t_stride2 + start_idx) % frames_len + 1\n                                 for idx in range(self.num_seg[1])]\n                    frames_idx_s = offsets_s\n                    frames_idx_f = offsets_f\n                else:\n                    sample_pos = max(1, 1 + frames_len - 64)\n                    t_stride1 = 64 // self.num_seg[0]\n                    t_stride2 = 64 // self.num_seg[1]\n                    start_list = np.linspace(0,\n                                             sample_pos - 1,\n                                             num=10,\n                                             dtype=int)\n                    offsets_s = []\n                    offsets_f = []\n                    for start_idx in start_list.tolist():\n                        offsets_s += [\n                            (idx * t_stride1 + start_idx) % frames_len + 1\n                            for idx in range(self.num_seg[0])\n                        ]\n                    for start_idx in start_list.tolist():",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode_sampler_MRI.py:116-135"
+    },
+    "5275": {
+        "file_id": 442,
+        "content": "This code calculates the sampling indices for both spatial and frequency domains. It creates two lists, frames_idx_s and frames_idx_f, based on the number of segments in each dimension (self.num_seg[0] and self.num_seg[1]). If the video length is less than 64 frames, it sets a smaller sampling range for both domains. The code also includes a backup strategy that uses a list of starting points for sampling if the video length is longer but still shorter than 64 frames.",
+        "type": "comment"
+    },
+    "5276": {
+        "file_id": 442,
+        "content": "                        offsets_f += [\n                            (idx * t_stride2 + start_idx) % frames_len + 1\n                            for idx in range(self.num_seg[1])\n                        ]\n                    frames_idx_s = offsets_s\n                    frames_idx_f = offsets_f\n            else:\n                for i in range(self.num_seg[0]):\n                    idx = 0\n                    if not self.valid_mode:\n                        if average_dur1 >= self.seg_len:\n                            idx = random.randint(0, average_dur1 - self.seg_len)\n                            idx += i * average_dur1\n                        elif average_dur1 >= 1:\n                            idx += i * average_dur1\n                        else:\n                            idx = i\n                    else:\n                        if average_dur1 >= self.seg_len:\n                            idx = (average_dur1 - 1) // 2\n                            idx += i * average_dur1\n                        elif average_dur1 >= 1:",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode_sampler_MRI.py:136-157"
+    },
+    "5277": {
+        "file_id": 442,
+        "content": "This code calculates the offsets for segmenting frames and storing them in two lists, `frames_idx_s` and `frames_idx_f`. If `valid_mode` is set, it randomly selects the indices within the constraints of `average_dur1`, otherwise it uses sequential indexing. It also handles cases where `average_dur1` is less than 1 by setting the index to i.",
+        "type": "comment"
+    },
+    "5278": {
+        "file_id": 442,
+        "content": "                            idx += i * average_dur1\n                        else:\n                            idx = i\n                    for jj in range(idx, idx + self.seg_len):\n                        frames_idx_s.append(jj)\n                for i in range(self.num_seg[1]):\n                    idx = 0\n                    if not self.valid_mode:\n                        if average_dur2 >= self.seg_len:\n                            idx = random.randint(0, average_dur2 - self.seg_len)\n                            idx += i * average_dur2\n                        elif average_dur2 >= 1:\n                            idx += i * average_dur2\n                        else:\n                            idx = i\n                    else:\n                        if average_dur2 >= self.seg_len:\n                            idx = (average_dur2 - 1) // 2\n                            idx += i * average_dur2\n                        elif average_dur2 >= 1:\n                            idx += i * average_dur2\n                        else:",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode_sampler_MRI.py:158-180"
+    },
+    "5279": {
+        "file_id": 442,
+        "content": "Code iterates over frames and segments, assigning frame indices based on valid mode and average durations. If valid mode is off, it determines the idx based on average duration 1 and 2, or if in valid mode, it sets the idx to half the remaining average duration 2 minus 1. Finally, it appends frame indices to frames_idx_s list for each segment length.",
+        "type": "comment"
+    },
+    "5280": {
+        "file_id": 442,
+        "content": "                            idx = i\n                    for jj in range(idx, idx + self.seg_len):\n                        frames_idx_f.append(jj)\n            return self._get(frames_idx_s, frames_idx_f, results)\n        else:  # for TSM\n            if not self.valid_mode:\n                if average_dur2 > 0:\n                    offsets_s = np.multiply(list(range(\n                        self.num_seg[0])), average_dur1) + np.random.randint(\n                            average_dur1, size=self.num_seg[0])\n                    offsets_f = np.multiply(list(range(\n                        self.num_seg[1])), average_dur2) + np.random.randint(\n                            average_dur2, size=self.num_seg[1])\n                elif frames_len > self.num_seg[1]:\n                    offsets_s = np.sort(\n                        np.random.randint(frames_len, size=self.num_seg[0]))\n                    offsets_f = np.sort(\n                        np.random.randint(frames_len, size=self.num_seg[1]))\n                else:\n                    offsets_s = np.zeros(shape=(self.num_seg[0], ))",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode_sampler_MRI.py:181-203"
+    },
+    "5281": {
+        "file_id": 442,
+        "content": "If not in valid mode, if average duration 2 > 0, generate offsets_s and offsets_f for TSM. If frames_len is greater than num_seg[1], randomly select offsets_s and offsets_f. Otherwise, set offsets_s to zeros.",
+        "type": "comment"
+    },
+    "5282": {
+        "file_id": 442,
+        "content": "                    offsets_f = np.zeros(shape=(self.num_seg[1], ))\n            else:\n                if frames_len > self.num_seg[1]:\n                    average_dur_float_s = frames_len / self.num_seg[0]\n                    offsets_s = np.array([\n                        int(average_dur_float_s / 2.0 + average_dur_float_s * x)\n                        for x in range(self.num_seg[0])\n                    ])\n                    average_dur_float_f = frames_len / self.num_seg[1]\n                    offsets_f = np.array([\n                        int(average_dur_float_f / 2.0 + average_dur_float_f * x)\n                        for x in range(self.num_seg[1])\n                    ])\n                else:\n                    offsets_s = np.zeros(shape=(self.num_seg[0], ))\n                    offsets_f = np.zeros(shape=(self.num_seg[1], ))\n            frames_idx_s = list(offsets_s)\n            frames_idx_f = list(offsets_f)\n            return self._get(frames_idx_s, frames_idx_f, results)",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/decode_sampler_MRI.py:204-224"
+    },
+    "5283": {
+        "file_id": 442,
+        "content": "This code calculates the offsets for segmenting frames into 's' and 'f' types based on the number of segments specified. If the total number of frames is greater than the specified number of segments, it calculates the average duration per segment for both types ('s' and 'f'). It then creates arrays of frame indices for 's' and 'f' frames using these calculated offsets. Finally, it returns an object by calling a method '_get'.",
+        "type": "comment"
+    },
+    "5284": {
+        "file_id": 443,
+        "content": "/paddlevideo/loader/pipelines/mix.py",
+        "type": "filepath"
+    },
+    "5285": {
+        "file_id": 443,
+        "content": "The code introduces a VideoMix operator for data augmentation in image classification tasks, using mixup and cutmix operations with controllable parameters.",
+        "type": "summary"
+    },
+    "5286": {
+        "file_id": 443,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport numpy as np\nfrom ..registry import PIPELINES\n@PIPELINES.register()\nclass Mixup(object):\n    \"\"\"\n    Mixup operator.\n    Args:\n        alpha(float): alpha value.\n    \"\"\"\n    def __init__(self, alpha=0.2):\n        assert alpha > 0., \\\n                'parameter alpha[%f] should > 0.0' % (alpha)\n        self.alpha = alpha\n    def __call__(self, batch):\n        imgs, labels = list(zip(*batch))\n        imgs = np.array(imgs)",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/mix.py:1-34"
+    },
+    "5287": {
+        "file_id": 443,
+        "content": "Mixup class implements a mixup operator for PaddleVideo. It takes an alpha value as input and ensures it is greater than 0. The __call__ method takes a batch of images and labels, combines them with random weights determined by the alpha value, and returns the mixed up image batch and label batch.",
+        "type": "comment"
+    },
+    "5288": {
+        "file_id": 443,
+        "content": "        labels = np.array(labels)\n        bs = len(batch)\n        idx = np.random.permutation(bs)\n        lam = np.random.beta(self.alpha, self.alpha)\n        lams = np.array([lam] * bs, dtype=np.float32)\n        imgs = lam * imgs + (1 - lam) * imgs[idx]\n        return list(zip(imgs, labels, labels[idx], lams))\n@PIPELINES.register()\nclass Cutmix(object):\n    \"\"\" Cutmix operator\n    Args:\n        alpha(float): alpha value.\n    \"\"\"\n    def __init__(self, alpha=0.2):\n        assert alpha > 0., \\\n                'parameter alpha[%f] should > 0.0' % (alpha)\n        self.alpha = alpha\n    def rand_bbox(self, size, lam):\n        \"\"\" rand_bbox \"\"\"\n        w = size[2]\n        h = size[3]\n        cut_rat = np.sqrt(1. - lam)\n        cut_w = np.int(w * cut_rat)\n        cut_h = np.int(h * cut_rat)\n        # uniform\n        cx = np.random.randint(w)\n        cy = np.random.randint(h)\n        bbx1 = np.clip(cx - cut_w // 2, 0, w)\n        bby1 = np.clip(cy - cut_h // 2, 0, h)\n        bbx2 = np.clip(cx + cut_w // 2, 0, w)\n        bby2 = np.clip(cy + cut_h // 2, 0, h)",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/mix.py:35-70"
+    },
+    "5289": {
+        "file_id": 443,
+        "content": "The code defines a Cutmix class for a mixup operator. It takes an alpha value as input, and randomly generates new images by cutting out a part of the original image and pasting it on top of another image, with alpha value determining the ratio of the two. The function rand_bbox is used to determine the dimensions and location of the cutout box.",
+        "type": "comment"
+    },
+    "5290": {
+        "file_id": 443,
+        "content": "        return bbx1, bby1, bbx2, bby2\n    def __call__(self, batch):\n        imgs, labels = list(zip(*batch))\n        imgs = np.array(imgs)\n        labels = np.array(labels)\n        bs = len(batch)\n        idx = np.random.permutation(bs)\n        lam = np.random.beta(self.alpha, self.alpha)\n        bbx1, bby1, bbx2, bby2 = self.rand_bbox(imgs.shape, lam)\n        imgs[:, :, bbx1:bbx2, bby1:bby2] = imgs[idx, :, bbx1:bbx2, bby1:bby2]\n        lam = 1 - (float(bbx2 - bbx1) * (bby2 - bby1) /\n                   (imgs.shape[-2] * imgs.shape[-1]))\n        lams = np.array([lam] * bs, dtype=np.float32)\n        return list(zip(imgs, labels, labels[idx], lams))\n@PIPELINES.register()\nclass VideoMix(object):\n    \"\"\"\n    VideoMix operator.\n    Args:\n        cutmix_prob(float): prob choose cutmix\n        mixup_alpha(float): alpha for mixup aug\n        cutmix_alpha(float): alpha for cutmix aug\n    \"\"\"\n    def __init__(self, cutmix_prob=0.5, mixup_alpha=0.2, cutmix_alpha=1.0):\n        assert cutmix_prob > 0., \\\n                'parameter cutmix_prob[%f] should > 0.0' % (cutmix_prob)",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/mix.py:72-103"
+    },
+    "5291": {
+        "file_id": 443,
+        "content": "This code defines a VideoMix operator that performs data augmentation by either mixing or cutting images from different samples in the batch. The mixup_alpha and cutmix_alpha parameters control the degree of blending between samples, while the cutmix_prob parameter determines the probability of applying the cutmix operation.",
+        "type": "comment"
+    },
+    "5292": {
+        "file_id": 443,
+        "content": "        assert mixup_alpha > 0., \\\n                'parameter mixup_alpha[%f] should > 0.0' % (mixup_alpha)\n        assert cutmix_alpha > 0., \\\n                'parameter cutmix_alpha[%f] should > 0.0' % (cutmix_alpha)\n        self.cutmix_prob = cutmix_prob\n        self.mixup = Mixup(mixup_alpha)\n        self.cutmix = Cutmix(cutmix_alpha)\n    def __call__(self, batch):\n        if np.random.random() < self.cutmix_prob:\n            return self.cutmix(batch)\n        else:\n            return self.mixup(batch)",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/mix.py:104-116"
+    },
+    "5293": {
+        "file_id": 443,
+        "content": "This code asserts that mixup_alpha and cutmix_alpha are greater than 0.0, sets the cutmix_prob, creates Mixup and Cutmix objects with the provided alphas, and defines a __call__ method to randomly choose between applying either Mixup or Cutmix to the batch.",
+        "type": "comment"
+    },
+    "5294": {
+        "file_id": 444,
+        "content": "/paddlevideo/loader/pipelines/multimodal.py",
+        "type": "filepath"
+    },
+    "5295": {
+        "file_id": 444,
+        "content": "The code introduces a new \"FeaturePadding\" class to PaddlePaddle library, handles data preprocessing for multimodal tasks, and provides masking, region selection, and action perturbation functions for PaddleVideo.",
+        "type": "summary"
+    },
+    "5296": {
+        "file_id": 444,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport random\nimport numpy as np\nfrom PIL import Image\nimport decord as de\nimport copy\nimport json\nfrom ..registry import PIPELINES\ntry:\n    from paddlenlp.transformers import BertTokenizer\nexcept ImportError as e:\n    print(\n        f\"Warning! {e}, [paddlenlp] package and it's dependencies is required for ActBERT.\"\n    )\n@PIPELINES.register()\nclass FeaturePadding(object):\n    \"\"\"\n    Padding feature to target shape.\n    \"\"\"",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/multimodal.py:1-35"
+    },
+    "5297": {
+        "file_id": 444,
+        "content": "This code is part of a PaddlePaddle video analysis library. It registers a new class called \"FeaturePadding\" which performs feature padding to target shape. It imports necessary libraries and packages including decord, PIL, numpy, json, paddlenlp for ActBERT, and the PIPELINES registry.",
+        "type": "comment"
+    },
+    "5298": {
+        "file_id": 444,
+        "content": "    def __init__(self, max_region_num=36, max_action_num=5):\n        self.max_region_num = max_region_num\n        self.max_action_num = max_action_num\n    def __call__(self, results):\n        \"\"\"\n        Padding feature.\n        \"\"\"\n        pack_feature = results['feature']\n        tokenizer = results['tokenizer']\n        image_feature_wp, image_target_wp, image_location_wp, \\\n                num_boxes,  image_h, image_w, image_id, caption, \\\n                action_feature_wp, action_target_wp, num_actions = pack_feature\n        image_feature = np.zeros((self.max_region_num, 2048), dtype=np.float32)\n        image_target = np.zeros((self.max_region_num, 1601), dtype=np.float32)\n        image_location = np.zeros((self.max_region_num, 5), dtype=np.float32)\n        action_feature = np.zeros((self.max_action_num, 2048), dtype=np.float32)\n        action_target = np.zeros((self.max_action_num, ), dtype=np.int64)\n        num_boxes = int(num_boxes)\n        image_feature[:num_boxes] = image_feature_wp\n        image_target[:num_boxes] = image_target_wp",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/multimodal.py:36-59"
+    },
+    "5299": {
+        "file_id": 444,
+        "content": "This code defines a class with an __init__ method and a __call__ method. The __init__ method initializes the maximum number of regions (36) and actions (5). The __call__ method takes in results as input, including feature packs for image and action data. It pads the features to their maximum allowed dimensions with zeroes if there are less than the specified maximum. This is useful for maintaining consistent input sizes in machine learning models.",
+        "type": "comment"
+    }
+}

@@ -1,0 +1,541 @@
+{
+    "7900": {
+        "file_id": 578,
+        "content": "        bbox_results = self._bbox_forward_train(x, sampling_results, gt_bboxes,\n                                                gt_labels)\n        losses = dict()\n        losses.update(bbox_results['loss_bbox'])\n        return losses\n    def simple_test(self, x, proposal_list, img_shape, rescale=False):\n        x_shape = x[0].shape\n        #assert x_shape[0] == 1, 'only accept 1 sample at test mode'\n        det_bboxes, det_labels = self.simple_test_bboxes(x,\n                                                         img_shape,\n                                                         proposal_list,\n                                                         self.action_thr,\n                                                         rescale=rescale)\n        bbox_results = bbox2result(det_bboxes, det_labels,\n                                   self.bbox_head.num_classes, img_shape,\n                                   self.action_thr)\n        return [bbox_results]\n    def simple_test_bboxes(self,\n                           x,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/roi_head.py:135-158"
+    },
+    "7901": {
+        "file_id": 578,
+        "content": "The code contains two main functions, \"simple_test\" and \"_bbox_forward_train\". The former is for testing the model in simple test mode by taking input x, proposal list, img_shape, and rescale flag. It calculates det_bboxes and det_labels using the function \"simple_test_bboxes\". Then it uses bbox2result to convert det_bboxes and det_labels into bbox_results. The latter function takes input x, sampling results, gt_bboxes, and gt_labels to calculate bbox results and losses. It updates the losses dictionary with \"loss_bbox\" and returns the losses.",
+        "type": "comment"
+    },
+    "7902": {
+        "file_id": 578,
+        "content": "                           img_shape,\n                           proposals,\n                           action_thr,\n                           rescale=False):\n        \"\"\"Test only det bboxes without augmentation.\"\"\"\n        rois = [proposals]\n        rois_num = [rois[0].shape[0]]\n        bbox_results = self._bbox_forward(x, rois, rois_num)\n        cls_score = bbox_results['cls_score']\n        crop_quadruple = np.array([0, 0, 1, 1])\n        flip = False\n        det_bboxes, det_labels = self.bbox_head.get_det_bboxes(\n            rois,\n            cls_score,\n            img_shape,\n            flip=flip,\n            crop_quadruple=crop_quadruple)\n        return det_bboxes, det_labels",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/roi_head.py:159-177"
+    },
+    "7903": {
+        "file_id": 578,
+        "content": "This function tests only detection bboxes without augmentation. It takes input x, proposals, action_thr, and rescale as parameters. It creates rois and rois_num from the proposals. It then calls _bbox_forward to get cls_score. It sets crop_quadruple and flip to False. Finally, it calls bbox_head's get_det_bboxes to return det_bboxes and det_labels.",
+        "type": "comment"
+    },
+    "7904": {
+        "file_id": 579,
+        "content": "/paddlevideo/modeling/heads/single_straight3d.py",
+        "type": "filepath"
+    },
+    "7905": {
+        "file_id": 579,
+        "content": "This code defines a 3D ROI extractor class and head, performing feature extraction with optional temporal pooling. The forward method executes feature extraction based on input features, RoIs, and number of RoIs, and returns the final output after applying ROI layer and stacking features along axis 2.",
+        "type": "summary"
+    },
+    "7906": {
+        "file_id": 579,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport paddle.nn as nn\nimport numpy as np\nfrom ..registry import ROI_EXTRACTORS\nfrom .roi_extractor import RoIAlign\n@ROI_EXTRACTORS.register()\nclass SingleRoIExtractor3D(nn.Layer):\n    \"\"\"Extract RoI features from a single level feature map.  \"\"\"\n    def __init__(self,\n                 roi_layer_type='RoIAlign',\n                 featmap_stride=16,\n                 output_size=16,\n                 sampling_ratio=0,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/single_straight3d.py:1-28"
+    },
+    "7907": {
+        "file_id": 579,
+        "content": "This code imports necessary libraries and registers a new ROI (Region of Interest) extractor named \"SingleRoIExtractor3D\". This class inherits from nn.Layer and is designed to extract RoI features from a single level feature map with specific options such as roi_layer_type, featmap_stride, output_size, and sampling_ratio.",
+        "type": "comment"
+    },
+    "7908": {
+        "file_id": 579,
+        "content": "                 pool_mode='avg',\n                 aligned=True,\n                 with_temporal_pool=True,\n                 with_global=False):\n        super().__init__()\n        self.roi_layer_type = roi_layer_type\n        assert self.roi_layer_type in ['RoIPool', 'RoIAlign']\n        self.featmap_stride = featmap_stride\n        self.spatial_scale = 1. / self.featmap_stride\n        self.output_size = output_size\n        self.sampling_ratio = sampling_ratio\n        self.pool_mode = pool_mode\n        self.aligned = aligned\n        self.with_temporal_pool = with_temporal_pool\n        self.with_global = with_global\n        self.roi_layer = RoIAlign(resolution=self.output_size,\n                                  spatial_scale=self.spatial_scale,\n                                  sampling_ratio=self.sampling_ratio,\n                                  aligned=self.aligned)\n    def init_weights(self):\n        pass\n    # The shape of feat is N, C, T, H, W\n    def forward(self, feat, rois, rois_num):\n        if len(feat) >= 2:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/single_straight3d.py:29-55"
+    },
+    "7909": {
+        "file_id": 579,
+        "content": "This code defines a class for a 3D head that takes input features and regions of interest (ROIs) to extract features using the RoIAlign layer. It also includes an optional temporal pooling operation and an initialization function. The forward method performs feature extraction given the input features, ROIs, and number of ROIs.",
+        "type": "comment"
+    },
+    "7910": {
+        "file_id": 579,
+        "content": "            assert self.with_temporal_pool\n        if self.with_temporal_pool:\n            xi = 0\n            for x in feat:\n                xi = xi + 1\n                y = paddle.mean(x, 2, keepdim=True)\n            feat = [paddle.mean(x, 2, keepdim=True) for x in feat]\n        feat = paddle.concat(feat, axis=1)  # merge slow and fast\n        roi_feats = []\n        for t in range(feat.shape[2]):\n            if type(t) == paddle.static.Variable:\n                index = paddle.to_tensor(t)\n            else:\n                data_index = np.array([t]).astype('int32')\n                index = paddle.to_tensor(data_index)\n            frame_feat = paddle.index_select(feat, index, axis=2)\n            frame_feat = paddle.squeeze(frame_feat,\n                                        axis=2)  #axis=2,避免N=1时, 第一维度被删除.\n            roi_feat = self.roi_layer(frame_feat, rois, rois_num)\n            roi_feats.append(roi_feat)\n        ret = paddle.stack(roi_feats, axis=2)\n        return ret",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/single_straight3d.py:56-79"
+    },
+    "7911": {
+        "file_id": 579,
+        "content": "This code performs temporal pooling, concatenates slow and fast features, extracts frame-wise features using index selection, squeezes the dimensions to prevent deletion when N=1, applies a ROI layer on each frame, stacks the resulting features along axis 2, and returns the final output.",
+        "type": "comment"
+    },
+    "7912": {
+        "file_id": 580,
+        "content": "/paddlevideo/modeling/heads/slowfast_head.py",
+        "type": "filepath"
+    },
+    "7913": {
+        "file_id": 580,
+        "content": "This code defines 3D head projection classes for PaddleVideo library, initializes a SlowFast head model with dropout regularization and adaptive average pooling, performs convolutional inference, applies softmax activation, averages when not training, and reshapes before returning.",
+        "type": "summary"
+    },
+    "7914": {
+        "file_id": 580,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom ..registry import HEADS\nfrom .base import BaseHead\nimport paddle\nimport paddle.nn.functional as F\nfrom ..weight_init import weight_init_\n@HEADS.register()\nclass SlowFastHead(BaseHead):\n    \"\"\"\n    ResNe(X)t 3D head.\n    This layer performs a fully-connected projection during training, when the\n    input size is 1x1x1. It performs a convolutional projection during testing\n    when the input size is larger than 1x1x1. If the inputs are from multiple",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/slowfast_head.py:1-30"
+    },
+    "7915": {
+        "file_id": 580,
+        "content": "This code is from the PaddleVideo library and defines a SlowFastHead class for ResNe(X)t 3D head. It performs a fully-connected projection during training and convolutional projection during testing, with different input sizes handled accordingly. The code includes import statements, registration using HEADS registry, and base class inheritance from BaseHead.",
+        "type": "comment"
+    },
+    "7916": {
+        "file_id": 580,
+        "content": "    different pathways, the inputs will be concatenated after pooling.\n    \"\"\"\n    def __init__(self,\n                 width_per_group,\n                 alpha,\n                 beta,\n                 num_classes,\n                 num_frames,\n                 crop_size,\n                 dropout_rate,\n                 pool_size_ratio=[[1, 1, 1], [1, 1, 1]],\n                 loss_cfg=dict(name='CrossEntropyLoss'),\n                 multigrid_short=False,\n                 **kwargs):\n        \"\"\"\n        ResNetBasicHead takes p pathways as input where p in [1, infty].\n        Args:\n            dim_in (list): the list of channel dimensions of the p inputs to the\n                ResNetHead.\n            num_classes (int): the channel dimensions of the p outputs to the\n                ResNetHead.\n            pool_size (list): the list of kernel sizes of p spatial temporal\n                poolings, temporal pool kernel size, spatial pool kernel size,\n                spatial pool kernel size in order.\n            dropout_rate (float): dropout rate. If equal to 0.0, perform no",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/slowfast_head.py:31-56"
+    },
+    "7917": {
+        "file_id": 580,
+        "content": "The code defines a class for SlowFast_Head, which takes different pathways as input and concatenates the inputs after pooling. It has various parameters such as width_per_group, alpha, beta, etc. The ResNetBasicHead takes p pathways as input where p can be in the range of 1 to infinity. It has arguments for dim_in (list), num_classes (int), pool_size (list), and dropout_rate (float).",
+        "type": "comment"
+    },
+    "7918": {
+        "file_id": 580,
+        "content": "                dropout.\n        \"\"\"\n        super().__init__(num_classes, loss_cfg, **kwargs)\n        self.multigrid_short = multigrid_short\n        self.width_per_group = width_per_group\n        self.alpha = alpha\n        self.beta = beta\n        self.num_classes = num_classes\n        self.num_frames = num_frames\n        self.crop_size = crop_size\n        self.dropout_rate = dropout_rate\n        self.pool_size_ratio = pool_size_ratio\n        self.dim_in = [\n            self.width_per_group * 32,\n            self.width_per_group * 32 // self.beta,\n        ]\n        self.pool_size = [None, None] if self.multigrid_short else [\n            [\n                self.num_frames // self.alpha // self.pool_size_ratio[0][0],\n                self.crop_size // 32 // self.pool_size_ratio[0][1],\n                self.crop_size // 32 // self.pool_size_ratio[0][2],\n            ],\n            [\n                self.num_frames // self.pool_size_ratio[1][0],\n                self.crop_size // 32 // self.pool_size_ratio[1][1],\n                self.crop_size // 32 // self.pool_size_ratio[1][2],",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/slowfast_head.py:57-83"
+    },
+    "7919": {
+        "file_id": 580,
+        "content": "This code is initializing a SlowFast head model with specified parameters such as multigrid_short, width_per_group, alpha, beta, num_classes, num_frames, crop_size, and dropout_rate. It also sets the dimension input (dim_in) based on these parameters, and determines the pool size accordingly based on whether multigrid_short is True or False.",
+        "type": "comment"
+    },
+    "7920": {
+        "file_id": 580,
+        "content": "            ],\n        ]\n        assert (len({len(self.pool_size), len(self.dim_in)\n                     }) == 1), \"pathway dimensions are not consistent.\"\n        self.num_pathways = len(self.pool_size)\n        self.dropout = paddle.nn.Dropout(p=self.dropout_rate)\n        self.projection = paddle.nn.Linear(\n            in_features=sum(self.dim_in),\n            out_features=self.num_classes,\n        )\n    def init_weights(self):\n        weight_init_(self.projection,\n                     \"Normal\",\n                     bias_value=0.0,\n                     mean=0.0,\n                     std=0.01)\n    def forward(self, inputs):\n        assert (len(inputs) == self.num_pathways\n                ), \"Input tensor does not contain {} pathway\".format(\n                    self.num_pathways)\n        pool_out = []\n        for pathway in range(self.num_pathways):\n            if self.pool_size[pathway] is None:\n                tmp_out = F.adaptive_avg_pool3d(x=inputs[pathway],\n                                                output_size=(1, 1, 1),",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/slowfast_head.py:84-113"
+    },
+    "7921": {
+        "file_id": 580,
+        "content": "This code initializes a SlowFast head model. It defines the number of pathways, applies dropout regularization, and initializes weights for linear projection. The forward method expects inputs with the same number of pathways as defined in the model. It then performs adaptive average pooling on each input pathway separately.",
+        "type": "comment"
+    },
+    "7922": {
+        "file_id": 580,
+        "content": "                                                data_format=\"NCDHW\")\n            else:\n                tmp_out = F.avg_pool3d(x=inputs[pathway],\n                                       kernel_size=self.pool_size[pathway],\n                                       stride=1,\n                                       data_format=\"NCDHW\")\n            pool_out.append(tmp_out)\n        x = paddle.concat(x=pool_out, axis=1)\n        x = paddle.transpose(x=x, perm=(0, 2, 3, 4, 1))\n        # Perform dropout.\n        if self.dropout_rate > 0.0:\n            x = self.dropout(x)\n        x = self.projection(x)\n        # Performs fully convlutional inference.\n        if not self.training:  # attr of base class\n            x = F.softmax(x, axis=4)\n            x = paddle.mean(x, axis=[1, 2, 3])\n        x = paddle.reshape(x, shape=(x.shape[0], -1))\n        return x",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/slowfast_head.py:114-137"
+    },
+    "7923": {
+        "file_id": 580,
+        "content": "This code performs pooling and dropout operations on input tensors, followed by projection and fully convolutional inference. It also applies softmax activation and averaging when not in training mode. The resulting tensor is reshaped before returning.",
+        "type": "comment"
+    },
+    "7924": {
+        "file_id": 581,
+        "content": "/paddlevideo/modeling/heads/stgcn_head.py",
+        "type": "filepath"
+    },
+    "7925": {
+        "file_id": 581,
+        "content": "This code creates a STGCNHead class in PaddlePaddle's video modeling library, initializing a convolutional layer and applying forward pass for input x to produce N, C shaped output.",
+        "type": "summary"
+    },
+    "7926": {
+        "file_id": 581,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport paddle.nn as nn\nfrom .base import BaseHead\nfrom ..registry import HEADS\nfrom ..weight_init import weight_init_\n@HEADS.register()\nclass STGCNHead(BaseHead):\n    \"\"\"\n    Head for ST-GCN model.\n    Args:\n        in_channels: int, input feature channels. Default: 256.\n        num_classes: int, number classes. Default: 10.\n    \"\"\"\n    def __init__(self, in_channels=256, num_classes=10, **kwargs):\n        super().__init__(num_classes, in_channels, **kwargs)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/stgcn_head.py:1-32"
+    },
+    "7927": {
+        "file_id": 581,
+        "content": "This code snippet is for the STGCNHead class in PaddlePaddle's video modeling library. It's a subclass of BaseHead with 256 input feature channels and 10 number classes as default values, initialized using super(). This model can be customized further by passing additional keyword arguments.",
+        "type": "comment"
+    },
+    "7928": {
+        "file_id": 581,
+        "content": "        self.fcn = nn.Conv2D(in_channels=in_channels,\n                             out_channels=num_classes,\n                             kernel_size=1)\n    def init_weights(self):\n        \"\"\"Initiate the parameters.\n        \"\"\"\n        for layer in self.sublayers():\n            if isinstance(layer, nn.Conv2D):\n                weight_init_(layer, 'Normal', std=0.02)\n    def forward(self, x):\n        \"\"\"Define how the head is going to run.\n        \"\"\"\n        x = self.fcn(x)\n        x = paddle.reshape_(x, (x.shape[0], -1))  # N,C,1,1 --> N,C\n        return x",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/stgcn_head.py:33-50"
+    },
+    "7929": {
+        "file_id": 581,
+        "content": "The code defines a head class with a convolutional layer, initializes its weights using a normal distribution with standard deviation 0.02, and applies the forward pass to input x by passing it through a convolutional layer and reshaping the output to shape N, C (N: number of samples, C: number of classes).",
+        "type": "comment"
+    },
+    "7930": {
+        "file_id": 582,
+        "content": "/paddlevideo/modeling/heads/timesformer_head.py",
+        "type": "filepath"
+    },
+    "7931": {
+        "file_id": 582,
+        "content": "The PaddleVideo's TimeSformerHead class is a model head in the TimeSformer architecture that initializes parameters and defines forward methods for computing output. It uses Linear layers from PaddlePaddle and allows customizing parameters with keyword arguments. The function applies an fc layer to input tensor x and returns classification scores without softmax, with unclear dropout location.",
+        "type": "summary"
+    },
+    "7932": {
+        "file_id": 582,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom paddle.nn import Linear\nfrom ..registry import HEADS\nfrom ..weight_init import trunc_normal_, weight_init_\nfrom .base import BaseHead\n@HEADS.register()\nclass TimeSformerHead(BaseHead):\n    \"\"\"TimeSformerHead Head.\n    Args:\n        num_classes (int): The number of classes to be classified.\n        in_channels (int): The number of channles in input feature.\n        loss_cfg (dict): Config for building config. Default: dict(name='CrossEntropyLoss').",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/timesformer_head.py:1-29"
+    },
+    "7933": {
+        "file_id": 582,
+        "content": "This code is from PaddleVideo's TimeSformerHead class, which is a head in the modeling module. It is a subclass of BaseHead and has attributes such as num_classes, in_channels, and loss_cfg. The class is registered using HEADS registry, and it uses functions from paddle.nn, Linear, and BaseHead modules. Weight initialization is performed using trunc_normal_ and weight_init functions.",
+        "type": "comment"
+    },
+    "7934": {
+        "file_id": 582,
+        "content": "        std(float): Std(Scale) value in normal initilizar. Default: 0.01.\n        kwargs (dict, optional): Any keyword argument to initialize.\n    \"\"\"\n    def __init__(self,\n                 num_classes,\n                 in_channels,\n                 loss_cfg=dict(name='CrossEntropyLoss'),\n                 std=0.02,\n                 **kwargs):\n        super().__init__(num_classes, in_channels, loss_cfg, **kwargs)\n        self.std = std\n        self.fc = Linear(self.in_channels, self.num_classes)\n    def init_weights(self):\n        \"\"\"Initiate the FC layer parameters\"\"\"\n        weight_init_(self.fc,\n                     'TruncatedNormal',\n                     'fc_0.w_0',\n                     'fc_0.b_0',\n                     mean=0.0,\n                     std=self.std)\n        # NOTE: Temporarily use trunc_normal_ instead of TruncatedNormal\n        trunc_normal_(self.fc.weight, std=self.std)\n    def forward(self, x):\n        \"\"\"Define how the head is going to run.\n        Args:\n            x (paddle.Tensor): The input data.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/timesformer_head.py:30-60"
+    },
+    "7935": {
+        "file_id": 582,
+        "content": "The code snippet defines a class for the TimeSformer head, initializes its parameters and provides a forward method to compute the output of the head. It uses PaddlePaddle's Linear layer and allows setting a specific std value in normal initialization, as well as customizing other parameters with additional keyword arguments. The forward function defines how the head operates on input data x.",
+        "type": "comment"
+    },
+    "7936": {
+        "file_id": 582,
+        "content": "        Returns:\n            score: (paddle.Tensor) The classification scores for input samples.\n        \"\"\"\n        # XXX: check dropout location!\n        # x.shape = [N, embed_dim]\n        score = self.fc(x)\n        # [N, num_class]\n        # x = F.softmax(x)  # NOTE remove\n        return score",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/timesformer_head.py:61-70"
+    },
+    "7937": {
+        "file_id": 582,
+        "content": "This function applies a fully connected layer (fc) to the input tensor x and returns the classification scores for input samples without applying softmax. The dropout location needs further clarification as indicated by XXX.",
+        "type": "comment"
+    },
+    "7938": {
+        "file_id": 583,
+        "content": "/paddlevideo/modeling/heads/token_shift_head.py",
+        "type": "filepath"
+    },
+    "7939": {
+        "file_id": 583,
+        "content": "The code defines a TokenShiftHead class for classification tasks in Paddle. It inherits from BaseHead, uses Linear module, and returns classification scores after passing input tensor x through fully connected layer self.fc.",
+        "type": "summary"
+    },
+    "7940": {
+        "file_id": 583,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom paddle.nn import Linear\nimport paddle\nfrom ..registry import HEADS\nfrom ..weight_init import trunc_normal_, weight_init_\nfrom .base import BaseHead\n@HEADS.register()\nclass TokenShiftHead(BaseHead):\n    \"\"\"TokenShift Transformer Head.\n    Args:\n        num_classes (int): The number of classes to be classified.\n        in_channels (int): The number of channles in input feature.\n        num_seg(int): The number of segments. Default: 8. ",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/token_shift_head.py:1-30"
+    },
+    "7941": {
+        "file_id": 583,
+        "content": "The code is defining a class called TokenShiftHead, which is a Transformer head for classification tasks. It has attributes such as num_classes, in_channels, and num_seg (defaulted to 8). The class inherits from BaseHead and is registered under the HEADS registry. The code imports necessary modules and functions, and uses Paddle's Linear module for the layer implementation.",
+        "type": "comment"
+    },
+    "7942": {
+        "file_id": 583,
+        "content": "        loss_cfg (dict): Config for building config. Default: dict(name='CrossEntropyLoss').\n        ls_eps (float): Label smoothing epsilon. Default: 0.01.\n        std (float): Std(Scale) Value in normal initilizar. Default: 0.02.\n        kwargs (dict, optional): Any keyword argument to initialize.\n    \"\"\"\n    def __init__(self,\n                 num_classes,\n                 in_channels,\n                 num_seg=8,\n                 loss_cfg=dict(name='CrossEntropyLoss'),\n                 ls_eps=0.01,\n                 std=0.02,\n                 **kwargs):\n        super().__init__(num_classes, in_channels, loss_cfg, ls_eps)\n        self.num_seg = num_seg\n        self.std = std\n        self.fc = Linear(self.in_channels, self.num_classes)\n    def init_weights(self):\n        \"\"\"Initiate the FC layer parameters\"\"\"\n        weight_init_(self.fc,\n                     'TruncatedNormal',\n                     'fc_0.w_0',\n                     'fc_0.b_0',\n                     mean=0.0,\n                     std=self.std)\n        # NOTE: Temporarily use trunc_normal_ instead of TruncatedNormal",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/token_shift_head.py:31-60"
+    },
+    "7943": {
+        "file_id": 583,
+        "content": "__init__ function initializes the class with specified parameters, and init_weights is used to initialize the FC layer's parameters using truncated normal distribution.",
+        "type": "comment"
+    },
+    "7944": {
+        "file_id": 583,
+        "content": "        trunc_normal_(self.fc.weight, std=self.std)\n    def forward(self, x):\n        \"\"\"Define how the head is going to run.\n        Args:\n            x (paddle.Tensor): The input data.\n        Returns:\n            score: (paddle.Tensor) The classification scores for input samples.\n        \"\"\"\n        # XXX: check dropout location!\n        # x.shape = [N, embed_dim]\n        score = self.fc(x)\n        # [N*T, num_class]\n        _, _m = score.shape\n        _t = self.num_seg\n        score = score.reshape([-1, _t, _m])\n        score = paddle.mean(score, 1)  # averaging predictions for every frame\n        score = paddle.squeeze(score, axis=1)\n        return score",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/token_shift_head.py:61-79"
+    },
+    "7945": {
+        "file_id": 583,
+        "content": "This code defines a TokenShiftHead, which performs classification tasks. The forward function takes input tensor x and passes it through fully connected layer self.fc, resulting in classification scores for each sample. It then reshapes the score to average predictions for every frame, finally squeezing the axis to return the final score.",
+        "type": "comment"
+    },
+    "7946": {
+        "file_id": 584,
+        "content": "/paddlevideo/modeling/heads/transnetv2_head.py",
+        "type": "filepath"
+    },
+    "7947": {
+        "file_id": 584,
+        "content": "This code defines the TransNetV2Head class, a type of head used in computer vision models, inheriting from BaseHead with arguments for number of classes, input channels, and loss configuration. It also includes TransNetV2Loss class registered as HEADS registry, and two methods (loss and get_score) for calculating loss and F1 score between predictions and ground truth.",
+        "type": "summary"
+    },
+    "7948": {
+        "file_id": 584,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .base import BaseHead\nfrom ..registry import HEADS\nfrom ..losses import TransNetV2Loss\nfrom ...metrics.transnetv2_metric import create_scene_based_summaries\n@HEADS.register()\nclass TransNetV2Head(BaseHead):\n    \"\"\"TransNetV2 Head.\n    \"\"\"\n    def __init__(self,\n                 num_classes,\n                 in_channels,\n                 loss_cfg=dict(name=\"TransNetV2Loss\")\n                 ):\n        super().__init__(num_classes,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/transnetv2_head.py:1-29"
+    },
+    "7949": {
+        "file_id": 584,
+        "content": "This code defines the TransNetV2Head class, which is a type of head used in computer vision models. It inherits from BaseHead and takes arguments for number of classes, input channels, and loss configuration. The TransNetV2Loss class is registered with the HEADS registry to be used by this head. Additionally, the code provides comments about licensing and copyright information.",
+        "type": "comment"
+    },
+    "7950": {
+        "file_id": 584,
+        "content": "                         in_channels,\n                         loss_cfg)\n    def loss(self, one_hot_pred, one_hot_gt,\n                many_hot_pred=None, many_hot_gt=None, reg_losses=None):\n        losses = dict()\n        loss = self.loss_func(scores, labels, **kwargs)\n        f1 = self.get_score(one_hot_pred, one_hot_gt)\n        losses['f1'] = f1\n        losses['loss'] = loss\n        return losses\n    def get_score(self, one_hot_pred, one_hot_gt):\n        f1 = create_scene_based_summaries(one_hot_pred, one_hot_gt)\n        return f1",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/transnetv2_head.py:30-45"
+    },
+    "7951": {
+        "file_id": 584,
+        "content": "This code defines a class with two methods, `loss` and `get_score`. The `loss` method calculates the loss between predictions and ground truth, while `get_score` method calculates an F1 score based on one-hot predictions and ground truth. The calculated losses are stored in a dictionary for further use.",
+        "type": "comment"
+    },
+    "7952": {
+        "file_id": 585,
+        "content": "/paddlevideo/modeling/heads/tsm_head.py",
+        "type": "filepath"
+    },
+    "7953": {
+        "file_id": 585,
+        "content": "TSMHead, a classification task-oriented class extending TSNHead, initializes weights and registers in the HEADS registry. It is part of PaddleVideo's temporal segment network head, with parameters for weights and data format, forward function with average pooling and optional dropout, and possible tensor reshaping.",
+        "type": "summary"
+    },
+    "7954": {
+        "file_id": 585,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport math\nimport paddle\nfrom paddle import ParamAttr\nfrom paddle.nn import Linear\nimport paddle.nn.functional as F\nfrom paddle.regularizer import L2Decay\nfrom .tsn_head import TSNHead\nfrom ..registry import HEADS\nfrom ..weight_init import weight_init_\n@HEADS.register()\nclass TSMHead(TSNHead):\n    \"\"\" TSM Head\n    Args:\n        num_classes (int): The number of classes to be classified.\n        in_channels (int): The number of channles in input feature.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/tsm_head.py:1-33"
+    },
+    "7955": {
+        "file_id": 585,
+        "content": "This code defines the TSMHead class, which extends the TSNHead class. It is used for classification tasks with a specific number of classes and input feature channels. The class is registered in the HEADS registry and follows a certain weight initialization method.",
+        "type": "comment"
+    },
+    "7956": {
+        "file_id": 585,
+        "content": "        loss_cfg (dict): Config for building config. Default: dict(name='CrossEntropyLoss').\n        drop_ratio(float): drop ratio. Default: 0.5.\n        std(float): Std(Scale) value in normal initilizar. Default: 0.001.\n        kwargs (dict, optional): Any keyword argument to initialize.\n    \"\"\"\n    def __init__(self,\n                 num_classes,\n                 in_channels,\n                 drop_ratio=0.5,\n                 std=0.001,\n                 data_format=\"NCHW\",\n                 **kwargs):\n        super().__init__(num_classes,\n                         in_channels,\n                         drop_ratio=drop_ratio,\n                         std=std,\n                         data_format=data_format,\n                         **kwargs)\n        self.fc = Linear(self.in_channels,\n                         self.num_classes,\n                         weight_attr=ParamAttr(learning_rate=5.0,\n                                               regularizer=L2Decay(1e-4)),\n                         bias_attr=ParamAttr(learning_rate=10.0,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/tsm_head.py:34-57"
+    },
+    "7957": {
+        "file_id": 585,
+        "content": "The code defines a class with an __init__ method that initializes the TsmHead object. It takes arguments like num_classes, in_channels, drop_ratio, std, and data_format to set up the internal structure of the class. The Linear layer is also initialized with specific learning rates for weights and biases.",
+        "type": "comment"
+    },
+    "7958": {
+        "file_id": 585,
+        "content": "                                             regularizer=L2Decay(0.0)))\n        assert (data_format in [\n            'NCHW', 'NHWC'\n        ]), f\"data_format must be 'NCHW' or 'NHWC', but got {data_format}\"\n        self.data_format = data_format\n        self.stdv = std\n    def init_weights(self):\n        \"\"\"Initiate the FC layer parameters\"\"\"\n        weight_init_(self.fc, 'Normal', 'fc_0.w_0', 'fc_0.b_0', std=self.stdv)\n    def forward(self, x, num_seg):\n        \"\"\"Define how the tsm-head is going to run.\n        Args:\n            x (paddle.Tensor): The input data.\n            num_segs (int): Number of segments.\n        Returns:\n            score: (paddle.Tensor) The classification scores for input samples.\n        \"\"\"\n        # x.shape = [N * num_segs, in_channels, 7, 7]\n        x = self.avgpool2d(x)  # [N * num_segs, in_channels, 1, 1]\n        if self.dropout is not None:\n            x = self.dropout(x)  # [N * num_seg, in_channels, 1, 1]\n        if self.data_format == 'NCHW':\n            x = paddle.reshape(x, x.shape[:2])",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/tsm_head.py:58-89"
+    },
+    "7959": {
+        "file_id": 585,
+        "content": "The code initializes a TSM head, sets the data format and standard deviation for weights, initializes FC layer parameters, defines the forward function to perform average pooling, dropout if applicable, and reshapes the tensor based on the data format.",
+        "type": "comment"
+    },
+    "7960": {
+        "file_id": 585,
+        "content": "        else:\n            x = paddle.reshape(x, x.shape[::3])\n        score = self.fc(x)  # [N * num_seg, num_class]\n        score = paddle.reshape(\n            score, [-1, num_seg, score.shape[1]])  # [N, num_seg, num_class]\n        score = paddle.mean(score, axis=1)  # [N, num_class]\n        score = paddle.reshape(score,\n                               shape=[-1, self.num_classes])  # [N, num_class]\n        # score = F.softmax(score)  #NOTE remove\n        return score",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/tsm_head.py:90-99"
+    },
+    "7961": {
+        "file_id": 585,
+        "content": "This code is part of a temporal segment network head in PaddleVideo. If the input is not 3-channel, it reshapes the feature map to have only the first third of channels. Then, it passes the reshaped feature through a fully connected layer and averages across segments to get a score for each class. The shape of the scores is then modified accordingly, and softmax could be applied (note: comment indicates that softmax might be removed).",
+        "type": "comment"
+    },
+    "7962": {
+        "file_id": 586,
+        "content": "/paddlevideo/modeling/heads/tsn_head.py",
+        "type": "filepath"
+    },
+    "7963": {
+        "file_id": 586,
+        "content": "TSNHead class is defined for image classification, inheriting from BaseHead with num_classes, in_channels, and loss_cfg parameters. It uses AdaptiveAvgPool2D, Linear, Dropout layers and weight_init function for initialization. The function defines a head for TSN model that performs average pooling, reshapes, takes mean, applies dropout if enabled, and passes through fully connected layer for classification scores.",
+        "type": "summary"
+    },
+    "7964": {
+        "file_id": 586,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nfrom paddle.nn import AdaptiveAvgPool2D, Linear, Dropout\nfrom .base import BaseHead\nfrom ..registry import HEADS\nfrom ..weight_init import weight_init_\n@HEADS.register()\nclass TSNHead(BaseHead):\n    \"\"\"TSN Head.\n    Args:\n        num_classes (int): The number of classes to be classified.\n        in_channels (int): The number of channles in input feature.\n        loss_cfg (dict): Config for building config. Default: dict(name='CrossEntropyLoss').",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/tsn_head.py:1-30"
+    },
+    "7965": {
+        "file_id": 586,
+        "content": "The code is defining a TSNHead class for image classification, which inherits from the BaseHead class. It has parameters for num_classes, in_channels, and loss_cfg, and uses AdaptiveAvgPool2D, Linear, Dropout layers. The weight_init function is also imported for weight initialization.",
+        "type": "comment"
+    },
+    "7966": {
+        "file_id": 586,
+        "content": "        drop_ratio(float): drop ratio. Default: 0.4.\n        std(float): Std(Scale) value in normal initilizar. Default: 0.01.\n        kwargs (dict, optional): Any keyword argument to initialize.\n    \"\"\"\n    def __init__(self,\n                 num_classes,\n                 in_channels,\n                 loss_cfg=dict(name='CrossEntropyLoss'),\n                 drop_ratio=0.4,\n                 std=0.01,\n                 data_format=\"NCHW\",\n                 **kwargs):\n        super().__init__(num_classes, in_channels, loss_cfg, **kwargs)\n        self.drop_ratio = drop_ratio\n        self.std = std\n        #NOTE: global pool performance\n        self.avgpool2d = AdaptiveAvgPool2D((1, 1), data_format=data_format)\n        if self.drop_ratio != 0:\n            self.dropout = Dropout(p=self.drop_ratio)\n        else:\n            self.dropout = None\n        self.fc = Linear(self.in_channels, self.num_classes)\n    def init_weights(self):\n        \"\"\"Initiate the FC layer parameters\"\"\"\n        weight_init_(self.fc,\n                     'Normal',",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/tsn_head.py:31-63"
+    },
+    "7967": {
+        "file_id": 586,
+        "content": "Initializes a TSN head with specified parameters, including num_classes, in_channels, loss_cfg, drop_ratio, std, and data_format. It creates an adaptive average pooling layer, a dropout layer if drop_ratio is non-zero, and a fully connected linear layer (fc). The fc layer weights are then initialized with normal distribution.",
+        "type": "comment"
+    },
+    "7968": {
+        "file_id": 586,
+        "content": "                     'fc_0.w_0',\n                     'fc_0.b_0',\n                     mean=0.,\n                     std=self.std)\n    def forward(self, x, num_seg):\n        \"\"\"Define how the head is going to run.\n        Args:\n            x (paddle.Tensor): The input data.\n            num_segs (int): Number of segments.\n        Returns:\n            score: (paddle.Tensor) The classification scores for input samples.\n        \"\"\"\n        #XXX: check dropout location!\n        # [N * num_segs, in_channels, 7, 7]\n        x = self.avgpool2d(x)\n        # [N * num_segs, in_channels, 1, 1]\n        x = paddle.reshape(x, [-1, num_seg, x.shape[1]])\n        # [N, num_seg, in_channels]\n        x = paddle.mean(x, axis=1)\n        # [N, in_channels]\n        if self.dropout is not None:\n            x = self.dropout(x)\n            # [N, in_channels]\n        score = self.fc(x)\n        # [N, num_class]\n        #x = F.softmax(x)  #NOTE remove\n        return score",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/tsn_head.py:64-93"
+    },
+    "7969": {
+        "file_id": 586,
+        "content": "The function defines a head for the TSN model. It performs average pooling, reshapes the input, takes the mean along an axis, applies dropout if enabled, and passes the result through a fully connected layer to output scores for classification.",
+        "type": "comment"
+    },
+    "7970": {
+        "file_id": 587,
+        "content": "/paddlevideo/modeling/losses/__init__.py",
+        "type": "filepath"
+    },
+    "7971": {
+        "file_id": 587,
+        "content": "This code imports diverse loss functions from different modules, such as CrossEntropyLoss, BMNLoss, and TransNetV2Loss for PaddleVideo's video recognition, segmentation tasks, providing a comprehensive list of usable losses. The PaddleVideo model uses BaseWeightedLoss, ASRFLoss, DistillationCELoss, and DistillationDMLLoss for audio-visual speech recognition, distillation-based learning, and region-specific loss computation.",
+        "type": "summary"
+    },
+    "7972": {
+        "file_id": 587,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .base import BaseWeightedLoss\nfrom .bmn_loss import BMNLoss\nfrom .cross_entropy_loss import CrossEntropyLoss\nfrom .depth_loss import ADDSLoss\nfrom .transnetv2_loss import TransNetV2Loss\nfrom .actbert_loss import ActBertLoss\nfrom .asrf_loss import ASRFLoss\nfrom .distillation_loss import DistillationCELoss, DistillationDMLLoss\nfrom .yowo_loss import RegionLoss\n__all__ = [\n    'CrossEntropyLoss', 'BMNLoss', 'TransNetV2Loss', 'ActBertLoss', 'ADDSLoss',",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/__init__.py:1-26"
+    },
+    "7973": {
+        "file_id": 587,
+        "content": "This code imports different types of loss functions from various modules, such as CrossEntropyLoss, BMNLoss, and TransNetV2Loss. These losses are used in PaddleVideo for various applications like video recognition, segmentation, and more. The code provides a comprehensive list of loss functions that can be used depending on the specific task.",
+        "type": "comment"
+    },
+    "7974": {
+        "file_id": 587,
+        "content": "    'BaseWeightedLoss', 'ASRFLoss', 'DistillationCELoss', 'DistillationDMLLoss',\n    'RegionLoss'\n]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/__init__.py:27-29"
+    },
+    "7975": {
+        "file_id": 587,
+        "content": "The code defines a list of loss functions used in the PaddleVideo model. These losses include BaseWeightedLoss, ASRFLoss, DistillationCELoss, and DistillationDMLLoss for various tasks like audio-visual speech recognition, distillation-based learning, and region-specific loss computation.",
+        "type": "comment"
+    },
+    "7976": {
+        "file_id": 588,
+        "content": "/paddlevideo/modeling/losses/actbert_loss.py",
+        "type": "filepath"
+    },
+    "7977": {
+        "file_id": 588,
+        "content": "This code defines ActBertLoss and actBertLoss classes as loss functions for ActBert model, using CrossEntropyLoss and nn.KLDivLoss. The total loss is calculated by summing masked text, masked image, masked action, and next sentence losses, based on predictions and labels from various sources.",
+        "type": "summary"
+    },
+    "7978": {
+        "file_id": 588,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport numpy as np\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nfrom ..registry import LOSSES\nfrom .base import BaseWeightedLoss\n@LOSSES.register()\nclass ActBertLoss(BaseWeightedLoss):\n    \"\"\"Loss for ActBert model\n    \"\"\"\n    def __init__(self, vocab_size=30522, a_target_size=700):\n        super().__init__()\n        self.vocab_size = vocab_size\n        self.a_target_size = a_target_size\n        self.loss_fct = nn.CrossEntropyLoss(ignore_index=-1)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/actbert_loss.py:1-32"
+    },
+    "7979": {
+        "file_id": 588,
+        "content": "This code defines the ActBertLoss class, which is a loss function for the ActBert model. It uses the CrossEntropyLoss from PaddlePaddle's nn library and takes two arguments: vocab_size and a_target_size. The class inherits from BaseWeightedLoss.",
+        "type": "comment"
+    },
+    "7980": {
+        "file_id": 588,
+        "content": "        self.vis_criterion = nn.KLDivLoss(reduction=\"none\")\n    def forward(self, prediction_scores_t, prediction_scores_v, prediction_scores_a, seq_relationship_score, \\\n                text_labels, image_label, image_target, action_label, next_sentence_label):\n        \"\"\"\n        Args:\n            text_label: text label(with mask). Shape: [batch_size, seqence_length]\n            image_label: image label(with mask). Shape: [batch_size, region_length]\n            image_target: label of image feature distribution,\n                            Shape: [batch_size, region_length-1, num_image_class](minus 1 for xxx).\n            action label: action label(with mask), Shape: [batch_size, action_length]\n            next_sentence_label: is next sentence or not. Shape: [batch_size]\n        \"\"\"\n        prediction_scores_v = prediction_scores_v[:,\n                                                  1:]  #8,37,1601 --> 8,36,1601\n        img_loss = self.vis_criterion(\n            F.log_softmax(prediction_scores_v, axis=2),",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/actbert_loss.py:33-50"
+    },
+    "7981": {
+        "file_id": 588,
+        "content": "This code defines a class for an actBert loss function. It uses the nn.KLDivLoss function as a criterion and takes in prediction scores, sequence labels, image labels, image targets, action labels, and next sentence labels as input to compute the visual loss (img_loss). The prediction_scores_v variable is modified by removing the first element from each sequence, likely for consistency purposes.",
+        "type": "comment"
+    },
+    "7982": {
+        "file_id": 588,
+        "content": "            image_target  #8,36,1601\n        )\n        masked_img_loss = paddle.sum(\n            img_loss * (image_label == 1).unsqueeze(2).astype('float32')) / max(\n                paddle.sum((image_label == 1).astype('float32')), 1e-6)\n        masked_text_loss = self.loss_fct(\n            prediction_scores_t.reshape([-1, self.vocab_size]),  #8,36,30522\n            text_labels.reshape([-1]),  #8,36   # label -1 will be ignored\n        )\n        masked_action_loss = self.loss_fct(\n            prediction_scores_a.reshape([-1, self.a_target_size]),  #8,5,700\n            action_label.reshape([-1]),  #8,5\n        )\n        next_sentence_loss = self.loss_fct(\n            seq_relationship_score.reshape([-1, 2]),\n            next_sentence_label.reshape([-1])  #8,2\n        )\n        total_loss = masked_text_loss.unsqueeze(0) + masked_img_loss.unsqueeze(\n            0) + masked_action_loss.unsqueeze(0) + next_sentence_loss.unsqueeze(\n                0)\n        return total_loss",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/actbert_loss.py:51-75"
+    },
+    "7983": {
+        "file_id": 588,
+        "content": "This code calculates a total loss by summing the masked text loss, masked image loss, masked action loss, and next sentence loss. The losses are calculated based on predictions and labels from various sources. The `loss_fct` function is used to compute these losses, and they are reshaped before being added together for the final total loss.",
+        "type": "comment"
+    },
+    "7984": {
+        "file_id": 589,
+        "content": "/paddlevideo/modeling/losses/asrf_loss.py",
+        "type": "filepath"
+    },
+    "7985": {
+        "file_id": 589,
+        "content": "This code defines custom loss functions for video modeling, including TMSE and GSTMSE, with the ActionSegmentationLoss class applying various criteria like regression, classification, and temporal segmentation losses.",
+        "type": "summary"
+    },
+    "7986": {
+        "file_id": 589,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n# https://github.com/yiskw713/asrf/libs/loss_fn/__init__.py\nimport numpy as np\nimport pandas as pd\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nimport sys\nimport os\nfrom ..registry import LOSSES\nclass TMSE(nn.Layer):\n    \"\"\"\n    Temporal MSE Loss Function\n    Proposed in Y. A. Farha et al. MS-TCN: Multi-Stage Temporal Convolutional Network for ActionSegmentation in CVPR2019\n    arXiv: https://arxiv.org/pdf/1903.01945.pdf",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/asrf_loss.py:1-32"
+    },
+    "7987": {
+        "file_id": 589,
+        "content": "The code defines a class TMSE, which is a temporal MSE loss function. It's inspired by the MS-TCN method proposed in CVPR2019 for action segmentation tasks.",
+        "type": "comment"
+    },
+    "7988": {
+        "file_id": 589,
+        "content": "    \"\"\"\n    def __init__(self, threshold=4, ignore_index=255):\n        super().__init__()\n        self.threshold = threshold\n        self.ignore_index = ignore_index\n        self.mse = nn.MSELoss(reduction=\"none\")\n    def forward(self, preds, gts):\n        total_loss = 0.0\n        batch_size = preds.shape[0]\n        for pred, gt in zip(preds, gts):\n            pred = paddle.gather(pred,\n                                 paddle.nonzero(gt != self.ignore_index)[:, 0])\n            loss = self.mse(F.log_softmax(pred[:, 1:], axis=1),\n                            F.log_softmax(pred[:, :-1], axis=1))\n            loss = paddle.clip(loss, min=0, max=self.threshold**2)\n            total_loss += paddle.mean(loss)\n        return total_loss / batch_size\nclass GaussianSimilarityTMSE(nn.Layer):\n    \"\"\"\n    Temporal MSE Loss Function with Gaussian Similarity Weighting\n    \"\"\"\n    def __init__(self, threshold=4, sigma=1.0, ignore_index=255):\n        super().__init__()\n        self.threshold = threshold\n        self.ignore_index = ignore_index",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/asrf_loss.py:33-66"
+    },
+    "7989": {
+        "file_id": 589,
+        "content": "The code defines two classes: ASRF_Loss and GaussianSimilarityTMSE. The first class represents the Average Symmetric Ranking Forest Loss, while the second class is a Temporal MSE Loss Function with Gaussian Similarity Weighting. Both classes inherit from nn.Layer and have an __init__ method for initialization, as well as a forward method for calculating losses. The ASRF_Loss class uses an MSELoss function to calculate loss between predicted and ground truth frames, while the GaussianSimilarityTMSE class calculates temporal MSE with Gaussian similarity weighting.",
+        "type": "comment"
+    },
+    "7990": {
+        "file_id": 589,
+        "content": "        self.mse = nn.MSELoss(reduction=\"none\")\n        self.sigma = sigma\n    def forward(self, preds, gts, sim_index):\n        \"\"\"\n        Args:\n            preds: the output of model before softmax. (N, C, T)\n            gts: Ground Truth. (N, T)\n            sim_index: similarity index. (N, C, T)\n        Return:\n            the value of Temporal MSE weighted by Gaussian Similarity.\n        \"\"\"\n        total_loss = 0.0\n        batch_size = preds.shape[0]\n        for pred, gt, sim in zip(preds, gts, sim_index):\n            pred = paddle.gather(pred,\n                                 paddle.nonzero(gt != self.ignore_index)[:, 0],\n                                 axis=1)\n            sim = paddle.gather(sim,\n                                paddle.nonzero(gt != self.ignore_index)[:, 0],\n                                axis=1)\n            # calculate gaussian similarity\n            diff = sim[:, 1:] - sim[:, :-1]\n            similarity = paddle.exp(\n                (-1 * paddle.norm(diff, axis=0)) / (2 * self.sigma**2))",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/asrf_loss.py:67-92"
+    },
+    "7991": {
+        "file_id": 589,
+        "content": "This code calculates a temporal MSE loss weighted by Gaussian similarity. It uses Paddle's nn.MSELoss function, with reduction set to \"none\". The forward method takes in the model's predictions (before softmax), ground truth and similarity index as inputs. It loops through each input, performs non-zero checks for gt != ignore_index, then gathers the relevant rows from the predicted values. It calculates gaussian similarity using the gathered data and the given sigma value. The calculated loss is returned.",
+        "type": "comment"
+    },
+    "7992": {
+        "file_id": 589,
+        "content": "            # calculate temporal mse\n            loss = self.mse(F.log_softmax(pred[:, 1:], axis=1),\n                            F.log_softmax(pred[:, :-1], axis=1))\n            loss = paddle.clip(loss, min=0, max=self.threshold**2)\n            # gaussian similarity weighting\n            loss = similarity * loss\n            total_loss += paddle.mean(loss)\n        return total_loss / batch_size\nclass FocalLoss(nn.Layer):\n    def __init__(self,\n                 weight=None,\n                 size_average=True,\n                 batch_average=True,\n                 ignore_index=255,\n                 gamma=2.0,\n                 alpha=0.25):\n        super().__init__()\n        self.gamma = gamma\n        self.alpha = alpha\n        self.batch_average = batch_average\n        self.criterion = nn.CrossEntropyLoss(weight=weight,\n                                             ignore_index=ignore_index,\n                                             size_average=size_average)\n    def forward(self, logit, target):\n        n, _, _ = logit.size()",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/asrf_loss.py:94-126"
+    },
+    "7993": {
+        "file_id": 589,
+        "content": "This code defines a class \"ASRF_Loss\" for calculating ASRF loss using temporal MSE and Gaussian similarity weighting. It also defines a class \"FocalLoss\" for focal loss calculation using CrossEntropyLoss with custom gamma and alpha parameters.",
+        "type": "comment"
+    },
+    "7994": {
+        "file_id": 589,
+        "content": "        logpt = -self.criterion(logit, target.long())\n        pt = paddle.exp(logpt)\n        if self.alpha is not None:\n            logpt *= self.alpha\n        loss = -((1 - pt)**self.gamma) * logpt\n        if self.batch_average:\n            loss /= n\n        return loss\nclass ActionSegmentationLoss(nn.Layer):\n    \"\"\"\n    Loss Function for Action Segmentation\n    You can choose the below loss functions and combine them.\n        - Cross Entropy Loss (CE)\n        - Focal Loss\n        - Temporal MSE (TMSE)\n        - Gaussian Similarity TMSE (GSTMSE)\n    \"\"\"\n    def __init__(self,\n                 num_classes,\n                 file_path,\n                 label_path,\n                 ce=True,\n                 focal=True,\n                 tmse=False,\n                 gstmse=False,\n                 weight=None,\n                 threshold=4.,\n                 ignore_index=255,\n                 ce_weight=1.0,\n                 focal_weight=1.0,\n                 tmse_weight=0.15,\n                 gstmse_weight=0.15):\n        super().__init__()",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/asrf_loss.py:128-167"
+    },
+    "7995": {
+        "file_id": 589,
+        "content": "This code defines an ActionSegmentationLoss class, which is a loss function for action segmentation tasks. It allows the user to choose from various loss functions including Cross Entropy Loss (CE), Focal Loss, Temporal MSE (TMSE), and Gaussian Similarity TMSE (GSTMSE). The user can specify parameters such as num_classes, file_path, label_path, ce, focal, tmse, gstmse, weight, threshold, ignore_index, ce_weight, focal_weight, and tmse_weight. The class initializes the chosen loss functions and calculates the overall loss based on user inputs.",
+        "type": "comment"
+    },
+    "7996": {
+        "file_id": 589,
+        "content": "        self.criterions = []\n        self.weights = []\n        self.num_classes = num_classes\n        self.file_path = file_path\n        self.label_path = label_path\n        if weight:\n            class_weight = self.get_class_weight()\n        else:\n            class_weight = None\n        if ce:\n            self.criterions.append(\n                nn.CrossEntropyLoss(weight=class_weight,\n                                    ignore_index=ignore_index))\n            self.weights.append(ce_weight)\n        if focal:\n            self.criterions.append(FocalLoss(ignore_index=ignore_index))\n            self.weights.append(focal_weight)\n        if tmse:\n            self.criterions.append(\n                TMSE(threshold=threshold, ignore_index=ignore_index))\n            self.weights.append(tmse_weight)\n        if gstmse:\n            self.criterions.append(\n                GaussianSimilarityTMSE(threshold=threshold,\n                                       ignore_index=ignore_index))\n            self.weights.append(gstmse_weight)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/asrf_loss.py:168-198"
+    },
+    "7997": {
+        "file_id": 589,
+        "content": "The code initializes criterions and weights for different loss functions based on the provided parameters. It adds CrossEntropyLoss, FocalLoss, TMSE, and GaussianSimilarityTMSE to self.criterions list, and their corresponding weights to self.weights list. The weight parameter determines whether class weights are used in CrossEntropyLoss. Ignore_index is added for all loss functions.",
+        "type": "comment"
+    },
+    "7998": {
+        "file_id": 589,
+        "content": "        if len(self.criterions) == 0:\n            print(\"You have to choose at least one loss function.\")\n            sys.exit(1)\n    def get_class_weight(self):\n        \"\"\"\n        Class weight for CrossEntropy\n        Class weight is calculated in the way described in:\n            D. Eigen and R. Fergus, “Predicting depth, surface normals and semantic labels with a common multi-scale convolutional architecture,” in ICCV,\n            openaccess: https://www.cv-foundation.org/openaccess/content_iccv_2015/papers/Eigen_Predicting_Depth_Surface_ICCV_2015_paper.pdf\n        \"\"\"\n        # load file list\n        file_ptr = open(self.file_path, 'r')\n        info = file_ptr.read().split('\\n')[:-1]\n        file_ptr.close()\n        nums = [0 for i in range(self.num_classes)]\n        for i in range(len(info)):\n            video_name = info[i]\n            file_name = video_name.split('.')[0] + \".npy\"\n            label_file_path = os.path.join(self.label_path, file_name)\n            label = np.load(label_file_path).astype(np.int64)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/asrf_loss.py:200-221"
+    },
+    "7999": {
+        "file_id": 589,
+        "content": "The code snippet loads file information from a given path and calculates class weights for CrossEntropy loss function, based on the method described in the Eigen and Fergus paper. It reads file names and their corresponding labels, and stores them as lists for later use.",
+        "type": "comment"
+    }
+}

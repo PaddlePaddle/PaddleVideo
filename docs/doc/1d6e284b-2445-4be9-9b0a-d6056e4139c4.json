@@ -1,0 +1,20 @@
+{
+    "summary": "The code is part of the PaddleVideo framework's VideoTag application, which imports libraries, sets up a logger, and handles YAML configuration. It logs each key-value pair in the config file, separated by dashed lines.",
+    "details": [
+        {
+            "comment": "This code snippet is part of the PaddleVideo framework's VideoTag application. It imports yaml and AttrDict from utility, sets up a logger for logging messages, defines four configuration section strings, and provides two functions: parse_config() to load config files into an AttrDict object and create_attr_dict() to create an AttrDict object with the specified attributes.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoTag/utils/config_utils.py\":0-36",
+            "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nimport yaml\nfrom .utility import AttrDict\nimport logging\nlogger = logging.getLogger(__name__)\nCONFIG_SECS = [\n    'train',\n    'valid',\n    'test',\n    'infer',\n]\ndef parse_config(cfg_file):\n    \"\"\"Load a config file into AttrDict\"\"\"\n    import yaml\n    with open(cfg_file, 'r') as fopen:\n        yaml_config = AttrDict(yaml.load(fopen, Loader=yaml.Loader))\n    create_attr_dict(yaml_config)\n    return yaml_config\ndef create_attr_dict(yaml_config):"
+        },
+        {
+            "comment": "This code includes three functions. The first function, `config_utils.py`, is for processing the yaml configuration by converting certain types into AttrDicts and evaluating string values. The second function, `merge_configs()`, merges argument dictionaries with pre-existing config section dictionaries. It skips None values and attempts to set new attributes. Finally, the third function, `print_configs()`, prints configuration arguments in a formatted manner.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoTag/utils/config_utils.py\":37-72",
+            "content": "    from ast import literal_eval\n    for key, value in yaml_config.items():\n        if type(value) is dict:\n            yaml_config[key] = value = AttrDict(value)\n        if isinstance(value, str):\n            try:\n                value = literal_eval(value)\n            except BaseException:\n                pass\n        if isinstance(value, AttrDict):\n            create_attr_dict(yaml_config[key])\n        else:\n            yaml_config[key] = value\n    return\ndef merge_configs(cfg, sec, args_dict):\n    assert sec in CONFIG_SECS, \"invalid config section {}\".format(sec)\n    sec_dict = getattr(cfg, sec.upper())\n    for k, v in args_dict.items():\n        if v is None:\n            continue\n        try:\n            if hasattr(sec_dict, k):\n                setattr(sec_dict, k, v)\n        except:\n            pass\n    return cfg\ndef print_configs(cfg, mode):\n    logger.info(\n        \"---------------- {:>5} Arguments ----------------\".format(mode))\n    for sec, sec_items in cfg.items():\n        logger.info(\"{}:\".format(sec))\n        for k, v in sec_items.items():"
+        },
+        {
+            "comment": "The code is logging information for each key-value pair in the configuration file, and then separating each set of logs with a dashed line.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoTag/utils/config_utils.py\":73-74",
+            "content": "            logger.info(\"    {}:{}\".format(k, v))\n    logger.info(\"-------------------------------------------------\")"
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "summary": "Code sets the QEI_VIDEO_ROOT variable to the absolute path of the directory containing the current file. It also imports the version module from QEIVideo and assigns its __version__ attribute to a variable. This may be used for identifying the version of the QEIVideo application.",
+    "details": [
+        {
+            "comment": "Code sets the QEI_VIDEO_ROOT variable to the absolute path of the directory containing the current file. It also imports the version module from QEIVideo and assigns its __version__ attribute to a variable. This may be used for identifying the version of the QEIVideo application.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/EIVideo/QEIVideo/__init__.py\":0-12",
+            "content": "# Author: Acer Zhang\n# Datetime: 2022/1/6 \n# Copyright belongs to the author.\n# Please indicate the source for reprinting.\nimport os\nQEI_VIDEO_ROOT = os.path.abspath(os.path.dirname(__file__))\nimport os\nfrom QEIVideo.version import __version__\nQEI_VIDEO_ROOT = os.path.abspath(os.path.dirname(__file__))"
+        }
+    ]
+}

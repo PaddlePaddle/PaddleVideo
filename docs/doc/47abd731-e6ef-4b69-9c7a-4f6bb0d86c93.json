@@ -1,0 +1,20 @@
+{
+    "summary": "The code creates a class to calculate top-1 and possibly top-5 accuracy metrics in image classification tasks, tracking and averaging them during iteration, with support for multi-GPU scenarios using all-reduce operations.",
+    "details": [
+        {
+            "comment": "This code defines the class CenterCropMetric_MRI, a metric for a video processing framework. It initializes variables and tracks top1 accuracy during iteration.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/metrics/center_crop_metric_MRI.py\":0-32",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport numpy as np\nimport paddle\nfrom .registry import METRIC\nfrom .base import BaseMetric\nfrom paddlevideo.utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@METRIC.register\nclass CenterCropMetric_MRI(BaseMetric):\n    def __init__(self, data_size, batch_size, log_interval=1, if_slowfast=0):\n        \"\"\"prepare for metrics\n        \"\"\"\n        super().__init__(data_size, batch_size, log_interval)\n        self.top1 = []\n        self.if_slowfast = if_slowfast\n    def update(self, batch_id, data, outputs):\n        \"\"\"update metrics during each iter"
+        },
+        {
+            "comment": "This code snippet defines a class for calculating top-1 and possibly top-5 accuracy metrics in an image classification task. It collects the metrics for each batch during testing, then averages them at the end of all iterations. The code handles multi-GPU scenarios by performing all-reduce operations on the metric values.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/metrics/center_crop_metric_MRI.py\":33-59",
+            "content": "        \"\"\"\n        labels = data[1]\n        if self.if_slowfast:\n            labels = data[2]\n        top1 = paddle.metric.accuracy(input=outputs, label=labels, k=1)\n        #top5 = paddle.metric.accuracy(input=outputs, label=labels, k=5)\n        #NOTE(shipping): deal with multi cards validate\n        if self.world_size > 1:\n            top1 = paddle.distributed.all_reduce(\n                top1, op=paddle.distributed.ReduceOp.SUM) / self.world_size\n            # top5 = paddle.distributed.all_reduce(\n            #     top5, op=paddle.distributed.ReduceOp.SUM) / self.world_size\n        self.top1.append(top1.numpy())\n        #self.top5.append(top5.numpy())\n        # preds ensemble\n        if batch_id % self.log_interval == 0:\n            logger.info(\"[TEST] Processing batch {}/{} ...\".format(\n                batch_id,\n                self.data_size // (self.batch_size * self.world_size)))\n    def accumulate(self):\n        \"\"\"accumulate metrics when finished all iters.\n        \"\"\"\n        logger.info('[TEST] finished, avg_acc1= {}'.format("
+        },
+        {
+            "comment": "Calculates mean of top-1 accuracy across all samples in the batch.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/metrics/center_crop_metric_MRI.py\":60-60",
+            "content": "            np.mean(np.array(self.top1))))"
+        }
+    ]
+}

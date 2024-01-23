@@ -1,0 +1,543 @@
+{
+    "200": {
+        "file_id": 21,
+        "content": "\"\"\"\nreader_util\n\"\"\"\n#  Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport random\nimport numpy as np\nclass ReaderNotFoundError(Exception):\n    \"\"\"\n    \"Error: reader not found\"\n    \"\"\"\n    def __init__(self, reader_name, avail_readers):\n        super(ReaderNotFoundError, self).__init__()\n        self.reader_name = reader_name\n        self.avail_readers = avail_readers\n    def __str__(self):\n        msg = \"Reader {} Not Found.\\nAvailiable readers:\\n\".format(\n            self.reader_name)",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/reader_utils.py:1-34"
+    },
+    "201": {
+        "file_id": 21,
+        "content": "This code defines a class \"ReaderNotFoundError\" for handling reader not found exceptions with the possibility to specify the unavailable reader name and available readers.",
+        "type": "comment"
+    },
+    "202": {
+        "file_id": 21,
+        "content": "        for reader in self.avail_readers:\n            msg += \"  {}\\n\".format(reader)\n        return msg\nclass DataReader(object):\n    \"\"\"\n    data reader for video input\n    \"\"\"\n    def __init__(self, model_name, mode, cfg):\n        self.name = model_name\n        self.mode = mode\n        self.cfg = cfg\n    def create_reader(self):\n        \"\"\"\n        Not implemented\n        \"\"\"\n        pass\n    def get_config_from_sec(self, sec, item, default=None):\n        \"\"\"\n        get_config_from_sec\n        \"\"\"\n        if sec.upper() not in self.cfg:\n            return default\n        return self.cfg[sec.upper()].get(item, default)\nclass ReaderZoo(object):\n    \"\"\"\n    ReaderZoo\n    \"\"\"\n    def __init__(self):\n        \"\"\"\n        __init__\n        \"\"\"\n        self.reader_zoo = {}\n    def regist(self, name, reader):\n        \"\"\"\n        regist\n        \"\"\"\n        assert reader.__base__ == DataReader, \"Unknow model type {}\".format(\n            type(reader))\n        self.reader_zoo[name] = reader\n    def get(self, name, mode, cfg, material=None):",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/reader_utils.py:35-83"
+    },
+    "203": {
+        "file_id": 21,
+        "content": "This code defines classes for video input data readers and a reader zoo. The DataReader class initializes with a model name, mode, and configuration. It has methods to create readers (not implemented) and get config from sections. The ReaderZoo class manages registered readers in a zoo, allowing easy access and usage of different reader types for video input data.",
+        "type": "comment"
+    },
+    "204": {
+        "file_id": 21,
+        "content": "        \"\"\"\n        get\n        \"\"\"\n        for k, v in self.reader_zoo.items():\n            if k == name:\n                return v(name, mode, cfg, material)\n        raise ReaderNotFoundError(name, self.reader_zoo.keys())\n# singleton reader_zoo\nreader_zoo = ReaderZoo()\ndef regist_reader(name, reader):\n    \"\"\"\n    regist_reader\n    \"\"\"\n    reader_zoo.regist(name, reader)\ndef get_reader(name, mode, cfg, material=None):\n    \"\"\"\n    get_reader\n    \"\"\"\n    reader_model = reader_zoo.get(name, mode, cfg, material)\n    return reader_model.create_reader()",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/reader_utils.py:84-109"
+    },
+    "205": {
+        "file_id": 21,
+        "content": "This code defines a singleton reader_zoo and provides functions for registering readers and getting a specific reader. The get_reader function returns the created reader instance based on the provided name, mode, configuration (cfg), and material (if any). If the reader is not found, it raises ReaderNotFoundError with available reader names as information.",
+        "type": "comment"
+    },
+    "206": {
+        "file_id": 22,
+        "content": "/applications/BasketballAction/predict/action_detect/reader/tsminf_reader.py",
+        "type": "filepath"
+    },
+    "207": {
+        "file_id": 22,
+        "content": "TSMINFReader is a multiprocessing-enabled video reader in jpg format, applying transformations for machine learning models. It computes crop positions, performs random cropping, resizing, flipping, and centering on groups of images with fault-tolerant image reading.",
+        "type": "summary"
+    },
+    "208": {
+        "file_id": 22,
+        "content": "\"\"\"\ntsn frame reader\n\"\"\"\n#  Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nimport os\nimport sys\nimport random\nimport functools\nimport concurrent.futures\nimport multiprocessing\nimport numpy as np\nimport paddle\nfrom PIL import Image, ImageEnhance\nfrom .reader_utils import DataReader\nclass TSMINFReader(DataReader):\n    \"\"\"\n    Data reader for video dataset of jpg folder.\n    \"\"\"\n    def __init__(self, name, mode, cfg, material=None):\n        super(TSMINFReader, self).__init__(name, mode, cfg)",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/tsminf_reader.py:1-37"
+    },
+    "209": {
+        "file_id": 22,
+        "content": "TSMINFReader is a data reader for video datasets in jpg format. It inherits from DataReader and takes parameters name, mode, and cfg. It supports multiprocessing for improved performance.",
+        "type": "comment"
+    },
+    "210": {
+        "file_id": 22,
+        "content": "        name = name.upper()\n        self.num_seg = cfg[name]['num_seg']\n        self.seglen = cfg[name]['seglen']\n        self.short_size = cfg[name]['short_size']\n        self.target_size = cfg[name]['target_size']\n        self.batch_size = cfg[name]['batch_size']\n        self.reader_threads = cfg[name]['reader_threads']\n        self.buf_size = cfg[name]['buf_size']\n        self.video_path = cfg[name]['frame_list']\n        self.img_mean = np.array(cfg[name]['image_mean']).reshape(\n            [3, 1, 1]).astype(np.float32)\n        self.img_std = np.array(cfg[name]['image_std']).reshape(\n            [3, 1, 1]).astype(np.float32)\n        self.material = material\n    def create_reader(self):\n        \"\"\"\n        batch loader for TSN\n        \"\"\"\n        _reader = self._inference_reader_creator_longvideo(\n            self.video_path,\n            self.mode,\n            num_seg=self.num_seg,\n            seglen=self.seglen,\n            short_size=self.short_size,\n            target_size=self.target_size,\n            img_mean=self.img_mean,",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/tsminf_reader.py:38-66"
+    },
+    "211": {
+        "file_id": 22,
+        "content": "The code sets various configuration parameters such as number of segments, segment length, short and target image sizes, batch size, reader threads, buffer size, video path, and image mean and standard deviation for a TSN inference reader. It then creates the TSN inference reader using these parameters.",
+        "type": "comment"
+    },
+    "212": {
+        "file_id": 22,
+        "content": "            img_std=self.img_std,\n            num_threads=self.reader_threads,\n            buf_size=self.buf_size)\n        def _batch_reader():\n            batch_out = []\n            for imgs, label in _reader():\n                if imgs is None:\n                    continue\n                batch_out.append((imgs, label))\n                if len(batch_out) == self.batch_size:\n                    yield batch_out\n                    batch_out = []\n            if len(batch_out) > 1:\n                yield batch_out[:-1]\n        return _batch_reader\n    def _inference_reader_creator_longvideo(self, video_path, mode, num_seg,\n                                            seglen, short_size, target_size,\n                                            img_mean, img_std, num_threads,\n                                            buf_size):\n        \"\"\"\n        inference reader for video\n        \"\"\"\n        def reader():\n            \"\"\"\n            reader\n            \"\"\"\n            def image_buf(image_id_path_buf):\n                \"\"\"",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/tsminf_reader.py:67-97"
+    },
+    "213": {
+        "file_id": 22,
+        "content": "This code defines a video inference reader for the PaddleVideo application's BasketballAction module. It creates a batch reader to process images and labels from the given video path, considering various parameters such as image mean, standard deviation, number of threads, and buffer size. The batch reader yields batches of images and labels until reaching the specified batch size or finishing processing all data.",
+        "type": "comment"
+    },
+    "214": {
+        "file_id": 22,
+        "content": "                image_buf reader\n                \"\"\"\n                try:\n                    img_path = image_id_path_buf[1]\n                    img = Image.open(img_path).convert(\"RGB\")\n                    image_id_path_buf[2] = img\n                except:\n                    image_id_path_buf[2] = None\n            frame_len = len(video_path)\n            read_thread_num = num_seg\n            for i in range(0, frame_len, read_thread_num):\n                image_list_part = video_path[i:i + read_thread_num]\n                image_id_path_buf_list = []\n                for k in range(len(image_list_part)):\n                    image_id_path_buf_list.append([k, image_list_part[k], None])\n                with concurrent.futures.ThreadPoolExecutor(\n                        max_workers=read_thread_num) as executor:\n                    executor.map(\n                        lambda image_id_path_buf: image_buf(image_id_path_buf),\n                        image_id_path_buf_list)\n                imgs_seg_list = [x[2] for x in image_id_path_buf_list]",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/tsminf_reader.py:98-120"
+    },
+    "215": {
+        "file_id": 22,
+        "content": "This code uses multithreading to process video frames into images. It opens image paths, converts them to RGB format, and stores them in a list for later use. The code then maps the image processing task onto multiple threads to increase efficiency. Finally, it collects the processed images from each thread and stores them in the imgs_seg_list variable.",
+        "type": "comment"
+    },
+    "216": {
+        "file_id": 22,
+        "content": "                # add the fault-tolerant for bad image\n                for k in range(len(image_id_path_buf_list)):\n                    img_buf = image_id_path_buf_list[k][2]\n                    pad_id = 1\n                    while pad_id < num_seg and img_buf is None:\n                        img_buf = imgs_seg_list[(k + pad_id) % num_seg][2]\n                    if img_buf is None:\n                        print(\"read img erro from {} to {}\".format(\n                            i, i + read_thread_num))\n                        exit(0)\n                    else:\n                        imgs_seg_list[k] = img_buf\n                for pad_id in range(len(imgs_seg_list), num_seg):\n                    imgs_seg_list.append(imgs_seg_list[-1])\n                yield imgs_seg_list\n        def inference_imgs_transform(imgs_list, mode, num_seg, seglen, short_size,\\\n                                    target_size, img_mean, img_std):\n            \"\"\"\n            inference_imgs_transform\n            \"\"\"\n            imgs_ret = imgs_transform(imgs_list, mode, num_seg, seglen,",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/tsminf_reader.py:122-144"
+    },
+    "217": {
+        "file_id": 22,
+        "content": "This code handles fault-tolerant reading of images for a specified range. It checks if the image buffer is None and if so, attempts to retrieve it from other segments. If an image cannot be retrieved, it prints an error message and exits. Additionally, it appends extra segments with the last image in case there are fewer than num_segments required. Finally, it yields the updated imgs_seg_list for further processing in the inference_imgs_transform function.",
+        "type": "comment"
+    },
+    "218": {
+        "file_id": 22,
+        "content": "                                      short_size, target_size, img_mean,\n                                      img_std)\n            label_ret = 0\n            return imgs_ret, label_ret\n        mapper = functools.partial(inference_imgs_transform,\n                                   mode=mode,\n                                   num_seg=num_seg,\n                                   seglen=seglen,\n                                   short_size=short_size,\n                                   target_size=target_size,\n                                   img_mean=img_mean,\n                                   img_std=img_std)\n        return paddle.reader.xmap_readers(mapper,\n                                          reader,\n                                          num_threads,\n                                          buf_size,\n                                          order=True)\ndef imgs_transform(imgs,\n                   mode,\n                   num_seg,\n                   seglen,\n                   short_size,\n                   target_size,",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/tsminf_reader.py:145-172"
+    },
+    "219": {
+        "file_id": 22,
+        "content": "This code defines a function `imgs_transform` that takes in images, mode, number of segments, segment length, short size, target size as input. It applies transformations to the images based on the given parameters and returns the transformed images. The `mapper` is defined as a partial function of `inference_imgs_transform`, with parameters such as mode, num_seg, seglen, short_size, target_size, img_mean, and img_std. Finally, the code returns the result of `paddle.reader.xmap_readers` which applies the mapper function to the reader, with given parameters like num_threads and buf_size.",
+        "type": "comment"
+    },
+    "220": {
+        "file_id": 22,
+        "content": "                   img_mean,\n                   img_std,\n                   name=''):\n    \"\"\"\n    imgs_transform\n    \"\"\"\n    imgs = group_scale(imgs, short_size)\n    if mode == 'train':\n        if name == \"TSM\":\n            imgs = group_multi_scale_crop(imgs, short_size)\n        imgs = group_random_crop(imgs, target_size)\n        imgs = group_random_flip(imgs)\n    else:\n        imgs = group_center_crop(imgs, target_size)\n    np_imgs = (np.array(imgs[0]).astype('float32').transpose(\n        (2, 0, 1))).reshape(1, 3, target_size, target_size) / 255\n    for i in range(len(imgs) - 1):\n        img = (np.array(imgs[i + 1]).astype('float32').transpose(\n            (2, 0, 1))).reshape(1, 3, target_size, target_size) / 255\n        np_imgs = np.concatenate((np_imgs, img))\n    imgs = np_imgs\n    imgs -= img_mean\n    imgs /= img_std\n    imgs = np.reshape(imgs, (num_seg, seglen * 3, target_size, target_size))\n    return imgs\ndef group_multi_scale_crop(img_group, target_size, scales=None, \\\n        max_distort=1, fix_crop=True, more_fix_crop=True):",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/tsminf_reader.py:173-203"
+    },
+    "221": {
+        "file_id": 22,
+        "content": "The code defines a function \"imgs_transform\" that takes in images and applies various transformations depending on the mode ('train' or 'test'). For training, it performs multi-scale cropping, random cropping, and random flipping. For testing, it centers crops the images. It then normalizes the images by subtracting the mean and dividing by standard deviation. Finally, it reshapes the images into a specific format and returns them.",
+        "type": "comment"
+    },
+    "222": {
+        "file_id": 22,
+        "content": "    \"\"\"\n    group_multi_scale_crop\n    \"\"\"\n    scales = scales if scales is not None else [1, .875, .75, .66]\n    input_size = [target_size, target_size]\n    im_size = img_group[0].size\n    # get random crop offset\n    def _sample_crop_size(im_size):\n        \"\"\"\n         _sample_crop_size\n        \"\"\"\n        image_w, image_h = im_size[0], im_size[1]\n        base_size = min(image_w, image_h)\n        crop_sizes = [int(base_size * x) for x in scales]\n        crop_h = [\n            input_size[1] if abs(x - input_size[1]) < 3 else x\n            for x in crop_sizes\n        ]\n        crop_w = [\n            input_size[0] if abs(x - input_size[0]) < 3 else x\n            for x in crop_sizes\n        ]\n        pairs = []\n        for i, h in enumerate(crop_h):\n            for j, w in enumerate(crop_w):\n                if abs(i - j) <= max_distort:\n                    pairs.append((w, h))\n        crop_pair = random.choice(pairs)\n        if not fix_crop:\n            w_offset = random.randint(0, image_w - crop_pair[0])\n            h_offset = random.randint(0, image_h - crop_pair[1])",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/tsminf_reader.py:204-239"
+    },
+    "223": {
+        "file_id": 22,
+        "content": "This code generates a random crop size based on predefined scales and applies it to an input image. It ensures the generated crop size is close to the target size and adjusts the offset to maintain aspect ratio if necessary. The function also handles cases where the maximum distance between width and height is specified by the max_distort parameter. If fix_crop is False, it further adds random offsets to the selected crop size.",
+        "type": "comment"
+    },
+    "224": {
+        "file_id": 22,
+        "content": "        else:\n            w_step = (image_w - crop_pair[0]) / 4\n            h_step = (image_h - crop_pair[1]) / 4\n            ret = list()\n            ret.append((0, 0))  # upper left\n            if w_step != 0:\n                ret.append((4 * w_step, 0))  # upper right\n            if h_step != 0:\n                ret.append((0, 4 * h_step))  # lower left\n            if h_step != 0 and w_step != 0:\n                ret.append((4 * w_step, 4 * h_step))  # lower right\n            if h_step != 0 or w_step != 0:\n                ret.append((2 * w_step, 2 * h_step))  # center\n            if more_fix_crop:\n                ret.append((0, 2 * h_step))  # center left\n                ret.append((4 * w_step, 2 * h_step))  # center right\n                ret.append((2 * w_step, 4 * h_step))  # lower center\n                ret.append((2 * w_step, 0 * h_step))  # upper center\n                ret.append((1 * w_step, 1 * h_step))  # upper left quarter\n                ret.append((3 * w_step, 1 * h_step))  # upper right quarter",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/tsminf_reader.py:240-262"
+    },
+    "225": {
+        "file_id": 22,
+        "content": "This code calculates crop positions for an image based on its width and height. It generates a list of potential cropping locations, including upper left/right, lower left/right, center, center left/right, upper left quarter, upper right quarter, and center. The calculations are done in case more_fix_crop is set to True, otherwise only the basic crop positions will be included.",
+        "type": "comment"
+    },
+    "226": {
+        "file_id": 22,
+        "content": "                ret.append((1 * w_step, 3 * h_step))  # lower left quarter\n                ret.append((3 * w_step, 3 * h_step))  # lower righ quarter\n            w_offset, h_offset = random.choice(ret)\n            crop_info = {\n                'crop_w': crop_pair[0],\n                'crop_h': crop_pair[1],\n                'offset_w': w_offset,\n                'offset_h': h_offset\n            }\n        return crop_info\n    crop_info = _sample_crop_size(im_size)\n    crop_w = crop_info['crop_w']\n    crop_h = crop_info['crop_h']\n    offset_w = crop_info['offset_w']\n    offset_h = crop_info['offset_h']\n    crop_img_group = [\n        img.crop((offset_w, offset_h, offset_w + crop_w, offset_h + crop_h))\n        for img in img_group\n    ]\n    ret_img_group = [\n        img.resize((input_size[0], input_size[1]), Image.BILINEAR)\n        for img in crop_img_group\n    ]\n    return ret_img_group\ndef group_random_crop(img_group, target_size):\n    \"\"\"\n    group_random_crop\n    \"\"\"\n    w, h = img_group[0].size\n    th, tw = target_size, target_size",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/tsminf_reader.py:263-298"
+    },
+    "227": {
+        "file_id": 22,
+        "content": "The code defines a function `group_random_crop` that takes an image group and a target size as input, performs random cropping on each image in the group with different crop sizes, offsets, and resizes them to the specified target size. The cropped images are then returned in a group.",
+        "type": "comment"
+    },
+    "228": {
+        "file_id": 22,
+        "content": "    assert (w >= target_size) and (h >= target_size), \\\n          \"image width({}) and height({}) should be larger than crop size\".format(w, h)\n    out_images = []\n    x1 = random.randint(0, w - tw)\n    y1 = random.randint(0, h - th)\n    for img in img_group:\n        if w == tw and h == th:\n            out_images.append(img)\n        else:\n            out_images.append(img.crop((x1, y1, x1 + tw, y1 + th)))\n    return out_images\ndef group_random_flip(img_group):\n    \"\"\"\n    group_random_flip\n    \"\"\"\n    v = random.random()\n    if v < 0.5:\n        ret = [img.transpose(Image.FLIP_LEFT_RIGHT) for img in img_group]\n        return ret\n    else:\n        return img_group\ndef group_center_crop(img_group, target_size):\n    \"\"\"\n    group_center_crop\n    \"\"\"\n    img_crop = []\n    for img in img_group:\n        w, h = img.size\n        th, tw = target_size, target_size\n        assert (w >= target_size) and (h >= target_size), \\\n             \"image width({}) and height({}) should be larger than crop size\".format(w, h)\n        x1 = int(round((w - tw) / 2.))",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/tsminf_reader.py:300-338"
+    },
+    "229": {
+        "file_id": 22,
+        "content": "This code is used to preprocess images by cropping, flipping, and centering them for machine learning models. The \"group_center_crop\" function crops images to a specific target size while ensuring the image dimensions are larger than the crop size. The \"group_random_flip\" function randomly flips the images horizontally with a 50% chance. The preprocessed images are returned in a list format.",
+        "type": "comment"
+    },
+    "230": {
+        "file_id": 22,
+        "content": "        y1 = int(round((h - th) / 2.))\n        img_crop.append(img.crop((x1, y1, x1 + tw, y1 + th)))\n    return img_crop\ndef group_scale(imgs, target_size):\n    \"\"\"\n    group_scale\n    \"\"\"\n    resized_imgs = []\n    for i in range(len(imgs)):\n        img = imgs[i]\n        w, h = img.size\n        if (w <= h and w == target_size) or (h <= w and h == target_size):\n            resized_imgs.append(img)\n            continue\n        if w < h:\n            ow = target_size\n            oh = int(target_size * 4.0 / 3.0)\n            resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))\n        else:\n            oh = target_size\n            ow = int(target_size * 4.0 / 3.0)\n            resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))\n    return resized_imgs",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/reader/tsminf_reader.py:339-366"
+    },
+    "231": {
+        "file_id": 22,
+        "content": "The code defines two functions: \"crop_imgs\" and \"group_scale\". The \"crop_imgs\" function takes an image and crops it based on the provided top-left x, y coordinates, width, and height. It then appends the cropped images to a list and returns that list. The \"group_scale\" function resizes a group of images to a target size by checking if each image's dimensions already match the target size, and if not, it adjusts the dimensions using a 4:3 aspect ratio. It then appends the resized images to a list and returns that list.",
+        "type": "comment"
+    },
+    "232": {
+        "file_id": 23,
+        "content": "/applications/BasketballAction/predict/action_detect/utils/config_utils.py",
+        "type": "filepath"
+    },
+    "233": {
+        "file_id": 23,
+        "content": "The code is from PaddleVideo's BasketballAction application, importing modules and defining AttrDict class. It loads config file into an AttrDict object, processes nested dictionaries, prints configurations, and logs a separator line using the logger module for organization and readability purposes.",
+        "type": "summary"
+    },
+    "234": {
+        "file_id": 23,
+        "content": "\"\"\"\nconfig_utils\n\"\"\"\n#  Copyright (c) 2018 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport yaml\nimport ast\nimport logger\nlogger = logger.Logger()\nCONFIG_SECS = [\n    'train',\n    'valid',\n    'test',\n    'infer',\n]\nclass AttrDict(dict):\n    \"\"\"\n    AttrDict\n    \"\"\"\n    def __getattr__(self, key):\n        return self[key]\n    def __setattr__(self, key, value):\n        if key in self.__dict__:\n            self.__dict__[key] = value\n        else:\n            self[key] = value\ndef parse_config(cfg_file):",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/utils/config_utils.py:1-46"
+    },
+    "235": {
+        "file_id": 23,
+        "content": "This code is from the PaddleVideo library's BasketballAction application. It imports yaml and ast modules, as well as a logger class. The code defines a constant list of section names (train, valid, test, infer). It also defines an AttrDict class to handle dictionaries with attributes like getattr and setattr methods. The parse_config function is defined which takes a configuration file as input.",
+        "type": "comment"
+    },
+    "236": {
+        "file_id": 23,
+        "content": "    \"\"\"Load a config file into AttrDict\"\"\"\n    import yaml\n    with open(cfg_file, 'r') as fopen:\n        yaml_config = AttrDict(yaml.load(fopen, Loader=yaml.Loader))\n    create_attr_dict(yaml_config)\n    return yaml_config\ndef create_attr_dict(yaml_config):\n    \"\"\"create_attr_dict\"\"\"\n    for key, value in yaml_config.items():\n        if isinstance(value, dict):\n            yaml_config[key] = value = AttrDict(value)\n        if isinstance(value, str):\n            try:\n                value = ast.literal_eval(value)\n            except BaseException:\n                pass\n        if isinstance(value, AttrDict):\n            create_attr_dict(yaml_config[key])\n        else:\n            yaml_config[key] = value\n    return\ndef print_configs(cfg, mode):\n    \"\"\"print_configs\"\"\"\n    logger.info(\"---------------- {:>5} Arguments ----------------\".format(\n        mode))\n    for sec, sec_items in cfg.items():\n        logger.info(\"{}:\".format(sec))\n        for k, v in sec_items.items():\n            logger.info(\"    {}:{}\".format(k, v))",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/utils/config_utils.py:47-79"
+    },
+    "237": {
+        "file_id": 23,
+        "content": "This code is responsible for loading a configuration file into an AttrDict object, processing the nested dictionary structure, and printing the configurations. It uses the yaml library to load the file, and the create_attr_dict function to handle nested dictionaries and convert strings to appropriate data types. The print_configs function prints the configuration in a formatted manner for readability.",
+        "type": "comment"
+    },
+    "238": {
+        "file_id": 23,
+        "content": "    logger.info(\"-------------------------------------------------\")",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/utils/config_utils.py:80-80"
+    },
+    "239": {
+        "file_id": 23,
+        "content": "This code snippet is logging a separator line using the logger module. The purpose of this logger statement might be to visually separate different sections or parts of the code for readability and organization purposes.",
+        "type": "comment"
+    },
+    "240": {
+        "file_id": 24,
+        "content": "/applications/BasketballAction/predict/action_detect/utils/preprocess.py",
+        "type": "filepath"
+    },
+    "241": {
+        "file_id": 24,
+        "content": "This code contains four functions that utilize the FFmpeg tool for handling video and audio files. \"ffmpeg_frames\" extracts frames from a given MP4 file, \"ffmpeg_pcm\" extracts audio in PCM format, \"ffmpeg_mp4\" downloads an MP4 file, and \"get_images\" lists the images inside a specified image directory.",
+        "type": "summary"
+    },
+    "242": {
+        "file_id": 24,
+        "content": "\"\"\" extract frames and pcm\"\"\"\nimport os\nimport sys\nimport shutil\ndef ffmpeg_frames(mp4_addr, frame_out_folder, fps=5):\n    \"\"\"ffmpeg_frames\"\"\"\n    if os.path.exists(frame_out_folder):\n        shutil.rmtree(frame_out_folder)\n    os.makedirs(frame_out_folder)\n    cmd = './src/utils/ffmpeg -v 0 -i %s -r %d -q 0 %s/%s.jpg' % (mp4_addr, fps, frame_out_folder, '%08d')\n    os.system(cmd)\ndef ffmpeg_pcm(mp4_addr, save_file_name):\n    \"\"\"ffmpeg_pcm\"\"\"\n    cmd = './src/utils/ffmpeg -y  -i %s  -acodec pcm_s16le -f s16le -ac 1 -ar 16000 %s -v 0' \\\n        % (mp4_addr, save_file_name)\n    os.system(cmd)\ndef ffmpeg_mp4(mp4_url, mp4_addr):\n    \"\"\"ffmpeg_mp4\"\"\"\n    cmd = \"wget %s -O %s -q\" % (mp4_url, mp4_addr)\n    print (\"cmd = \", cmd)\n    os.system(cmd)\ndef get_images(image_path):\n    \"\"\"get_images\"\"\"\n    images = sorted(os.listdir(image_path))\n    images = images\n    images_path_list = [image_path + '/' + im for im in images]\n    return images_path_list",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/utils/preprocess.py:1-35"
+    },
+    "243": {
+        "file_id": 24,
+        "content": "This code contains four functions that utilize the FFmpeg tool for handling video and audio files. \"ffmpeg_frames\" extracts frames from a given MP4 file, \"ffmpeg_pcm\" extracts audio in PCM format, \"ffmpeg_mp4\" downloads an MP4 file, and \"get_images\" lists the images inside a specified image directory.",
+        "type": "comment"
+    },
+    "244": {
+        "file_id": 25,
+        "content": "/applications/BasketballAction/predict/action_detect/utils/process_result.py",
+        "type": "filepath"
+    },
+    "245": {
+        "file_id": 25,
+        "content": "The code retrieves data, applies NMS to bounding box proposals, filters detected actions from videos using NMS, and stores relevant information in the \"video_results\" list. It defines a function `get_action_result` that takes inputs and performs NMS on processed results.",
+        "type": "summary"
+    },
+    "246": {
+        "file_id": 25,
+        "content": "\"\"\"\n# @File  : process_result.py  \n# @Author: macaihong\n# @Date  : 2019/12/15\n# @Desc  :\n\"\"\"\nimport sys\nimport os\nimport re\nimport numpy as np\nimport pickle\nimport json\nimport logger\nlogger = logger.Logger()\ndef get_data_res(label_map, data, topk):\n    \"\"\"get_data_res\"\"\"\n    sum_vid = len(data)\n    video_result = []\n    for i in range(sum_vid):\n        vid_name = data[i][0][0]\n        # true_label predict_start predict_end predict_score predict_len gt_iou gt_start gt_ioa\n        feature_start_id = float(data[i][0][1]['start'])\n        feature_end_id = float(data[i][0][1]['end'])\n        feature_stage1_score = data[i][0][1]['score']\n        predict_res = []\n        for k in range(topk):\n            score_top = data[i][1][k]\n            labelid_top = data[i][2][k]\n            label_iou = data[i][3]\n            labelname_top = label_map[str(labelid_top)]\n            video_result.append([feature_start_id, feature_end_id, labelid_top, labelname_top, score_top, label_iou])\n    return video_result\ndef base_nms(bboxes, thresh, delta=0, nms_id=2):",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/utils/process_result.py:1-39"
+    },
+    "247": {
+        "file_id": 25,
+        "content": "This code defines two functions: `get_data_res` and `base_nms`. The first function takes in a label map, data (a list of features), and a topk value. It iterates through each video in the data, extracts relevant information from the feature, and appends this information to a new list called `video_result`. Finally, it returns the `video_result` list. The second function is an incomplete definition for a non-maximum suppression algorithm used for bounding boxes. It takes in bboxes (bounding box coordinates), thresh (threshold value), delta (optional parameter with default value 0), and nms_id (an identifier for the NMS operation, with a default value of 2).",
+        "type": "comment"
+    },
+    "248": {
+        "file_id": 25,
+        "content": "    \"\"\"\n    One-dimensional non-maximal suppression\n    :param bboxes: [[vid, label, st, ed, score, ...], ...]\n    :param thresh:\n    :return:\n    \"\"\"\n    \"\"\"\n    t1 = bboxes[:, 0]\n    t2 = bboxes[:, 1]\n    scores = bboxes[:, nms_id]\n    \"\"\"\n    t1 = np.array([max(0, x[0] - delta) for x in bboxes])\n    t2 = np.array([x[1] + delta for x in bboxes])\n    scores = np.array([x[nms_id] for x in bboxes])\n    durations = t2 - t1\n    order = scores.argsort()[::-1]\n    keep = []\n    while order.size > 0:\n        i = order[0]\n        keep.append(i)\n        tt1 = np.maximum(t1[i], t1[order[1:]])\n        tt2 = np.minimum(t2[i], t2[order[1:]])\n        intersection = tt2 - tt1\n        IoU = intersection / (durations[i] + durations[order[1:]] - intersection).astype(float)\n        inds = np.where(IoU <= thresh)[0]\n        order = order[inds + 1]\n    return [bboxes[i] for i in keep]\ndef process_proposal(source_prop_box, min_frame_thread=5, nms_thresh=0.7, score_thresh=0.01):\n    \"\"\"process_video_prop\"\"\"\n    prop_box = []\n    for items in source_prop_box:",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/utils/process_result.py:40-76"
+    },
+    "249": {
+        "file_id": 25,
+        "content": "This code performs non-maximal suppression on bounding box proposals. It filters out overlapping boxes by keeping only those with the highest scores and discarding the rest. The function process_proposal takes source bounding box proposals, applies non-maximal suppression with a threshold, and returns the filtered results.",
+        "type": "comment"
+    },
+    "250": {
+        "file_id": 25,
+        "content": "        start_frame = float(items[0])\n        end_frame = float(items[1])\n        score = float(items[2])\n        if end_frame - start_frame < min_frame_thread or score < score_thresh:\n            continue\n        prop_box.append([start_frame, end_frame, score])\n    prop_box_keep = base_nms(prop_box, nms_thresh)\n    prop_res = []\n    for res in prop_box_keep:\n        prop_res.append({'start': res[0], 'end': res[1], 'score': res[2]})\n    return prop_res\ndef process_video_classify(video_prop, fps, score_thread, iou_thread, \\\n                           nms_id=5, nms_thread=0.01, nms_delta=10, backgroundid=0):\n    \"\"\"process_video_classify\"\"\"\n    prop_filter = []\n    for item in video_prop:\n        if item[2] == backgroundid:\n            continue\n        prop_filter.append(item)\n    # prop_filter = sorted(prop_filter, key=lambda x: x[nms_id], reverse=True)\n    prop_filter = base_nms(prop_filter, nms_thread, nms_delta, nms_id)\n    prop_filter = sorted(prop_filter, key=lambda x: x[0])\n    video_results = []\n    for item in prop_filter:",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/utils/process_result.py:77-107"
+    },
+    "251": {
+        "file_id": 25,
+        "content": "This code is part of a video classification process. It filters and sorts the detected actions in a video, discarding background or weak detections. The results are stored in 'prop_res' and 'video_results'. The code applies non-maximum suppression (NMS) to filter and sort the detections based on frame duration, score threshold, and other parameters like fps, nms_thread, and nms_delta.",
+        "type": "comment"
+    },
+    "252": {
+        "file_id": 25,
+        "content": "        start_sec = item[0] / fps\n        end_sec = item[1] / fps\n        start_id_frame = item[0]\n        end_id_frame = item[1]\n        # start_time = \"%02d:%02d:%02d\" % ((start_id_frame / fps) / 3600, \\\n        #     ((start_id_frame / fps) % 3600) / 60, (start_id_frame / fps) % 60)\n        # end_time = \"%02d:%02d:%02d\" % ((end_id_frame / fps) / 3600, \\\n        #     ((end_id_frame / fps) % 3600) / 60, (end_id_frame / fps) % 60)\n        start_time = int(start_id_frame / fps)\n        end_time = int(end_id_frame / fps)\n        label_id = item[2]\n        label_name = item[3]\n        label_classify_score = item[4]\n        label_iou_score = item[5]\n        if label_classify_score > score_thread and label_iou_score > iou_thread:\n            video_results.append({\"start_time\": start_time,\n                                  \"end_time\": end_time,\n                                  \"label_id\": label_id,\n                                  \"label_name\": label_name,\n                                  \"classify_score\": label_classify_score,",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/utils/process_result.py:108-129"
+    },
+    "253": {
+        "file_id": 25,
+        "content": "This code calculates the start and end time in seconds, frame IDs, and other relevant details of detected actions from a video. It then appends these details as a dictionary to the \"video_results\" list if the classify score and IoU score exceed certain thresholds.",
+        "type": "comment"
+    },
+    "254": {
+        "file_id": 25,
+        "content": "                                  \"iou_score\": label_iou_score})\n    return video_results\ndef get_action_result(result_info, label_map_file, fps, score_thread=0, \\\n                      iou_thread=0, nms_id=5, nms_thread=0.01, frame_offset=10, topk=1):\n    \"\"\"get_action_result\"\"\"\n    label_map = json.load(open(label_map_file, 'r', encoding='utf-8'))\n    org_result = get_data_res(label_map, result_info, topk)\n    nms_result = process_video_classify(org_result, fps, score_thread, iou_thread, nms_id, nms_thread, frame_offset)\n    return nms_result",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/action_detect/utils/process_result.py:130-144"
+    },
+    "255": {
+        "file_id": 25,
+        "content": "This code defines a function `get_action_result` that takes in `result_info`, `label_map_file`, `fps`, `score_thread`, `iou_thread`, `nms_id`, `nms_thread`, and `frame_offset` as inputs. It reads the label map from `label_map_file`, processes the result data using `get_data_res` function, performs non-maximum suppression (NMS) on the processed results with specified parameters, and returns the final NMS results.",
+        "type": "comment"
+    },
+    "256": {
+        "file_id": 26,
+        "content": "/applications/BasketballAction/predict/eval.py",
+        "type": "filepath"
+    },
+    "257": {
+        "file_id": 26,
+        "content": "The code defines a function for loading annotations and includes helper functions, iterates through label ranges and thresholds to find the best combination of IOU and score threshold for evaluating basketball actions, calculates evaluation results, updates best scores, and prints these best scores along with the evaluation results.",
+        "type": "summary"
+    },
+    "258": {
+        "file_id": 26,
+        "content": "\"\"\"\nget instance for lstm\n根据gts计算每个proposal_bmn的iou、ioa、label等信息\n\"\"\"\nimport os\nimport sys\nimport json\nimport random\nimport pickle\nimport numpy as np\nimport io\nsys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding = 'utf-8')\ndataset = \"datasets/\"\nlabel_index_file = './configs_basketball/index_label_basketball_6.json'\neval_datasets = ['EuroCup2016']\nlabel_files = {'train': 'label_cls6_train.json',\n               'validation': 'label_cls6_val.json'}\nglobal fps, mode\nlabel_index = json.load(open(label_index_file, 'rb'))\ndef load_gts():\n    global fps\n    gts_data = {'fps': 0, 'gts': {}}\n    for eval_data in eval_datasets:\n        for item, value in label_files.items():\n            label_file = '{}/{}/{}'.format(dataset, eval_data, value)\n            gts = json.load(open(label_file, 'rb'))\n            gts_data['fps'] = gts['fps']\n            fps = gts['fps']\n            for gt in gts['gts']:\n                gt['mode'] = item\n                basename = '{}/{}/mp4/{}'.format(dataset, eval_data, os.path.basename(gt['url']))",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/eval.py:1-36"
+    },
+    "259": {
+        "file_id": 26,
+        "content": "This code defines a function called `load_gts()` which loads ground truth annotations (gts) for video evaluation. It imports necessary modules, sets up global variables like fps and mode, and utilizes a JSON file to map labels to their indices. The gts data is stored in a dictionary with 'fps' and 'gts' keys, where 'fps' stores the frame rate and 'gts' stores individual annotations for each video. Each annotation has a 'mode' key indicating whether it's from training or validation set.",
+        "type": "comment"
+    },
+    "260": {
+        "file_id": 26,
+        "content": "                gts_data['gts'][basename] = gt\n    return gts_data['gts']\ndef computeIoU(e1, e2):\n    \"\"\"\n    clc iou and ioa\n    \"\"\"\n    if not (e1['label'] == e2['label'] and e1['basename'] == e2['basename']):\n        return 0.\n    area1 = e1[\"end\"] - e1[\"start\"]\n    area2 = e2[\"end\"] - e2[\"start\"]\n    x1 = np.maximum(e1[\"start\"], e2[\"start\"])\n    x2 = np.minimum(e1[\"end\"], e2[\"end\"])\n    inter = np.maximum(0.0, x2 - x1)\n    iou = 0.0 if (area1 + area2 - inter) == 0 else inter * 1.0 / (area1 + area2 - inter)\n    if not mode == 'proposal':\n        iou = 0.0 if area2 == 0 else inter * 1.0 / area2\n    return iou\ndef convert_proposal(boxes, basename, score_threshold=0.01):\n    boxes = sorted(boxes, key=lambda x:float(x['score']), reverse=True)\n    res = []\n    for box in boxes:\n        if not float(box['score']) >= score_threshold:\n            continue\n        res.append({'basename': basename,\n                    'start': int(float(box['start']) / fps),\n                    'end': int(float(box['end']) / fps),\n                    'label': 0})",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/eval.py:37-67"
+    },
+    "261": {
+        "file_id": 26,
+        "content": "This code snippet defines three functions: \"get_gt\", \"computeIoU\", and \"convert_proposal\". The \"get_gt\" function takes a baseline name and returns the ground truth (GT) for that specific baseline. The \"computeIoU\" function calculates the intersection over union (IoU) between two events. Lastly, the \"convert_proposal\" function converts event proposals into ground truths based on their scores, threshold, and frame rates.",
+        "type": "comment"
+    },
+    "262": {
+        "file_id": 26,
+        "content": "    return res\ndef convert_classify(boxes, basename, iou_threshold, score_threshold):\n    boxes = sorted(boxes, key=lambda x:(float(x['classify_score']), float(x['iou_score'])), reverse=True)\n    def convert_time_to_frame(time_type):\n        return int(time_type)\n        h, m, s = time_type.split(':')\n        return int(h) * 3600 + int(m) * 60 + int(s)\n    res = []\n    for box in boxes:\n        if not (box['iou_score'] >= iou_threshold and\n                box['classify_score'] >= score_threshold):\n            continue\n        res.append({'basename': basename,\n                    'start': convert_time_to_frame(box['start_time']),\n                    'end': convert_time_to_frame(box['end_time']),\n                    'label': box['label_id']})\n    return res\ndef convert_groundtruth(boxes, basename, phase=None):\n    res = []\n    for box in boxes:\n        for item in box['label_ids']:\n            label = 0 if phase == 'proposal' else item\n            res.append({'basename': basename,\n                        'start': box['start_id'],",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/eval.py:68-93"
+    },
+    "263": {
+        "file_id": 26,
+        "content": "The code defines a function `convert_classify` that takes in boxes, base name, iou threshold, and score threshold. It sorts the boxes based on their classify score and iou score in descending order. The function then loops over each box, checks if the box meets the iou and score thresholds, and appends to a list named 'res' with necessary details such as basename, start time converted to frame number, end time converted to frame number, and label id. The code also has another function `convert_groundtruth` which takes in boxes, base name, and phase (optional). It iterates over the label ids of each box and appends a dictionary to the list 'res' with necessary details such as basename, start id, and label.",
+        "type": "comment"
+    },
+    "264": {
+        "file_id": 26,
+        "content": "                        'end': box['end_id'],\n                        'label': label})\n    return res\ndef print_head(iou):\n    print(\"\\nioa = {:.1f}\".format(iou))\n    res_str = ''\n    for item in ['label_name']:\n        res_str += '{:<12s}'.format(item)\n    for item in ['label_id', 'precision', 'recall', 'hit_prop', 'num_prop', 'hit_gts', 'num_gts']:\n        res_str += '{:<10s}'.format(item)\n    print(res_str)\ndef print_result(res_dict, label='avg'):\n    if label == 'avg':\n        res_str = '{:<22s}'.format(str(label))\n    else:\n        res_str = '{0:{2}<6s}{1:<10s}'.format(label_index[str(label)], str(label), chr(12288))\n    for item in ['prec', 'recall']:\n        res_str += '{:<10.4f}'.format(res_dict[item])\n    for item in ['hit_prop', 'num_prop', 'hit_gts', 'num_gts']:\n        res_str += '{:<10d}'.format(res_dict[item])\n    print(res_str)\ndef evaluation(res_boxes, gts_boxes, label_range, iou_range, show_sub = False):\n    iou_map = [computeIoU(resId, gtsId) for resId in res_boxes \\\n                                        for gtsId in gts_boxes]",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/eval.py:94-120"
+    },
+    "265": {
+        "file_id": 26,
+        "content": "This code contains four functions: `evaluation`, `print_result`, `print_head`, and `print_head`. These functions calculate and print the evaluation results for a set of detected boxes (res_boxes) against the ground truth boxes (gts_boxes). The code also calculates various metrics such as precision, recall, hit properties, and number of instances. It uses label ranges, IoU thresholds, and can show intermediate IoU values if specified.",
+        "type": "comment"
+    },
+    "266": {
+        "file_id": 26,
+        "content": "    iou_map = np.array(iou_map).reshape((len(res_boxes), len(gts_boxes)))\n    hit_map_prop_total = np.max(iou_map, axis=1)\n    hit_map_index_total = np.argmax(iou_map, axis=1)\n    res_dict = ['hit_prop', 'num_prop', 'hit_gts', 'num_gts']\n    for iou_threshold in iou_range:\n        if show_sub:\n            print_head(iou_threshold)\n        iou_prop = np.array([k >= iou_threshold for k in hit_map_prop_total])\n        average_results = {}\n        for label_id in label_range:\n            sub_results = {}\n            label_prop = np.array([k['label'] == label_id for k in res_boxes])\n            label_gts = np.array([k['label'] == label_id for k in gts_boxes])\n            sub_results['num_prop'] = sum(label_prop)\n            sub_results['num_gts'] = sum(label_gts)\n            if sub_results['num_prop'] == 0:\n                hit_prop_index = []\n            else:\n                hit_prop_index = label_prop & iou_prop\n            sub_results['hit_prop'] = sum(hit_prop_index)\n            sub_results['hit_gts'] = len(set(hit_map_index_total[hit_prop_index]))",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/eval.py:121-144"
+    },
+    "267": {
+        "file_id": 26,
+        "content": "This code calculates evaluation metrics for detected objects based on their Intersection over Union (IoU) with ground truth objects. It iterates through different IoU thresholds and label ranges to compute hit proportion, number of propositions, hit GTs, and number of ground truth objects for each threshold and label. The results are stored in a dictionary.",
+        "type": "comment"
+    },
+    "268": {
+        "file_id": 26,
+        "content": "            sub_results['prec'] = 0.0 if sub_results['num_prop'] == 0 \\\n                                      else sub_results['hit_prop'] * 1.0 / sub_results['num_prop']\n            sub_results['recall'] = 0.0 if sub_results['num_gts'] == 0 \\\n                                        else sub_results['hit_gts'] * 1.0 / sub_results['num_gts']\n            if show_sub:\n                print_result(sub_results, label=label_id)\n            for item in res_dict:\n                if not item in average_results:\n                    average_results[item] = 0\n                average_results[item] += sub_results[item]\n        if len(label_range) == 1:   # proposal 不需要输出average值\n            continue\n        average_results['prec'] = 0.0 if average_results['num_prop'] == 0 \\\n                                      else average_results['hit_prop'] * 1.0 / average_results['num_prop']\n        average_results['recall'] = 0.0 if average_results['num_gts'] == 0 \\\n                                        else average_results['hit_gts'] * 1.0 / average_results['num_gts']",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/eval.py:146-161"
+    },
+    "269": {
+        "file_id": 26,
+        "content": "This code calculates precision and recall values for sub-results and average results in a classification task. It handles cases where the number of true positives, true negatives, false positives or false negatives is zero by assigning precision and recall as 0. The code outputs average values only for labels with a range greater than one.",
+        "type": "comment"
+    },
+    "270": {
+        "file_id": 26,
+        "content": "        if show_sub:\n            print_result(average_results)\n        average_results['F1'] = 0.0 if (average_results['prec'] + average_results['recall'] == 0) \\\n                                    else 2 * average_results['prec'] * average_results['recall'] / \\\n                                            (average_results['prec'] + average_results['recall'])\n        return average_results\ndef get_eval_results(predicts, gts_data, phase, iou_threshold = 0.3, score_threshold = 0.3, show_sub = False):\n    global mode\n    mode = phase\n    res_boxes = []\n    gts_boxes = []\n    for ped_data in predicts:\n        basename = ped_data['video_name']\n        # eval sub data\n        such_eval = False\n        for eval_name in eval_datasets:\n            if eval_name in basename:\n                such_eval = True\n                break\n        if not such_eval:\n            continue\n        gts = gts_data[basename]['actions']\n        if phase == 'proposal':\n            res_boxes.extend(convert_proposal(ped_data['bmn_results'], basename, score_threshold))",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/eval.py:162-189"
+    },
+    "271": {
+        "file_id": 26,
+        "content": "This code calculates the F1 score for a set of predictions and ground truth data. If 'show_sub' is True, it prints the average results. It then calculates the F1 score based on precision and recall values. The function returns the average results containing precision, recall, and F1 score.",
+        "type": "comment"
+    },
+    "272": {
+        "file_id": 26,
+        "content": "            gts_boxes.extend(convert_groundtruth(gts, basename, phase='proposal'))\n            label_range = [0]\n            iou_range = np.arange(0.1, 1, 0.1)\n        else:\n            res_boxes.extend(convert_classify(ped_data['action_results'], basename, iou_threshold, score_threshold))\n            gts_boxes.extend(convert_groundtruth(gts, basename))\n            label_range = range(1, len(label_index))\n            iou_range = np.arange(0.5, 0.6, 0.1)\n    eval_results = evaluation(res_boxes, gts_boxes, label_range, iou_range, show_sub = show_sub)\n    return eval_results\nif __name__ == \"__main__\":\n    result_file = sys.argv[1]\n    predicts = json.load(open(result_file, 'r', encoding='utf-8'))\n    gts_data = load_gts()\n    get_eval_results(predicts, gts_data, 'proposal', \n                     score_threshold = 0.03,\n                     show_sub = True)\n    #get_eval_results(predicts, gts_data, 'actions')\n    best_F1 = -0.1\n    best_res = {}\n    best_iou_threshold = 0.\n    best_score_threshold = 0.\n    for iou_threshold in np.arange(0.1, 0.9, 0.1):",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/eval.py:190-218"
+    },
+    "273": {
+        "file_id": 26,
+        "content": "The code is evaluating the performance of a video action detection model. It extends the ground truth boxes for proposals and classifies them based on IOU and score thresholds. It then performs evaluation using these results and displays the best F1 score.",
+        "type": "comment"
+    },
+    "274": {
+        "file_id": 26,
+        "content": "        for score_threshold in np.arange(0.1, 1, 0.1):\n            avg_res = get_eval_results(predicts, gts_data, 'actions', \n                                       iou_threshold = iou_threshold,\n                                       score_threshold = score_threshold,\n                                       show_sub = False)\n            if best_F1 < avg_res['F1']:\n                best_F1 = avg_res['F1']\n                best_res = avg_res\n                best_iou_threshold = iou_threshold\n                best_score_threshold = score_threshold\n    print(\"best iou threshold = {:.1f}\".format(best_iou_threshold))\n    print(\"best score threshold = {:.1f}\".format(best_score_threshold))\n    print('best F1 score = {:.4f}'.format(best_F1))\n    print_head(0.5)\n    print_result(best_res)\n    get_eval_results(predicts, gts_data, 'actions', iou_threshold = best_iou_threshold,\n                                                    score_threshold = best_score_threshold,\n                                                    show_sub = True)",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/eval.py:219-237"
+    },
+    "275": {
+        "file_id": 26,
+        "content": "This code is iterating through different score thresholds to find the best combination of IOU and score threshold for evaluating basketball actions. It calculates evaluation results for each threshold, updating the best scores accordingly. Finally, it prints these best scores and displays the evaluation results using a function called print_result().",
+        "type": "comment"
+    },
+    "276": {
+        "file_id": 27,
+        "content": "/applications/BasketballAction/predict/predict.py",
+        "type": "filepath"
+    },
+    "277": {
+        "file_id": 27,
+        "content": "The code initializes an ActionDetection instance, loads a model for prediction, processes video URLs by extracting frames and audio, makes predictions on these inputs, and stores the results in a JSON file. The JSON file is written without escaping special characters.",
+        "type": "summary"
+    },
+    "278": {
+        "file_id": 27,
+        "content": "import os\nimport sys\nimport json\nsys.path.append('action_detect')\nfrom action import ActionDetection\nif __name__ == '__main__':\n    dataset_dir = \"datasets/\"\n    model_predict = ActionDetection(cfg_file=\"configs_basketball/configs_basketball.yaml\")\n    model_predict.load_model()\n    video_url = os.path.join(dataset_dir, 'mp4.list')\n    with open(video_url, 'r') as f:\n        lines = f.readlines()\n    lines = [os.path.join(dataset_dir, \"mp4\", os.path.basename(k.strip())) for k in lines]\n    results = []\n    for line in lines:\n        video_name = line\n        print(video_name)\n        imgs_path = video_name.replace(\".mp4\", \"\").replace(\"mp4\", \"frames\")\n        pcm_path = video_name.replace(\".mp4\", \".pcm\").replace(\"mp4\", \"pcm\")\n        bmn_results, action_results = model_predict.infer(imgs_path, pcm_path)\n        results.append({'video_name': line,\n                        'bmn_results': bmn_results, \n                        'action_results': action_results})\n    with open('results.json', 'w', encoding='utf-8') as f:",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/predict.py:2-33"
+    },
+    "279": {
+        "file_id": 27,
+        "content": "The code imports necessary libraries, appends the \"action_detect\" directory to the system path, and initializes an ActionDetection instance. It then loads the model for prediction using a specified configuration file. The code reads a list of video URLs from a file, processes each video by extracting image frames and audio, and makes predictions on these inputs. Finally, it stores the results in a JSON file.",
+        "type": "comment"
+    },
+    "280": {
+        "file_id": 27,
+        "content": "       data = json.dumps(results, indent=4, ensure_ascii=False)\n       f.write(data) ",
+        "type": "code",
+        "location": "/applications/BasketballAction/predict/predict.py:34-35"
+    },
+    "281": {
+        "file_id": 27,
+        "content": "Writes JSON-formatted 'results' to file using indentation and without escaping special characters.",
+        "type": "comment"
+    },
+    "282": {
+        "file_id": 28,
+        "content": "/applications/EIVideo/EIVideo/README.MD",
+        "type": "filepath"
+    },
+    "283": {
+        "file_id": 28,
+        "content": "This is a Chinese comment for an interactive video annotation tool's Command Line Interface (CLI). It mentions installing the \"scikit-image\" package, running the program in inference mode using a specific configuration and model file, and provides a reference document link.",
+        "type": "summary"
+    },
+    "284": {
+        "file_id": 28,
+        "content": "# 交互式视频智能标注工具 - CLI(Command Line Interface)\n在开始使用之前，您需要按照以下命令安装额外的依赖包：\n```bash\npython -m pip install scikit-image\n```\n## 推理运行方式\n```shell\nC:\\Python\\Python37\\python.exe main.py --test -c E:/PaddlePaddle_Project/EIVideo/resources/backend/configs/manet.yaml -w E:/PaddlePaddle_Project/EIVideo/resources/backend/model/save_step_80000.pdparams\nC:\\Python\\Python37\\python.exe resources/backend/main.py --test -c E:/PaddlePaddle_Project/EIVideo/resources/backend/configs/manet.yaml -w E:/PaddlePaddle_Project/EIVideo/resources/backend/model/save_step_80000.pdparams\n```\n## 参考文档\n[manet](docs/zh-CN/manet.md)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/README.MD:1-15"
+    },
+    "285": {
+        "file_id": 28,
+        "content": "This is a Chinese comment for an interactive video annotation tool's Command Line Interface (CLI). It mentions installing the \"scikit-image\" package, running the program in inference mode using a specific configuration and model file, and provides a reference document link.",
+        "type": "comment"
+    },
+    "286": {
+        "file_id": 29,
+        "content": "/applications/EIVideo/EIVideo/__init__.py",
+        "type": "filepath"
+    },
+    "287": {
+        "file_id": 29,
+        "content": "This code file is an __init__.py for EIVideo application, authored by Acer Zhang on Jan 6th. It sets root path and defines constants for temporary image and JSON file paths. The join_root_path function helps construct full paths from given partial paths.",
+        "type": "summary"
+    },
+    "288": {
+        "file_id": 29,
+        "content": "# Author: Acer Zhang\n# Datetime: 2022/1/6 \n# Copyright belongs to the author.\n# Please indicate the source for reprinting.\nimport os\nfrom EIVideo.version import __version__\nEI_VIDEO_ROOT = os.path.abspath(os.path.dirname(__file__))\nTEMP_IMG_SAVE_PATH = \"./temp.png\"\nTEMP_JSON_SAVE_PATH = \"./save.json\"\nTEMP_JSON_FINAL_PATH = \"./final.json\"\ndef join_root_path(path: str):\n    return os.path.join(EI_VIDEO_ROOT, path)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/__init__.py:1-16"
+    },
+    "289": {
+        "file_id": 29,
+        "content": "This code file is an __init__.py for EIVideo application, authored by Acer Zhang on Jan 6th. It sets root path and defines constants for temporary image and JSON file paths. The join_root_path function helps construct full paths from given partial paths.",
+        "type": "comment"
+    },
+    "290": {
+        "file_id": 30,
+        "content": "/applications/EIVideo/EIVideo/api.py",
+        "type": "filepath"
+    },
+    "291": {
+        "file_id": 30,
+        "content": "This code retrieves images, converts them to JSON format and stores object locations. It also processes videos, creating JSON annotations on frames with functions for video loading/saving, image resizing, mask processing, and PNG saving.",
+        "type": "summary"
+    },
+    "292": {
+        "file_id": 30,
+        "content": "# Author: AP-Kai\n# Datetime: 2022/1/10\n# Copyright belongs to the author.\n# Please indicate the source for reprinting.\nimport json\nimport os\nfrom collections import OrderedDict\nimport cv2\nimport numpy as np\nfrom PIL import Image\nfrom EIVideo.paddlevideo.utils.manet_utils import overlay_davis\nfrom EIVideo import TEMP_JSON_SAVE_PATH, TEMP_JSON_FINAL_PATH\ndef get_images(sequence='bike-packing'):\n    img_path = os.path.join('data', sequence.strip(), 'frame')\n    img_files = os.listdir(img_path)\n    img_files.sort()\n    files = []\n    for img in img_files:\n        img_file = np.array(Image.open(os.path.join(img_path, img)))\n        files.append(img_file)\n    return np.array(files)\ndef json2frame(path):\n    print(\"now turn masks.json to frames\", path)\n    with open(path, 'r', encoding='utf-8') as f:\n        res = f.read()\n        a = json.loads(res)\n        b = a.get('overlays')\n        b_array = np.array(b)\n        frame_list = []\n        for i in range(0, len(b_array)):\n            im = Image.fromarray(np.uint8(b_array[i]))",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/api.py:1-39"
+    },
+    "293": {
+        "file_id": 30,
+        "content": "Code imports necessary libraries and defines two functions. `get_images` retrieves image files from a specified sequence, sorts them, and returns as a numpy array. `json2frame` reads a JSON file and converts its overlays into Image objects in a list format.",
+        "type": "comment"
+    },
+    "294": {
+        "file_id": 30,
+        "content": "            im = cv2.cvtColor(np.asarray(im), cv2.COLOR_RGB2BGR)\n            im = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)\n            # im = np.array(b_array[i]).astype(\"uint8\")\n            # im = im.transpose((2, 0, 1))\n            # im = cv2.merge(im)\n            frame_list.append(im)\n    return frame_list\ndef png2json(image_path, sliderframenum, save_json_path):\n    image = Image.open(image_path)  # 用PIL中的Image.open打开图像\n    image = image.convert('P')\n    image_arr = np.array(image)  # 转化成numpy数组\n    image_arr = image_arr.astype(\"float32\")\n    r1 = np.argwhere(image_arr == 1)  # tuple\n    pframes = []\n    # i -> object id\n    for i in range(1, len(np.unique(image_arr))):\n        pframe = OrderedDict()\n        pframe['path'] = []\n        # Find object id in image_arr\n        r1 = np.argwhere(image_arr == i)  # tuple\n        r1 = r1.astype(\"float32\")\n        # Add path to pframe\n        for j in range(0, len(r1)):\n            r1[j][0] = r1[j][0] / 480.0\n            r1[j][1] = r1[j][1] / 910.0\n            # r1[j] = np.around(r1[j], decimals=16)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/api.py:40-67"
+    },
+    "295": {
+        "file_id": 30,
+        "content": "The code converts a PNG image to JSON format. It opens the image using PIL, converts it to grayscale, and stores the unique object IDs found in the image. For each object ID, it finds its corresponding locations in the image and adds them as paths to the pframe (an OrderedDict). Finally, it appends the pframes to a list called pframes. The function returns this list of pframes when complete.",
+        "type": "comment"
+    },
+    "296": {
+        "file_id": 30,
+        "content": "            pframe['path'].append(r1[j].tolist())\n        # Add object id, start_time, stop_time\n        pframe['object_id'] = i\n        pframe['start_time'] = sliderframenum\n        pframe['stop_time'] = sliderframenum\n        # Add pframe to pframes\n        pframes.append(pframe)\n    dic = OrderedDict()\n    dic['scribbles'] = []\n    for i in range(0, int(100)):\n        if i == sliderframenum:\n            # Add value to frame[]\n            dic['scribbles'].append(pframes)\n        else:\n            dic['scribbles'].append([])\n    json_str = json.dumps(dic)\n    with open(save_json_path, 'w') as json_file:\n        json_file.write(json_str)\ndef load_video(video_path, min_side=None):\n    frame_list = []\n    # ToDo To AP-kai: 是不是轻松干掉了m.video_path？\n    cap = cv2.VideoCapture(video_path)\n    # ToDo To AP-kai: while (cap.isOpened()): -> 不必多写个括号哈\n    while cap.isOpened():\n        _, frame = cap.read()\n        if frame is None:\n            break\n        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)\n        if min_side:\n            h, w = frame.shape[:2]",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/api.py:68-101"
+    },
+    "297": {
+        "file_id": 30,
+        "content": "This code is related to video processing, specifically for saving and loading videos. It creates a JSON file with scribble annotations on frames. The \"load_video\" function reads the video frames and converts them to RGB format if necessary. It also supports optional minimum side parameter for resizing frames.",
+        "type": "comment"
+    },
+    "298": {
+        "file_id": 30,
+        "content": "            new_w = (w * min_side // min(w, h))\n            new_h = (h * min_side // min(w, h))\n            frame = cv2.resize(frame, (new_w, new_h),\n                               interpolation=cv2.INTER_CUBIC)\n            # .transpose([2, 0, 1])\n        frame_list.append(frame)\n    frames = np.stack(frame_list, axis=0)\n    return frames, frame_list\ndef get_scribbles():\n    # os.makedirs(TEMP_JSON_SAVE_PATH, exist_ok=True)\n    with open(TEMP_JSON_SAVE_PATH) as f:\n        print(\"load TEMP_JSON_SAVE_PATH success\")\n        scribbles = json.load(f)\n        first_scribble = True\n        yield scribbles, first_scribble\ndef submit_masks(save_path, masks, images):\n    overlays = []\n    for img_name, (mask, image) in enumerate(zip(masks, images)):\n        overlay = overlay_davis(image, mask)\n        overlays.append(overlay.tolist())\n        overlay = Image.fromarray(overlay)\n        img_name = str(img_name)\n        while len(img_name) < 5:\n            img_name = '0' + img_name\n        overlay.save(os.path.join(save_path, img_name + '.png'))",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/api.py:102-130"
+    },
+    "299": {
+        "file_id": 30,
+        "content": "Code chunk resizes images, appends them to a list, stacks the frames into an array and returns both. It also handles loading data from TEMP_JSON_SAVE_PATH and yields scribbles with a boolean flag for the first one. The last function processes masks by overlaying them onto images, saves them as PNGs in the specified save path.",
+        "type": "comment"
+    }
+}

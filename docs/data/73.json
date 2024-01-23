@@ -1,0 +1,541 @@
+{
+    "7300": {
+        "file_id": 530,
+        "content": "/paddlevideo/modeling/framework/localizers/__init__.py",
+        "type": "filepath"
+    },
+    "7301": {
+        "file_id": 530,
+        "content": "This code is a part of the PaddleVideo library and contains localizers, which are responsible for handling different types of video localization tasks. The base class \"BaseLocalizer\" serves as a parent class, while specific classes like \"BMNLocalizer\" and \"YOWOLocalizer\" extend it to handle various localization techniques. These localizers may be used in a wide range of applications depending on the required localization approach.",
+        "type": "summary"
+    },
+    "7302": {
+        "file_id": 530,
+        "content": "# copyright (c) 2020  paddlepaddle authors. all rights reserved.\n#\n# licensed under the apache license, version 2.0 (the \"license\"\n# you may not use this file except in compliance with the license.\n# you may obtain a copy of the license at\n#\n#     http://www.apache.org/licenses/license-2.0\n#\n# unless required by applicable law or agreed to in writing, software\n# distributed under the license is distributed on an \"as is\" basis,\n# without warranties or conditions of any kind, either express or implied.\n# see the license for the specific language governing permissions and\n# limitations under the license.\nfrom .base import BaseLocalizer\nfrom .bmn_localizer import BMNLocalizer\nfrom .yowo_localizer import YOWOLocalizer\n__all__ = ['BaseLocalizer', 'BMNLocalizer', 'YOWOLocalizer']",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/__init__.py:1-19"
+    },
+    "7303": {
+        "file_id": 530,
+        "content": "This code is a part of the PaddleVideo library and contains localizers, which are responsible for handling different types of video localization tasks. The base class \"BaseLocalizer\" serves as a parent class, while specific classes like \"BMNLocalizer\" and \"YOWOLocalizer\" extend it to handle various localization techniques. These localizers may be used in a wide range of applications depending on the required localization approach.",
+        "type": "comment"
+    },
+    "7304": {
+        "file_id": 531,
+        "content": "/paddlevideo/modeling/framework/localizers/base.py",
+        "type": "filepath"
+    },
+    "7305": {
+        "file_id": 531,
+        "content": "This code defines a base class for localization models using PaddlePaddle framework, with train, valid, and test steps implemented in subclasses. It supports different operation modes and allows weight initialization.",
+        "type": "summary"
+    },
+    "7306": {
+        "file_id": 531,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom abc import abstractmethod\nimport paddle.nn as nn\nfrom ... import builder\nclass BaseLocalizer(nn.Layer):\n    \"\"\"Base class for Localization.\n    All localizer should subclass it.\n    All subclass should overwrite:\n    - Methods:``train_step``, define your train step.\n    - Methods:``valid_step``, define your valid step, always the same as train_step.\n    - Methods:``test_step``, define your test step.\n    \"\"\"",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/base.py:1-27"
+    },
+    "7307": {
+        "file_id": 531,
+        "content": "This code snippet defines a base class for localization models. All subclasses of this base class should implement train_step, valid_step, and test_step methods to define their respective steps in the model's training process. It uses PaddlePaddle's framework and is licensed under the Apache License, Version 2.0.",
+        "type": "comment"
+    },
+    "7308": {
+        "file_id": 531,
+        "content": "    def __init__(self, backbone, loss):\n        super().__init__()\n        self.backbone = builder.build_backbone(backbone)\n        self.loss = builder.build_loss(loss)\n        self.init_weights()\n    def init_weights(self):\n        \"\"\"Initialize the model network weights. \"\"\"\n        if getattr(self.backbone, 'init_weights'):\n            self.backbone.init_weights()\n        else:\n            pass\n    def forward(self, data_batch, mode='infer'):\n        \"\"\"\n        1. Define how the model is going to run, from input to output.\n        2. Console of train, valid, test or infer step\n        3. Set mode='infer' is used for saving inference model, refer to tools/export_model.py\n        \"\"\"\n        if mode == 'train':\n            return self.train_step(data_batch)\n        elif mode == 'valid':\n            return self.val_step(data_batch)\n        elif mode == 'test':\n            return self.test_step(data_batch)\n        elif mode == 'infer':\n            return self.infer_step(data_batch)\n        else:\n            raise NotImplementedError",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/base.py:28-56"
+    },
+    "7309": {
+        "file_id": 531,
+        "content": "This code initializes a localizer model, handling backbone and loss functions, and allows for different operation modes (train, valid, test, infer). It also includes a function to initialize the model's network weights.",
+        "type": "comment"
+    },
+    "7310": {
+        "file_id": 531,
+        "content": "    @abstractmethod\n    def train_step(self, data_batch, **kwargs):\n        \"\"\"Training step.  input_data_batch -> loss_metric\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def val_step(self, data_batch, **kwargs):\n        \"\"\"Validating setp. input_data_batch -> loss_metric\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def test_step(self, data_batch, **kwargs):\n        \"\"\"Tets setp. to get acc in test data. input_data_batch -> output\n        \"\"\"\n        raise NotImplementedError",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/base.py:58-74"
+    },
+    "7311": {
+        "file_id": 531,
+        "content": "This code defines abstract classes for training, validation, and testing steps in a model. The train_step, val_step, and test_step methods require implementation by subclasses to perform the necessary computations.",
+        "type": "comment"
+    },
+    "7312": {
+        "file_id": 532,
+        "content": "/paddlevideo/modeling/framework/localizers/bmn_localizer.py",
+        "type": "filepath"
+    },
+    "7313": {
+        "file_id": 532,
+        "content": "This code defines a localizer model for PaddleVideo with forward network and methods for training, validating, testing, and inferring. It uses input data to predict bounding boxes, start position, and end position while calculating loss using ground truth values.",
+        "type": "summary"
+    },
+    "7314": {
+        "file_id": 532,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom ...registry import LOCALIZERS\nfrom .base import BaseLocalizer\nimport paddle\n@LOCALIZERS.register()\nclass BMNLocalizer(BaseLocalizer):\n    \"\"\"BMN Localization framework\n    \"\"\"\n    def forward_net(self, imgs):\n        \"\"\"Call backbone forward.\n        \"\"\"\n        preds = self.backbone(imgs)\n        return preds\n    def train_step(self, data_batch):\n        \"\"\"Training step.\n        \"\"\"\n        x_data = data_batch[0]\n        gt_iou_map = data_batch[1]\n        gt_start = data_batch[2]\n        gt_end = data_batch[3]\n        gt_iou_map.stop_gradient = True",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/bmn_localizer.py:1-36"
+    },
+    "7315": {
+        "file_id": 532,
+        "content": "This code is part of the PaddleVideo library and defines a BMNLocalizer class, which is a localization framework. It includes a forward_net method for calling the backbone's forward function and a train_step method for handling training steps with input data. The gt_iou_map, gt_start, and gt_end are provided as part of the data batch to be used in the training step.",
+        "type": "comment"
+    },
+    "7316": {
+        "file_id": 532,
+        "content": "        gt_start.stop_gradient = True\n        gt_end.stop_gradient = True\n        # call Model forward\n        pred_bm, pred_start, pred_end = self.forward_net(x_data)\n        # call Loss forward\n        loss = self.loss(pred_bm, pred_start, pred_end, gt_iou_map, gt_start,\n                         gt_end)\n        avg_loss = paddle.mean(loss)\n        loss_metrics = dict()\n        loss_metrics['loss'] = avg_loss\n        return loss_metrics\n    def val_step(self, data_batch):\n        \"\"\"Validating setp.\n        \"\"\"\n        return self.train_step(data_batch)\n    def test_step(self, data_batch):\n        \"\"\"Test step.\n        \"\"\"\n        x_data = data_batch[0]\n        pred_bm, pred_start, pred_end = self.forward_net(x_data)\n        return pred_bm, pred_start, pred_end\n    def infer_step(self, data_batch):\n        \"\"\"Infer step\n        \"\"\"\n        x_data = data_batch[0]\n        # call Model forward\n        pred_bm, pred_start, pred_end = self.forward_net(x_data)\n        return pred_bm, pred_start, pred_end",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/bmn_localizer.py:37-69"
+    },
+    "7317": {
+        "file_id": 532,
+        "content": "This code defines a localizer model for PaddleVideo. It includes functions for training, validating, testing, and inferring steps. The localizer has a forward network which takes input data and returns predictions for bounding boxes (pred_bm), start position (pred_start), and end position (pred_end). Loss is calculated using the provided ground truth values (gt_iou_map, gt_start, gt_end) and averaged over the batch.",
+        "type": "comment"
+    },
+    "7318": {
+        "file_id": 533,
+        "content": "/paddlevideo/modeling/framework/localizers/yowo_localizer.py",
+        "type": "filepath"
+    },
+    "7319": {
+        "file_id": 533,
+        "content": "The YOWOLocalizer extends BaseLocalizer, performs NMS on detected boxes, matches ground truth with predicted boxes based on IoU threshold, and calculates precision, recall, and F-score for YOWO localizer using test step function.",
+        "type": "summary"
+    },
+    "7320": {
+        "file_id": 533,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom ...registry import LOCALIZERS\nfrom .base import BaseLocalizer\nfrom .yowo_utils import truths_length, nms, get_region_boxes, bbox_iou\n@LOCALIZERS.register()\nclass YOWOLocalizer(BaseLocalizer):\n    \"\"\"YOWO Localization framework\n    \"\"\"\n    def forward_net(self, imgs):\n        \"\"\"Call backbone forward.\n        \"\"\"\n        # imgs.shape=[N,C,T,H,W], for YOWO\n        preds = self.backbone(imgs)\n        return preds\n    def train_step(self, data_batch):\n        \"\"\"Training step.\n        \"\"\"\n        x_data = data_batch[0]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/yowo_localizer.py:1-33"
+    },
+    "7321": {
+        "file_id": 533,
+        "content": "Code from PaddleVideo's yowo_localizer.py file defines a YOWOLocalizer class which extends BaseLocalizer and utilizes the backbone function for forwarding image data. It also includes methods forward_net and train_step for processing images in training context.",
+        "type": "comment"
+    },
+    "7322": {
+        "file_id": 533,
+        "content": "        target = data_batch[1].squeeze(1)  # indeed do squeeze to adapt to paddle tensor\n        target.stop_gradient = True\n        # call Model forward\n        out = self.forward_net(x_data)\n        # call Loss forward\n        loss, nCorrect = self.loss(out, target)\n        loss_metrics = dict()\n        loss_metrics['loss'] = loss\n        loss_metrics['nCorrect'] = nCorrect\n        return loss_metrics\n    def val_step(self, data_batch):\n        \"\"\"Validating setp.\n        \"\"\"\n        total = 0.0\n        proposals = 0.0\n        correct = 0.0\n        fscore = 0.0\n        eps = 1e-5\n        nms_thresh = 0.4\n        iou_thresh = 0.5\n        x_data = data_batch[0]\n        target = data_batch[1].squeeze(1)  # indeed do squeeze to adapt to paddle tensor\n        frame_idx = data_batch[2]\n        target.stop_gradient = True\n        # call Model forward\n        out = self.forward_net(x_data)\n        all_boxes = get_region_boxes(out)\n        out_boxes = []\n        for i in range(out.shape[0]):\n            boxes = all_boxes[i]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/yowo_localizer.py:34-67"
+    },
+    "7323": {
+        "file_id": 533,
+        "content": "Function \"forward_net\" is called to perform model's forward pass, and the output of this function call is stored in 'out'. The code then calls another function \"loss\" passing the output from the model (out) and the target data (target). The output from the loss function call is stored in 'loss', along with number of correct predictions ('nCorrect'). A dictionary named 'loss_metrics' is created storing 'loss' and 'nCorrect'. This process is part of training set step. \nThe 'val_step' function performs validation steps like calculating total, proposals, correct and fscore variables using specific values (total = 0.0, proposals = 0.0, correct = 0.0, fscore = 0.0). It also uses an epsilon value of 1e-5 and a nms_thresh and iou_thresh of 0.4 for certain calculations. It calls the model's forward pass (forward_net) to get 'out', then gets all region boxes using get_region_boxes function, then iterates over each box in out, storing them in a list named 'out_boxes'. This process is part of validating step.",
+        "type": "comment"
+    },
+    "7324": {
+        "file_id": 533,
+        "content": "            boxes = nms(boxes, nms_thresh)\n            out_boxes.append(boxes)\n            truths = target[i].reshape([-1, 5])\n            num_gts = truths_length(truths)\n            total = total + num_gts\n            pred_list = []\n            for i in range(len(boxes)):\n                if boxes[i][4] > 0.25:\n                    proposals = proposals + 1\n                    pred_list.append(i)\n            for i in range(num_gts):\n                box_gt = [truths[i][1], truths[i][2], truths[i][3], truths[i][4], 1.0, 1.0, truths[i][0]]\n                best_iou = 0\n                best_j = -1\n                for j in pred_list:  # ITERATE THROUGH ONLY CONFIDENT BOXES\n                    iou = bbox_iou(box_gt, boxes[j], x1y1x2y2=False)\n                    if iou > best_iou:\n                        best_j = j\n                        best_iou = iou\n                if best_iou > iou_thresh and int(boxes[best_j][6]) == box_gt[6]:\n                    correct = correct + 1\n        precision = 1.0 * correct / (proposals + eps)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/yowo_localizer.py:68-90"
+    },
+    "7325": {
+        "file_id": 533,
+        "content": "This code performs Non-Maximum Suppression (NMS) on detected boxes, selects confident boxes for further processing, and associates ground truth boxes with predicted boxes based on Intersection over Union (IoU) threshold. It counts correct matches, proposals, total ground truth boxes, and calculates precision. The precision is calculated by dividing the number of correct matches by the sum of proposals and a small epsilon value to avoid division by zero.",
+        "type": "comment"
+    },
+    "7326": {
+        "file_id": 533,
+        "content": "        recall = 1.0 * correct / (total + eps)\n        fscore = 2.0 * precision * recall / (precision + recall + eps)\n        outs = dict()\n        outs['precision'] = precision\n        outs['recall'] = recall\n        outs['fscore'] = fscore\n        outs['frame_idx'] = frame_idx\n        return outs\n    def test_step(self, data_batch):\n        \"\"\"Test step.\n        \"\"\"\n        total = 0.0\n        proposals = 0.0\n        correct = 0.0\n        fscore = 0.0\n        eps = 1e-5\n        nms_thresh = 0.4\n        iou_thresh = 0.5\n        x_data = data_batch[0]\n        target = data_batch[1].squeeze(1)  # indeed do squeeze to adapt to paddle tensor\n        frame_idx = data_batch[2]\n        target.stop_gradient = True\n        # call Model forward\n        out = self.forward_net(x_data)\n        all_boxes = get_region_boxes(out)\n        out_boxes = []\n        for i in range(out.shape[0]):\n            boxes = all_boxes[i]\n            boxes = nms(boxes, nms_thresh)\n            out_boxes.append(boxes)\n            truths = target[i].reshape([-1, 5])",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/yowo_localizer.py:91-125"
+    },
+    "7327": {
+        "file_id": 533,
+        "content": "This code defines a localizer for the YOLOv3 model and calculates precision, recall, and F-score using test step function. It initializes variables, processes input data batch, applies non-maximum suppression (NMS) to regions of interest, and returns output metrics including precision, recall, F-score, and frame index.",
+        "type": "comment"
+    },
+    "7328": {
+        "file_id": 533,
+        "content": "            num_gts = truths_length(truths)\n            total = total + num_gts\n            pred_list = []\n            for i in range(len(boxes)):\n                if boxes[i][4] > 0.25:\n                    proposals = proposals + 1\n                    pred_list.append(i)\n            for i in range(num_gts):\n                box_gt = [truths[i][1], truths[i][2], truths[i][3], truths[i][4], 1.0, 1.0, truths[i][0]]\n                best_iou = 0\n                best_j = -1\n                for j in pred_list:  # ITERATE THROUGH ONLY CONFIDENT BOXES\n                    iou = bbox_iou(box_gt, boxes[j], x1y1x2y2=False)\n                    if iou > best_iou:\n                        best_j = j\n                        best_iou = iou\n                if best_iou > iou_thresh and int(boxes[best_j][6]) == box_gt[6]:\n                    correct = correct + 1\n        precision = 1.0 * correct / (proposals + eps)\n        recall = 1.0 * correct / (total + eps)\n        fscore = 2.0 * precision * recall / (precision + recall + eps)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/yowo_localizer.py:126-147"
+    },
+    "7329": {
+        "file_id": 533,
+        "content": "The code computes precision, recall, and F-score for each class of the YOWO localizer. It iterates through ground truth boxes and confident proposal boxes to match them based on Intersection over Union (IoU) threshold. It counts correctly matched boxes and total boxes, then calculates precision, recall, and F-score using these values.",
+        "type": "comment"
+    },
+    "7330": {
+        "file_id": 533,
+        "content": "        outs = dict()\n        outs['boxes'] = out_boxes\n        outs['precision'] = precision\n        outs['recall'] = recall\n        outs['fscore'] = fscore\n        outs['frame_idx'] = frame_idx\n        return outs\n    def infer_step(self, data_batch):\n        \"\"\"Infer step.\n        \"\"\"\n        out = self.forward_net(data_batch[0])\n        return out",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/yowo_localizer.py:149-161"
+    },
+    "7331": {
+        "file_id": 533,
+        "content": "This code defines two functions within the yowo_localizer class. The first function, \"infer_step\", takes in a data batch and feeds it into the forward_net to get an output. The second function returns dictionaries for boxes, precision, recall, fscore, and frame_idx as outputs.",
+        "type": "comment"
+    },
+    "7332": {
+        "file_id": 534,
+        "content": "/paddlevideo/modeling/framework/localizers/yowo_utils.py",
+        "type": "filepath"
+    },
+    "7333": {
+        "file_id": 534,
+        "content": "The code contains functions for non-maximum suppression, tensor movement, and applying NMS to anchor boxes in images using PaddlePaddle. It transforms YOLOv2 output, generates ground truth targets, calculates IoU, counts instances, updates predictions, and returns masks and transformation parameters for translation, width, and height.",
+        "type": "summary"
+    },
+    "7334": {
+        "file_id": 534,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport math\nimport paddle\nimport paddle.nn as nn\nimport numpy as np\nfrom builtins import range as xrange\ndef truths_length(truths):\n    for i in range(50):\n        if truths[i][1] == 0:\n            return i\ndef nms(boxes, nms_thresh):\n    if len(boxes) == 0:\n        return boxes\n    det_confs = paddle.zeros([len(boxes)])\n    for i in range(len(boxes)):\n        det_confs[i] = 1 - boxes[i][4]\n    sortIds = paddle.argsort(det_confs)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/yowo_utils.py:1-36"
+    },
+    "7335": {
+        "file_id": 534,
+        "content": "This code snippet defines a function `truths_length()` that returns the index of the first occurrence where the second element in 'truths' array is 0. It also defines a function `nms()` that applies Non-Maximum Suppression to filter out bounding boxes based on a given NMS threshold. The code checks if there are any bounding boxes, assigns confidence scores, sorts them in descending order of confidence, and removes overlapping bounding boxes with IoU greater than the NMS threshold.",
+        "type": "comment"
+    },
+    "7336": {
+        "file_id": 534,
+        "content": "    out_boxes = []\n    for i in range(len(boxes)):\n        box_i = boxes[sortIds[i]]\n        if box_i[4] > 0:\n            out_boxes.append(box_i)\n            for j in range(i + 1, len(boxes)):\n                box_j = boxes[sortIds[j]]\n                if bbox_iou(box_i, box_j, x1y1x2y2=False) > nms_thresh:\n                    box_j[4] = 0\n    return out_boxes\ndef convert2cpu(gpu_matrix):\n    float_32_g = gpu_matrix.astype('float32')\n    return float_32_g.cpu()\ndef convert2cpu_long(gpu_matrix):\n    int_64_g = gpu_matrix.astype('int64')\n    return int_64_g.cpu()\ndef get_region_boxes(output, conf_thresh=0.005, num_classes=24,\n                     anchors=[0.70458, 1.18803, 1.26654, 2.55121, 1.59382,\n                              4.08321, 2.30548, 4.94180, 3.52332, 5.91979],\n                     num_anchors=5, only_objectness=1, validation=False):\n    anchor_step = len(anchors) // num_anchors\n    if output.dim() == 3:\n        output = output.unsqueeze(0)\n    batch = output.shape[0]\n    assert (output.shape[1] == (5 + num_classes) * num_anchors)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/yowo_utils.py:37-67"
+    },
+    "7337": {
+        "file_id": 534,
+        "content": "This code is defining three functions: \"out_boxes\" appears to perform non-maximum suppression on bounding boxes, \"convert2cpu\" converts a tensor from GPU memory to CPU memory as a float32 type, and \"convert2cpu_long\" performs the same operation but as an int64 type. The \"get_region_boxes\" function takes in output from a model and applies non-maximum suppression for each anchor box in the image, using provided anchors and thresholds. This function also reshapes the input to have shape (batch, num_anchors, 5 + num_classes). The code includes assertions to ensure proper input shapes are being used.",
+        "type": "comment"
+    },
+    "7338": {
+        "file_id": 534,
+        "content": "    h = output.shape[2]\n    w = output.shape[3]\n    all_boxes = []\n    output = paddle.reshape(\n        output, [batch * num_anchors, 5 + num_classes, h * w])\n    output = paddle.transpose(output, (1, 0, 2))\n    output = paddle.reshape(\n        output, [5 + num_classes, batch * num_anchors * h * w])\n    grid_x = paddle.linspace(0, w - 1, w)\n    grid_x = paddle.tile(grid_x, [h, 1])\n    grid_x = paddle.tile(grid_x, [batch * num_anchors, 1, 1])\n    grid_x = paddle.reshape(grid_x, [batch * num_anchors * h * w]).cuda()\n    grid_y = paddle.linspace(0, h - 1, h)\n    grid_y = paddle.tile(grid_y, [w, 1]).t()\n    grid_y = paddle.tile(grid_y, [batch * num_anchors, 1, 1])\n    grid_y = paddle.reshape(grid_y, [batch * num_anchors * h * w]).cuda()\n    sigmoid = nn.Sigmoid()\n    xs = sigmoid(output[0]) + grid_x\n    ys = sigmoid(output[1]) + grid_y\n    anchor_w = paddle.to_tensor(anchors)\n    anchor_w = paddle.reshape(anchor_w, [num_anchors, anchor_step])\n    anchor_w = paddle.index_select(anchor_w, index=paddle.to_tensor(\n        np.array([0]).astype('int32')), axis=1)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/yowo_utils.py:68-94"
+    },
+    "7339": {
+        "file_id": 534,
+        "content": "This code performs box regression by reshaping the output tensor, creating grids for x and y coordinates, applying sigmoid function to the output, adding grid coordinates to get refined box coordinates. It also converts anchor widths into a tensor for further processing.",
+        "type": "comment"
+    },
+    "7340": {
+        "file_id": 534,
+        "content": "    anchor_h = paddle.to_tensor(anchors)\n    anchor_h = paddle.reshape(anchor_h, [num_anchors, anchor_step])\n    anchor_h = paddle.index_select(anchor_h, index=paddle.to_tensor(\n        np.array([1]).astype('int32')), axis=1)\n    anchor_w = paddle.tile(anchor_w, [batch, 1])\n    anchor_w = paddle.tile(anchor_w, [1, 1, h * w])\n    anchor_w = paddle.reshape(anchor_w, [batch * num_anchors * h * w]).cuda()\n    anchor_h = paddle.tile(anchor_h, [batch, 1])\n    anchor_h = paddle.tile(anchor_h, [1, 1, h * w])\n    anchor_h = paddle.reshape(anchor_h, [batch * num_anchors * h * w]).cuda()\n    ws = paddle.exp(output[2]) * anchor_w\n    hs = paddle.exp(output[3]) * anchor_h\n    det_confs = sigmoid(output[4])\n    cls_confs = paddle.to_tensor(output[5:5 + num_classes], stop_gradient=True)\n    cls_confs = paddle.transpose(cls_confs, [1, 0])\n    s = nn.Softmax()\n    cls_confs = paddle.to_tensor(s(cls_confs))\n    cls_max_confs = paddle.max(cls_confs, axis=1)\n    cls_max_ids = paddle.argmax(cls_confs, axis=1)\n    cls_max_confs = paddle.reshape(cls_max_confs, [-1])",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/yowo_utils.py:96-122"
+    },
+    "7341": {
+        "file_id": 534,
+        "content": "Code prepares output from a YOLOv2 object detection model, performing necessary reshaping and transformations to obtain the final detections and classifications. It computes the widths (ws) and heights (hs) of the bounding boxes based on the input feature maps, applies sigmoid activation to the fifth output channel for detection confidences, and converts the rest of the outputs to stop_gradient=True tensors for class predictions. The code then performs softmax normalization over class predictions and retrieves the maximum confidence and corresponding class IDs for each bounding box. Finally, it reshapes cls_max_confs to a 1D tensor.",
+        "type": "comment"
+    },
+    "7342": {
+        "file_id": 534,
+        "content": "    cls_max_ids = paddle.reshape(cls_max_ids, [-1])\n    sz_hw = h * w\n    sz_hwa = sz_hw * num_anchors\n    det_confs = convert2cpu(det_confs)\n    cls_max_confs = convert2cpu(cls_max_confs)\n    cls_max_ids = convert2cpu_long(cls_max_ids)\n    xs = convert2cpu(xs)\n    ys = convert2cpu(ys)\n    ws = convert2cpu(ws)\n    hs = convert2cpu(hs)\n    if validation:\n        cls_confs = convert2cpu(cls_confs.reshape([-1, num_classes]))\n    for b in range(batch):\n        boxes = []\n        for cy in range(h):\n            for cx in range(w):\n                for i in range(num_anchors):\n                    ind = b * sz_hwa + i * sz_hw + cy * w + cx\n                    det_conf = det_confs[ind]\n                    if only_objectness:\n                        conf = det_confs[ind]\n                    else:\n                        conf = det_confs[ind] * cls_max_confs[ind]\n                    if conf > conf_thresh:\n                        bcx = xs[ind]\n                        bcy = ys[ind]\n                        bw = ws[ind]\n                        bh = hs[ind]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/yowo_utils.py:123-153"
+    },
+    "7343": {
+        "file_id": 534,
+        "content": "The code extracts data from a PaddlePaddle tensor and converts it to CPU memory. It then reshapes the data, applies conditions, and stores box coordinates and confidences in lists for each batch. The extracted data is used to create bounding boxes for objects detected within the input image.",
+        "type": "comment"
+    },
+    "7344": {
+        "file_id": 534,
+        "content": "                        cls_max_conf = cls_max_confs[ind]\n                        cls_max_id = cls_max_ids[ind]\n                        box = [bcx / w, bcy / h, bw / w, bh / h,\n                               det_conf, cls_max_conf, cls_max_id]\n                        if (not only_objectness) and validation:\n                            for c in range(num_classes):\n                                tmp_conf = cls_confs[ind][c]\n                                if c != cls_max_id and det_confs[ind] * tmp_conf > conf_thresh:\n                                    box.append(tmp_conf)\n                                    box.append(c)\n                        boxes.append(box)\n        all_boxes.append(boxes)\n    return all_boxes\ndef bbox_iou(box1, box2, x1y1x2y2=True):\n    if x1y1x2y2:\n        mx = min(box1[0], box2[0])\n        Mx = max(box1[2], box2[2])\n        my = min(box1[1], box2[1])\n        My = max(box1[3], box2[3])\n        w1 = box1[2] - box1[0]\n        h1 = box1[3] - box1[1]\n        w2 = box2[2] - box2[0]\n        h2 = box2[3] - box2[1]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/yowo_utils.py:154-178"
+    },
+    "7345": {
+        "file_id": 534,
+        "content": "The function `yowo_utils.py` returns a list of boxes with their respective confidences and class ids for each box. It includes only objectness if only_objectness is True, otherwise it also includes the per-class confidences. The function `bbox_iou` calculates the intersection over union between two bounding boxes, considering x1y1x2y2 format where (x1, y1) is the top left corner and (x2, y2) is the bottom right corner.",
+        "type": "comment"
+    },
+    "7346": {
+        "file_id": 534,
+        "content": "    else:\n        mx = min(float(box1[0] - box1[2] / 2.0),\n                 float(box2[0] - box2[2] / 2.0))\n        Mx = max(float(box1[0] + box1[2] / 2.0),\n                 float(box2[0] + box2[2] / 2.0))\n        my = min(float(box1[1] - box1[3] / 2.0),\n                 float(box2[1] - box2[3] / 2.0))\n        My = max(float(box1[1] + box1[3] / 2.0),\n                 float(box2[1] + box2[3] / 2.0))\n        w1 = box1[2]\n        h1 = box1[3]\n        w2 = box2[2]\n        h2 = box2[3]\n    uw = Mx - mx\n    uh = My - my\n    cw = w1 + w2 - uw\n    ch = h1 + h2 - uh\n    carea = 0\n    if cw <= 0 or ch <= 0:\n        return paddle.to_tensor(0.0)\n    area1 = w1 * h1\n    area2 = w2 * h2\n    carea = cw * ch\n    uarea = area1 + area2 - carea\n    return carea / uarea\ndef bbox_ious(boxes1, boxes2, x1y1x2y2=True):\n    if x1y1x2y2:\n        mx = paddle.min(boxes1[0], boxes2[0])\n        Mx = paddle.max(boxes1[2], boxes2[2])\n        my = paddle.min(boxes1[1], boxes2[1])\n        My = paddle.max(boxes1[3], boxes2[3])\n        w1 = boxes1[2] - boxes1[0]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/yowo_utils.py:179-213"
+    },
+    "7347": {
+        "file_id": 534,
+        "content": "The code calculates the intersection-over-union (IOU) between two bounding boxes, which is commonly used in object detection tasks. It first finds the overlapping area by computing the minimum and maximum coordinates of the bounding boxes, then calculates the union of these boxes, and finally returns the intersection over union ratio. This helps in determining if the two bounding boxes represent the same object or not.",
+        "type": "comment"
+    },
+    "7348": {
+        "file_id": 534,
+        "content": "        h1 = boxes1[3] - boxes1[1]\n        w2 = boxes2[2] - boxes2[0]\n        h2 = boxes2[3] - boxes2[1]\n    else:\n        mx = paddle.min(paddle.stack(\n            [boxes1[0] - boxes1[2] / 2.0, boxes2[0] - boxes2[2] / 2.0], axis=0), axis=0)\n        Mx = paddle.max(paddle.stack(\n            [boxes1[0] + boxes1[2] / 2.0, boxes2[0] + boxes2[2] / 2.0], axis=0), axis=0)\n        my = paddle.min(paddle.stack(\n            [boxes1[1] - boxes1[3] / 2.0, boxes2[1] - boxes2[3] / 2.0], axis=0), axis=0)\n        My = paddle.max(paddle.stack(\n            [boxes1[1] + boxes1[3] / 2.0, boxes2[1] + boxes2[3] / 2.0], axis=0), axis=0)\n        w1 = boxes1[2]\n        h1 = boxes1[3]\n        w2 = boxes2[2]\n        h2 = boxes2[3]\n    uw = Mx - mx\n    uh = My - my\n    cw = w1 + w2 - uw\n    ch = h1 + h2 - uh\n    mask = paddle.cast(cw <= 0, dtype=\"int32\") + \\\n        paddle.cast(ch <= 0, dtype=\"int32\") > 0\n    area1 = w1 * h1\n    area2 = w2 * h2\n    carea = cw * ch\n    carea[mask] = 0\n    uarea = area1 + area2 - carea\n    return carea / uarea",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/yowo_utils.py:214-241"
+    },
+    "7349": {
+        "file_id": 534,
+        "content": "This code calculates the intersection over union (IoU) between two bounding boxes. It first checks if both boxes have valid dimensions, then computes the coordinates of each box and their widths and heights. If the boxes overlap, it calculates the intersection area and union area of the bounding boxes, taking into account non-overlapping areas by setting them to 0 in the case of non-intersection. Finally, it returns the IoU as the intersection area divided by the union area.",
+        "type": "comment"
+    },
+    "7350": {
+        "file_id": 534,
+        "content": "# this function works for building the groud truth\ndef build_targets(pred_boxes, target, anchors, num_anchors, num_classes, nH, nW, noobject_scale, object_scale,\n                  sil_thresh):\n    # nH, nW here are number of grids in y and x directions (7, 7 here)\n    nB = target.shape[0]  # batch size\n    nA = num_anchors  # 5 for our case\n    nC = num_classes\n    anchor_step = len(anchors) // num_anchors\n    conf_mask = paddle.ones([nB, nA, nH, nW]) * noobject_scale\n    coord_mask = paddle.zeros([nB, nA, nH, nW])\n    cls_mask = paddle.zeros([nB, nA, nH, nW])\n    tx = paddle.zeros([nB, nA, nH, nW])\n    ty = paddle.zeros([nB, nA, nH, nW])\n    tw = paddle.zeros([nB, nA, nH, nW])\n    th = paddle.zeros([nB, nA, nH, nW])\n    tconf = paddle.zeros([nB, nA, nH, nW])\n    tcls = paddle.zeros([nB, nA, nH, nW])\n    # for each grid there are nA anchors\n    # nAnchors is the number of anchor for one image\n    nAnchors = nA * nH * nW\n    nPixels = nH * nW\n    # for each image\n    for b in xrange(nB):\n        # get all anchor boxes in one image",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/yowo_utils.py:244-268"
+    },
+    "7351": {
+        "file_id": 534,
+        "content": "This function builds ground truth targets for each grid in the image. It iterates over each batch, anchor, height, and width to create confidence, coordinate, and class masks, as well as target coordinates and classes for each anchor box. The targets are then concatenated into a single tensor.",
+        "type": "comment"
+    },
+    "7352": {
+        "file_id": 534,
+        "content": "        # (4 * nAnchors)\n        cur_pred_boxes = pred_boxes[b * nAnchors:(b + 1) * nAnchors].t()\n        # initialize iou score for each anchor\n        cur_ious = paddle.zeros([nAnchors])\n        for t in xrange(50):\n            # for each anchor 4 coordinate parameters, already in the coordinate system for the whole image\n            # this loop is for anchors in each image\n            # for each anchor 5 parameters are available (class, x, y, w, h)\n            if target[b][t * 5 + 1] == 0:\n                break\n            gx = target[b][t * 5 + 1] * nW\n            gy = target[b][t * 5 + 2] * nH\n            gw = target[b][t * 5 + 3] * nW\n            gh = target[b][t * 5 + 4] * nH\n            # groud truth boxes\n            cur_gt_boxes = paddle.tile(paddle.to_tensor(\n                [gx, gy, gw, gh], dtype='float32').t(), [nAnchors, 1]).t()\n            # bbox_ious is the iou value between orediction and groud truth\n            cur_ious = paddle.max(\n                paddle.stack([cur_ious, bbox_ious(cur_pred_boxes, cur_gt_boxes, x1y1x2y2=False)], axis=0), axis=0)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/yowo_utils.py:269-288"
+    },
+    "7353": {
+        "file_id": 534,
+        "content": "This code calculates the IoU (Intersection over Union) between predicted and ground truth boxes for each anchor. It uses a loop to iterate through 50 time steps, breaks if no target is available at the current time step, and calculates the bbox_ious function using cur_pred_boxes and cur_gt_boxes for IoU calculation. The highest IoU value is stored in cur_ious for each anchor.",
+        "type": "comment"
+    },
+    "7354": {
+        "file_id": 534,
+        "content": "        # if iou > a given threshold, it is seen as it includes an object\n        # conf_mask[b][cur_ious>sil_thresh] = 0\n        conf_mask_t = paddle.reshape(conf_mask, [nB, -1])\n        conf_mask_t[b, cur_ious > sil_thresh] = 0\n        conf_mask_tt = paddle.reshape(conf_mask_t[b], [nA, nH, nW])\n        conf_mask[b] = conf_mask_tt\n    # number of ground truth\n    nGT = 0\n    nCorrect = 0\n    for b in xrange(nB):\n        # anchors for one batch (at least batch size, and for some specific classes, there might exist more than one anchor)\n        for t in xrange(50):\n            if target[b][t * 5 + 1] == 0:\n                break\n            nGT = nGT + 1\n            best_iou = 0.0\n            best_n = -1\n            min_dist = 10000\n            # the values saved in target is ratios\n            # times by the width and height of the output feature maps nW and nH\n            gx = target[b][t * 5 + 1] * nW\n            gy = target[b][t * 5 + 2] * nH\n            gi = int(gx)\n            gj = int(gy)\n            gw = target[b][t * 5 + 3] * nW",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/yowo_utils.py:289-315"
+    },
+    "7355": {
+        "file_id": 534,
+        "content": "This code calculates the IoU (Intersection over Union) between predicted bounding boxes and ground truth bounding boxes, and applies a mask to the confidences based on this IoU. It also counts the number of ground truth instances (nGT) and correct detections (nCorrect). The target values are ratios multiplied by the width and height of the output feature maps.",
+        "type": "comment"
+    },
+    "7356": {
+        "file_id": 534,
+        "content": "            gh = target[b][t * 5 + 4] * nH\n            gt_box = [0, 0, gw, gh]\n            for n in xrange(nA):\n                # get anchor parameters (2 values)\n                aw = anchors[anchor_step * n]\n                ah = anchors[anchor_step * n + 1]\n                anchor_box = [0, 0, aw, ah]\n                # only consider the size (width and height) of the anchor box\n                iou = bbox_iou(anchor_box, gt_box, x1y1x2y2=False)\n                # get the best anchor form with the highest iou\n                if iou > best_iou:\n                    best_iou = iou\n                    best_n = n\n            # then we determine the parameters for an anchor (4 values together)\n            gt_box = [gx, gy, gw, gh]\n            # find corresponding prediction box\n            pred_box = pred_boxes[b * nAnchors +\n                                  best_n * nPixels + gj * nW + gi]\n            # only consider the best anchor box, for each image\n            coord_mask[b, best_n, gj, gi] = 1\n            cls_mask[b, best_n, gj, gi] = 1",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/yowo_utils.py:316-338"
+    },
+    "7357": {
+        "file_id": 534,
+        "content": "This code iterates over anchor boxes, calculates IoU with ground truth boxes and selects the best matching one. It then updates the corresponding prediction box for that image and marks it as valid in coord_mask and cls_mask matrices.",
+        "type": "comment"
+    },
+    "7358": {
+        "file_id": 534,
+        "content": "            # in this cell of the output feature map, there exists an object\n            conf_mask[b, best_n, gj, gi] = object_scale\n            tx[b, best_n, gj, gi] = paddle.cast(\n                target[b][t * 5 + 1] * nW - gi, dtype='float32')\n            ty[b, best_n, gj, gi] = paddle.cast(\n                target[b][t * 5 + 2] * nH - gj, dtype='float32')\n            tw[b, best_n, gj, gi] = math.log(\n                gw / anchors[anchor_step * best_n])\n            th[b, best_n, gj, gi] = math.log(\n                gh / anchors[anchor_step * best_n + 1])\n            iou = bbox_iou(gt_box, pred_box, x1y1x2y2=False)  # best_iou\n            # confidence equals to iou of the corresponding anchor\n            tconf[b, best_n, gj, gi] = paddle.cast(iou, dtype='float32')\n            tcls[b, best_n, gj, gi] = paddle.cast(\n                target[b][t * 5], dtype='float32')\n            # if ious larger than 0.5, we justify it as a correct prediction\n            if iou > 0.5:\n                nCorrect = nCorrect + 1",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/yowo_utils.py:340-357"
+    },
+    "7359": {
+        "file_id": 534,
+        "content": "The code calculates object position, size, and confidence for each detected object. It then counts the number of correct detections by checking if the IOU is greater than 0.5.",
+        "type": "comment"
+    },
+    "7360": {
+        "file_id": 534,
+        "content": "    # true values are returned\n    return nGT, nCorrect, coord_mask, conf_mask, cls_mask, tx, ty, tw, th, tconf, tcls",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/localizers/yowo_utils.py:358-359"
+    },
+    "7361": {
+        "file_id": 534,
+        "content": "The function returns the ground truth values (nGT), correct predictions (nCorrect), and corresponding masks for coordinates, confidence, and class labels, as well as the transformation parameters for translation, width, and height.",
+        "type": "comment"
+    },
+    "7362": {
+        "file_id": 535,
+        "content": "/paddlevideo/modeling/framework/multimodal/__init__.py",
+        "type": "filepath"
+    },
+    "7363": {
+        "file_id": 535,
+        "content": "This code file is part of the PaddleVideo library and contains the initialization, base class (BaseMultimodal), and a specific multimodal model (ActBert). It also mentions licensing information and a link to access it. The __all__ variable lists the available modules for importing from this file.",
+        "type": "summary"
+    },
+    "7364": {
+        "file_id": 535,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom .base import BaseMultimodal\nfrom .actbert import ActBert\n__all__ = ['BaseMultimodal', 'ActBert']",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/multimodal/__init__.py:1-16"
+    },
+    "7365": {
+        "file_id": 535,
+        "content": "This code file is part of the PaddleVideo library and contains the initialization, base class (BaseMultimodal), and a specific multimodal model (ActBert). It also mentions licensing information and a link to access it. The __all__ variable lists the available modules for importing from this file.",
+        "type": "comment"
+    },
+    "7366": {
+        "file_id": 536,
+        "content": "/paddlevideo/modeling/framework/multimodal/actbert.py",
+        "type": "filepath"
+    },
+    "7367": {
+        "file_id": 536,
+        "content": "The code introduces the ActBert model for multimodal tasks, including training and validation steps. It utilizes a backbone function for predictions with text, video, and action scores along with sequence relationship scores. The infer_step is yet to be implemented.",
+        "type": "summary"
+    },
+    "7368": {
+        "file_id": 536,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom ...registry import MULTIMODAL\nfrom .base import BaseMultimodal\nimport paddle\nfrom paddlevideo.utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@MULTIMODAL.register()\nclass ActBert(BaseMultimodal):\n    \"\"\"ActBert model framework.\"\"\"\n    def forward_net(self, text_ids, action_feat, image_feat, image_loc,\n                    token_type_ids, text_mask, image_mask, action_mask):\n        pred = self.backbone(text_ids, action_feat, image_feat, image_loc,\n                             token_type_ids, text_mask, image_mask, action_mask)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/multimodal/actbert.py:1-27"
+    },
+    "7369": {
+        "file_id": 536,
+        "content": "This code snippet defines the ActBert class, which is a multimodal model framework. It registers the model under MULTIMODAL in the registry and includes a forward_net method for processing text, action, and image data. The self.backbone function is used to make predictions based on this data. The code also includes import statements, variable definitions, and a get_logger function call for logging purposes.",
+        "type": "comment"
+    },
+    "7370": {
+        "file_id": 536,
+        "content": "        return pred\n    def train_step(self, data_batch):\n        \"\"\"For ActBert Dataset. Define how the model is going to train, from input to output.\n        \"\"\"\n        text_ids, action_feat, image_feat, image_loc, \\\n        token_type_ids, text_mask, image_mask, action_mask, \\\n        text_labels, action_label, next_sentence_label, image_label, image_target = data_batch\n        loss_metrics = dict()\n        pred = self.backbone(text_ids, action_feat, image_feat, image_loc,\n                             token_type_ids, text_mask, image_mask, action_mask)\n        prediction_scores_t, prediction_scores_v, prediction_scores_a, seq_relationship_score = pred\n        total_loss = self.loss(prediction_scores_t, prediction_scores_v, prediction_scores_a, seq_relationship_score, \\\n                text_labels, image_label, image_target, action_label, next_sentence_label)\n        loss_metrics['loss'] = paddle.mean(total_loss)\n        return loss_metrics\n    def val_step(self, data_batch):\n        \"\"\"For ActBert Dataset. Define how the model is going to val, from input to output.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/multimodal/actbert.py:28-46"
+    },
+    "7371": {
+        "file_id": 536,
+        "content": "This code defines a train_step and val_step for ActBert Dataset. In the train_step, it takes input data (text_ids, action_feat, image_feat, etc.), passes them through the backbone model to get prediction scores, calculates loss, and returns a loss metric dictionary. The val_step does not appear to have any additional functionality.",
+        "type": "comment"
+    },
+    "7372": {
+        "file_id": 536,
+        "content": "        \"\"\"\n        return self.train_step(data_batch)\n    def test_step(self, data_batch):\n        \"\"\"For MSR-VTT Dataset. Define how the model is going to test, from input to output.\"\"\"\n        text_ids, action_feat, image_feat, image_loc, token_type_ids, text_mask, image_mask, action_mask = data_batch[:\n                                                                                                                      -1]\n        action_feat = action_feat.squeeze(0)\n        image_feat = image_feat.squeeze(0)\n        image_loc = image_loc.squeeze(0)\n        image_mask = image_mask.squeeze(0)\n        action_mask = action_mask.squeeze(0)\n        prediction_scores_t, prediction_scores_v, prediction_scores_a, seq_relationship_score = self.forward_net(text_ids, \\\n            action_feat, image_feat, image_loc, token_type_ids, text_mask, image_mask, action_mask)\n        return prediction_scores_t, prediction_scores_v, prediction_scores_a, seq_relationship_score\n    def infer_step(self, data_batch):\n        pass",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/multimodal/actbert.py:47-64"
+    },
+    "7373": {
+        "file_id": 536,
+        "content": "The code defines a model that takes in multiple inputs like text_ids, action_feat, image_feat, and more. It performs testing with the test_step() function and returns prediction scores for text, video, and action, along with the sequence relationship score. The infer_step() function is not implemented yet.",
+        "type": "comment"
+    },
+    "7374": {
+        "file_id": 537,
+        "content": "/paddlevideo/modeling/framework/multimodal/base.py",
+        "type": "filepath"
+    },
+    "7375": {
+        "file_id": 537,
+        "content": "This code defines a base class for multimodal models in PaddleVideo, requiring subclasses to override train_step, valid_step, test_step, and define abstract methods for validating, testing, and inference steps.",
+        "type": "summary"
+    },
+    "7376": {
+        "file_id": 537,
+        "content": "from abc import abstractmethod\nfrom ... import builder\nimport paddle.nn as nn\nclass BaseMultimodal(nn.Layer):\n    \"\"\"Base class for Multimodal.\n    All Multimodal model should subclass it.\n    All subclass should overwrite:\n    - Methods:``train_step``, supporting to forward when training.\n    - Methods:``valid_step``, supporting to forward when validating.\n    - Methods:``test_step``, supporting to forward when testing.\n    Args:\n        backbone (dict): Backbone modules to extract feature.\n        head (dict): Head to process feature.\n        loss(dict): Loss function.\n    \"\"\"\n    def __init__(self, backbone=None, head=None, loss=None):\n        super().__init__()\n        if backbone is not None:\n            self.backbone = builder.build_backbone(backbone)\n            if hasattr(self.backbone, 'init_weights'):\n                self.backbone.init_weights()\n        else:\n            self.backbone = None\n        if head is not None:\n            self.head_name = head.name\n            self.head = builder.build_head(head)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/multimodal/base.py:1-32"
+    },
+    "7377": {
+        "file_id": 537,
+        "content": "This code defines a base class for multimodal models in PaddleVideo. It requires subclasses to override train_step, valid_step, and test_step methods. The constructor accepts optional backbone, head, and loss parameters which are built using the builder module. If provided, the backbone is initialized with its init_weights method.",
+        "type": "comment"
+    },
+    "7378": {
+        "file_id": 537,
+        "content": "            if hasattr(self.head, 'init_weights'):\n                self.head.init_weights()\n        else:\n            self.head = None\n        if loss is not None:\n            self.loss = builder.build_loss(loss)\n        else:\n            self.loss = None\n    def forward(self, data_batch, mode='infer'):\n        \"\"\"\n        1. Define how the model is going to run, from input to output.\n        2. Console of train, valid, test or infer step\n        3. Set mode='infer' is used for saving inference model, refer to tools/export_model.py\n        \"\"\"\n        if mode == 'train':\n            return self.train_step(data_batch)\n        elif mode == 'valid':\n            return self.val_step(data_batch)\n        elif mode == 'test':\n            return self.test_step(data_batch)\n        elif mode == 'infer':\n            return self.infer_step(data_batch)\n        else:\n            raise NotImplementedError\n    @abstractmethod\n    def train_step(self, data_batch, **kwargs):\n        \"\"\"Training step.\n        \"\"\"\n        raise NotImplementedError",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/multimodal/base.py:33-63"
+    },
+    "7379": {
+        "file_id": 537,
+        "content": "The code defines a base class for multimodal models, with an initializer to set up the head and loss functions. The `forward` method selects the appropriate step function based on the given mode (train, valid, test, or infer). The abstract `train_step` method must be implemented in subclasses for training.",
+        "type": "comment"
+    },
+    "7380": {
+        "file_id": 537,
+        "content": "    @abstractmethod\n    def val_step(self, data_batch, **kwargs):\n        \"\"\"Validating step.\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def test_step(self, data_batch, **kwargs):\n        \"\"\"Test step.\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def infer_step(self, data_batch, **kwargs):\n        \"\"\"Infer step.\n        \"\"\"\n        raise NotImplementedError",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/multimodal/base.py:65-81"
+    },
+    "7381": {
+        "file_id": 537,
+        "content": "This code defines three abstract methods: val_step, test_step, and infer_step. These methods represent validating, testing, and inference steps respectively. The methods are not yet implemented and will need to be filled by subclasses according to the specific requirements of the model being developed.",
+        "type": "comment"
+    },
+    "7382": {
+        "file_id": 538,
+        "content": "/paddlevideo/modeling/framework/partitioners/__init__.py",
+        "type": "filepath"
+    },
+    "7383": {
+        "file_id": 538,
+        "content": "This code is the initialization file of PaddleVideo's partitioner module. It imports base and TransNetV2Partitioner classes, and declares them as part of the public interface (__all__). The license and copyright information are also included.",
+        "type": "summary"
+    },
+    "7384": {
+        "file_id": 538,
+        "content": "# copyright (c) 2020  paddlepaddle authors. all rights reserved.\n#\n# licensed under the apache license, version 2.0 (the \"license\"\n# you may not use this file except in compliance with the license.\n# you may obtain a copy of the license at\n#\n#     http://www.apache.org/licenses/license-2.0\n#\n# unless required by applicable law or agreed to in writing, software\n# distributed under the license is distributed on an \"as is\" basis,\n# without warranties or conditions of any kind, either express or implied.\n# see the license for the specific language governing permissions and\n# limitations under the license.\nfrom .base import BasePartitioner\nfrom .transnetv2_partitioner import TransNetV2Partitioner\n__all__ = ['BasePartitioner', 'TransNetV2Partitioner']",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/partitioners/__init__.py:1-18"
+    },
+    "7385": {
+        "file_id": 538,
+        "content": "This code is the initialization file of PaddleVideo's partitioner module. It imports base and TransNetV2Partitioner classes, and declares them as part of the public interface (__all__). The license and copyright information are also included.",
+        "type": "comment"
+    },
+    "7386": {
+        "file_id": 539,
+        "content": "/paddlevideo/modeling/framework/partitioners/base.py",
+        "type": "filepath"
+    },
+    "7387": {
+        "file_id": 539,
+        "content": "This Python class is part of PaddleVideo's modeling framework, serving as a base for partitioners and initializing partitioned models. It includes backbone and head components initialization, optional weight initialization, and defines a forward function. A base class for model partitioners is also defined with methods for train, validate, test, and infer steps, leaving the actual implementation to subclasses.",
+        "type": "summary"
+    },
+    "7388": {
+        "file_id": 539,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom abc import abstractmethod\nimport paddle.nn as nn\nfrom ... import builder\nclass BasePartitioner(nn.Layer):\n    \"\"\"Base class for Partition.\n    All partitioner should subclass it.\n    All subclass should overwrite:\n    - Methods:``train_step``, define your train step.\n    - Methods:``valid_step``, define your valid step, always the same as train_step.\n    - Methods:``test_step``, define your test step.\n    \"\"\"",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/partitioners/base.py:1-27"
+    },
+    "7389": {
+        "file_id": 539,
+        "content": "This code is a Python class for base partitioner in PaddleVideo's modeling framework. It is an abstract class that serves as the foundation for all partitioners and requires its subclasses to define specific methods like train_step, valid_step, and test_step.",
+        "type": "comment"
+    },
+    "7390": {
+        "file_id": 539,
+        "content": "    def __init__(self, backbone=None, head=None):\n        super().__init__()\n        if backbone is not None:\n            self.backbone = builder.build_backbone(backbone)\n            if hasattr(self.backbone, 'init_weights'):\n                self.backbone.init_weights()\n        else:\n            self.backbone = None\n        if head is not None:\n            self.head_name = head.name\n            self.head = builder.build_head(head)\n            if hasattr(self.head, 'init_weights'):\n                self.head.init_weights()\n        else:\n            self.head = None\n    def init_weights(self):\n        \"\"\"Initialize the model network weights. \"\"\"\n        if getattr(self.backbone, 'init_weights'):\n            self.backbone.init_weights()\n        else:\n            pass\n    def forward(self, data_batch, mode='infer'):\n        \"\"\"\n        1. Define how the model is going to run, from input to output.\n        2. Console of train, valid, test or infer step\n        3. Set mode='infer' is used for saving inference model, refer to tools/export_model.py",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/partitioners/base.py:28-55"
+    },
+    "7391": {
+        "file_id": 539,
+        "content": "This code initializes a partitioned model by building backbone and head components. It also includes an option to initialize weights for these components, and provides a forward function defining the model's execution path depending on the provided mode.",
+        "type": "comment"
+    },
+    "7392": {
+        "file_id": 539,
+        "content": "        \"\"\"\n        if mode == 'train':\n            return self.train_step(data_batch)\n        elif mode == 'valid':\n            return self.val_step(data_batch)\n        elif mode == 'test':\n            return self.test_step(data_batch)\n        elif mode == 'infer':\n            return self.infer_step(data_batch)\n        else:\n            raise NotImplementedError\n    @abstractmethod\n    def train_step(self, data_batch, **kwargs):\n        \"\"\"Training step.  input_data_batch -> loss_metric\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def val_step(self, data_batch, **kwargs):\n        \"\"\"Validating setp. input_data_batch -> loss_metric\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def test_step(self, data_batch, **kwargs):\n        \"\"\"Tets setp. to get acc in test data. input_data_batch -> output\n        \"\"\"\n        raise NotImplementedError",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/partitioners/base.py:56-84"
+    },
+    "7393": {
+        "file_id": 539,
+        "content": "The code defines a base class for model partitioners, which includes methods for train, validate, test, and infer steps. Each step takes a data batch as input and returns either a loss metric or the output. If an unsupported mode is provided, it raises a NotImplementedError. The actual implementation of these steps is left to subclasses.",
+        "type": "comment"
+    },
+    "7394": {
+        "file_id": 540,
+        "content": "/paddlevideo/modeling/framework/partitioners/transnetv2_partitioner.py",
+        "type": "filepath"
+    },
+    "7395": {
+        "file_id": 540,
+        "content": "TransNetV2 Partitioner in PaddleVideo framework defines a model partitioner, includes forwarding methods for image processing and computing loss metrics. It has three methods: \"loss_metrics\", \"test_step\", and \"infer_step\" for training, testing, and inference phases respectively.",
+        "type": "summary"
+    },
+    "7396": {
+        "file_id": 540,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom ...registry import PARTITIONERS\nfrom .base import BasePartitioner\nimport paddle\n@PARTITIONERS.register()\nclass TransNetV2Partitioner(BasePartitioner):\n    \"\"\"TransNetV2 Partitioner framework\n    \"\"\"\n    def forward_net(self, imgs):\n        one_hot_pred = self.backbone(imgs)\n        return one_hot_pred\n    def train_step(self, data_batch):\n        \"\"\"Define how the model is going to train, from input to output.\n        \"\"\"\n        frame_sequence = data_batch[0]\n        one_hot_gt, many_hot_gt = data_batch[1:]\n        one_hot_pred = self.forward_net(frame_sequence)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/partitioners/transnetv2_partitioner.py:1-32"
+    },
+    "7397": {
+        "file_id": 540,
+        "content": "TransNetV2 Partitioner class for PaddleVideo framework, with forward_net and train_step methods for image processing and model training.",
+        "type": "comment"
+    },
+    "7398": {
+        "file_id": 540,
+        "content": "        dict_ = {}\n        if isinstance(one_hot_pred, tuple):\n            one_hot_pred, dict_ = one_hot_pred\n        many_hot_pred = dict_.get(\"many_hot\", None)\n        comb_reg_loss = dict_.get(\"comb_reg_loss\", None)\n        loss_metrics = self.head.loss(one_hot_pred, one_hot_gt,\n                                    many_hot_pred, many_hot_gt,\n                                    reg_losses={\"comb_reg\": comb_reg_loss})\n        return loss_metrics\n    def val_step(self, data_batch):\n        frame_sequence = data_batch[0]\n        one_hot_gt, many_hot_gt = data_batch[1:]\n        one_hot_pred = self.forward_net(frame_sequence)\n        dict_ = {}\n        if isinstance(one_hot_pred, tuple):\n            one_hot_pred, dict_ = one_hot_pred\n        many_hot_pred = dict_.get(\"many_hot\", None)\n        comb_reg_loss = dict_.get(\"comb_reg_loss\", None)\n        loss_metrics = self.head.loss(one_hot_pred, one_hot_gt,\n                                      many_hot_pred, many_hot_gt,\n                                      reg_losses={\"comb_reg\": comb_reg_loss})",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/partitioners/transnetv2_partitioner.py:33-54"
+    },
+    "7399": {
+        "file_id": 540,
+        "content": "Code defines a model partitioner for TransNetV2. It returns loss metrics from the validation step by forwarding frame sequences through the model, extracting one-hot and many-hot predictions and ground truths, and applying losses based on provided dictionaries.",
+        "type": "comment"
+    }
+}

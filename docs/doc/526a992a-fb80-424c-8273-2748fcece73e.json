@@ -1,0 +1,10 @@
+{
+    "summary": "This code imports the function 'get_metrics' from the 'metrics_util' module in the same application directory. This function is likely used to calculate and retrieve various metrics related to video processing or analysis.",
+    "details": [
+        {
+            "comment": "This code imports the function 'get_metrics' from the 'metrics_util' module in the same application directory. This function is likely used to calculate and retrieve various metrics related to video processing or analysis.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoTag/metrics/__init__.py\":0-0",
+            "content": "from .metrics_util import get_metrics"
+        }
+    ]
+}

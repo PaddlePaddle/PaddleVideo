@@ -1,0 +1,547 @@
+{
+    "7500": {
+        "file_id": 551,
+        "content": "                        self.runtime_cfg.test.num_seg]\n            cls_score.append(self.forward_net(view))\n        cls_score = self._average_view(cls_score,\n                                       self.runtime_cfg.test.avg_type)\n        return cls_score\n    def infer_step(self, data_batch):\n        \"\"\"Define how the model is going to infer, from input to output.\"\"\"\n        imgs = data_batch[0]\n        num_views = imgs.shape[2] // self.runtime_cfg.test.num_seg\n        cls_score = []\n        for i in range(num_views):\n            view = imgs[:, :, i * self.runtime_cfg.test.num_seg:(i + 1) *\n                        self.runtime_cfg.test.num_seg]\n            cls_score.append(self.forward_net(view))\n        cls_score = self._average_view(cls_score,\n                                       self.runtime_cfg.test.avg_type)\n        return cls_score\n    def _average_view(self, cls_score, avg_type='score'):\n        \"\"\"Combine the predicted results of different views\n        Args:\n            cls_score (list): results of multiple views",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer_transformer.py:63-86"
+    },
+    "7501": {
+        "file_id": 551,
+        "content": "This code defines a model for inferring the results from multiple views of images. The `forward_net` function is used to process each view, and then the results are averaged using the `_average_view` function based on the specified average type. This allows the model to make predictions from different perspectives of an image and combine them for a more accurate result.",
+        "type": "comment"
+    },
+    "7502": {
+        "file_id": 551,
+        "content": "            avg_type (str, optional): Average calculation method. Defaults to 'score'.\n        \"\"\"\n        assert avg_type in ['score', 'prob'], \\\n            f\"Currently only the average of 'score' or 'prob' is supported, but got {avg_type}\"\n        if avg_type == 'score':\n            return paddle.add_n(cls_score) / len(cls_score)\n        elif avg_type == 'prob':\n            return paddle.add_n(\n                [F.softmax(score, axis=-1)\n                 for score in cls_score]) / len(cls_score)\n        else:\n            raise NotImplementedError",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer_transformer.py:87-98"
+    },
+    "7503": {
+        "file_id": 551,
+        "content": "This code defines a class method with an optional 'avg_type' parameter for average calculation. It checks if the input is either 'score' or 'prob'. If 'score', it returns the sum of 'cls_score' divided by its length. If 'prob', it applies softmax to each element in 'cls_score', then averages their sum and length. Otherwise, it raises a NotImplementedError.",
+        "type": "comment"
+    },
+    "7504": {
+        "file_id": 552,
+        "content": "/paddlevideo/modeling/framework/recognizers/recognizer_transformer_MRI.py",
+        "type": "filepath"
+    },
+    "7505": {
+        "file_id": 552,
+        "content": "The code imports libraries, defines the RecognizerTransformer_MRI model class with forward method and training/validation steps, using loss metrics. It includes two inference methods: 'test_step' and 'infer_step', which split input into multiple views for classification score generation. The average_view function combines these scores across views, using either 'score' or 'prob' averaging types.",
+        "type": "summary"
+    },
+    "7506": {
+        "file_id": 552,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport paddle\nimport paddle.nn.functional as F\nfrom paddlevideo.utils import get_logger\nfrom ...registry import RECOGNIZERS\nfrom .base import BaseRecognizer\nlogger = get_logger(\"paddlevideo\")\n@RECOGNIZERS.register()\nclass RecognizerTransformer_MRI(BaseRecognizer):\n    \"\"\"Transformer's recognizer model framework.\"\"\"\n    def forward_net(self, imgs):\n        # imgs.shape=[N,C,T,H,W], for transformer case\n        imgs = paddle.cast(imgs, \"float32\")  #############\n        imgs = imgs.unsqueeze(1)\n        if self.backbone != None:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer_transformer_MRI.py:1-32"
+    },
+    "7507": {
+        "file_id": 552,
+        "content": "This code imports necessary libraries, defines a class for the RecognizerTransformer_MRI model, and sets the input image shape. The forward_net method preprocesses input images by casting them to float32 type and adding an extra dimension for compatibility with the transformer architecture.",
+        "type": "comment"
+    },
+    "7508": {
+        "file_id": 552,
+        "content": "            feature = self.backbone(imgs)\n        else:\n            feature = imgs\n        if self.head != None:\n            cls_score = self.head(feature)\n        else:\n            cls_score = None\n        return cls_score\n    def train_step(self, data_batch):\n        \"\"\"Define how the model is going to train, from input to output.\n        \"\"\"\n        imgs = data_batch[0]\n        labels = data_batch[1:]\n        cls_score = self.forward_net(imgs)\n        cls_score = paddle.nn.functional.sigmoid(cls_score)\n        loss_metrics = self.head.loss(cls_score, labels, if_top5=False)\n        return loss_metrics\n    def val_step(self, data_batch):\n        imgs = data_batch[0]\n        labels = data_batch[1:]\n        cls_score = self.forward_net(imgs)\n        cls_score = paddle.nn.functional.sigmoid(cls_score)\n        loss_metrics = self.head.loss(cls_score,\n                                      labels,\n                                      valid_mode=True,\n                                      if_top5=False)\n        return loss_metrics",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer_transformer_MRI.py:33-63"
+    },
+    "7509": {
+        "file_id": 552,
+        "content": "This code defines a recognizer transformer model for image classification. The `forward_net` method processes images and returns class scores, while the `train_step` and `val_step` methods perform training and validation steps by passing data batches to the model and computing loss metrics using sigmoid activation and the head's loss function.",
+        "type": "comment"
+    },
+    "7510": {
+        "file_id": 552,
+        "content": "    def test_step(self, data_batch):\n        \"\"\"Define how the model is going to infer, from input to output.\"\"\"\n        imgs = data_batch[0]\n        num_views = imgs.shape[2] // self.backbone.seg_num\n        cls_score = []\n        for i in range(num_views):\n            view = imgs[:, :, i * self.backbone.seg_num:(i + 1) *\n                        self.backbone.seg_num]\n            cls_score.append(self.forward_net(view))\n        cls_score = self.average_view(cls_score)\n        return cls_score\n    def infer_step(self, data_batch):\n        \"\"\"Define how the model is going to infer, from input to output.\"\"\"\n        imgs = data_batch[0]\n        num_views = imgs.shape[2] // self.backbone.seg_num\n        cls_score = []\n        for i in range(num_views):\n            view = imgs[:, :, i * self.backbone.seg_num:(i + 1) *\n                        self.backbone.seg_num]\n            cls_score.append(self.forward_net(view))\n        cls_score = self.average_view(cls_score)\n        return cls_score\n    def average_view(self, cls_score, average_type='score'):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer_transformer_MRI.py:65-89"
+    },
+    "7511": {
+        "file_id": 552,
+        "content": "The code defines two methods, 'test_step' and 'infer_step', for the model to infer from input to output. It splits the input into multiple views based on the number of segments in each view. For each view, it applies the forward network to generate a set of classification scores. Finally, it averages the scores across all views using the average_view method.",
+        "type": "comment"
+    },
+    "7512": {
+        "file_id": 552,
+        "content": "        \"\"\"Combine the scores of different views\n        Args:\n            cls_score (list): Scores of multiple views\n            average_type (str, optional): Average calculation method. Defaults to 'score'.\n        \"\"\"\n        assert average_type in ['score', 'prob'], \\\n            f\"Currently only the average of 'score' or 'prob' is supported, but got {average_type}\"\n        if average_type == 'score':\n            return paddle.add_n(cls_score) / len(cls_score)\n        elif average_type == 'avg':\n            return paddle.add_n([F.softmax(score)\n                                 for score in cls_score]) / len(cls_score)\n        else:\n            raise NotImplementedError",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/recognizers/recognizer_transformer_MRI.py:90-104"
+    },
+    "7513": {
+        "file_id": 552,
+        "content": "This function combines the scores of multiple views, taking two arguments: a list of cls_scores and an optional average_type. It asserts that average_type is either 'score' or 'prob'. If 'score', it adds all scores in the list and divides by the count. If 'avg', it first applies softmax to each score, then adds them and divides by the count. Otherwise, it raises a NotImplementedError.",
+        "type": "comment"
+    },
+    "7514": {
+        "file_id": 553,
+        "content": "/paddlevideo/modeling/framework/segment/__init__.py",
+        "type": "filepath"
+    },
+    "7515": {
+        "file_id": 553,
+        "content": "This code file contains the Python implementation of segment models in PaddleVideo, including BaseSegment and CFBI classes. It is licensed under the Apache License, Version 2.0. The __all__ variable lists the available segments: BaseSegment and CFBI.",
+        "type": "summary"
+    },
+    "7516": {
+        "file_id": 553,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom .base import BaseSegment\nfrom .cfbi import CFBI\n__all__ = ['BaseSegment', 'CFBI']",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/__init__.py:1-16"
+    },
+    "7517": {
+        "file_id": 553,
+        "content": "This code file contains the Python implementation of segment models in PaddleVideo, including BaseSegment and CFBI classes. It is licensed under the Apache License, Version 2.0. The __all__ variable lists the available segments: BaseSegment and CFBI.",
+        "type": "comment"
+    },
+    "7518": {
+        "file_id": 554,
+        "content": "/paddlevideo/modeling/framework/segment/base.py",
+        "type": "filepath"
+    },
+    "7519": {
+        "file_id": 554,
+        "content": "This code defines a semi-Video Object Segmentation abstract base class with train_step, valid_step, and test_step methods for different modes (train, valid, test, or infer). Subclasses must implement 4 methods for model training and evaluation.",
+        "type": "summary"
+    },
+    "7520": {
+        "file_id": 554,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom abc import abstractmethod\nfrom ... import builder\nimport paddle.nn as nn\nclass BaseSegment(nn.Layer):\n    \"\"\"Base class for semi-Video Object Segmentation.\n    All subclass should overwrite:\n    - Methods:``train_step``, supporting to forward when training.\n    - Methods:``valid_step``, supporting to forward when validating.\n    - Methods:``test_step``, supporting to forward when testing.\n    Args:\n        backbone (dict): Backbone modules to extract feature.\n        head (dict): Head to process feature.\n        loss(dict): Loss function.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/base.py:1-29"
+    },
+    "7521": {
+        "file_id": 554,
+        "content": "This code defines an abstract base class for semi-Video Object Segmentation. It has three required methods: train_step, valid_step, and test_step. The class also contains backbone, head, and loss modules to extract feature, process feature, and define the loss function respectively.",
+        "type": "comment"
+    },
+    "7522": {
+        "file_id": 554,
+        "content": "    \"\"\"\n    def __init__(self, backbone=None, head=None, loss=None):\n        super().__init__()\n        if backbone is not None:\n            self.backbone = builder.build_backbone(backbone)\n            if hasattr(self.backbone, 'init_weights'):\n                self.backbone.init_weights()\n        else:\n            self.backbone = None\n        if head is not None:\n            self.head_name = head.name\n            self.head = builder.build_head(head)\n            if hasattr(self.head, 'init_weights'):\n                self.head.init_weights()\n        else:\n            self.head = None\n        if loss is not None:\n            self.loss = builder.build_loss(loss)\n        else:\n            self.loss = None\n    def forward(self, data_batch, mode='infer'):\n        \"\"\"\n        1. Define how the model is going to run, from input to output.\n        2. Console of train, valid, test or infer step\n        3. Set mode='infer' is used for saving inference model, refer to tools/export_model.py\n        \"\"\"\n        if mode == 'train':",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/base.py:30-57"
+    },
+    "7523": {
+        "file_id": 554,
+        "content": "This code initializes a segment model by building its backbone, head, and loss based on the provided parameters. The forward method defines how the model runs in different modes (train, valid, test, or infer). If running in train mode, the model performs training operations.",
+        "type": "comment"
+    },
+    "7524": {
+        "file_id": 554,
+        "content": "            return self.train_step(data_batch)\n        elif mode == 'valid':\n            return self.val_step(data_batch)\n        elif mode == 'test':\n            return self.test_step(data_batch)\n        elif mode == 'infer':\n            return self.infer_step(data_batch)\n        else:\n            raise NotImplementedError\n    @abstractmethod\n    def train_step(self, data_batch, **kwargs):\n        \"\"\"Training step.\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def val_step(self, data_batch, **kwargs):\n        \"\"\"Validating step.\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def test_step(self, data_batch, **kwargs):\n        \"\"\"Test step.\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def infer_step(self, data_batch, **kwargs):\n        \"\"\"Infer step.\n        \"\"\"\n        raise NotImplementedError",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/base.py:58-90"
+    },
+    "7525": {
+        "file_id": 554,
+        "content": "The code defines an abstract class with four methods (train_step, val_step, test_step, and infer_step) that must be implemented by subclasses. The method name is chosen based on the mode input parameter for different phases of model training or evaluation. If an unsupported mode is passed, a NotImplementedError is raised.",
+        "type": "comment"
+    },
+    "7526": {
+        "file_id": 555,
+        "content": "/paddlevideo/modeling/framework/segment/cfbi.py",
+        "type": "filepath"
+    },
+    "7527": {
+        "file_id": 555,
+        "content": "This Python class initializes the CFBI model in PaddleVideo library for image segmentation and video processing using AI techniques, with instance-level attention via previous frame embeddings and labels.",
+        "type": "summary"
+    },
+    "7528": {
+        "file_id": 555,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nimport numpy as np\nfrom .utils import foreground2background, global_matching_for_eval, local_matching, calculate_attention_head_for_eval\nfrom ...registry import SEGMENT\nfrom .base import BaseSegment\nfrom paddlevideo.utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@SEGMENT.register()\nclass CFBI(BaseSegment):\n    \"\"\"CFBI model framework.\"\"\"\n    def __init__(self, backbone=None, head=None, loss=None):\n        super().__init__(backbone, head, loss)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/cfbi.py:1-30"
+    },
+    "7529": {
+        "file_id": 555,
+        "content": "This code is a Python class for the CFBI model in the PaddleVideo library. It initializes the model and inherits from the BaseSegment class, allowing it to use other classes like backbone, head, and loss.",
+        "type": "comment"
+    },
+    "7530": {
+        "file_id": 555,
+        "content": "        x1 = paddle.zeros([3, 1, 1, 1])\n        self.bg_bias = paddle.create_parameter(\n            shape=x1.shape,\n            dtype=x1.dtype,\n            default_initializer=nn.initializer.Assign(x1))\n        self.fg_bias = paddle.create_parameter(\n            shape=x1.shape,\n            dtype=x1.dtype,\n            default_initializer=nn.initializer.Assign(x1))\n        self.epsilon = 1e-05\n    def test_step(self, data_batch):\n        \"\"\"Define how the model is going to test, from input to output.\n        \"\"\"\n        self.test_mode = True\n        ref_embeddings, ref_masks, prev_embedding, prev_mask, current_frame, pred_size, gt_ids = data_batch\n        current_frame_embedding_4x, current_frame_embedding_8x, current_frame_embedding_16x, \\\n        current_low_level = self.backbone(current_frame)\n        current_frame_embedding = [\n            current_frame_embedding_4x, current_frame_embedding_8x,\n            current_frame_embedding_16x\n        ]\n        if prev_embedding is None:\n            return None, current_frame_embedding",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/cfbi.py:31-56"
+    },
+    "7531": {
+        "file_id": 555,
+        "content": "This code defines a class with a `test_step` method that performs testing on input data. It initializes some parameters and returns None if there is no previous embedding. The backbone function extracts multiple frame embeddings, which are stored in the `current_frame_embedding` list.",
+        "type": "comment"
+    },
+    "7532": {
+        "file_id": 555,
+        "content": "        else:\n            bs, c, h, w = current_frame_embedding_4x.shape\n            tmp_dic, _ = self.before_seghead_process(\n                ref_embeddings,\n                prev_embedding,\n                current_frame_embedding,\n                ref_masks,\n                prev_mask,\n                gt_ids,\n                current_low_level=current_low_level,\n            )\n            all_pred = []\n            for i in range(bs):\n                pred = tmp_dic[i]\n                pred = F.interpolate(pred,\n                                     size=[pred_size[0], pred_size[1]],\n                                     mode='bilinear',\n                                     align_corners=True)\n                all_pred.append(pred)\n            all_pred = paddle.concat(all_pred, axis=0)\n            all_pred = F.softmax(all_pred, axis=1)\n            return all_pred, current_frame_embedding\n    def before_seghead_process(self,\n                               ref_frame_embeddings=None,\n                               previous_frame_embeddings=None,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/cfbi.py:57-84"
+    },
+    "7533": {
+        "file_id": 555,
+        "content": "The code is in PaddleVideo framework, and it contains an else block that executes when a condition is not met. The function first defines the shape of current_frame_embedding_4x. It then processes reference embeddings, previous embeddings, and current frame embedding with other parameters such as masks and IDs. It interpolates predictions and concatenates them along the specified axis. Finally, it applies softmax to all_pred on the specified axis before returning both all_pred and current_frame_embedding.",
+        "type": "comment"
+    },
+    "7534": {
+        "file_id": 555,
+        "content": "                               current_frame_embeddings=None,\n                               ref_frame_labels=None,\n                               previous_frame_mask=None,\n                               gt_ids=None,\n                               current_low_level=None):\n        \"\"\" process befor segmentation head\"\"\"\n        TEST_GLOBAL_MATCHING_CHUNK = [4, 1, 1]\n        TEST_GLOBAL_ATROUS_RATE = [2, 1, 1]\n        TRAIN_LOCAL_ATROUS_RATE = [2, 1, 1]\n        TEST_LOCAL_ATROUS_RATE = [2, 1, 1]\n        MODEL_FLOAT16_MATCHING = False\n        TEST_GLOBAL_MATCHING_MIN_PIXEL = 100\n        MODEL_MULTI_LOCAL_DISTANCE = [[4, 8, 12, 16, 20, 24],\n                                      [2, 4, 6, 8, 10, 12], [2, 4, 6, 8, 10]]\n        TRAIN_LOCAL_PARALLEL = True\n        TEST_LOCAL_PARALLEL = True\n        MODEL_MATCHING_BACKGROUND = True\n        MODEL_SEMANTIC_MATCHING_DIM = [32, 64, 128]\n        dic_tmp = []\n        boards = {}\n        scale_ref_frame_labels = []\n        scale_previous_frame_labels = []\n        for current_frame_embedding in current_frame_embeddings:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/cfbi.py:85-108"
+    },
+    "7535": {
+        "file_id": 555,
+        "content": "The code initializes various constants and variables for the segmentation head process. It includes settings for matching, atroous rates, and parallel processing, as well as defining arrays for scale reference frame labels and previous frame labels.",
+        "type": "comment"
+    },
+    "7536": {
+        "file_id": 555,
+        "content": "            bs, c, h, w = current_frame_embedding.shape\n            if not self.test_mode:\n                raise NotImplementedError\n            else:\n                ref_frame_embeddings = list(zip(*ref_frame_embeddings))\n                all_scale_ref_frame_label = []\n                for ref_frame_label in ref_frame_labels:\n                    scale_ref_frame_label = paddle.cast(F.interpolate(\n                        paddle.cast(ref_frame_label, dtype=\"float32\"),\n                        size=(h, w),\n                        mode='nearest'),\n                                                        dtype=\"int32\")\n                    all_scale_ref_frame_label.append(scale_ref_frame_label)\n                scale_ref_frame_labels.append(all_scale_ref_frame_label)\n            scale_previous_frame_label = paddle.cast(F.interpolate(\n                paddle.cast(previous_frame_mask, dtype=\"float32\"),\n                size=(h, w),\n                mode='nearest'),\n                                                     dtype=\"int32\")",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/cfbi.py:109-127"
+    },
+    "7537": {
+        "file_id": 555,
+        "content": "Resizing ref_frame_label and previous_frame_mask to match current frame size for nearest mode interpolation in PaddleVideo model.",
+        "type": "comment"
+    },
+    "7538": {
+        "file_id": 555,
+        "content": "            scale_previous_frame_labels.append(scale_previous_frame_label)\n        for n in range(bs):\n            ref_obj_ids = paddle.reshape(\n                paddle.cast(paddle.arange(0,\n                                          np.array(gt_ids)[n] + 1),\n                            dtype=\"int32\"), [-1, 1, 1, 1])\n            obj_num = ref_obj_ids.shape[0]\n            low_level_feat = paddle.unsqueeze(current_low_level[n], axis=0)\n            all_CE_input = []\n            all_attention_head = []\n            for scale_idx, current_frame_embedding, ref_frame_embedding, previous_frame_embedding, \\\n                scale_ref_frame_label, scale_previous_frame_label in zip(range(3), \\\n                    current_frame_embeddings, ref_frame_embeddings, previous_frame_embeddings, \\\n                    scale_ref_frame_labels, scale_previous_frame_labels):\n                #Prepare\n                seq_current_frame_embedding = current_frame_embedding[n]\n                seq_prev_frame_embedding = previous_frame_embedding[n]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/cfbi.py:128-144"
+    },
+    "7539": {
+        "file_id": 555,
+        "content": "The code is iterating over the input data and for each frame, it prepares the current_frame_embedding and previous_frame_embedding by reshaping, unsqueezing, and extracting the specific frames from their respective arrays. It then adds these embeddings to separate lists for later use in calculating attention scores and computing cross-entropy loss.",
+        "type": "comment"
+    },
+    "7540": {
+        "file_id": 555,
+        "content": "                seq_previous_frame_label = paddle.cast(\n                    (paddle.cast(scale_previous_frame_label[n], dtype=\"int32\")\n                     == ref_obj_ids),\n                    dtype=\"float32\")\n                if np.array(gt_ids)[n] > 0:\n                    dis_bias = paddle.concat([\n                        paddle.unsqueeze(self.bg_bias[scale_idx], axis=0),\n                        paddle.expand(\n                            paddle.unsqueeze(self.fg_bias[scale_idx], axis=0),\n                            [np.array(gt_ids)[n], -1, -1, -1])\n                    ],\n                                             axis=0)\n                else:\n                    dis_bias = paddle.unsqueeze(self.bg_bias[scale_idx], axis=0)\n                #Global FG map\n                matching_dim = MODEL_SEMANTIC_MATCHING_DIM[scale_idx]\n                seq_current_frame_embedding_for_matching = paddle.transpose(\n                    seq_current_frame_embedding[:matching_dim], [1, 2, 0])\n                if not self.test_mode:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/cfbi.py:145-164"
+    },
+    "7541": {
+        "file_id": 555,
+        "content": "This code calculates the distance bias for each frame in a sequence and prepares it for matching. It checks if the object ID is greater than 0, then assigns the corresponding background or foreground distance bias. It also transposes the current frame embedding for matching in case it's not in test mode.",
+        "type": "comment"
+    },
+    "7542": {
+        "file_id": 555,
+        "content": "                    raise NotImplementedError\n                else:\n                    all_scale_ref_frame_label = scale_ref_frame_label\n                    all_ref_frame_embedding = ref_frame_embedding\n                    all_reference_embeddings = []\n                    all_reference_labels = []\n                    seq_ref_frame_labels = []\n                    count = 0\n                    for idx in range(len(all_scale_ref_frame_label)):\n                        ref_frame_embedding = all_ref_frame_embedding[idx]\n                        scale_ref_frame_label = all_scale_ref_frame_label[idx]\n                        seq_ref_frame_embedding = ref_frame_embedding[n]\n                        seq_ref_frame_embedding = paddle.transpose(\n                            seq_ref_frame_embedding, [1, 2, 0])\n                        seq_ref_frame_label = paddle.cast(\n                            (paddle.cast(scale_ref_frame_label[n],\n                                         dtype=\"int32\") == ref_obj_ids),\n                            dtype=\"float32\")",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/cfbi.py:165-184"
+    },
+    "7543": {
+        "file_id": 555,
+        "content": "The code raises a NotImplementedError if the condition is met and otherwise creates variables for storing reference frame embeddings, labels, and sequence-specific values. It then iterates through the provided labels and embeddings to prepare them for use in the model's segmentation process.",
+        "type": "comment"
+    },
+    "7544": {
+        "file_id": 555,
+        "content": "                        seq_ref_frame_labels.append(seq_ref_frame_label)\n                        seq_ref_frame_label = paddle.transpose(\n                            paddle.squeeze(seq_ref_frame_label, axis=1),\n                            [1, 2, 0])\n                        all_reference_embeddings.append(\n                            seq_ref_frame_embedding[:, :, :matching_dim])\n                        all_reference_labels.append(seq_ref_frame_label)\n                    global_matching_fg = global_matching_for_eval(\n                        all_reference_embeddings=all_reference_embeddings,\n                        query_embeddings=\n                        seq_current_frame_embedding_for_matching,\n                        all_reference_labels=all_reference_labels,\n                        n_chunks=TEST_GLOBAL_MATCHING_CHUNK[scale_idx],\n                        dis_bias=dis_bias,\n                        atrous_rate=TEST_GLOBAL_ATROUS_RATE[scale_idx],\n                        use_float16=MODEL_FLOAT16_MATCHING,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/cfbi.py:185-200"
+    },
+    "7545": {
+        "file_id": 555,
+        "content": "This code appears to be part of a computer vision model. It is appending reference frame labels, transposing them, and adding the reference embeddings to a list. Then it calls a function called \"global_matching_fg\" with the reference embeddings, query embeddings, reference labels, number of chunks, distance bias, and atrous rate as arguments. The function is likely used for global matching evaluation in the context of this model.",
+        "type": "comment"
+    },
+    "7546": {
+        "file_id": 555,
+        "content": "                        atrous_obj_pixel_num=TEST_GLOBAL_MATCHING_MIN_PIXEL)\n                # Local FG map\n                seq_prev_frame_embedding_for_matching = paddle.transpose(\n                    seq_prev_frame_embedding[:matching_dim], [1, 2, 0])\n                seq_previous_frame_label_for_matching = paddle.transpose(\n                    paddle.squeeze(seq_previous_frame_label, axis=1), [1, 2, 0])\n                local_matching_fg = local_matching(\n                    prev_frame_embedding=seq_prev_frame_embedding_for_matching,\n                    query_embedding=seq_current_frame_embedding_for_matching,\n                    prev_frame_labels=seq_previous_frame_label_for_matching,\n                    multi_local_distance=MODEL_MULTI_LOCAL_DISTANCE[scale_idx],\n                    dis_bias=dis_bias,\n                    atrous_rate=TRAIN_LOCAL_ATROUS_RATE[scale_idx] if\n                    not self.test_mode else TEST_LOCAL_ATROUS_RATE[scale_idx],\n                    use_float16=MODEL_FLOAT16_MATCHING,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/cfbi.py:201-216"
+    },
+    "7547": {
+        "file_id": 555,
+        "content": "This code block prepares input for a local matching function to compare previous and current frames. It transposes the embeddings and labels, sets atrous rate based on test mode, and uses float16 if needed.",
+        "type": "comment"
+    },
+    "7548": {
+        "file_id": 555,
+        "content": "                    allow_downsample=False,\n                    allow_parallel=TRAIN_LOCAL_PARALLEL\n                    if not self.test_mode else TEST_LOCAL_PARALLEL)\n                #Aggregate Pixel-level Matching\n                to_cat_global_matching_fg = paddle.transpose(\n                    paddle.squeeze(global_matching_fg, axis=0), [2, 3, 0, 1])\n                to_cat_local_matching_fg = paddle.transpose(\n                    paddle.squeeze(local_matching_fg, axis=0), [2, 3, 0, 1])\n                all_to_cat = [\n                    to_cat_global_matching_fg, to_cat_local_matching_fg,\n                    seq_previous_frame_label\n                ]\n                #Global and Local BG map\n                if MODEL_MATCHING_BACKGROUND:\n                    to_cat_global_matching_bg = foreground2background(\n                        to_cat_global_matching_fg,\n                        np.array(gt_ids)[n] + 1)\n                    reshaped_prev_nn_feature_n = paddle.unsqueeze(\n                        paddle.transpose(to_cat_local_matching_fg,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/cfbi.py:217-237"
+    },
+    "7549": {
+        "file_id": 555,
+        "content": "This code performs pixel-level matching and global/local background subtraction for image segmentation. It transposes and squeezes the global and local matching results, concatenates them with previous frame labels, and if using background modeling, computes global and local background maps.",
+        "type": "comment"
+    },
+    "7550": {
+        "file_id": 555,
+        "content": "                                         [0, 2, 3, 1]),\n                        axis=1)\n                    to_cat_local_matching_bg = foreground2background(\n                        reshaped_prev_nn_feature_n,\n                        np.array(gt_ids)[n] + 1)\n                    to_cat_local_matching_bg = paddle.squeeze(paddle.transpose(\n                        to_cat_local_matching_bg, [0, 4, 2, 3, 1]),\n                                                              axis=-1)\n                    all_to_cat += [\n                        to_cat_local_matching_bg, to_cat_global_matching_bg\n                    ]\n                to_cat_current_frame_embedding = paddle.expand(\n                    paddle.unsqueeze(current_frame_embedding[n], axis=0),\n                    [obj_num, -1, -1, -1])\n                to_cat_prev_frame_embedding = paddle.expand(\n                    paddle.unsqueeze(previous_frame_embedding[n], axis=0),\n                    [obj_num, -1, -1, -1])\n                to_cat_prev_frame_embedding_fg = to_cat_prev_frame_embedding * seq_previous_frame_label",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/cfbi.py:238-256"
+    },
+    "7551": {
+        "file_id": 555,
+        "content": "This code segment appears to be part of a computer vision model that handles segmentation for video frames. It seems to be working with object instances, their previous and current frame embeddings, and global/local matching backgrounds. The code is performing reshaping operations and expansions on tensors, and calculating local and global matching backgrounds for the current frame's object instance. Overall, it appears to be a complex segment of a larger AI-based video processing pipeline.",
+        "type": "comment"
+    },
+    "7552": {
+        "file_id": 555,
+        "content": "                to_cat_prev_frame_embedding_bg = to_cat_prev_frame_embedding * (\n                    1 - seq_previous_frame_label)\n                all_to_cat += [\n                    to_cat_current_frame_embedding,\n                    to_cat_prev_frame_embedding_fg,\n                    to_cat_prev_frame_embedding_bg\n                ]\n                CE_input = paddle.concat(all_to_cat, axis=1)\n                #Instance-level Attention\n                if not self.test_mode:\n                    raise NotImplementedError\n                else:\n                    attention_head = calculate_attention_head_for_eval(\n                        all_ref_frame_embedding,\n                        seq_ref_frame_labels,\n                        paddle.expand(\n                            paddle.unsqueeze(previous_frame_embedding[n],\n                                             axis=0), [obj_num, -1, -1, -1]),\n                        seq_previous_frame_label,\n                        epsilon=self.epsilon)\n                all_CE_input.append(CE_input)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/cfbi.py:257-279"
+    },
+    "7553": {
+        "file_id": 555,
+        "content": "This code calculates attention for instance-level using previous frame embeddings and labels. It concatenates current, previous frame embedding (for foreground and background), and then applies attention on all frames in non-test mode. In test mode, it raises a NotImplementedError.",
+        "type": "comment"
+    },
+    "7554": {
+        "file_id": 555,
+        "content": "                all_attention_head.append(attention_head)\n            #Collaborative Ensembler\n            pred = self.head(all_CE_input, all_attention_head, low_level_feat)\n            dic_tmp.append(pred)\n        return dic_tmp, boards",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/cfbi.py:280-286"
+    },
+    "7555": {
+        "file_id": 555,
+        "content": "This code snippet is part of a machine learning model. It appends the \"attention_head\" to the list \"all_attention_head\", then passes the combined inputs along with \"low_level_feat\" to a \"head\" function, and appends its output to \"dic_tmp\". Finally, it returns both \"dic_tmp\" and \"boards\".",
+        "type": "comment"
+    },
+    "7556": {
+        "file_id": 556,
+        "content": "/paddlevideo/modeling/framework/segment/utils.py",
+        "type": "filepath"
+    },
+    "7557": {
+        "file_id": 556,
+        "content": "This code uses PaddleVideo for video segment matching, ASPP-based deep learning models for object size determination and feature extraction, handles padding, computes distances, prepares data, performs feature selection and masking, and utilizes parallel processing in PaddlePaddle.",
+        "type": "summary"
+    },
+    "7558": {
+        "file_id": 556,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport numpy as np\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\ndef foreground2background(dis, obj_num):\n    if obj_num == 1:\n        return dis\n    bg_dis = []\n    for i in range(obj_num):\n        obj_back = []\n        for j in range(obj_num):\n            if i == j:\n                continue\n            obj_back.append(paddle.unsqueeze(dis[j], axis=0))\n        obj_back = paddle.concat(x=obj_back, axis=1)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:1-31"
+    },
+    "7559": {
+        "file_id": 556,
+        "content": "This code defines a function \"foreground2background\" that takes distance (dis) and object number (obj_num) as inputs. It returns the background distances for each foreground object when obj_num is greater than 1 by concatenating the unsqueezed distance of other objects along axis 1.",
+        "type": "comment"
+    },
+    "7560": {
+        "file_id": 556,
+        "content": "        obj_back = paddle.min(x=obj_back, axis=1, keepdim=True)\n        bg_dis.append(obj_back)\n    bg_dis = paddle.concat(x=bg_dis, axis=0)\n    return bg_dis\nWRONG_LABEL_PADDING_DISTANCE = 5e4\n#GLOBAL_DIST_MAP\ndef _pairwise_distances(x, x2, y, y2):\n    \"\"\"\n    Computes pairwise squared l2 distances between tensors x and y.\n    Args:\n    x: [n, feature_dim].\n    y: [m, feature_dim].\n    Returns:\n    d: [n, m].\n    \"\"\"\n    xs = x2\n    ys = y2\n    xs = paddle.unsqueeze(xs, axis=1)\n    ys = paddle.unsqueeze(ys, axis=0)\n    d = xs + ys - 2. * paddle.matmul(x, y, transpose_y=True)\n    return d\ndef _flattened_pairwise_distances(reference_embeddings, ref_square,\n                                  query_embeddings, query_square):\n    \"\"\"\n    Calculates flattened tensor of pairwise distances between ref and query.\n    Args:\n        reference_embeddings: [..., embedding_dim],\n          the embedding vectors for the reference frame\n        query_embeddings: [..., embedding_dim],\n          the embedding vectors for the query frames.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:32-68"
+    },
+    "7561": {
+        "file_id": 556,
+        "content": "This function calculates the pairwise squared L2 distances between tensors x and y, returns them in a matrix d. The function takes x and y as input, which are [n, feature_dim] and [m, feature_dim] respectively. It then performs matrix calculations to compute the pairwise distances and returns d, which is of size [n, m].",
+        "type": "comment"
+    },
+    "7562": {
+        "file_id": 556,
+        "content": "    Returns:\n        dists: [reference_embeddings.size / embedding_dim, query_embeddings.size / embedding_dim]\n    \"\"\"\n    dists = _pairwise_distances(query_embeddings, query_square,\n                                reference_embeddings, ref_square)\n    return dists\ndef _nn_features_per_object_for_chunk(reference_embeddings, ref_square,\n                                      query_embeddings, query_square,\n                                      wrong_label_mask):\n    \"\"\"Extracts features for each object using nearest neighbor attention.\n    Args:\n        reference_embeddings: [n_chunk, embedding_dim],\n          the embedding vectors for the reference frame.\n        query_embeddings: [m_chunk, embedding_dim],\n          the embedding vectors for the query frames.\n        wrong_label_mask: [n_objects, n_chunk],\n          the mask for pixels not used for matching.\n    Returns:\n        nn_features: A float32 tensor of nearest neighbor features of shape\n          [m_chunk, n_objects, n_chunk].\n    \"\"\"\n    if reference_embeddings.dtype == \"float16\":",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:69-92"
+    },
+    "7563": {
+        "file_id": 556,
+        "content": "This code computes pairwise distances between query and reference embeddings, then extracts features for each object using nearest neighbor attention. It takes embedding vectors for the reference frame and query frames as input, along with a mask for pixels not used for matching. The output is a tensor of nearest neighbor features shape [m_chunk, n_objects, n_chunk]. The code also checks the dtype of reference_embeddings to handle float16 data.",
+        "type": "comment"
+    },
+    "7564": {
+        "file_id": 556,
+        "content": "        wrong_label_mask = paddle.cast(wrong_label_mask, dtype=\"float16\")\n    else:\n        wrong_label_mask = paddle.cast(wrong_label_mask, dtype=\"float32\")\n    reference_embeddings_key = reference_embeddings\n    query_embeddings_key = query_embeddings\n    dists = _flattened_pairwise_distances(reference_embeddings_key, ref_square,\n                                          query_embeddings_key, query_square)\n    dists = (paddle.unsqueeze(dists, axis=1) +\n             paddle.unsqueeze(wrong_label_mask, axis=0) *\n             WRONG_LABEL_PADDING_DISTANCE)\n    features = paddle.min(dists, axis=2, keepdim=True)\n    return features\ndef _nearest_neighbor_features_per_object_in_chunks(reference_embeddings_flat,\n                                                    query_embeddings_flat,\n                                                    reference_labels_flat,\n                                                    n_chunks):\n    \"\"\"Calculates the nearest neighbor features per object in chunks to save mem.\n    Uses chunking to bound the memory use.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:93-113"
+    },
+    "7565": {
+        "file_id": 556,
+        "content": "This function calculates the nearest neighbor features per object in chunks to save memory. It takes reference embeddings, query embeddings, and reference labels as inputs. The function first casts the wrong_label_mask based on its type (float16 or float32). Then it calculates pairwise distances between reference and query embeddings. Distances for incorrect matches are set to a specific padding distance using wrong_label_mask. Finally, it returns the features by taking the minimum value across chunks in each dimension.",
+        "type": "comment"
+    },
+    "7566": {
+        "file_id": 556,
+        "content": "    Args:\n        reference_embeddings_flat: [n, embedding_dim],\n          the embedding vectors for the reference frame.\n        query_embeddings_flat: [m, embedding_dim],\n          the embedding vectors for the query frames.\n        reference_labels_flat: [n, n_objects],\n          the class labels of the reference frame.\n        n_chunks: Integer, the number of chunks to use to save memory\n          (set to 1 for no chunking).\n    Returns:\n        nn_features: [m, n_objects, n].\n    \"\"\"\n    feature_dim, embedding_dim = query_embeddings_flat.shape\n    chunk_size = int(np.ceil(float(feature_dim) / n_chunks))\n    wrong_label_mask = reference_labels_flat < 0.1\n    wrong_label_mask = paddle.transpose(x=wrong_label_mask, perm=[1, 0])\n    ref_square = paddle.sum(paddle.pow(reference_embeddings_flat, 2), axis=1)\n    query_square = paddle.sum(paddle.pow(query_embeddings_flat, 2), axis=1)\n    all_features = []\n    for n in range(n_chunks):\n        if n_chunks == 1:\n            query_embeddings_flat_chunk = query_embeddings_flat",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:114-138"
+    },
+    "7567": {
+        "file_id": 556,
+        "content": "This function computes the features for a set of query frames against a reference frame. It takes in embedding vectors for reference and query frames, as well as their respective class labels. The function uses chunking to handle large feature dimensions, with the number of chunks adjustable by the user. It returns a tensor of shape [m, n_objects, n] which represents the features for each query frame.",
+        "type": "comment"
+    },
+    "7568": {
+        "file_id": 556,
+        "content": "            query_square_chunk = query_square\n            chunk_start = 0\n        else:\n            chunk_start = n * chunk_size\n            chunk_end = (n + 1) * chunk_size\n            query_square_chunk = query_square[chunk_start:chunk_end]\n            if query_square_chunk.shape[0] == 0:\n                continue\n            query_embeddings_flat_chunk = query_embeddings_flat[\n                chunk_start:chunk_end]\n        features = _nn_features_per_object_for_chunk(\n            reference_embeddings_flat, ref_square, query_embeddings_flat_chunk,\n            query_square_chunk, wrong_label_mask)\n        all_features.append(features)\n    if n_chunks == 1:\n        nn_features = all_features[0]\n    else:\n        nn_features = paddle.concat(all_features, axis=0)\n    return nn_features\ndef global_matching(reference_embeddings,\n                    query_embeddings,\n                    reference_labels,\n                    n_chunks=100,\n                    dis_bias=0.,\n                    ori_size=None,\n                    atrous_rate=1,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:139-167"
+    },
+    "7569": {
+        "file_id": 556,
+        "content": "This function is performing global matching on query embeddings and reference embeddings. It breaks down the embeddings into chunks, calculates features for each chunk, and concatenates these features to get the final nn_features. The number of chunks is determined by n_chunks, which default to 100. If n_chunks = 1, it returns the features from the only chunk.",
+        "type": "comment"
+    },
+    "7570": {
+        "file_id": 556,
+        "content": "                    use_float16=True,\n                    atrous_obj_pixel_num=0):\n    \"\"\"\n    Calculates the distance to the nearest neighbor per object.\n    For every pixel of query_embeddings calculate the distance to the\n    nearest neighbor in the (possibly subsampled) reference_embeddings per object.\n    Args:\n        reference_embeddings: [height, width, embedding_dim],\n          the embedding vectors for the reference frame.\n        query_embeddings: [height, width,\n          embedding_dim], the embedding vectors for the query frames.\n        reference_labels: [height, width, obj_nums],\n          the class labels of the reference frame.\n        n_chunks: Integer, the number of chunks to use to save memory\n          (set to 1 for no chunking).\n        dis_bias: [n_objects], foreground and background bias\n        ori_size: (ori_height, ori_width),\n          the original spatial size. If \"None\", (ori_height, ori_width) = (height, width).\n        atrous_rate: Integer, the atrous rate of reference_embeddings.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:168-186"
+    },
+    "7571": {
+        "file_id": 556,
+        "content": "This code calculates the distance to the nearest neighbor per object for query_embeddings and reference_embeddings, given class labels and other parameters. It uses chunks to save memory and takes into account the atrous rate of reference_embeddings.",
+        "type": "comment"
+    },
+    "7572": {
+        "file_id": 556,
+        "content": "        use_float16: Bool, if \"True\", use float16 type for matching.\n    Returns:\n        nn_features: [1, ori_height, ori_width, n_objects, feature_dim].\n    \"\"\"\n    assert (reference_embeddings.shape[:2] == reference_labels.shape[:2])\n    if use_float16:\n        query_embeddings = paddle.cast(query_embeddings, dtype=\"float16\")\n        reference_embeddings = paddle.cast(reference_embeddings,\n                                           dtype=\"float16\")\n    h, w, embedding_dim = query_embeddings.shape\n    obj_nums = reference_labels.shape[2]\n    if atrous_rate > 1:\n        h_pad = (atrous_rate - h % atrous_rate) % atrous_rate\n        w_pad = (atrous_rate - w % atrous_rate) % atrous_rate\n        selected_points = paddle.zeros([h + h_pad, w + w_pad])\n        selected_points = selected_points.view(\n            (h + h_pad) // atrous_rate, atrous_rate, (w + w_pad) // atrous_rate,\n            atrous_rate)\n        selected_points[:, 0, :, 0] = 1.\n        selected_points = paddle.reshape(selected_points,\n                                         [h + h_pad, w + w_pad, 1])[:h, :w]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:187-209"
+    },
+    "7573": {
+        "file_id": 556,
+        "content": "This code snippet calculates and pads the selected points for spatial pyramid pooling in a segmentation model. It checks if float16 is used, then prepares padding based on the atrous rate. The resulting tensor of selected points is reshaped to match the input shape before returning it.",
+        "type": "comment"
+    },
+    "7574": {
+        "file_id": 556,
+        "content": "        is_big_obj = (paddle.sum(\n            reference_labels,\n            axis=(0, 1))) > (atrous_obj_pixel_num * atrous_rate**2)\n        reference_labels[:, :,\n                         is_big_obj] = reference_labels[:, :,\n                                                        is_big_obj] * selected_points\n    reference_embeddings_flat = paddle.reshape(reference_embeddings,\n                                               [-1, embedding_dim])\n    reference_labels_flat = paddle.reshape(reference_labels, [-1, obj_nums])\n    query_embeddings_flat = paddle.reshape(query_embeddings,\n                                           [-1, embedding_dim])\n    all_ref_fg = paddle.sum(reference_labels_flat, axis=1, keepdim=True) > 0.9\n    reference_labels_flat = paddle.reshape(\n        paddle.masked_select(reference_labels_flat,\n                             paddle.expand(all_ref_fg, [-1, obj_nums])),\n        [-1, obj_nums])\n    if reference_labels_flat.shape[0] == 0:\n        return paddle.ones([1, h, w, obj_nums, 1])\n    reference_embeddings_flat = paddle.reshape(",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:210-230"
+    },
+    "7575": {
+        "file_id": 556,
+        "content": "The code is implementing a segmentation method in the PaddleVideo library. It first determines if an object is big or small based on the sum of reference labels. Then, it reshapes the reference embeddings and labels for further processing. It checks if any reference labels are present and returns default values if none are found.",
+        "type": "comment"
+    },
+    "7576": {
+        "file_id": 556,
+        "content": "        paddle.masked_select(reference_embeddings_flat,\n                             paddle.expand(all_ref_fg, [-1, embedding_dim])),\n        [-1, embedding_dim])\n    nn_features = _nearest_neighbor_features_per_object_in_chunks(\n        reference_embeddings_flat, query_embeddings_flat, reference_labels_flat,\n        n_chunks)\n    nn_features_reshape = paddle.reshape(nn_features, [1, h, w, obj_nums, 1])\n    nn_features_reshape = (\n        F.sigmoid(nn_features_reshape +\n                  paddle.reshape(dis_bias, [1, 1, 1, -1, 1])) - 0.5) * 2\n    #TODO: ori_size is not None\n    if use_float16:\n        nn_features_reshape = paddle.cast(nn_features_reshape, dtype=\"float32\")\n    return nn_features_reshape\ndef global_matching_for_eval(all_reference_embeddings,\n                             query_embeddings,\n                             all_reference_labels,\n                             n_chunks=20,\n                             dis_bias=0.,\n                             ori_size=None,\n                             atrous_rate=1,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:231-257"
+    },
+    "7577": {
+        "file_id": 556,
+        "content": "This function performs nearest neighbor feature extraction for video segment matching using reference and query embeddings, reference labels, and other parameters such as number of chunks, displacement bias, original size, and atrous rate. It returns the normalized nearest neighbor features in a reshaped format.",
+        "type": "comment"
+    },
+    "7578": {
+        "file_id": 556,
+        "content": "                             use_float16=True,\n                             atrous_obj_pixel_num=0):\n    \"\"\"\n    Calculates the distance to the nearest neighbor per object.\n    For every pixel of query_embeddings calculate the distance to the\n    nearest neighbor in the (possibly subsampled) reference_embeddings per object.\n    Args:\n        all_reference_embeddings: A list of reference_embeddings,\n          each with size [height, width, embedding_dim],\n          the embedding vectors for the reference frame.\n        query_embeddings: [n_query_images, height, width,\n          embedding_dim], the embedding vectors for the query frames.\n        all_reference_labels: A list of reference_labels,\n          each with size [height, width, obj_nums],\n          the class labels of the reference frame.\n        n_chunks: Integer, the number of chunks to use to save memory\n          (set to 1 for no chunking).\n        dis_bias: [n_objects], foreground and background bias\n        ori_size: (ori_height, ori_width),\n          the original spatial size. If \"None\", (ori_height, ori_width) = (height, width).",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:258-277"
+    },
+    "7579": {
+        "file_id": 556,
+        "content": "This code calculates the distance to the nearest neighbor per object for query embeddings in a list of reference embeddings, considering potentially subsampled frames. It takes query_embeddings of size [n_query_images, height, width, embedding_dim], all_reference_embeddings and all_reference_labels lists with size [height, width, obj_nums] each, n_chunks, dis_bias, and ori_size as input arguments.",
+        "type": "comment"
+    },
+    "7580": {
+        "file_id": 556,
+        "content": "        atrous_rate: Integer, the atrous rate of reference_embeddings.\n        use_float16: Bool, if \"True\", use float16 type for matching.\n    Returns:\n        nn_features: [n_query_images, ori_height, ori_width, n_objects, feature_dim].\n    \"\"\"\n    h, w, embedding_dim = query_embeddings.shape\n    obj_nums = all_reference_labels[0].shape[2]\n    all_reference_embeddings_flat = []\n    all_reference_labels_flat = []\n    ref_num = len(all_reference_labels)\n    n_chunks *= ref_num\n    if atrous_obj_pixel_num > 0:\n        if atrous_rate > 1:\n            h_pad = (atrous_rate - h % atrous_rate) % atrous_rate\n            w_pad = (atrous_rate - w % atrous_rate) % atrous_rate\n            selected_points = paddle.zeros([h + h_pad, w + w_pad])\n            selected_points = paddle.reshape(\n                selected_points, [(h + h_pad) // atrous_rate, atrous_rate,\n                                  (w + w_pad) // atrous_rate, atrous_rate])\n            selected_points[:, 0, :, 0] = 1.\n            selected_points = paddle.reshape(selected_points,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:278-299"
+    },
+    "7581": {
+        "file_id": 556,
+        "content": "This function is responsible for creating a tensor of reference embeddings and labels for a given set of query embeddings, based on the provided atrous rate. The function first calculates the shape of the input tensors, then initializes empty lists for flat versions of reference embeddings and labels. It then determines the padding needed to match the atrous rate, creates a selection matrix with ones at the selected points, and reshapes it according to the atrous rate. Finally, it prepares the tensor for matching by flattening the reference embeddings and labels lists.",
+        "type": "comment"
+    },
+    "7582": {
+        "file_id": 556,
+        "content": "                                             [h + h_pad, w + w_pad, 1])[:h, :w]\n        for reference_embeddings, reference_labels, idx in zip(\n                all_reference_embeddings, all_reference_labels, range(ref_num)):\n            if atrous_rate > 1:\n                is_big_obj = paddle.sum(\n                    reference_labels,\n                    axis=(0, 1)) > (atrous_obj_pixel_num * atrous_rate**2)\n                is_big_obj = list(np.array(is_big_obj))\n                for j in range(len(is_big_obj)):\n                    if is_big_obj[j] == True:\n                        reference_labels[:, :, j:j +\n                                         1] = reference_labels[:, :, j:j +\n                                                               1] * selected_points\n            reference_embeddings_flat = paddle.reshape(reference_embeddings,\n                                                       [-1, embedding_dim])\n            reference_labels_flat = paddle.reshape(reference_labels,\n                                                   [-1, obj_nums])",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:300-318"
+    },
+    "7583": {
+        "file_id": 556,
+        "content": "This code segment appears to be a part of image segmentation or object detection algorithm. It processes reference embeddings and labels, potentially for each detected object in the image. The atrous rate determines if an object is big or small, with larger objects being processed separately by multiplying selected points to corresponding regions in reference_labels. The embeddings are flattened into 1D arrays, as well as reference_labels.",
+        "type": "comment"
+    },
+    "7584": {
+        "file_id": 556,
+        "content": "            all_reference_embeddings_flat.append(reference_embeddings_flat)\n            all_reference_labels_flat.append(reference_labels_flat)\n        reference_embeddings_flat = paddle.concat(\n            x=all_reference_embeddings_flat, axis=0)\n        reference_labels_flat = paddle.concat(x=all_reference_labels_flat,\n                                              axis=0)\n    else:\n        if ref_num == 1:\n            reference_embeddings, reference_labels = all_reference_embeddings[\n                0], all_reference_labels[0]\n            if atrous_rate > 1:\n                h_pad = (atrous_rate - h % atrous_rate) % atrous_rate\n                w_pad = (atrous_rate - w % atrous_rate) % atrous_rate\n                if h_pad > 0 or w_pad > 0:\n                    reference_embeddings = F.pad(reference_embeddings,\n                                                 [0, h_pad, 0, w_pad, 0, 0])\n                    reference_labels = F.pad(reference_labels,\n                                             [0, h_pad, 0, w_pad, 0, 0])",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:320-338"
+    },
+    "7585": {
+        "file_id": 556,
+        "content": "The code concatenates reference embeddings and labels, then pads them if necessary based on the atrous rate. If there is only one reference, it directly selects the first item from all_reference_embeddings and all_reference_labels lists.",
+        "type": "comment"
+    },
+    "7586": {
+        "file_id": 556,
+        "content": "                reference_embeddings = paddle.reshape(\n                    reference_embeddings,\n                    [(h + h_pad) // atrous_rate, atrous_rate,\n                     (w + w_pad) // atrous_rate, atrous_rate, 32])\n                reference_labels = paddle.reshape(\n                    reference_labels,\n                    [(h + h_pad) // atrous_rate, atrous_rate,\n                     (w + w_pad) // atrous_rate, atrous_rate, -1])\n                reference_embeddings = paddle.reshape(\n                    reference_embeddings[:, 0, :, 0, :],\n                    reference_embeddings[:, 0, :, 0, :].shape)\n                reference_labels = paddle.reshape(\n                    reference_labels[:, 0, :, 0, :],\n                    reference_labels[:, 0, :, 0, :].shape)\n            reference_embeddings_flat = paddle.reshape(reference_embeddings,\n                                                       [-1, embedding_dim])\n            reference_labels_flat = paddle.reshape(reference_labels,\n                                                   [-1, obj_nums])",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:339-356"
+    },
+    "7587": {
+        "file_id": 556,
+        "content": "This code reshapes the reference embeddings and labels to match a specific pattern, then flattens the reference embeddings while preserving their data type and shape.",
+        "type": "comment"
+    },
+    "7588": {
+        "file_id": 556,
+        "content": "        else:\n            for reference_embeddings, reference_labels, idx in zip(\n                    all_reference_embeddings, all_reference_labels,\n                    range(ref_num)):\n                if atrous_rate > 1:\n                    h_pad = (atrous_rate - h % atrous_rate) % atrous_rate\n                    w_pad = (atrous_rate - w % atrous_rate) % atrous_rate\n                    if h_pad > 0 or w_pad > 0:\n                        reference_embeddings = F.pad(reference_embeddings,\n                                                     [0, h_pad, 0, w_pad, 0, 0])\n                        reference_labels = F.pad(reference_labels,\n                                                 [0, h_pad, 0, w_pad, 0, 0])\n                    reference_embeddings = paddle.reshape(\n                        reference_embeddings,\n                        [(h + h_pad) // atrous_rate, atrous_rate,\n                         (w + w_pad) // atrous_rate, atrous_rate, -1])\n                    reference_labels = paddle.reshape(\n                        reference_labels,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:357-375"
+    },
+    "7589": {
+        "file_id": 556,
+        "content": "This code segment handles the case where atrous_rate is greater than 1. It pads reference embeddings and labels if needed, then reshapes them to have a shape compatible with Atrous Spatial Pyramid Pooling (ASPP) in deep learning models for image classification or detection tasks.",
+        "type": "comment"
+    },
+    "7590": {
+        "file_id": 556,
+        "content": "                        [(h + h_pad) // atrous_rate, atrous_rate,\n                         (w + w_pad) // atrous_rate, atrous_rate, -1])\n                    reference_embeddings = paddle.reshape(\n                        reference_embeddings[:, 0, :, 0, :],\n                        reference_embeddings[:, 0, :, 0, :].shape)\n                    reference_labels = paddle.reshape(\n                        reference_labels[:, 0, :, 0, :],\n                        reference_labels[:, 0, :, 0, :].shape)\n                reference_embeddings_flat = paddle.reshape(\n                    reference_embeddings, [-1, embedding_dim])\n                reference_labels_flat = paddle.reshape(reference_labels,\n                                                       [-1, obj_nums])\n                all_reference_embeddings_flat.append(reference_embeddings_flat)\n                all_reference_labels_flat.append(reference_labels_flat)\n            reference_embeddings_flat = paddle.concat(\n                all_reference_embeddings_flat, axis=0)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:376-394"
+    },
+    "7591": {
+        "file_id": 556,
+        "content": "This code reshapes the reference embeddings and labels into a flattened format, appends them to lists, and then concatenates all the flattened reference embeddings along axis 0. This is likely for use in a deep learning model that requires the data in this specific format for training or prediction.",
+        "type": "comment"
+    },
+    "7592": {
+        "file_id": 556,
+        "content": "            reference_labels_flat = paddle.concat(all_reference_labels_flat,\n                                                  axis=0)\n    query_embeddings_flat = paddle.reshape(query_embeddings,\n                                           [-1, embedding_dim])\n    all_ref_fg = paddle.sum(reference_labels_flat, axis=1, keepdim=True) > 0.9\n    reference_labels_flat = paddle.reshape(\n        paddle.masked_select(reference_labels_flat,\n                             paddle.expand(all_ref_fg, [-1, obj_nums])),\n        [-1, obj_nums])\n    if reference_labels_flat.shape[0] == 0:\n        return paddle.ones([1, h, w, obj_nums, 1])\n    reference_embeddings_flat = paddle.reshape(\n        paddle.masked_select(reference_embeddings_flat,\n                             paddle.expand(all_ref_fg, [-1, embedding_dim])),\n        [-1, embedding_dim])\n    if use_float16:\n        query_embeddings_flat = paddle.cast(query_embeddings_flat,\n                                            dtype=\"float16\")\n        reference_embeddings_flat = paddle.cast(reference_embeddings_flat,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:395-415"
+    },
+    "7593": {
+        "file_id": 556,
+        "content": "This code segment performs feature selection and reshaping of query and reference embeddings for the segment matching process. It concatenates all reference labels, flattens the query embeddings, masks the selected reference labels and embeddings based on a threshold, and finally reshapes them before returning a tensor of ones if no references are found or casting the embeddings to float16 datatype if specified.",
+        "type": "comment"
+    },
+    "7594": {
+        "file_id": 556,
+        "content": "                                                dtype=\"float16\")\n    nn_features = _nearest_neighbor_features_per_object_in_chunks(\n        reference_embeddings_flat, query_embeddings_flat, reference_labels_flat,\n        n_chunks)\n    nn_features_reshape = paddle.reshape(nn_features, [1, h, w, obj_nums, 1])\n    nn_features_reshape = (\n        F.sigmoid(nn_features_reshape +\n                  paddle.reshape(dis_bias, [1, 1, 1, -1, 1])) - 0.5) * 2\n    # TODO: ori_size is not None\n    if use_float16:\n        nn_features_reshape = paddle.cast(nn_features_reshape, dtype=\"float32\")\n    return nn_features_reshape\n#LOCAL_DIST_MAP\ndef local_pairwise_distances(x,\n                             y,\n                             max_distance=9,\n                             atrous_rate=1,\n                             allow_downsample=False):\n    \"\"\"Computes pairwise squared l2 distances using a local search window.\n        Use for-loop for saving memory.\n    Args:\n        x: Float32 tensor of shape [height, width, feature_dim].",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:416-442"
+    },
+    "7595": {
+        "file_id": 556,
+        "content": "This code calculates pairwise squared L2 distances using a local search window, and then computes the nearest neighbor features for each object in image chunks. The result is reshaped into an appropriate format and can be used for further processing or analysis.",
+        "type": "comment"
+    },
+    "7596": {
+        "file_id": 556,
+        "content": "        y: Float32 tensor of shape [height, width, feature_dim].\n        max_distance: Integer, the maximum distance in pixel coordinates\n          per dimension which is considered to be in the search window.\n        atrous_rate: Integer, the atrous rate of local matching.\n        allow_downsample: Bool, if \"True\", downsample x and y\n          with a stride of 2.\n    Returns:\n        Float32 distances tensor of shape [height, width, (2 * max_distance + 1) ** 2].\n    \"\"\"\n    if allow_downsample:\n        ori_height = x.shape[0]\n        ori_width = x.shape[1]\n        x = paddle.unsqueeze(paddle.transpose(x, [2, 0, 1]), axis=0)\n        y = paddle.unsqueeze(paddle.transpose(y, [2, 0, 1]), axis=0)\n        down_size = (int(ori_height / 2) + 1, int(ori_width / 2) + 1)\n        x = F.interpolate(x,\n                          size=down_size,\n                          mode='bilinear',\n                          align_corners=True)\n        y = F.interpolate(y,\n                          size=down_size,\n                          mode='bilinear',",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:443-464"
+    },
+    "7597": {
+        "file_id": 556,
+        "content": "This function takes in a tensor 'x' and 'y', along with parameters such as max_distance, atrous_rate, and allow_downsample. It returns a distances tensor of shape [height, width, (2 * max_distance + 1) ** 2]. If downsampling is allowed, the original height and width are saved and the tensors 'x' and 'y' are reshaped. Then, using bilinear interpolation, 'x' and 'y' are downsampled to half their size while preserving values at borders.",
+        "type": "comment"
+    },
+    "7598": {
+        "file_id": 556,
+        "content": "                          align_corners=True)\n        x = paddle.unsqueeze(paddle.transpose(x, [1, 2, 0]), axis=0)\n        y = paddle.unsqueeze(paddle.transpose(y, [1, 2, 0]), axis=0)\n    pad_max_distance = max_distance - max_distance % atrous_rate\n    # no change pad\n    padded_y = F.pad(y, (0, 0, pad_max_distance, pad_max_distance,\n                         pad_max_distance, pad_max_distance),\n                     value=WRONG_LABEL_PADDING_DISTANCE)\n    height, width, _ = x.shape\n    dists = []\n    for y in range(2 * pad_max_distance // atrous_rate + 1):\n        y_start = y * atrous_rate\n        y_end = y_start + height\n        y_slice = padded_y[y_start:y_end]\n        for x in range(2 * max_distance + 1):\n            x_start = x * atrous_rate\n            x_end = x_start + width\n            offset_y = y_slice[:, x_start:x_end]\n            dist = paddle.sum(paddle.pow((x - offset_y), 2), axis=2)\n            dists.append(dist)\n    dists = paddle.stack(dists, axis=2)\n    return dists\ndef local_pairwise_distances_parallel(x,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:465-492"
+    },
+    "7599": {
+        "file_id": 556,
+        "content": "This code computes local pairwise distances between the input tensors x and y, accounting for atrous dilation. It first pads y with wrong label padding distance to match the size of x. Then it loops through the range of possible offsets for each pixel and calculates the sum of squared differences between the current pixel and all potential offsets in y. These distances are then stacked along the channel axis before being returned.",
+        "type": "comment"
+    }
+}

@@ -1,0 +1,544 @@
+{
+    "3800": {
+        "file_id": 321,
+        "content": "        test_indices = np.hstack((test_indices, temp)).astype(np.int)\n        # Get indices of training data\n        for train_id in train_ids:\n            temp = np.where(camera == train_id)[0]  # 0-based index\n            train_indices = np.hstack((train_indices, temp)).astype(np.int)\n    return train_indices, test_indices\nif __name__ == '__main__':\n    camera = np.loadtxt(camera_file, dtype=np.int)  # camera id: 1, 2, 3\n    performer = np.loadtxt(performer_file, dtype=np.int)  # subject id: 1~40\n    label = np.loadtxt(label_file, dtype=np.int) - 1  # action label: 0~59\n    frames_cnt = np.loadtxt(frames_file, dtype=np.int)  # frames_cnt\n    skes_name = np.loadtxt(skes_name_file, dtype=np.string_)\n    with open(raw_skes_joints_pkl, 'rb') as fr:\n        skes_joints = pickle.load(fr)  # a list\n    skes_joints = seq_translation(skes_joints)\n    skes_joints = align_frames(skes_joints,\n                               frames_cnt)  # aligned to the same frame length\n    evaluations = ['xview', 'xsub']\n    for evaluation in evaluations:",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/seq_transformation.py:236-263"
+    },
+    "3801": {
+        "file_id": 321,
+        "content": "Code reads camera, performer, label, and frames_cnt from respective files. It loads skes_name and skes_joints data from file using pickle. Applies seq_translation and align_frames to skes_joints. Creates test_indices and train_ids by filtering camera ids. Returns train_indices and test_indices.",
+        "type": "comment"
+    },
+    "3802": {
+        "file_id": 321,
+        "content": "        split_dataset(skes_name, skes_joints, label, performer, camera,\n                      evaluation, save_path)\n    print('Done!')",
+        "type": "code",
+        "location": "/data/ntu-rgb-d/seq_transformation.py:264-266"
+    },
+    "3803": {
+        "file_id": 321,
+        "content": "The code is calling the \"split_dataset\" function to process data, likely dividing it into training and testing sets. The input parameters include various file names, labels, performers, cameras, evaluation criteria, and a save path. Once completed, it prints 'Done!'.",
+        "type": "comment"
+    },
+    "3804": {
+        "file_id": 322,
+        "content": "/deploy/cpp_infer/external-cmake/auto-log.cmake",
+        "type": "filepath"
+    },
+    "3805": {
+        "file_id": 322,
+        "content": "This code is used to find and include the Git package, declare an external project named \"extern_Autolog\" using FetchContent, set its base directory, specify the repository URL and tag, and finally make the external project available for use.",
+        "type": "summary"
+    },
+    "3806": {
+        "file_id": 322,
+        "content": "find_package(Git REQUIRED)\ninclude(FetchContent)\nset(FETCHCONTENT_BASE_DIR \"${CMAKE_CURRENT_BINARY_DIR}/third-party\")\nFetchContent_Declare(\n  extern_Autolog\n  PREFIX autolog\n  GIT_REPOSITORY https://github.com/LDOUBLEV/AutoLog.git\n  GIT_TAG        main\n)\nFetchContent_MakeAvailable(extern_Autolog)",
+        "type": "code",
+        "location": "/deploy/cpp_infer/external-cmake/auto-log.cmake:1-12"
+    },
+    "3807": {
+        "file_id": 322,
+        "content": "This code is used to find and include the Git package, declare an external project named \"extern_Autolog\" using FetchContent, set its base directory, specify the repository URL and tag, and finally make the external project available for use.",
+        "type": "comment"
+    },
+    "3808": {
+        "file_id": 323,
+        "content": "/deploy/cpp_infer/include/postprocess_op.h",
+        "type": "filepath"
+    },
+    "3809": {
+        "file_id": 323,
+        "content": "This code defines a Softmax class with an Inplace_Run method that applies softmax function in-place to iterator ranges of float vectors. The code also includes a virtual function for postprocessing operations in the PaddleVideo library.",
+        "type": "summary"
+    },
+    "3810": {
+        "file_id": 323,
+        "content": "// Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\");\n// you may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n#pragma once\n#include \"opencv2/core.hpp\"\n#include \"opencv2/imgcodecs.hpp\"\n#include \"opencv2/imgproc.hpp\"\n#include <chrono>\n#include <iomanip>\n#include <iostream>\n#include <ostream>\n#include <vector>\n#include <cstring>\n#include <fstream>\n#include <numeric>\n#include \"include/utility.h\"\nnamespace PaddleVideo\n{\n    class Softmax\n    {\n    public:\n        virtual void Inplace_Run(const std::vector<float>::iterator &_begin, const std::vector<float>::iterator &_end);",
+        "type": "code",
+        "location": "/deploy/cpp_infer/include/postprocess_op.h:1-39"
+    },
+    "3811": {
+        "file_id": 323,
+        "content": "This code defines a class Softmax that contains a method Inplace_Run. The method takes an iterator range of a vector of floats and applies softmax function in-place to the values within this range.",
+        "type": "comment"
+    },
+    "3812": {
+        "file_id": 323,
+        "content": "        virtual std::vector<float> Run(const std::vector<float>::iterator &_begin, const std::vector<float>::iterator &_end);\n    };\n} // namespace PaddleVideo",
+        "type": "code",
+        "location": "/deploy/cpp_infer/include/postprocess_op.h:40-43"
+    },
+    "3813": {
+        "file_id": 323,
+        "content": "This code defines a virtual function that takes in two iterators to a vector of floats and returns a vector of floats as output. It is part of the PaddleVideo library's postprocessing operation namespace.",
+        "type": "comment"
+    },
+    "3814": {
+        "file_id": 324,
+        "content": "/deploy/cpp_infer/include/preprocess_op.h",
+        "type": "filepath"
+    },
+    "3815": {
+        "file_id": 324,
+        "content": "This code defines the Normalize class for image normalization, along with several preprocessing operation classes like Permute, Scale, CenterCrop, and TenCrop, which can be used in PaddleVideo library for preparing images before inference.",
+        "type": "summary"
+    },
+    "3816": {
+        "file_id": 324,
+        "content": "// Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\");\n// you may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n#pragma once\n#include \"opencv2/core.hpp\"\n#include \"opencv2/imgcodecs.hpp\"\n#include \"opencv2/imgproc.hpp\"\n#include <chrono>\n#include <iomanip>\n#include <iostream>\n#include <ostream>\n#include <vector>\n#include <cstring>\n#include <fstream>\n#include <numeric>\nusing namespace std;\nusing namespace paddle;\nnamespace PaddleVideo\n{\n    class Normalize\n    {\n    public:\n        virtual void Run(cv::Mat *im, const std::vector<float> &mean,",
+        "type": "code",
+        "location": "/deploy/cpp_infer/include/preprocess_op.h:1-39"
+    },
+    "3817": {
+        "file_id": 324,
+        "content": "This code defines a class called Normalize with a Run method that takes in an input image and a vector of means for normalization. It is part of the PaddleVideo library, which likely uses OpenCV for image processing tasks.",
+        "type": "comment"
+    },
+    "3818": {
+        "file_id": 324,
+        "content": "                         const std::vector<float> &scale, const bool is_scale = true);\n    };\n    // RGB -> CHW\n    class Permute\n    {\n    public:\n        virtual void Run(const cv::Mat *img, float *data);\n    };\n    class Scale\n    {\n    public:\n        virtual void Run(const cv::Mat &img, cv::Mat &resize_img,\n                         bool use_tensorrt = false,\n                         const int &short_size = 256);\n    };\n    class CenterCrop\n    {\n    public:\n        virtual void Run(const cv::Mat &img, cv::Mat &crop_img,\n                         bool use_tensorrt = false,\n                         const int &target_size = 224);\n    };\n    class TenCrop\n    {\n    public:\n        virtual void Run(const cv::Mat &img, std::vector<cv::Mat> &crop_frames,\n                         const int &begin_index,\n                         bool use_tensorrt = false,\n                         const int &target_size = 224);\n    };\n} // namespace PaddleVideo",
+        "type": "code",
+        "location": "/deploy/cpp_infer/include/preprocess_op.h:40-74"
+    },
+    "3819": {
+        "file_id": 324,
+        "content": "The code defines several classes representing image preprocessing operations, including Permute for changing RGB to CHW format, Scale for resizing images, CenterCrop for cropping images to a specific size, and TenCrop for splitting an image into multiple crops. These classes can be used in the PaddleVideo library for preparing images before running inference with deep learning models.",
+        "type": "comment"
+    },
+    "3820": {
+        "file_id": 325,
+        "content": "/deploy/cpp_infer/include/utility.h",
+        "type": "filepath"
+    },
+    "3821": {
+        "file_id": 325,
+        "content": "This class offers static methods to read dictionary files and perform utility operations related to PaddleVideo, including functions for file handling, image manipulation, value indexing, and frame sampling.",
+        "type": "summary"
+    },
+    "3822": {
+        "file_id": 325,
+        "content": "// Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\");\n// you may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n#pragma once\n#include <chrono>\n#include <iomanip>\n#include <iostream>\n#include <ostream>\n#include <stdlib.h>\n#include <vector>\n#include <algorithm>\n#include <cstring>\n#include <fstream>\n#include <numeric>\n#include \"opencv2/core.hpp\"\n#include \"opencv2/imgcodecs.hpp\"\n#include \"opencv2/imgproc.hpp\"\n#include \"opencv2/opencv.hpp\"\nnamespace PaddleVideo\n{\n    class Utility\n    {\n    public:\n        static std::vector<std::string> ReadDict(const std::string &path);",
+        "type": "code",
+        "location": "/deploy/cpp_infer/include/utility.h:1-40"
+    },
+    "3823": {
+        "file_id": 325,
+        "content": "Utility class for PaddleVideo containing static methods to read dictionary files and perform various utility operations.",
+        "type": "comment"
+    },
+    "3824": {
+        "file_id": 325,
+        "content": "        static void GetAllFiles(const char *dir_name, std::vector<std::string> &all_inputs);\n        static cv::Mat GetRotateCropImage(const cv::Mat &srcimage, std::vector<std::vector<int>> box);\n        template <class ForwardIterator> inline static size_t argmax(ForwardIterator first, ForwardIterator last)\n        {\n            return std::distance(first, std::max_element(first, last));\n        }\n        static std::vector<cv::Mat> SampleFramesFromVideo(const std::string &VideoPath, const int &num_seg, const int &seg_len);\n    };\n} // namespace PaddleVideo",
+        "type": "code",
+        "location": "/deploy/cpp_infer/include/utility.h:42-54"
+    },
+    "3825": {
+        "file_id": 325,
+        "content": "The code contains several utility functions. It has a function to get all files in a directory, another for rotating and cropping images based on bounding boxes, a template function for finding the index of maximum value in a range, and one for sampling frames from a video file. All these belong to the PaddleVideo namespace.",
+        "type": "comment"
+    },
+    "3826": {
+        "file_id": 326,
+        "content": "/deploy/cpp_infer/include/video_rec.h",
+        "type": "filepath"
+    },
+    "3827": {
+        "file_id": 326,
+        "content": "This code includes necessary headers for OpenCV and PaddlePaddle integration, defines operations like pre-processing, post-processing, and utility functions. The class creates a VideoRecognizer object with initialization variables, initializing the model and operation objects for inference steps.",
+        "type": "summary"
+    },
+    "3828": {
+        "file_id": 326,
+        "content": "// Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\");\n// you may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n#pragma once\n#include \"opencv2/core.hpp\"\n#include \"opencv2/imgcodecs.hpp\"\n#include \"opencv2/imgproc.hpp\"\n#include \"paddle_api.h\"\n#include \"paddle_inference_api.h\"\n#include <chrono>\n#include <iomanip>\n#include <iostream>\n#include <ostream>\n#include <vector>\n#include <cstring>\n#include <fstream>\n#include <numeric>\n#include <include/postprocess_op.h>\n#include <include/preprocess_op.h>\n#include <include/utility.h>",
+        "type": "code",
+        "location": "/deploy/cpp_infer/include/video_rec.h:1-34"
+    },
+    "3829": {
+        "file_id": 326,
+        "content": "This code is licensing information and includes necessary headers for OpenCV and PaddlePaddle API integration. It defines various operations such as pre-processing, post-processing, utility functions, and possibly some video recording functionality using the PaddlePaddle library.",
+        "type": "comment"
+    },
+    "3830": {
+        "file_id": 326,
+        "content": "using namespace paddle_infer;\nnamespace PaddleVideo\n{\n    class VideoRecognizer\n    {\n    public:\n        explicit VideoRecognizer(const std::string &model_dir, const std::string &inference_model_name, const bool &use_gpu, const int &num_seg,\n                                 const int &rec_batch_num, const int &gpu_id,\n                                 const int &gpu_mem, const int &cpu_math_library_num_threads,\n                                 const bool &use_mkldnn, const std::string &label_path,\n                                 const bool &use_tensorrt, const std::string &precision, const std::vector<float> &_mean = {0.406, 0.456, 0.485},\n                                 const std::vector<float> &_scale = {0.225, 0.224, 0.229})\n        {\n            this->inference_model_name = inference_model_name;\n            this->use_gpu_ = use_gpu;\n            this->num_seg = num_seg;\n            this->rec_batch_num = rec_batch_num;\n            this->gpu_id_ = gpu_id;\n            this->gpu_mem_ = gpu_mem;\n            this->cpu_math_library_num_threads_ = cpu_math_library_num_threads;",
+        "type": "code",
+        "location": "/deploy/cpp_infer/include/video_rec.h:36-57"
+    },
+    "3831": {
+        "file_id": 326,
+        "content": "This class is for creating a VideoRecognizer object, which initializes variables such as the model directory, inference model name, use of GPU, number of segments, recording batch number, GPU ID, GPU memory, CPU math library threads, use of MKLDNN, label path, and optionally sets mean and scale values for image preprocessing.",
+        "type": "comment"
+    },
+    "3832": {
+        "file_id": 326,
+        "content": "            this->use_mkldnn_ = use_mkldnn;\n            this->use_tensorrt_ = use_tensorrt;\n            this->precision_ = precision;\n            this->mean_ = _mean;\n            this->scale_ = _scale;\n            this->label_list_ = Utility::ReadDict(label_path);\n            LoadModel(model_dir);\n        }\n        // Load Paddle inference model\n        void LoadModel(const std::string &model_dir);\n        void Run(const std::vector<string> &frames_batch_path, const std::vector<std::vector<cv::Mat> > &frames_batch, std::vector<double> *times);\n    private:\n        std::string inference_model_name;\n        std::shared_ptr<Predictor> predictor_;\n        bool use_gpu_ = false;\n        int gpu_id_ = 0;\n        int rec_batch_num = 1;\n        int gpu_mem_ = 4000;\n        int cpu_math_library_num_threads_ = 4;\n        bool use_mkldnn_ = false;\n        int num_seg = 8;\n        std::vector<std::string> label_list_;\n        std::vector<float> mean_ = {0.406, 0.456, 0.485};\n        std::vector<float> scale_ = {0.225, 0.224, 0.229};",
+        "type": "code",
+        "location": "/deploy/cpp_infer/include/video_rec.h:58-86"
+    },
+    "3833": {
+        "file_id": 326,
+        "content": "This function initializes the video recognition class, sets member variables for model type (use_mkldnn_, use_tensorrt_), precision, mean values, scale values, and loads the label list from a given path. It also calls the LoadModel() function to load the inference model.",
+        "type": "comment"
+    },
+    "3834": {
+        "file_id": 326,
+        "content": "        bool is_scale_ = true;\n        bool use_tensorrt_ = false;\n        std::string precision_ = \"fp32\";\n        // Instantiate pre-process operation object(s)\n        Scale scale_op_;\n        CenterCrop centercrop_op_;\n        TenCrop tencrop_op_;\n        Normalize normalize_op_;\n        Permute permute_op_;\n        // Instantiate post-process operation object(s)\n        Softmax softmax_op_;\n    }; // class VideoRecognizer\n} // namespace PaddleVideo",
+        "type": "code",
+        "location": "/deploy/cpp_infer/include/video_rec.h:87-105"
+    },
+    "3835": {
+        "file_id": 326,
+        "content": "This code initializes various operation objects for pre-processing and post-processing steps in the VideoRecognizer class of PaddleVideo library. It also sets default values for scale, precision, and use_tensorrt.",
+        "type": "comment"
+    },
+    "3836": {
+        "file_id": 327,
+        "content": "/deploy/cpp_infer/readme.md",
+        "type": "filepath"
+    },
+    "3837": {
+        "file_id": 327,
+        "content": "This code deploys PaddleVideo models with C++, supports optional settings and displays inference results, but encounters an error searching for 'libcudnn.so' due to incorrect/missing CUDNN_LIB_DIR setting.",
+        "type": "summary"
+    },
+    "3838": {
+        "file_id": 327,
+        "content": "[English](./readme_en.md) | 简体中文\n# 服务器端C++预测\n本章节介绍PaddleVideo模型的的C++部署方法，python预测部署方法请参考各自模型的**模型推理**章节。\nC++在性能计算上优于python，因此，在大多数CPU、GPU部署场景，多采用C++的部署方式，本节将介绍如何在Linux（CPU/GPU）环境下配置C++环境并完成\nPaddleVideo模型部署。\n在开始使用之前，您需要按照以下命令安装额外的依赖包：\n```bash\npython -m pip install git+https://github.com/LDOUBLEV/AutoLog\n```\n## 1. 准备环境\n- Linux环境，推荐使用docker。\n- Windows环境，目前支持基于`Visual Studio 2019 Community`进行编译（TODO）\n* 该文档主要介绍基于Linux环境的PaddleVideo C++预测流程，如果需要在Windows下基于预测库进行C++预测，具体编译方法请参考[Windows下编译教程](./docs/windows_vs2019_build.md)（TODO）\n* **准备环境的目的是得到编译好的opencv库与paddle预测库**。\n### 1.1 编译opencv库\n* 首先需要从opencv官网上下载在Linux环境下源码编译的压缩包，并解压成文件夹。以opencv3.4.7为例，下载命令如下：\n    ```bash\n    cd deploy/cpp_infer\n    wget https://github.com/opencv/opencv/archive/3.4.7.tar.gz\n    tar -xf 3.4.7.tar.gz\n    ```\n    解压完毕后在`deploy/cpp_infer`目录下可以得到解压出的`opencv-3.4.7`的文件夹。\n* 安装ffmpeg\n    opencv配合ffmpeg才能在linux下正常读取视频，否则可能遇到视频帧数返回为0或无法读取任何视频帧的情况\n    采用较为简单的apt安装，安装命令如下：\n    ```bash\n    apt-get update\n    apt install libavformat-dev\n    apt install libavcodec-dev",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme.md:1-45"
+    },
+    "3839": {
+        "file_id": 327,
+        "content": "Explanation of the code: This is an introduction to deploying PaddleVideo models using C++. It provides instructions on setting up a Linux environment and compiling OpenCV and PaddlePaddle libraries for model prediction. The code also mentions the need to install additional dependencies and provides commands for downloading, extracting, and compiling the OpenCV library. Additionally, it notes that Windows support is currently under development (TODO) and requires Visual Studio 2019 Community for compilation (TODO).",
+        "type": "comment"
+    },
+    "3840": {
+        "file_id": 327,
+        "content": "    apt install libswresample-dev\n    apt install libswscale-dev\n    apt install libavutil-dev\n    apt install libsdl1.2-dev\n    apt-get install ffmpeg\n    ```\n* 准备编译opencv，首先进入`opencv-3.4.7`的文件夹，然后设置opencv源码路径`root_path`以及安装路径`install_path`。执行命令如下：\n    ```bash\n    cd opencv-3.4.7\n    root_path=$PWD  # 当前所在路径即为opencv-3.4.7的绝对路径\n    install_path=${root_path}/opencv3\n    rm -rf build\n    mkdir build\n    cd build\n    cmake .. \\\n        -DCMAKE_INSTALL_PREFIX=${install_path} \\\n        -DCMAKE_BUILD_TYPE=Release \\\n        -DBUILD_SHARED_LIBS=OFF \\\n        -DWITH_IPP=OFF \\\n        -DBUILD_IPP_IW=OFF \\\n        -DWITH_LAPACK=OFF \\\n        -DWITH_EIGEN=OFF \\\n        -DCMAKE_INSTALL_LIBDIR=lib64 \\\n        -DWITH_ZLIB=ON \\\n        -DBUILD_ZLIB=ON \\\n        -DWITH_JPEG=ON \\\n        -DBUILD_JPEG=ON \\\n        -DWITH_PNG=ON \\\n        -DBUILD_PNG=ON \\\n        -DWITH_TIFF=ON \\\n        -DBUILD_TIFF=ON \\\n        -DWITH_FFMPEG=ON\n    make -j\n    make install\n    ```\n    `make install`完成之后，会在该文件夹下生成opencv头文件和库文件，用于后面的Video推理C++代码编译。\n    最终会以安装路径`install_path`为指定路径，得到一个`opencv3`的文件夹，其文件结构如下所示。",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme.md:46-91"
+    },
+    "3841": {
+        "file_id": 327,
+        "content": "Preparing to compile OpenCV, enter the `opencv-3.4.7` directory and set `root_path` and `install_path`. Remove existing `build` folder, create a new one, navigate into it, run cmake commands with specified options, make and install. Results in an `opencv3` folder with header files and libraries for C++ video inference code compilation.",
+        "type": "comment"
+    },
+    "3842": {
+        "file_id": 327,
+        "content": "    ```shell\n    opencv-3.4.7/\n    ├── opencv3/  # 安装在opencv3目录下\n    │   ├── bin/\n    │   ├── include/\n    │   ├── lib/\n    │   ├── lib64/\n    │   └── share/\n    ```\n### 1.2 下载或者编译Paddle预测库\n有2种方式获取Paddle预测库，下面进行详细介绍。\n#### 1.2.1 直接下载安装\n* [Paddle预测库官网](https://paddleinference.paddlepaddle.org.cn/v2.2/user_guides/download_lib.html) 上提供了不同cuda版本的Linux预测库，可以在官网查看并**选择合适的预测库版本**（建议选择paddle版本>=2.0.1版本的预测库，推荐使用2.2.2的预测库）。\n* 下载得到一个`paddle_inference.tgz`压缩包，然后将它解压成文件夹，命令如下(以机器环境为gcc8.2为例)：\n    ```bash\n    wget https://paddle-inference-lib.bj.bcebos.com/2.2.2/cxx_c/Linux/GPU/x86-64_gcc8.2_avx_mkl_cuda10.1_cudnn7.6.5_trt6.0.1.5/paddle_inference.tgz\n    tar -xf paddle_inference.tgz\n    ```\n    最终会在当前的文件夹中生成`paddle_inference/`的子文件夹。\n#### 1.2.2 预测库源码编译\n* 如果希望获取最新预测库特性，可以从Paddle github上克隆最新代码，源码编译预测库。\n* 可以参考[Paddle预测库安装编译说明](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0/guides/05_inference_deployment/inference/build_and_install_lib_cn.html#congyuanmabianyi) 的说明，从github上获取Paddle代码，然后进行编译，生成最新的预测库。使用git获取代码方法如下。\n    ```shell",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme.md:93-125"
+    },
+    "3843": {
+        "file_id": 327,
+        "content": "In this code snippet, the user is provided with two methods to obtain Paddle prediction library. The first method involves directly downloading a pre-compiled version of the library from the official website based on the desired CUDA version and OS architecture. The second method involves cloning the latest source code from Paddle's GitHub repository and compiling it manually for the most recent features. The code also provides sample commands to download and extract a pre-compiled library or clone the Paddle source code using 'wget' and 'tar' commands.",
+        "type": "comment"
+    },
+    "3844": {
+        "file_id": 327,
+        "content": "    git clone https://github.com/PaddlePaddle/Paddle.git\n    git checkout release/2.2\n    ```\n* 进入Paddle目录后，编译方法如下。\n    ```shell\n    rm -rf build\n    mkdir build\n    cd build\n    cmake  .. \\\n        -DWITH_CONTRIB=OFF \\\n        -DWITH_MKL=ON \\\n        -DWITH_MKLDNN=ON  \\\n        -DWITH_TESTING=OFF \\\n        -DCMAKE_BUILD_TYPE=Release \\\n        -DWITH_INFERENCE_API_TEST=OFF \\\n        -DON_INFER=ON \\\n        -DWITH_PYTHON=ON\n    make -j4\n    make inference_lib_dist -j4 # 4为编译时使用核数，可根据机器情况自行修改\n    ```\n    更多编译参数选项介绍可以参考[文档说明](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0/guides/05_inference_deployment/inference/build_and_install_lib_cn.html#congyuanmabianyi)。\n* 编译完成之后，可以在`build/paddle_inference_install_dir/`文件下看到生成了以下文件及文件夹。\n    ```bash\n    build/\n    └── paddle_inference_install_dir/\n        ├── CMakeCache.txt\n        ├── paddle/\n        ├── third_party/\n        └── version.txt\n    ```\n    其中`paddle`就是C++预测所需的Paddle库，`version.txt`中包含当前预测库的版本信息。\n## 2. 编译并运行预测demo\n### 2.1 将模型导出为inference model\n* 该步骤与python部署方式下的导出预测模型相同，可以参考各自模型的模型预测章节。导出的几个相关inference model文件用于模型预测。**以PP-TSM为例**，导出预测模型的目录结构如下。",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme.md:126-170"
+    },
+    "3845": {
+        "file_id": 327,
+        "content": "The provided code demonstrates how to compile the Paddle inference API library from the source code. It explains the steps for cloning and entering the Paddle repository, setting build parameters, compiling the library using make, and creating a build directory. The comments also mention where to find more information about build parameter options and what files are generated after compilation.",
+        "type": "comment"
+    },
+    "3846": {
+        "file_id": 327,
+        "content": "    ```\n    inference/\n    └── ppTSM/\n        ├── ppTSM.pdiparams\n        ├── ppTSM.pdiparamsinfo\n        └── ppTSM.pdmodel\n    ```\n### 2.2 编译PaddleVideo C++预测demo\n* 进入到`deploy/cpp_infer`目录下，执行以下编译命令\n    ```shell\n    bash tools/build.sh\n    ```\n    `tools/build.sh`中的Paddle C++预测库、opencv等其他依赖库的地址需要换成自己机器上的实际地址。\n* 具体地，需要修改`tools/build.sh`中的环境路径，相关内容如下：\n    ```shell\n    OPENCV_DIR=your_opencv_dir\n    LIB_DIR=your_paddle_inference_dir\n    CUDA_LIB_DIR=your_cuda_lib_dir\n    CUDNN_LIB_DIR=your_cudnn_lib_dir\n    ```\n    上述参数如下(以下路径用户可根据自己机器的情况对应修改)\n    ```bash\n    OPENCV_DIR=/path/to/opencv3\n    LIB_DIR=/path/to/paddle_inference\n    CUDA_LIB_DIR=/usr/local/cuda/lib64\n    CUDNN_LIB_DIR=/usr/lib/x86_64-linux-gnu/\n    ```\n    `OPENCV_DIR`为opencv编译安装的地址\n    `LIB_DIR`为下载(`paddle_inference`文件夹)或者编译生成的Paddle预测库地址(`build/paddle_inference_install_dir`文件夹)\n    `CUDA_LIB_DIR`为cuda库文件地址，在docker中为`/usr/local/cuda/lib64`\n    `CUDNN_LIB_DIR`为cudnn库文件地址，在docker中为`/usr/lib/x86_64-linux-gnu/`。\n    **如果希望预测时开启TensorRT加速功能，那么还需要修改`tools/build.sh`3处代码**",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme.md:172-213"
+    },
+    "3847": {
+        "file_id": 327,
+        "content": "This code is providing instructions to compile the PaddleVideo C++ prediction demo for an inference model. Users need to navigate to the \"deploy/cpp_infer\" directory and execute the `bash tools/build.sh` command. They must also modify the `tools/build.sh` script with their specific openCV, Paddle Inference, CUDA library, and CUDNN library directories before running the build script.",
+        "type": "comment"
+    },
+    "3848": {
+        "file_id": 327,
+        "content": "    1. 设置`DWITH_GPU=ON`\n    2. 设置`DWITH_TENSORRT=ON`\n    3. 设置`TENSORRT_DIR=/path/to/TensorRT-x.x.x.x`\n    **以上路径都写绝对路径，不要写相对路径**\n* 编译完成之后，会在`cpp_infer/build`文件夹下生成一个名为`ppvideo`的可执行文件。\n### 2.3 运行PaddleVideo C++预测demo\n运行方式：\n```bash\n./build/ppvideo <mode> [--param1] [--param2] [...]\n```\n其中，`mode`为必选参数，表示选择的功能，取值范围['rec']，表示**视频识别**（更多功能会陆续加入）。\n##### 1. 调用视频识别：\n```bash\n# 调用PP-TSM识别\n./build/ppvideo rec \\\n--rec_model_dir=../../inference/ppTSM \\\n--inference_model_name=ppTSM \\\n--video_dir=./example_video_dir \\\n--num_seg=8 \\\n--seg_len=1\n# 调用PP-TSN识别\n./build/ppvideo rec \\\n--rec_model_dir=../../inference/ppTSN \\\n--inference_model_name=ppTSN \\\n--video_dir=./example_video_dir \\\n--num_seg=25 \\\n--seg_len=1\n```\n更多参数如下：\n- 通用参数\n    | 参数名称      | 类型 | 默认参数        | 意义                                                         |\n    | ------------- | ---- | --------------- | ------------------------------------------------------------ |\n    | use_gpu       | bool | false           | 是否使用GPU                                                  |",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme.md:214-259"
+    },
+    "3849": {
+        "file_id": 327,
+        "content": "This code sets the necessary environment variables and provides instructions for running PaddleVideo's C++ prediction demo. It supports video recognition mode with optional parameters such as model directory, inference model name, video directory, number of segments, and segment length. Users can choose from PP-TSM or PP-TSN models.",
+        "type": "comment"
+    },
+    "3850": {
+        "file_id": 327,
+        "content": "    | gpu_id        | int  | 0               | GPU id，使用GPU时有效                                        |\n    | gpu_mem       | int  | 4000            | 申请的GPU内存                                                |\n    | cpu_threads   | int  | 10              | CPU预测时的线程数，在机器核数充足的情况下，该值越大，预测速度越快 |\n    | enable_mkldnn | bool | false           | 是否使用mkldnn库                                             |\n    | use_tensorrt  | bool | false           | 是否使用tensorrt库                                           |\n    | precision     | str  | \"fp32\"          | 使用fp32/fp16/uint8精度来预测                                |\n    | benchmark     | bool | true            | 预测时是否开启benchmark，开启后会在最后输出配置、模型、耗时等信息。 |\n- 视频识别模型相关\n    | 参数名称       | 类型   | 默认参数                                      | 意义                                 |\n    | -------------- | ------ | --------------------------------------------- | ------------------------------------ |\n    | video_dir      | string | \"../example_video_dir\"                        | 存放将要识别的视频的文件夹路径       |",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme.md:260-273"
+    },
+    "3851": {
+        "file_id": 327,
+        "content": "This code snippet defines various parameters for video recognition model execution. It specifies GPU ID, requested GPU memory, CPU thread count for faster predictions on machines with sufficient cores, boolean values to enable mkldnn and tensorrt libraries, precision type for predictions (fp32/fp16/uint8), and a flag to start benchmarking during prediction. The video recognition model parameters include the path to the folder containing videos to be recognized.",
+        "type": "comment"
+    },
+    "3852": {
+        "file_id": 327,
+        "content": "    | rec_model_dir  | string | \"\"                                            | 存放导出的预测模型的文件夹路径       |\n    | inference_model_name | string | \"ppTSM\"                                 | 预测模型的名称 |\n    | num_seg        | int    | 8                                             | 视频分段的段数                       |\n    | seg_len        | int    | 1                                             | 视频每段抽取的帧数                   |\n    | rec_batch_num  | int    | 1                                             | 模型预测时的batch size               |\n    | char_list_file | str    | \"../../data/k400/Kinetics-400_label_list.txt\" | 存放所有类别标号和对应名字的文本路径 |\n​\t以example_video_dir下的样例视频`example01.avi`为输入视频为例，最终屏幕上会输出检测结果如下。\n```bash\n[./inference/ppTSM]\n[./deploy/cpp_infer/example_video_dir]\ntotal videos num: 1\n./example_video_dir/example01.avi   class: 5 archery       score: 0.999556\nI1125 08:10:45.834288 13955 autolog.h:50] ----------------------- Config info -----------------------\nI1125 08:10:45.834458 13955 autolog.h:51] runtime_device: cpu",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme.md:274-289"
+    },
+    "3853": {
+        "file_id": 327,
+        "content": "The code is configuring the model directory path, inference model name, number of video segments, length of each segment, batch size for prediction, and the file path containing class labels and names. An example input video is used to demonstrate how the code outputs the detected results on the screen, including video file, classification, and confidence score.",
+        "type": "comment"
+    },
+    "3854": {
+        "file_id": 327,
+        "content": "I1125 08:10:45.834467 13955 autolog.h:52] ir_optim: True\nI1125 08:10:45.834475 13955 autolog.h:53] enable_memory_optim: True\nI1125 08:10:45.834483 13955 autolog.h:54] enable_tensorrt: 0\nI1125 08:10:45.834518 13955 autolog.h:55] enable_mkldnn: False\nI1125 08:10:45.834525 13955 autolog.h:56] cpu_math_library_num_threads: 10\nI1125 08:10:45.834532 13955 autolog.h:57] ----------------------- Data info -----------------------\nI1125 08:10:45.834540 13955 autolog.h:58] batch_size: 1\nI1125 08:10:45.834547 13955 autolog.h:59] input_shape: dynamic\nI1125 08:10:45.834556 13955 autolog.h:60] data_num: 1\nI1125 08:10:45.834564 13955 autolog.h:61] ----------------------- Model info -----------------------\nI1125 08:10:45.834573 13955 autolog.h:62] model_name: rec\nI1125 08:10:45.834579 13955 autolog.h:63] precision: fp32\nI1125 08:10:45.834586 13955 autolog.h:64] ----------------------- Perf info ------------------------\nI1125 08:10:45.834594 13955 autolog.h:65] Total time spent(ms): 2739\nI1125 08:10:45.834602 13955 au",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme.md:290-304"
+    },
+    "3855": {
+        "file_id": 327,
+        "content": "This code configures the inference engine with options for optimizing IR, memory optimization, TensorRT and MKLDNN support. It also sets the number of CPU threads, displays data information (batch size, input shape, data count), model name and precision, and logs the total time spent for inference.",
+        "type": "comment"
+    },
+    "3856": {
+        "file_id": 327,
+        "content": "tolog.h:67] preprocess_time(ms): 10.6524, inference_time(ms): 1269.55, postprocess_time(ms): 0.009118\n```\n### 3 FAQ\n1. 编译demo过程中出现以下错误\n    ```shell\n    make[2]: *** No rule to make target '/usr/lib/x86_64-linux-gn/libcudnn.so', needed by 'ppvideo'.  Stop.\n    make[2]: *** Waiting for unfinished jobs....\n    [ 16%] Building CXX object CMakeFiles/ppvideo.dir/src/main.cpp.o\n    [ 50%] Building CXX object CMakeFiles/ppvideo.dir/src/preprocess_op.cpp.o\n    [ 50%] Building CXX object CMakeFiles/ppvideo.dir/src/postprocess_op.cpp.o\n    [ 83%] Building CXX object CMakeFiles/ppvideo.dir/src/utility.cpp.o\n    [ 83%] Building CXX object CMakeFiles/ppvideo.dir/src/video_rec.cpp.o\n    CMakeFiles/Makefile2:95: recipe for target 'CMakeFiles/ppvideo.dir/all' failed\n    make[1]: *** [CMakeFiles/ppvideo.dir/all] Error 2\n    Makefile:83: recipe for target 'all' failed\n    make: *** [all] Error 2\n    ```\n    可能是`CUDNN_LIB_DIR`设置的不对，导致找不到该目录下的`libcudnn.so`。",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme.md:304-324"
+    },
+    "3857": {
+        "file_id": 327,
+        "content": "This code snippet displays the preprocess time, inference time, and postprocess time for a certain task. It shows that the inference time is 1269.55ms and the postprocess time is 0.009118ms. The error message indicates a problem with finding the 'libcudnn.so' library due to an incorrect or missing CUDNN_LIB_DIR setting.",
+        "type": "comment"
+    },
+    "3858": {
+        "file_id": 328,
+        "content": "/deploy/cpp_infer/readme_en.md",
+        "type": "filepath"
+    },
+    "3859": {
+        "file_id": 328,
+        "content": "This section provides Linux setup for deploying PaddleVideo models, offers Windows support, and recommends Docker. It installs OpenCV 3.4.7, sets paths, compiles Video inference code, builds prediction library with simple commands, and defines model parameters/configuration options but may encounter errors due to missing libcudnn or incorrect CUDNN_LIB_DIR setting.",
+        "type": "summary"
+    },
+    "3860": {
+        "file_id": 328,
+        "content": "English | [简体中文](./readme.md)\n# Server-side C++ prediction\nThis chapter introduces the C++ deployment method of the PaddleVideo model. For the python prediction deployment method, please refer to the **Model Reasoning** chapter of the respective model.\nC++ is better than python in terms of performance calculation. Therefore, in most CPU and GPU deployment scenarios, C++ deployment methods are mostly used. This section will introduce how to configure the C++ environment in the Linux (CPU/GPU) environment and complete it.\nPaddleVideo model deployment.\nBefore getting started, you need to install additional dependencies as follows:\n```bash\npython -m pip install [paddledet](git+https://github.com/LDOUBLEV/AutoLog)\n```\n## 1. Prepare the environment\n- For Linux environment, docker is recommended.\n- Windows environment, currently supports compilation based on `Visual Studio 2019 Community` (TODO)\n* This document mainly introduces the PaddleVideo C++ prediction process based on the Linux environment. If yo",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme_en.md:1-20"
+    },
+    "3861": {
+        "file_id": 328,
+        "content": "This section introduces the C++ deployment method of PaddleVideo model, which offers better performance compared to Python. It provides instructions for setting up a Linux environment with docker recommendation and mentions that Windows support is under development. Additionally, it requires installing extra dependencies like paddledet using pip.",
+        "type": "comment"
+    },
+    "3862": {
+        "file_id": 328,
+        "content": "u need to perform C++ prediction based on the prediction library under Windows, please refer to [Windows Compilation Tutorial](./docs/windows_vs2019_build.md)(TODO) for the specific compilation method\n* **The purpose of preparing the environment is to get the compiled opencv library and paddle prediction library**.\n### 1.1 Compile opencv library\n* First, you need to download the compressed package compiled from the source code in the Linux environment from the opencv official website, and unzip it into a folder. Take opencv3.4.7 as an example, the download command is as follows:\n    ```bash\n    cd deploy/cpp_infer\n    wget https://github.com/opencv/opencv/archive/3.4.7.tar.gz\n    tar -xf 3.4.7.tar.gz\n    ```\n    After decompression, you can get the decompressed folder of `opencv-3.4.7` in the `deploy/cpp_infer` directory.\n* Install ffmpeg\n    Opencv and ffmpeg can read the video normally under linux, otherwise it may encounter the situation that the number of video frames returns to 0 or no video frame can be read",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme_en.md:20-37"
+    },
+    "3863": {
+        "file_id": 328,
+        "content": "This code provides instructions for compiling the OpenCV library and installing FFmpeg to enable normal video reading under Linux. It also mentions a Windows Compilation Tutorial that needs to be completed (TODO).",
+        "type": "comment"
+    },
+    "3864": {
+        "file_id": 328,
+        "content": "    Using a relatively simple apt installation, the installation command is as follows:\n    ```bash\n    apt-get update\n    apt install libavformat-dev\n    apt install libavcodec-dev\n    apt install libswresample-dev\n    apt install libswscale-dev\n    apt install libavutil-dev\n    apt install libsdl1.2-dev\n    apt-get install ffmpeg\n    ```\n* To prepare to compile opencv, first enter the `opencv-3.4.7` folder, and then set the opencv source path `root_path` and the installation path `install_path`. The execution command is as follows:\n    ```bash\n    cd opencv-3.4.7\n    root_path=$PWD  # That is the absolute path of opencv-3.4.7\n    install_path=${root_path}/opencv3\n    rm -rf build\n    mkdir build\n    cd build\n    cmake .. \\\n        -DCMAKE_INSTALL_PREFIX=${install_path} \\\n        -DCMAKE_BUILD_TYPE=Release \\\n        -DBUILD_SHARED_LIBS=OFF \\\n        -DWITH_IPP=OFF \\\n        -DBUILD_IPP_IW=OFF \\\n        -DWITH_LAPACK=OFF \\\n        -DWITH_EIGEN=OFF \\\n        -DCMAKE_INSTALL_LIBDIR=lib64 \\\n        -DWITH_ZLIB=ON \\\n        -DBUILD_ZLIB=ON \\",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme_en.md:39-76"
+    },
+    "3865": {
+        "file_id": 328,
+        "content": "This code installs necessary libraries for compiling OpenCV 3.4.7 on Linux, sets the source and installation paths, removes existing build folder, creates a new one, runs cmake to configure build options and libraries to use, and then proceeds with the compilation process.",
+        "type": "comment"
+    },
+    "3866": {
+        "file_id": 328,
+        "content": "        -DWITH_JPEG=ON \\\n        -DBUILD_JPEG=ON \\\n        -DWITH_PNG=ON \\\n        -DBUILD_PNG=ON \\\n        -DWITH_TIFF=ON \\\n        -DBUILD_TIFF=ON \\\n        -DWITH_FFMPEG=ON\n    make -j\n    make install\n    ```\n    After the completion of `make install`, opencv header files and library files will be generated in this folder, which will be used to compile the Video inference C++ code later.\n    Finally, the installation path `install_path` will be used as the specified path, and a folder of `opencv3` will be obtained. The file structure is shown below.\n    ```shell\n    opencv-3.4.7/\n    ├── opencv3/\n    │   ├── bin/\n    │   ├── include/\n    │   ├── lib/\n    │   ├── lib64/\n    │   └── share/\n    ```\n### 1.2 Download or compile Paddle prediction library\nThere are two ways to obtain the Paddle prediction library, which will be described in detail below.\n#### 1.2.1 Download and install directly\n* [Paddle prediction library official website](https://paddleinference.paddlepaddle.org.cn/v2.2/user_guides/download_li",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme_en.md:77-110"
+    },
+    "3867": {
+        "file_id": 328,
+        "content": "Configuring and installing OpenCV library with specified options and building the Video inference C++ code using it.",
+        "type": "comment"
+    },
+    "3868": {
+        "file_id": 328,
+        "content": "b.html) provides different cuda versions of Linux prediction libraries, you can Check and **select the appropriate prediction library version** on the official website (it is recommended to select the prediction library with paddle version>=2.0.1, and the prediction library of 2.2.2 is recommended).\n* Download and get a `paddle_inference.tgz` compressed package, and then unzip it into a folder, the command is as follows (taking the machine environment as gcc8.2 as an example):\n    ```bash\n    wget https://paddle-inference-lib.bj.bcebos.com/2.2.2/cxx_c/Linux/GPU/x86-64_gcc8.2_avx_mkl_cuda10.1_cudnn7.6.5_trt6.0.1.5/paddle_inference.tgz\n    tar -xf paddle_inference.tgz\n    ```\n    Eventually, a subfolder of `paddle_inference/` will be generated in the current folder.\n#### 1.2.2 Prediction library source code compilation\n* If you want to get the latest prediction library features, you can clone the latest code from Paddle github and compile the prediction library from source code.\n* You can refer t",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme_en.md:110-123"
+    },
+    "3869": {
+        "file_id": 328,
+        "content": "This code provides instructions for downloading and unzipping the prediction library, or compiling it from source code if you want the latest features. It specifies the appropriate version selection on the official website (paddle version>=2.0.1, 2.2.2 recommended) and the required environment (gcc8.2). The wget command downloads the tgz package, tar extracts it into a subfolder of paddle_inference in the current folder. Alternatively, cloning the latest code from Paddle GitHub and compiling from source can be done for accessing the latest prediction library features.",
+        "type": "comment"
+    },
+    "3870": {
+        "file_id": 328,
+        "content": "o [Paddle prediction library installation and compilation instructions](https://paddleinference.paddlepaddle.org.cn/user_guides/source_compile.html) instructions from github Obtain the Paddle code, and then compile it to generate the latest prediction library. The method of using git to get the code is as follows.\n    ```shell\n    git clone https://github.com/PaddlePaddle/Paddle.git\n    git checkout release/2.2\n    ```\n* After entering the Paddle directory, the compilation method is as follows.\n    ```shell\n    rm -rf build\n    mkdir build\n    cd build\n    cmake .. \\\n        -DWITH_CONTRIB=OFF \\\n        -DWITH_MKL=ON \\\n        -DWITH_MKLDNN=ON \\\n        -DWITH_TESTING=OFF \\\n        -DCMAKE_BUILD_TYPE=Release \\\n        -DWITH_INFERENCE_API_TEST=OFF \\\n        -DON_INFER=ON \\\n        -DWITH_PYTHON=ON\n    make -j\n    make inference_lib_dist -j4 # 4为编译时使用核数，可根据机器情况自行修改\n    ```\n    You can refer to [documentation](https://www.paddlepaddle.org.cn/documentation/docs/zh/2.0/guides/05_inference_deployment/inference/b",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme_en.md:123-150"
+    },
+    "3871": {
+        "file_id": 328,
+        "content": "This code provides the installation and compilation instructions for Paddle prediction library. The steps involve cloning the Paddle repository, checking out a specific release branch, configuring and building the project with CMake, and finally generating the prediction library by making and making inference_lib_dist. This process is done to ensure that users can obtain the latest and most optimized version of the prediction library for their needs.",
+        "type": "comment"
+    },
+    "3872": {
+        "file_id": 328,
+        "content": "uild_and_install_lib_cn.html#congyuanmabianyi) for more introduction of compilation parameter options.\n* After the compilation is complete, you can see the following files and folders are generated under the file `build/paddle_inference_install_dir/`.\n    ```\n    build/\n    └── paddle_inference_install_dir/\n        ├── CMakeCache.txt\n        ├── paddle/\n        ├── third_party/\n        └── version.txt\n    ```\n    Among them, `paddle` is the Paddle library required for C++ prediction, and `version.txt` contains the version information of the current prediction library.\n## 2. Compile and run the prediction demo\n### 2.1 Export the model as an inference model\n* This step is the same as the export prediction model under the python deployment mode. You can refer to the model prediction chapter of the respective model. Several related inference model files exported are used for model prediction. **Taking PP-TSM as an example**, the directory structure of the derived prediction model is as follows.\n    ```\n    inference/",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme_en.md:150-173"
+    },
+    "3873": {
+        "file_id": 328,
+        "content": "Step 1: The code describes the generation of several files and folders after a successful compilation process. These include `CMakeCache.txt`, `paddle/`, `third_party/`, and `version.txt`.\n\nStep 2: Explains that among these, `paddle` is the C++ library required for prediction, while `version.txt` contains version information of the current prediction library.",
+        "type": "comment"
+    },
+    "3874": {
+        "file_id": 328,
+        "content": "    └── ppTSM/\n        ├── ppTSM.pdiparams\n        ├── ppTSM.pdiparamsinfo\n        └── ppTSM.pdmodel\n    ```\n### 2.2 Compile PaddleVideo C++ prediction demo\n* Enter the `deploy/cpp_infer` directory and execute the following compile command\n    ```shell\n    bash tools/build.sh\n    ```\n    The addresses of the Paddle C++ prediction library, opencv and other dependent libraries in `tools/build.sh` need to be replaced with the actual addresses on your own machine.\n* Specifically, you need to modify the environment path in `tools/build.sh`, the relevant content is as follows:\n    ```shell\n    OPENCV_DIR=your_opencv_dir\n    LIB_DIR=your_paddle_inference_dir\n    CUDA_LIB_DIR=/usr/local/cuda/lib64\n    CUDNN_LIB_DIR=/usr/lib/x86_64-linux-gnu/\n    ```\n    The above parameters are as follows (the following path users can modify according to their own machine conditions)\n    `OPENCV_DIR` is the address where opencv is compiled and installed\n     `LIB_DIR` is the download (`paddle_inference` folder) or the generated Paddle prediction library address (`build/paddle_inference_install_dir` folder)",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme_en.md:174-203"
+    },
+    "3875": {
+        "file_id": 328,
+        "content": "This code snippet provides instructions for compiling the PaddleVideo C++ prediction demo. First, navigate to the `deploy/cpp_infer` directory. Then, execute the compile command `bash tools/build.sh`. Modify environment paths in `tools/build.sh`, such as OPENCV_DIR, LIB_DIR, CUDA_LIB_DIR, and CUDNN_LIB_DIR to match your system's configuration.",
+        "type": "comment"
+    },
+    "3876": {
+        "file_id": 328,
+        "content": "     `CUDA_LIB_DIR` is the address of the cuda library file, which is `/usr/local/cuda/lib64` in docker\n     `CUDNN_LIB_DIR` is the cudnn library file address, which is `/usr/lib/x86_64-linux-gnu/` in docker.\n     **If you want to enable TensorRT acceleration during prediction, you need to modify the code at `tools/build.sh`3**\n     1. Set `DWITH_GPU=ON`\n     2. Set `DWITH_TENSORRT=ON`\n     3. Set `TENSORRT_DIR=/path/to/TensorRT-x.x.x.x`\n    **The above paths are all absolute paths, do not use relative paths**\n* After the compilation is complete, an executable file named `ppvideo` will be generated in the `cpp_infer/build` folder.\n### 2.3 Run PaddleVideo C++ prediction demo\nOperation mode:\n```bash\n./build/ppvideo <mode> [--param1] [--param2] [...]\n```\nAmong them, `mode` is a required parameter, which means the selected function, and the value range is ['rec'], which means **video recognition** (more functions will be added in succession).\n##### 1. Call video recognition:\n```bash\n# run PP-TSM inference\n./build/ppvideo rec \\",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme_en.md:204-231"
+    },
+    "3877": {
+        "file_id": 328,
+        "content": "To enable TensorRT acceleration during prediction, modify the code in `tools/build.sh` by setting `DWITH_GPU=ON`, `DWITH_TENSORRT=ON`, and providing the absolute path to TensorRT using `TENSORRT_DIR`. This allows for GPU-accelerated predictions with PaddleVideo's C++ implementation.",
+        "type": "comment"
+    },
+    "3878": {
+        "file_id": 328,
+        "content": "--rec_model_dir=../../inference/ppTSM \\\n--inference_model_name=ppTSM \\\n--video_dir=./example_video_dir \\\n--num_seg=8 \\\n--seg_len=1\n# run PP-TSN inference\n./build/ppvideo rec \\\n--rec_model_dir=../../inference/ppTSN \\\n--inference_model_name=ppTSN \\\n--video_dir=./example_video_dir \\\n--num_seg=25 \\\n--seg_len=1\n```\nMore parameters are as follows:\n- General parameters\n    | Parameter name | Type | Default parameter | Meaning |\n    | ------------- | ---- | --------------- | ------------------------------------------------------------ |\n    | use_gpu | bool | false | Whether to use GPU |\n    | gpu_id | int | 0 | GPU id, valid when using GPU |\n    | gpu_mem | int | 4000 | GPU memory requested |\n    | cpu_threads | int | 10 | The number of threads for CPU prediction. When the number of machine cores is sufficient, the larger the value, the faster the prediction speed |\n    | enable_mkldnn | bool | false | Whether to use mkldnn library |\n    | use_tensorrt | bool | false | Whether to use the tensorrt library |\n    | precision | str | \"fp32\" | Use fp32/fp16/uint8 precision to predict |",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme_en.md:232-258"
+    },
+    "3879": {
+        "file_id": 328,
+        "content": "This code sets the model directory, inference model name, video directory, number of segments, and segment length for PaddleVideo's PP-TSM and PP-TSN inference. Additional parameters include use_gpu, gpu_id, gpu_mem, cpu_threads, enable_mkldnn, use_tensorrt, and precision for customizing the inference process.",
+        "type": "comment"
+    },
+    "3880": {
+        "file_id": 328,
+        "content": "    | benchmark | bool | true | Whether to enable benchmark during prediction, after enabling it, the configuration, model, time-consuming and other information will be output at the end. |\n- Video recognition model related\n    | Parameter name | Type | Default parameter | Meaning |\n    | -------------- | ------ | --------------------------------------------- | ------------------------------------ |\n    | video_dir | string | \"../example_video_dir\" | The path of the folder where the video to be recognized is stored |\n    | rec_model_dir | string | \"\" | The folder path where the exported prediction model is stored |\n    | inference_model_name | string | \"ppTSM\" | The name of the model used in the prediction |\n    | num_seg | int | 8 | Number of video segments |\n    | seg_len | int | 1 | The number of frames extracted in each segment of the video |\n    | rec_batch_num | int | 1 | Batch size during model prediction |\n    | char_list_file | str | \"../../data/k400/Kinetics-400_label_list.txt\" | The text path for storing all category labels and corresponding names |",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme_en.md:259-271"
+    },
+    "3881": {
+        "file_id": 328,
+        "content": "This code provides configuration parameters for video recognition models. The `video_dir` specifies the folder path containing the video to be recognized, while `rec_model_dir` points to the exported prediction model's location. The `inference_model_name` refers to the name of the model used in prediction. `num_seg` and `seg_len` determine the number of video segments and frames per segment respectively. `rec_batch_num` indicates the batch size during model prediction, and `char_list_file` stores category labels and names.",
+        "type": "comment"
+    },
+    "3882": {
+        "file_id": 328,
+        "content": "​\tTake the sample video `example01.avi` under example_video_dir as the input video as an example, the final \tscreen will output the detection results as follows.\n```bash\n[./inference/ppTSM]\n[./deploy/cpp_infer/example_video_dir]\ntotal videos num: 1\n./example_video_dir/example01.avi   class: 5 archery       score: 0.999556\nI1125 08:10:45.834288 13955 autolog.h:50] ----------------------- Config info -----------------------\nI1125 08:10:45.834458 13955 autolog.h:51] runtime_device: cpu\nI1125 08:10:45.834467 13955 autolog.h:52] ir_optim: True\nI1125 08:10:45.834475 13955 autolog.h:53] enable_memory_optim: True\nI1125 08:10:45.834483 13955 autolog.h:54] enable_tensorrt: 0\nI1125 08:10:45.834518 13955 autolog.h:55] enable_mkldnn: False\nI1125 08:10:45.834525 13955 autolog.h:56] cpu_math_library_num_threads: 10\nI1125 08:10:45.834532 13955 autolog.h:57] ----------------------- Data info -----------------------\nI1125 08:10:45.834540 13955 autolog.h:58] batch_size: 1\nI1125 08:10:45.834547 13955 autolog.h:59] input_shape: dynamic",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme_en.md:273-289"
+    },
+    "3883": {
+        "file_id": 328,
+        "content": "This code snippet demonstrates the output of the inference process for a sample video. It shows the input video, its class and score. Additionally, it provides information about the runtime device, IR optimization, memory optimization, whether TensorRT is enabled or not, the number of CPU math library threads, and data information such as batch size and input shape.",
+        "type": "comment"
+    },
+    "3884": {
+        "file_id": 328,
+        "content": "I1125 08:10:45.834556 13955 autolog.h:60] data_num: 1\nI1125 08:10:45.834564 13955 autolog.h:61] ----------------------- Model info -----------------------\nI1125 08:10:45.834573 13955 autolog.h:62] model_name: rec\nI1125 08:10:45.834579 13955 autolog.h:63] precision: fp32\nI1125 08:10:45.834586 13955 autolog.h:64] ----------------------- Perf info ------------------------\nI1125 08:10:45.834594 13955 autolog.h:65] Total time spent(ms): 2739\nI1125 08:10:45.834602 13955 autolog.h:67] preprocess_time(ms): 10.6524, inference_time(ms): 1269.55, postprocess_time(ms): 0.009118\n```\n### 3 FAQ\n1. The following error occurred during the compilation of the demo\n     ```shell\n     make[2]: *** No rule to make target '/usr/lib/x86_64-linux-gn/libcudnn.so', needed by 'ppvideo'. Stop.\n     make[2]: *** Waiting for unfinished jobs....\n     [ 16%] Building CXX object CMakeFiles/ppvideo.dir/src/main.cpp.o\n     [ 50%] Building CXX object CMakeFiles/ppvideo.dir/src/preprocess_op.cpp.o\n     [ 50%] Building CXX object CMakeFiles/ppvideo.dir/src/postprocess_op.cpp.o",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme_en.md:290-308"
+    },
+    "3885": {
+        "file_id": 328,
+        "content": "The code is displaying information about the model used for inference. It mentions the model name, precision type, and total time spent on inference. Additionally, it provides a breakdown of preprocessing, inference, and post-processing times. The error message indicates that the CUDA Deep Neural Network library (libcudnn) is missing or not found during compilation.",
+        "type": "comment"
+    },
+    "3886": {
+        "file_id": 328,
+        "content": "     [83%] Building CXX object CMakeFiles/ppvideo.dir/src/utility.cpp.o\n     [ 83%] Building CXX object CMakeFiles/ppvideo.dir/src/video_rec.cpp.o\n     CMakeFiles/Makefile2:95: recipe for target 'CMakeFiles/ppvideo.dir/all' failed\n     make[1]: *** [CMakeFiles/ppvideo.dir/all] Error 2\n     Makefile:83: recipe for target 'all' failed\n     make: *** [all] Error 2\n     ````\n     It may be that `CUDNN_LIB_DIR` is set incorrectly, resulting in that `libcudnn.so` in this directory cannot be found.",
+        "type": "code",
+        "location": "/deploy/cpp_infer/readme_en.md:309-316"
+    },
+    "3887": {
+        "file_id": 328,
+        "content": "Error: CMakeFiles/ppvideo.dir/all and all target failed with Error 2 due to missing libcudnn.so, possibly caused by incorrect CUDNN_LIB_DIR setting.",
+        "type": "comment"
+    },
+    "3888": {
+        "file_id": 329,
+        "content": "/deploy/cpp_infer/src/main.cpp",
+        "type": "filepath"
+    },
+    "3889": {
+        "file_id": 329,
+        "content": "This code uses OpenCV and other libraries, processes video frames in batches with PaddleVideo's Recognition class, enables benchmarking if set, and handles main function execution and program termination.",
+        "type": "summary"
+    },
+    "3890": {
+        "file_id": 329,
+        "content": "// Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\");\n// you may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n#include \"glog/logging.h\"\n#include \"omp.h\"\n#include \"opencv2/core.hpp\"\n#include \"opencv2/imgcodecs.hpp\"\n#include \"opencv2/imgproc.hpp\"\n#include <chrono>\n#include <iomanip>\n#include <iostream>\n#include <ostream>\n#include <vector>\n#include <cstring>\n#include <fstream>\n#include <numeric>\n#include <include/video_rec.h>\n#include <include/utility.h>\n#include <sys/stat.h>\n#include <gflags/gflags.h>\n#include \"auto_log/autolog.h\"",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/main.cpp:1-35"
+    },
+    "3891": {
+        "file_id": 329,
+        "content": "This code file contains copyright information, license details, and includes necessary header files for OpenCV, Google Logging, GFlags, and other utilities. It also includes the header file for video_rec and utility functions. This seems to be part of a larger codebase related to video processing or analysis.",
+        "type": "comment"
+    },
+    "3892": {
+        "file_id": 329,
+        "content": "// general parameters\nDEFINE_bool(use_gpu, false, \"Infering with GPU or CPU.\");\nDEFINE_int32(gpu_id, 0, \"Device id of GPU to execute.\");\nDEFINE_int32(gpu_mem, 4000, \"GPU id when infering with GPU.\");\nDEFINE_int32(cpu_threads, 10, \"Num of threads with CPU.\");\nDEFINE_bool(enable_mkldnn, false, \"Whether use mkldnn with CPU.\");\nDEFINE_bool(use_tensorrt, false, \"Whether use tensorrt.\");\nDEFINE_string(precision, \"fp32\", \"Precision be one of fp32/fp16/int8.\");\nDEFINE_bool(benchmark, true, \"Whether to log and report benchmark information during inference.\");\n// video recognition related\nDEFINE_string(video_dir, \"\", \"Dir of input video(s).\");\nDEFINE_string(rec_model_dir, \"../example_video_dir\", \"Path of video rec inference model.\");\nDEFINE_string(inference_model_name, \"ppTSM\", \"The name of the model used in the prediction.\");\nDEFINE_int32(num_seg, 8, \"number of frames input to model, which are extracted from a video.\");\nDEFINE_int32(seg_len, 1, \"number of frames from a segment.\");\nDEFINE_int32(rec_batch_num, 1, \"rec_batch_num.\");",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/main.cpp:37-54"
+    },
+    "3893": {
+        "file_id": 329,
+        "content": "This code defines various parameters for an inference process. The use_gpu flag determines if GPU or CPU is used, gpu_id specifies the device id of the GPU, gpu_mem sets the GPU id for inferencing with GPU, cpu_threads indicates the number of threads for CPU usage, enable_mkldnn enables MKL-DNN for CPU operations, use_tensorrt utilizes TensorRT, precision selects the desired precision format (fp32/fp16/int8), benchmark tracks inference timings, and video recognition parameters include the input video directory, model path, model name, number of frames per segment, and batch number.",
+        "type": "comment"
+    },
+    "3894": {
+        "file_id": 329,
+        "content": "DEFINE_string(char_list_file, \"../../data/k400/Kinetics-400_label_list.txt\", \"Path of dictionary.\");\nusing namespace std;\nusing namespace cv;\nusing namespace PaddleVideo;\nstatic bool PathExists(const std::string& path)\n{\n#ifdef _WIN32\n    struct _stat buffer;\n    return (_stat(path.c_str(), &buffer) == 0);\n#else\n    struct stat buffer;\n    return (stat(path.c_str(), &buffer) == 0);\n#endif  // !_WIN32\n}\nint main_rec(std::vector<cv::String> &cv_all_video_names)\n{\n    std::vector<double> time_info = {0, 0, 0}; // Statement time statistics vector\n    VideoRecognizer rec(FLAGS_rec_model_dir, FLAGS_inference_model_name, FLAGS_use_gpu, FLAGS_num_seg,\n                        FLAGS_rec_batch_num, FLAGS_gpu_id,\n                        FLAGS_gpu_mem, FLAGS_cpu_threads,\n                        FLAGS_enable_mkldnn, FLAGS_char_list_file,\n                        FLAGS_use_tensorrt, FLAGS_precision); // Instantiate a video recognition object\n    int batch_num = FLAGS_rec_batch_num;\n    for (int i = 0, n = cv_all_video_names.size(); i < n; i += batch_num) // Process each video",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/main.cpp:55-85"
+    },
+    "3895": {
+        "file_id": 329,
+        "content": "Initializing a video recognition object and processing each video in batches.",
+        "type": "comment"
+    },
+    "3896": {
+        "file_id": 329,
+        "content": "    {\n        int start_idx = i;\n        int end_idx = min(i + batch_num, n);\n        std::vector<std::vector<cv::Mat> > frames_batch;\n        for (int j = start_idx; j < end_idx; ++j)\n        {\n            std::vector<cv::Mat> frames = Utility::SampleFramesFromVideo(cv_all_video_names[i], FLAGS_num_seg, FLAGS_seg_len);\n            frames_batch.emplace_back(frames);\n        }\n        std::vector<double> rec_times; // Initialization time consumption statistics\n        // Take the read several video frames and send them to the run method of the recognition class to predict\n        rec.Run(std::vector<string>(cv_all_video_names.begin() + start_idx, cv_all_video_names.begin() + end_idx), frames_batch, &rec_times);\n        time_info[0] += rec_times[0];\n        time_info[1] += rec_times[1];\n        time_info[2] += rec_times[2];\n    }\n    if (FLAGS_benchmark)\n    {\n        AutoLogger autolog(\"rec\",\n                           FLAGS_use_gpu,\n                           FLAGS_use_tensorrt,\n                           FLAGS_enable_mkldnn,",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/main.cpp:86-109"
+    },
+    "3897": {
+        "file_id": 329,
+        "content": "This code is processing a batch of video frames using PaddleVideo's Recognition class. It initializes time consumption statistics, then runs the recognition method on each frame within the specified batch and stores the results in `time_info`. Additionally, it enables benchmarking if FLAGS_benchmark flag is set.",
+        "type": "comment"
+    },
+    "3898": {
+        "file_id": 329,
+        "content": "                           FLAGS_cpu_threads,\n                           FLAGS_rec_batch_num,\n                           \"dynamic\",\n                           FLAGS_precision,\n                           time_info,\n                           cv_all_video_names.size()); // Generate detailed information on the run\n        autolog.report(); // Print running details\n    }\n    return 0;\n}\nvoid check_params(char* mode)\n{\n    if (strcmp(mode, \"rec\") == 0)\n    {\n        std::cout << \"[\" << FLAGS_rec_model_dir << \"]\" << std::endl;\n        std::cout << \"[\" << FLAGS_video_dir << \"]\" << std::endl;\n        if (FLAGS_rec_model_dir.empty() || FLAGS_video_dir.empty())\n        {\n            std::cout << \"Usage[rec]: ./ppvideo --rec_model_dir=/PATH/TO/REC_INFERENCE_MODEL/ \"\n                      << \"--video_dir=/PATH/TO/INPUT/VIDEO/\" << std::endl;\n            exit(1);\n        }\n    }\n    if (FLAGS_precision != \"fp32\" && FLAGS_precision != \"fp16\" && FLAGS_precision != \"int8\")\n    {\n        cout << \"precison should be 'fp32'(default), 'fp16' or 'int8'. \" << endl;",
+        "type": "code",
+        "location": "/deploy/cpp_infer/src/main.cpp:110-138"
+    },
+    "3899": {
+        "file_id": 329,
+        "content": "This code segment is checking the parameters for running the video inference. If it's in recording mode, it ensures that both rec_model_dir and video_dir are not empty. It also checks if the precision specified (fp32, fp16, or int8) is valid. If any error is found, it displays an appropriate usage message and exits with an error code.",
+        "type": "comment"
+    }
+}

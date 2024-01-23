@@ -1,0 +1,542 @@
+{
+    "8100": {
+        "file_id": 596,
+        "content": "        tx.stop_gradient = False\n        ty = ty.cuda()\n        ty.stop_gradient = False\n        tw = tw.cuda()\n        tw.stop_gradient = False\n        th = th.cuda()\n        th.stop_gradient = False\n        tconf = tconf.cuda()\n        tconf.stop_gradient = False\n        tcls = paddle.reshape(tcls, [-1]).astype('int64')[paddle.reshape(cls_mask, [-1])].cuda()\n        tcls.stop_gradient = False\n        coord_mask = coord_mask.cuda()\n        coord_mask.stop_gradient = False\n        conf_mask = conf_mask.cuda().sqrt()\n        coord_mask.stop_gradient = False\n        cls_mask = paddle.tile(paddle.reshape(cls_mask, [-1, 1]), [1, nC]).cuda()\n        cls_mask.stop_gradient = False\n        cls = paddle.reshape(cls[cls_mask], [-1, nC])\n        # losses between predictions and targets (ground truth)\n        # In total 6 aspects are considered as losses:\n        # 4 for bounding box location, 2 for prediction confidence and classification seperately\n        L1_loss = nn.SmoothL1Loss(reduction='sum')\n        loss_x = self.coord_scale * L1_loss(paddle.cast(x, dtype=\"float32\") * coord_mask, tx * coord_mask) / 2.0",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/yowo_loss.py:211-237"
+    },
+    "8101": {
+        "file_id": 596,
+        "content": "This code is moving variables to the GPU and setting their gradient flags to False. Then, it calculates losses for bounding box location, prediction confidence, and classification separately using SmoothL1Loss.",
+        "type": "comment"
+    },
+    "8102": {
+        "file_id": 596,
+        "content": "        loss_y = self.coord_scale * L1_loss(paddle.cast(y, dtype=\"float32\") * coord_mask, ty * coord_mask) / 2.0\n        loss_w = self.coord_scale * L1_loss(paddle.cast(w * coord_mask, dtype=\"float32\"), tw * coord_mask) / 2.0\n        loss_h = self.coord_scale * L1_loss(paddle.cast(h * coord_mask, dtype=\"float32\"), th * coord_mask) / 2.0\n        loss_conf = nn.MSELoss(reduction='sum')(paddle.cast(conf, dtype=\"float32\") * conf_mask, tconf * conf_mask) / 2.0\n        # try focal loss with gamma = 2\n        loss_cls = self.class_scale * self.focalloss(cls, tcls)\n        # sum of loss\n        loss = loss_x + loss_y + loss_w + loss_h + loss_conf + loss_cls\n        return loss, nCorrect",
+        "type": "code",
+        "location": "/paddlevideo/modeling/losses/yowo_loss.py:238-249"
+    },
+    "8103": {
+        "file_id": 596,
+        "content": "This code calculates the loss for an object detection model, consisting of L1_loss for coordinates (x, y, w, h) and MSELoss for confidence. It applies focal loss for classification with a gamma value of 2, sums all losses together, and returns the total loss and count of correct predictions.",
+        "type": "comment"
+    },
+    "8104": {
+        "file_id": 597,
+        "content": "/paddlevideo/modeling/registry.py",
+        "type": "filepath"
+    },
+    "8105": {
+        "file_id": 597,
+        "content": "This code registers various model types (backbones, heads, recognizers) using a Registry class for efficient organization and management in a larger model architecture or framework implementation. Registries are created for 'bbox_coder', 'estimator', 'multimodal', and 'segment'.",
+        "type": "summary"
+    },
+    "8106": {
+        "file_id": 597,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom ..utils import Registry\nBACKBONES = Registry('backbone')\nHEADS = Registry('head')\nRECOGNIZERS = Registry('recognizer')\nSEGMENTERS = Registry('Segmenters')\nLOCALIZERS = Registry('localizer')\nPARTITIONERS = Registry('partitioner')\nLOSSES = Registry('loss')\nROI_EXTRACTORS = Registry('roi_extractor')\nDETECTORS = Registry('detectors')\nBBOX_ASSIGNERS = Registry('bbox_assigner')\nBBOX_SAMPLERS = Registry('bbox_sampler')",
+        "type": "code",
+        "location": "/paddlevideo/modeling/registry.py:1-27"
+    },
+    "8107": {
+        "file_id": 597,
+        "content": "This code is registering different types of models (backbones, heads, recognizers, etc.) using a Registry class from the utils module. The Registry will help in organizing and managing these different model types efficiently. This code snippet seems to be part of a larger model architecture or framework implementation.",
+        "type": "comment"
+    },
+    "8108": {
+        "file_id": 597,
+        "content": "BBOX_CODERS = Registry('bbox_coder')\nESTIMATORS = Registry('estimator')\nMULTIMODAL = Registry('multimodal')\nSEGMENT = Registry('segment')",
+        "type": "code",
+        "location": "/paddlevideo/modeling/registry.py:28-31"
+    },
+    "8109": {
+        "file_id": 597,
+        "content": "Registry is created for 'bbox_coder', 'estimator', 'multimodal', and 'segment'. These Registries organize and manage the different types of models or coding methods, allowing for easy access and maintenance.",
+        "type": "comment"
+    },
+    "8110": {
+        "file_id": 598,
+        "content": "/paddlevideo/modeling/samplers/__init__.py",
+        "type": "filepath"
+    },
+    "8111": {
+        "file_id": 598,
+        "content": "This code is licensing information and imports the RandomSampler class from a submodule, then defines the __all__ variable to include only the RandomSampler class.",
+        "type": "summary"
+    },
+    "8112": {
+        "file_id": 598,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .random_sampler import RandomSampler\n__all__ = ['RandomSampler']",
+        "type": "code",
+        "location": "/paddlevideo/modeling/samplers/__init__.py:1-17"
+    },
+    "8113": {
+        "file_id": 598,
+        "content": "This code is licensing information and imports the RandomSampler class from a submodule, then defines the __all__ variable to include only the RandomSampler class.",
+        "type": "comment"
+    },
+    "8114": {
+        "file_id": 599,
+        "content": "/paddlevideo/modeling/samplers/random_sampler.py",
+        "type": "filepath"
+    },
+    "8115": {
+        "file_id": 599,
+        "content": "The code initializes a SamplingResult class for bbox sampling and defines a RandomSampler class to sample positive and negative bboxes from assigned results, ensuring enough samples are available in each case.",
+        "type": "summary"
+    },
+    "8116": {
+        "file_id": 599,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport numpy as np\nfrom ..registry import BBOX_SAMPLERS\nclass SamplingResult():\n    \"\"\"Bbox sampling result.  \"\"\"\n    def __init__(self, pos_inds, neg_inds, bboxes, gt_bboxes, assign_result,\n                 gt_flags):\n        self.pos_inds = pos_inds\n        self.neg_inds = neg_inds\n        self.pos_bboxes = paddle.index_select(bboxes,pos_inds)\n        # neg_inds may be empty\n        if neg_inds.shape[0]!=0:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/samplers/random_sampler.py:1-28"
+    },
+    "8117": {
+        "file_id": 599,
+        "content": "This code is importing necessary libraries and defining a class called \"SamplingResult\" that holds the result of bbox sampling. The class has attributes for positive indices, negative indices, bboxes, gt_bboxes, assign_result, and gt_flags. It uses paddle library to index select the bboxes based on pos_inds. Negative_inds may be empty.",
+        "type": "comment"
+    },
+    "8118": {
+        "file_id": 599,
+        "content": "            self.neg_bboxes = paddle.index_select(bboxes,neg_inds)\n        else:\n            self.neg_bboxes=None\n        self.pos_is_gt  = paddle.index_select(gt_flags,pos_inds)\n        self.num_gts = gt_bboxes.shape[0]\n        self.pos_assigned_gt_inds = paddle.index_select(assign_result.gt_inds,pos_inds) - 1\n        if float(gt_bboxes.numel()) == 0:\n            assert self.pos_assigned_gt_inds.numel() == 0\n            self.pos_gt_bboxes = paddle.empty_like(gt_bboxes).view(-1, 4)\n        else:\n            if len(gt_bboxes.shape) < 2:\n                gt_bboxes = gt_bboxes.view(-1, 4)\n            self.pos_gt_bboxes = paddle.index_select(gt_bboxes, self.pos_assigned_gt_inds)\n        if assign_result.labels is not None:\n            self.pos_gt_labels = paddle.index_select(assign_result.labels, pos_inds)\n        else:\n            self.pos_gt_labels = None\n    @property\n    def bboxes(self):\n        if self.neg_bboxes is not None:\n            ret = paddle.concat([self.pos_bboxes, self.neg_bboxes])\n        else:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/samplers/random_sampler.py:29-55"
+    },
+    "8119": {
+        "file_id": 599,
+        "content": "This code initializes the negative bounding boxes, positive ground truth (gt) bounding boxes and labels for a sampler. It checks if there are any gt bboxes available, if not, it sets up a placeholder for them. The 'pos_bboxes' are then concatenated with the neg_bboxes if they exist. If assign_result.labels is not None, it also extracts and stores positive gt labels.",
+        "type": "comment"
+    },
+    "8120": {
+        "file_id": 599,
+        "content": "            # neg bbox may be empty\n            ret = self.pos_bboxes\n        return ret\n@BBOX_SAMPLERS.register()\nclass RandomSampler():\n    def __init__(self,\n                 num,\n                 pos_fraction,\n                 neg_pos_ub=-1,\n                 add_gt_as_proposals=True,\n                 **kwargs):\n        self.num = num\n        self.pos_fraction = pos_fraction\n        self.neg_pos_ub = neg_pos_ub\n        self.add_gt_as_proposals = add_gt_as_proposals\n    def sample(self,\n               assign_result,\n               bboxes,\n               gt_bboxes,\n               gt_labels=None,\n               **kwargs):\n        \"\"\"Sample positive and negative bboxes.  \"\"\"\n        if len(bboxes.shape) < 2:\n            bboxes = bboxes[None, :]\n        bboxes = bboxes[:, :4]\n        gt_flags = paddle.full([bboxes.shape[0], ], 0, dtype='int32')\n        if self.add_gt_as_proposals and len(gt_bboxes) > 0:\n            if gt_labels is None:\n                raise ValueError(\n                    'gt_labels must be given when add_gt_as_proposals is True')",
+        "type": "code",
+        "location": "/paddlevideo/modeling/samplers/random_sampler.py:56-92"
+    },
+    "8121": {
+        "file_id": 599,
+        "content": "This code defines a RandomSampler class which samples positive and negative bboxes from assigned results. It takes arguments like num, pos_fraction, neg_pos_ub, add_gt_as_proposals, etc. If add_gt_as_proposals is True and gt_bboxes are present, it raises a ValueError if gt_labels are not given. The sample method takes assign_result, bboxes, gt_bboxes, and gt_labels as arguments. It checks the shape of bboxes, converts them to 4-column format, and creates gt_flags.",
+        "type": "comment"
+    },
+    "8122": {
+        "file_id": 599,
+        "content": "            bboxes = paddle.concat([gt_bboxes, bboxes])\n            assign_result.add_gt_(gt_labels)\n            gt_ones = paddle.full([gt_bboxes.shape[0], ], 1, dtype='int32')\n            gt_flags = paddle.concat([gt_ones, gt_flags])\n        #1. 得到正样本的数量, inds\n        num_expected_pos = int(self.num * self.pos_fraction)\n        pos_inds = self._sample_pos( assign_result, num_expected_pos, bboxes=bboxes, **kwargs)\n        pos_inds = paddle.to_tensor(np.unique(pos_inds.numpy()))\n        #2. 得到负样本的数量, inds\n        num_sampled_pos = pos_inds.numel()\n        num_expected_neg = self.num - num_sampled_pos\n        neg_inds = self._sample_neg(\n            assign_result, num_expected_neg, bboxes=bboxes, **kwargs)\n        neg_inds = paddle.to_tensor(np.unique(neg_inds.numpy()))\n        #3. 得到sampling result\n        sampling_result = SamplingResult(pos_inds, neg_inds, bboxes, gt_bboxes,\n                                         assign_result, gt_flags)\n        return sampling_result\n    def random_choice(self, gallery, num):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/samplers/random_sampler.py:93-114"
+    },
+    "8123": {
+        "file_id": 599,
+        "content": "This code samples positive and negative indices for assigning ground truth labels to objects, ensuring a desired ratio of positive and negative samples. It then creates a SamplingResult object containing these indices along with bounding boxes and other information. The random_choice function is used to randomly select a specific number of samples from a given set of objects.",
+        "type": "comment"
+    },
+    "8124": {
+        "file_id": 599,
+        "content": "        \"\"\"Random select some elements from the gallery.  \"\"\"\n        assert len(gallery) >= num\n        perm = paddle.arange(gallery.numel())[:num]\n        perm = paddle.randperm(gallery.numel())[:num] \n        rand_inds = paddle.index_select(gallery, perm)\n        return rand_inds\n    def _sample_pos(self, assign_result, num_expected, **kwargs):\n        \"\"\"Randomly sample some positive samples.\"\"\"\n        #1.首先看一下给的bboxes里面有哪些label是大于0的 得到了他们的index\n        pos_inds = paddle.nonzero(assign_result.gt_inds, as_tuple=False)\n        #2. 只要这个pos_inds的数目不是0个 这些就都可以是positive sample\n        # 当pos_inds的数目小于num_expected(想要的sample的最大数目), 就直接用这个pos_inds\n        # 反之就从这么多index里随机采样num_expected个出来\n        if float(pos_inds.numel()) != 0:\n            pos_inds = pos_inds.squeeze() \n        if float(pos_inds.numel()) <= num_expected:\n            return pos_inds\n        else:\n            return self.random_choice(pos_inds, num_expected)\n    def _sample_neg(self, assign_result, num_expected, **kwargs):\n        \"\"\"Randomly sample some negative samples.\"\"\"",
+        "type": "code",
+        "location": "/paddlevideo/modeling/samplers/random_sampler.py:115-139"
+    },
+    "8125": {
+        "file_id": 599,
+        "content": "The code defines a random sampler that randomly selects elements from the gallery. It has two functions: _sample_pos, which randomly samples positive samples, and _sample_neg, which randomly samples negative samples. The _sample_pos function first finds indexes of assign_result with label greater than 0 (i.e., positive samples), then checks if the number of positive samples is less than or equal to num_expected. If it's less, returns the indices; otherwise, selects num_expected random samples from the available indices using the random_choice method. The _sample_neg function does a similar process for negative samples but doesn't return the indices if their number is 0.",
+        "type": "comment"
+    },
+    "8126": {
+        "file_id": 599,
+        "content": "        neg_inds = paddle.nonzero(assign_result.gt_inds == 0, as_tuple=False)\n        if float(neg_inds.numel()) != 0:\n            neg_inds = neg_inds.squeeze() \n        if (float(neg_inds.numel())) <= float(num_expected):\n            return neg_inds\n        else:\n            return self.random_choice(neg_inds, num_expected)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/samplers/random_sampler.py:140-146"
+    },
+    "8127": {
+        "file_id": 599,
+        "content": "This code checks the assign_result's gt_inds for zero values, extracts their indices in neg_inds, and if there are non-zero values, squeezes them. If the number of non-zero values is less than or equal to expected, it returns neg_inds. Otherwise, it uses random_choice() to select required indices from neg_inds.",
+        "type": "comment"
+    },
+    "8128": {
+        "file_id": 600,
+        "content": "/paddlevideo/modeling/weight_init.py",
+        "type": "filepath"
+    },
+    "8129": {
+        "file_id": 600,
+        "content": "This code initializes layer weights in PaddlePaddle, applying truncated normal or other initializations like Gaussian and Kaiming uniform. It adjusts for different modes and supports numpy arrays and Paddle tensors.",
+        "type": "summary"
+    },
+    "8130": {
+        "file_id": 600,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport math\nimport paddle\nimport paddle.nn.initializer as init\nimport numpy as np\nfrom scipy import special\ndef weight_init_(layer,\n                 func,\n                 weight_name=None,\n                 bias_name=None,\n                 bias_value=0.0,\n                 **kwargs):\n    \"\"\"\n    In-place params init function.\n    Usage:\n    .. code-block:: python\n        import paddle\n        import numpy as np\n        data = np.ones([3, 4], dtype='float32')",
+        "type": "code",
+        "location": "/paddlevideo/modeling/weight_init.py:1-36"
+    },
+    "8131": {
+        "file_id": 600,
+        "content": "This code defines a function that initializes the weights of a PaddlePaddle layer using specified functions. It can also set bias values and is compatible with numpy arrays and Paddle tensors.",
+        "type": "comment"
+    },
+    "8132": {
+        "file_id": 600,
+        "content": "        linear = paddle.nn.Linear(4, 4)\n        input = paddle.to_tensor(data)\n        print(linear.weight)\n        linear(input)\n        weight_init_(linear, 'Normal', 'fc_w0', 'fc_b0', std=0.01, mean=0.1)\n        print(linear.weight)\n    \"\"\"\n    if hasattr(layer, 'weight') and layer.weight is not None:\n        getattr(init, func)(**kwargs)(layer.weight)\n        if weight_name is not None:\n            # override weight name\n            layer.weight.name = weight_name\n    if hasattr(layer, 'bias') and layer.bias is not None:\n        init.Constant(bias_value)(layer.bias)\n        if bias_name is not None:\n            # override bias name\n            layer.bias.name = bias_name\ndef _no_grad_trunc_normal_(tensor, mean, std, a, b):\n    def norm_cdf(x):\n        # Computes standard normal cumulative distribution function\n        return (1. + math.erf(x / math.sqrt(2.))) / 2.\n    if (mean < a - 2 * std) or (mean > b + 2 * std):\n        print(\"mean is more than 2 std from [a, b] in nn.init.trunc_normal_. \"\n              \"The distribution of values may be incorrect.\")",
+        "type": "code",
+        "location": "/paddlevideo/modeling/weight_init.py:37-66"
+    },
+    "8133": {
+        "file_id": 600,
+        "content": "Code initializes a Linear layer, applies truncated normal initialization to its weights with specified mean and std deviation, and optionally changes the weight name. If the layer has bias, it initializes the bias with a constant value and optionally changes the bias name. The _no_grad_trunc_normal_ function is used internally by nn.init.trunc_normal_.",
+        "type": "comment"
+    },
+    "8134": {
+        "file_id": 600,
+        "content": "    with paddle.no_grad():\n        # Values are generated by using a truncated uniform distribution and\n        # then using the inverse CDF for the normal distribution.\n        # Get upper and lower cdf values\n        l = norm_cdf((a - mean) / std)\n        u = norm_cdf((b - mean) / std)\n        # Uniformly fill tensor with values from [l, u], then translate to [2l-1, 2u-1].\n        tmp = np.random.uniform(2 * l - 1, 2 * u - 1,\n                                size=list(tensor.shape)).astype(np.float32)\n        # Use inverse cdf transform for normal distribution to get truncated\n        # standard normal\n        tmp = special.erfinv(tmp)\n        # Transform to proper mean, std\n        tmp *= (std * math.sqrt(2.0))\n        tmp += mean\n        # Clamp to ensure it's in the proper range\n        tmp = np.clip(tmp, a, b)\n        tensor.set_value(paddle.to_tensor(tmp))\n        return tensor\ndef _calculate_fan_in_and_fan_out(tensor):\n    dimensions = tensor.dim()\n    if dimensions < 2:\n        raise ValueError(\n            \"Fan in and fan out can not be computed for tensor with fewer than 2 dimensions\"",
+        "type": "code",
+        "location": "/paddlevideo/modeling/weight_init.py:68-98"
+    },
+    "8135": {
+        "file_id": 600,
+        "content": "This code generates weights for a tensor following a truncated Gaussian distribution. It computes the lower and upper bounds, uniformly fills the tensor with values between these bounds, transforms them to a standard Gaussian distribution, adjusts the mean and standard deviation, clamps the values within the original bounds, and sets the tensor's value.",
+        "type": "comment"
+    },
+    "8136": {
+        "file_id": 600,
+        "content": "        )\n    num_input_fmaps = tensor.shape[1]\n    num_output_fmaps = tensor.shape[0]\n    receptive_field_size = 1\n    if tensor.dim() > 2:\n        receptive_field_size = tensor[0][0].numel()\n    fan_in = num_input_fmaps * receptive_field_size\n    fan_out = num_output_fmaps * receptive_field_size\n    return fan_in, fan_out\ndef trunc_normal_(tensor, mean=0., std=1., a=-2., b=2.):\n    return _no_grad_trunc_normal_(tensor, mean, std, a, b)\ndef kaiming_normal_(tensor, a=0., mode='fan_in', nonlinearity='leaky_relu'):\n    def _calculate_correct_fan(tensor, mode):\n        mode = mode.lower()\n        valid_modes = ['fan_in', 'fan_out']\n        if mode not in valid_modes:\n            raise ValueError(\n                \"Mode {} not supported, please use one of {}\".format(\n                    mode, valid_modes))\n        fan_in, fan_out = _calculate_fan_in_and_fan_out(tensor)\n        return fan_in if mode == 'fan_in' else fan_out\n    def calculate_gain(nonlinearity, param=None):\n        linear_fns = [\n            'linear', 'conv1d', 'conv2d', 'conv3d', 'conv_transpose1d',",
+        "type": "code",
+        "location": "/paddlevideo/modeling/weight_init.py:99-130"
+    },
+    "8137": {
+        "file_id": 600,
+        "content": "This code initializes weights in a convolutional layer using either truncated normal or Kaiming uniform initialization. It calculates the fan-in and fan-out based on input and output feature maps, receptive field size, and optionally adjusts for different modes. The `trunc_normal_` function generates random values within specific bounds using truncated normal distribution, while `kaiming_normal_` sets weights using Kaiming uniform initialization with an optional nonlinearity parameter.",
+        "type": "comment"
+    },
+    "8138": {
+        "file_id": 600,
+        "content": "            'conv_transpose2d', 'conv_transpose3d'\n        ]\n        if nonlinearity in linear_fns or nonlinearity == 'sigmoid':\n            return 1\n        elif nonlinearity == 'tanh':\n            return 5.0 / 3\n        elif nonlinearity == 'relu':\n            return math.sqrt(2.0)\n        elif nonlinearity == 'leaky_relu':\n            if param is None:\n                negative_slope = 0.01\n            elif not isinstance(param, bool) and isinstance(\n                    param, int) or isinstance(param, float):\n                negative_slope = param\n            else:\n                raise ValueError(\n                    \"negative_slope {} not a valid number\".format(param))\n            return math.sqrt(2.0 / (1 + negative_slope**2))\n        else:\n            raise ValueError(\"Unsupported nonlinearity {}\".format(nonlinearity))\n    fan = _calculate_correct_fan(tensor, mode)\n    gain = calculate_gain(nonlinearity, a)\n    std = gain / math.sqrt(fan)\n    with paddle.no_grad():\n        paddle.nn.initializer.Normal(0, std)(tensor)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/weight_init.py:131-156"
+    },
+    "8139": {
+        "file_id": 600,
+        "content": "This function initializes the weights of a neural network layer with respect to the nonlinearity used. It returns different values depending on the nonlinearity type, calculates the fan for each layer and then applies normal initialization using Paddle's Normal initializer.",
+        "type": "comment"
+    },
+    "8140": {
+        "file_id": 600,
+        "content": "        return tensor",
+        "type": "code",
+        "location": "/paddlevideo/modeling/weight_init.py:157-157"
+    },
+    "8141": {
+        "file_id": 600,
+        "content": "Initializes a tensor with specified values and returns it.",
+        "type": "comment"
+    },
+    "8142": {
+        "file_id": 601,
+        "content": "/paddlevideo/solver/__init__.py",
+        "type": "filepath"
+    },
+    "8143": {
+        "file_id": 601,
+        "content": "This code snippet appears to import the \"build_optimizer\" and \"build_lr\" functions from their respective modules within the \"paddlevideo.solver\" package. The comments at the top of the file indicate that this code is protected by copyright and licensed under the Apache License, Version 2.0.",
+        "type": "summary"
+    },
+    "8144": {
+        "file_id": 601,
+        "content": "# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .optimizer import build_optimizer\nfrom .lr import build_lr",
+        "type": "code",
+        "location": "/paddlevideo/solver/__init__.py:1-16"
+    },
+    "8145": {
+        "file_id": 601,
+        "content": "This code snippet appears to import the \"build_optimizer\" and \"build_lr\" functions from their respective modules within the \"paddlevideo.solver\" package. The comments at the top of the file indicate that this code is protected by copyright and licensed under the Apache License, Version 2.0.",
+        "type": "comment"
+    },
+    "8146": {
+        "file_id": 602,
+        "content": "/paddlevideo/solver/custom_lr.py",
+        "type": "filepath"
+    },
+    "8147": {
+        "file_id": 602,
+        "content": "The code introduces CustomWarmupCosineDecay and CustomWarmupPiecewiseDecay schedulers for PaddleVideo, combining warm-up, cosine decay, and piecewise decay. The CustomWarmupAdjustDecay scheduler combines warmup and cosine decay and adjusts based on epoch number.",
+        "type": "summary"
+    },
+    "8148": {
+        "file_id": 602,
+        "content": "# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport math\nfrom paddle.optimizer.lr import *\nimport numpy as np\n\"\"\"\nPaddleVideo Learning Rate Schedule:\nYou can use paddle.optimizer.lr\nor define your custom_lr in this file.\n\"\"\"\nclass CustomWarmupCosineDecay(LRScheduler):\n    r\"\"\"\n    We combine warmup and stepwise-cosine which is used in slowfast model.\n    Args:\n        warmup_start_lr (float): start learning rate used in warmup stage.\n        warmup_epochs (int): the number epochs of warmup.",
+        "type": "code",
+        "location": "/paddlevideo/solver/custom_lr.py:1-31"
+    },
+    "8149": {
+        "file_id": 602,
+        "content": "This code defines a custom learning rate scheduler, CustomWarmupCosineDecay, which combines warmup and stepwise-cosine decay for use in PaddleVideo. It is part of the PaddlePaddle framework and can be used to adjust learning rates during training.",
+        "type": "comment"
+    },
+    "8150": {
+        "file_id": 602,
+        "content": "        cosine_base_lr (float|int, optional): base learning rate in cosine schedule.\n        max_epoch (int): total training epochs.\n        num_iters(int): number iterations of each epoch.\n        last_epoch (int, optional):  The index of last epoch. Can be set to restart training. Default: -1, means initial learning rate.\n        verbose (bool, optional): If ``True``, prints a message to stdout for each update. Default: ``False`` .\n    Returns:\n        ``CosineAnnealingDecay`` instance to schedule learning rate.\n    \"\"\"\n    def __init__(self,\n                 warmup_start_lr,\n                 warmup_epochs,\n                 cosine_base_lr,\n                 max_epoch,\n                 num_iters,\n                 last_epoch=-1,\n                 verbose=False):\n        self.warmup_start_lr = warmup_start_lr\n        self.warmup_epochs = warmup_epochs\n        self.cosine_base_lr = cosine_base_lr\n        self.max_epoch = max_epoch\n        self.num_iters = num_iters\n        #call step() in base class, last_lr/last_epoch/base_lr will be update",
+        "type": "code",
+        "location": "/paddlevideo/solver/custom_lr.py:32-54"
+    },
+    "8151": {
+        "file_id": 602,
+        "content": "This code defines a class `CosineAnnealingDecay` that schedules the learning rate for training. It takes parameters like warmup start lr, warmup epochs, cosine base lr, max epoch, num_iters, last_epoch (optional), and verbose (optional). The class initializes these parameters and provides a `step()` method to update the learning rate based on cosine annealing schedule. If verbose is set to True, it will print messages for each update.",
+        "type": "comment"
+    },
+    "8152": {
+        "file_id": 602,
+        "content": "        super(CustomWarmupCosineDecay, self).__init__(last_epoch=last_epoch,\n                                                      verbose=verbose)\n    def step(self, epoch=None):\n        \"\"\"\n        ``step`` should be called after ``optimizer.step`` . It will update the learning rate in optimizer according to current ``epoch`` .\n        The new learning rate will take effect on next ``optimizer.step`` .\n        Args:\n            epoch (int, None): specify current epoch. Default: None. Auto-increment from last_epoch=-1.\n        Returns:\n            None\n        \"\"\"\n        if epoch is None:\n            if self.last_epoch == -1:\n                self.last_epoch += 1\n            else:\n                self.last_epoch += 1 / self.num_iters  # update step with iters\n        else:\n            self.last_epoch = epoch\n        self.last_lr = self.get_lr()\n        if self.verbose:\n            print('Epoch {}: {} set learning rate to {}.'.format(\n                self.last_epoch, self.__class__.__name__, self.last_lr))\n    def _lr_func_cosine(self, cur_epoch, cosine_base_lr, max_epoch):",
+        "type": "code",
+        "location": "/paddlevideo/solver/custom_lr.py:55-80"
+    },
+    "8153": {
+        "file_id": 602,
+        "content": "This code defines a custom learning rate scheduler for PaddleVideo, implementing the CustomWarmupCosineDecay class. The step() method updates the learning rate based on current epoch and calls get_lr() to set the new learning rate. The _lr_func_cosine() function calculates the learning rate using a cosine annealing schedule.",
+        "type": "comment"
+    },
+    "8154": {
+        "file_id": 602,
+        "content": "        return cosine_base_lr * (math.cos(math.pi * cur_epoch / max_epoch) +\n                                 1.0) * 0.5\n    def get_lr(self):\n        \"\"\"Define lr policy\"\"\"\n        lr = self._lr_func_cosine(self.last_epoch, self.cosine_base_lr,\n                                  self.max_epoch)\n        lr_end = self._lr_func_cosine(self.warmup_epochs, self.cosine_base_lr,\n                                      self.max_epoch)\n        # Perform warm up.\n        if self.last_epoch < self.warmup_epochs:\n            lr_start = self.warmup_start_lr\n            alpha = (lr_end - lr_start) / self.warmup_epochs\n            lr = self.last_epoch * alpha + lr_start\n        return lr\nclass CustomWarmupPiecewiseDecay(LRScheduler):\n    r\"\"\"\n    This op combine warmup and stepwise-cosine which is used in slowfast model.\n    Args:\n        warmup_start_lr (float): start learning rate used in warmup stage.\n        warmup_epochs (int): the number epochs of warmup.\n        step_base_lr (float|int, optional): base learning rate in step schedule.",
+        "type": "code",
+        "location": "/paddlevideo/solver/custom_lr.py:81-106"
+    },
+    "8155": {
+        "file_id": 602,
+        "content": "The code defines a custom learning rate (LR) scheduler that includes warmup and stepwise-cosine decay. It first performs a warmup stage with a linear increase in LR from the warmup_start_lr to lr_end over warmup_epochs, then applies cosine annealing for the rest of the epochs, resulting in a learning rate that decreases from the base value according to the cosine function.",
+        "type": "comment"
+    },
+    "8156": {
+        "file_id": 602,
+        "content": "        max_epoch (int): total training epochs.\n        num_iters(int): number iterations of each epoch.\n        last_epoch (int, optional):  The index of last epoch. Can be set to restart training. Default: -1, means initial learning rate.\n        verbose (bool, optional): If ``True``, prints a message to stdout for each update. Default: ``False`` .\n    Returns:\n        ``CustomWarmupPiecewiseDecay`` instance to schedule learning rate.\n    \"\"\"\n    def __init__(self,\n                 warmup_start_lr,\n                 warmup_epochs,\n                 step_base_lr,\n                 lrs,\n                 gamma,\n                 steps,\n                 max_epoch,\n                 num_iters,\n                 last_epoch=0,\n                 verbose=False):\n        self.warmup_start_lr = warmup_start_lr\n        self.warmup_epochs = warmup_epochs\n        self.step_base_lr = step_base_lr\n        self.lrs = lrs\n        self.gamma = gamma\n        self.steps = steps\n        self.max_epoch = max_epoch\n        self.num_iters = num_iters",
+        "type": "code",
+        "location": "/paddlevideo/solver/custom_lr.py:107-133"
+    },
+    "8157": {
+        "file_id": 602,
+        "content": "This code defines a class `CustomWarmupPiecewiseDecay` which schedules learning rate for training. The class takes parameters like warmup_start_lr, warmup_epochs, step_base_lr, lrs, gamma, steps, max_epoch, num_iters, last_epoch, and verbose. It initializes these parameters in the constructor (__init__). The learning rate is scheduled to decay over time following a piecewise function with warm-up and custom decays.",
+        "type": "comment"
+    },
+    "8158": {
+        "file_id": 602,
+        "content": "        self.last_epoch = last_epoch\n        self.last_lr = self.warmup_start_lr  # used in first iter\n        self.verbose = verbose\n        self._var_name = None\n    def step(self, epoch=None, rebuild=False):\n        \"\"\"\n        ``step`` should be called after ``optimizer.step`` . It will update the learning rate in optimizer according to current ``epoch`` .\n        The new learning rate will take effect on next ``optimizer.step`` .\n        Args:\n            epoch (int, None): specify current epoch. Default: None. Auto-increment from last_epoch=-1.\n        Returns:\n            None\n        \"\"\"\n        if epoch is None:\n            if not rebuild:\n                self.last_epoch += 1 / self.num_iters  # update step with iters\n        else:\n            self.last_epoch = epoch\n        self.last_lr = self.get_lr()\n        if self.verbose:\n            print(\n                'step Epoch {}: {} set learning rate to {}.self.num_iters={}, 1/self.num_iters={}'\n                .format(self.last_epoch, self.__class__.__name__, self.last_lr,",
+        "type": "code",
+        "location": "/paddlevideo/solver/custom_lr.py:134-158"
+    },
+    "8159": {
+        "file_id": 602,
+        "content": "This code defines a custom learning rate scheduler for the PaddleVideo library. The `step` method updates the learning rate based on the current epoch and returns None. It should be called after `optimizer.step`. If no epoch is specified, it increments the last epoch by the number of iterations divided by the total number of iterations. The last learning rate is stored in `self.last_lr`, and if verbose is set to True, it prints the current epoch, scheduler name, and updated learning rate.",
+        "type": "comment"
+    },
+    "8160": {
+        "file_id": 602,
+        "content": "                        self.num_iters, 1 / self.num_iters))\n    def _lr_func_steps_with_relative_lrs(self, cur_epoch, lrs, base_lr, steps,\n                                         max_epoch):\n        # get step index\n        steps = steps + [max_epoch]\n        for ind, step in enumerate(steps):\n            if cur_epoch < step:\n                break\n        if self.verbose:\n            print(\n                '_lr_func_steps_with_relative_lrs, cur_epoch {}: {}, steps {}, ind {}, step{}, max_epoch{}'\n                .format(cur_epoch, self.__class__.__name__, steps, ind, step,\n                        max_epoch))\n        return lrs[ind - 1] * base_lr\n    def get_lr(self):\n        \"\"\"Define lr policy\"\"\"\n        lr = self._lr_func_steps_with_relative_lrs(\n            self.last_epoch,\n            self.lrs,\n            self.step_base_lr,\n            self.steps,\n            self.max_epoch,\n        )\n        lr_end = self._lr_func_steps_with_relative_lrs(\n            self.warmup_epochs,\n            self.lrs,\n            self.step_base_lr,",
+        "type": "code",
+        "location": "/paddlevideo/solver/custom_lr.py:159-188"
+    },
+    "8161": {
+        "file_id": 602,
+        "content": "This function defines a learning rate (lr) policy that varies based on the current epoch, predefined learning rates, base lr, steps, and maximum epoch. It calculates the learning rate for each step using a relative learning rate function and returns it. The function also includes a warmup phase where the learning rate gradually increases from 0 to its final value over the specified number of epochs.",
+        "type": "comment"
+    },
+    "8162": {
+        "file_id": 602,
+        "content": "            self.steps,\n            self.max_epoch,\n        )\n        # Perform warm up.\n        if self.last_epoch < self.warmup_epochs:\n            lr_start = self.warmup_start_lr\n            alpha = (lr_end - lr_start) / self.warmup_epochs\n            lr = self.last_epoch * alpha + lr_start\n        if self.verbose:\n            print(\n                'get_lr, Epoch {}: {}, lr {}, lr_end {}, self.lrs{}, self.step_base_lr{}, self.steps{}, self.max_epoch{}'\n                .format(self.last_epoch, self.__class__.__name__, lr, lr_end,\n                        self.lrs, self.step_base_lr, self.steps,\n                        self.max_epoch))\n        return lr\nclass CustomPiecewiseDecay(PiecewiseDecay):\n    def __init__(self, **kargs):\n        kargs.pop('num_iters')\n        super().__init__(**kargs)\nclass CustomWarmupCosineStepDecay(LRScheduler):\n    def __init__(self,\n                 warmup_iters,\n                 warmup_ratio=0.1,\n                 min_lr=0,\n                 base_lr=3e-5,\n                 max_epoch=30,",
+        "type": "code",
+        "location": "/paddlevideo/solver/custom_lr.py:189-222"
+    },
+    "8163": {
+        "file_id": 602,
+        "content": "This code implements a CustomWarmupCosineStepDecay learning rate scheduler, which performs warm up and then applies piecewise decay. The learning rate is determined based on the current epoch, warmup epochs, warmup start and end rates, and the number of steps. A CustomPiecewiseDecay class is also defined, which inherits from PiecewiseDecay and overrides the num_iters parameter.",
+        "type": "comment"
+    },
+    "8164": {
+        "file_id": 602,
+        "content": "                 last_epoch=-1,\n                 num_iters=None,\n                 verbose=False):\n        self.warmup_ratio = warmup_ratio\n        self.min_lr = min_lr\n        self.warmup_epochs = warmup_iters\n        self.warmup_iters = warmup_iters * num_iters\n        self.cnt_iters = 0\n        self.cnt_epoch = 0\n        self.num_iters = num_iters\n        self.tot_iters = max_epoch * num_iters\n        self.max_epoch = max_epoch\n        self.cosine_base_lr = base_lr  # initial lr for all param groups\n        self.regular_lr = self.get_regular_lr()\n        super().__init__(last_epoch=last_epoch, verbose=verbose)\n    def annealing_cos(self, start, end, factor, weight=1):\n        cos_out = math.cos(math.pi * factor) + 1\n        return end + 0.5 * weight * (start - end) * cos_out\n    def get_regular_lr(self):\n        progress = self.cnt_epoch\n        max_progress = self.max_epoch\n        target_lr = self.min_lr\n        return self.annealing_cos(self.cosine_base_lr, target_lr, progress /\n                                  max_progress)  # self.cosine_base_lr",
+        "type": "code",
+        "location": "/paddlevideo/solver/custom_lr.py:223-249"
+    },
+    "8165": {
+        "file_id": 602,
+        "content": "This function initializes the custom learning rate scheduler. It sets warmup ratio, minimum learning rate, and warmup iterations. The total number of iterations, maximum epochs, base learning rate for cosine annealing, and a regular learning rate are calculated. The function also defines a helper method 'annealing_cos' for cosine annealing.",
+        "type": "comment"
+    },
+    "8166": {
+        "file_id": 602,
+        "content": "    def get_warmup_lr(self, cur_iters):\n        k = (1 - cur_iters / self.warmup_iters) * (1 - self.warmup_ratio)\n        warmup_lr = self.regular_lr * (1 - k)  # 3e-5 * (1-k)\n        return warmup_lr\n    def step(self, epoch=None):\n        self.regular_lr = self.get_regular_lr()\n        self.last_lr = self.get_lr()\n        self.cnt_epoch = (self.cnt_iters +\n                          1) // self.num_iters  # update step with iters\n        self.cnt_iters += 1\n        if self.verbose:\n            print('Epoch {}: {} set learning rate to {}.'.format(\n                self.last_epoch, self.__class__.__name__, self.last_lr))\n    def get_lr(self):\n        \"\"\"Define lr policy\"\"\"\n        cur_iter = self.cnt_iters\n        if cur_iter >= self.warmup_iters:\n            return self.regular_lr\n        else:\n            warmup_lr = self.get_warmup_lr(cur_iter)\n            return warmup_lr\nclass CustomWarmupAdjustDecay(LRScheduler):\n    r\"\"\"\n    We combine warmup and stepwise-cosine which is used in slowfast model.\n    Args:\n        step_base_lr (float): start learning rate used in warmup stage.",
+        "type": "code",
+        "location": "/paddlevideo/solver/custom_lr.py:251-282"
+    },
+    "8167": {
+        "file_id": 602,
+        "content": "This code defines a custom learning rate scheduler that combines warmup and stepwise-cosine decay. The get_warmup_lr function calculates the warmup learning rate, while the get_lr function determines whether the current iteration is in the warmup stage or not, returning either the regular learning rate or the warmed-up learning rate. The step function updates the learning rate and counts the number of iterations.",
+        "type": "comment"
+    },
+    "8168": {
+        "file_id": 602,
+        "content": "        warmup_epochs (int): the number epochs of warmup.\n        lr_decay_rate (float|int, optional): base learning rate decay rate.\n        step (int): step in change learning rate.\n        last_epoch (int, optional):  The index of last epoch. Can be set to restart training. Default: -1, means initial learning rate.\n        verbose (bool, optional): If ``True``, prints a message to stdout for each update. Default: ``False`` .\n    Returns:\n        ``CosineAnnealingDecay`` instance to schedule learning rate.\n    \"\"\"\n    def __init__(self,\n                 step_base_lr,\n                 warmup_epochs,\n                 lr_decay_rate,\n                 boundaries,\n                 num_iters=None,\n                 last_epoch=-1,\n                 verbose=False):\n        self.step_base_lr = step_base_lr\n        self.warmup_epochs = warmup_epochs\n        self.lr_decay_rate = lr_decay_rate\n        self.boundaries = boundaries\n        self.num_iters = num_iters\n        #call step() in base class, last_lr/last_epoch/base_lr will be update",
+        "type": "code",
+        "location": "/paddlevideo/solver/custom_lr.py:283-305"
+    },
+    "8169": {
+        "file_id": 602,
+        "content": "Custom learning rate scheduler with warmup, decay, and boundary steps. Initializes the LR scheduler with step base LR, warmup epochs, decay rate, boundaries, number of iterations (optional), last epoch (optional), and verbosity level (optional).",
+        "type": "comment"
+    },
+    "8170": {
+        "file_id": 602,
+        "content": "        super(CustomWarmupAdjustDecay, self).__init__(last_epoch=last_epoch,\n                                                      verbose=verbose)\n    def step(self, epoch=None):\n        \"\"\"\n        ``step`` should be called after ``optimizer.step`` . It will update the learning rate in optimizer according to current ``epoch`` .\n        The new learning rate will take effect on next ``optimizer.step`` .\n        Args:\n            epoch (int, None): specify current epoch. Default: None. Auto-increment from last_epoch=-1.\n        Returns:\n            None\n        \"\"\"\n        if epoch is None:\n            if self.last_epoch == -1:\n                self.last_epoch += 1\n            else:\n                self.last_epoch += 1 / self.num_iters  # update step with iters\n        else:\n            self.last_epoch = epoch\n        self.last_lr = self.get_lr()\n        if self.verbose:\n            print('Epoch {}: {} set learning rate to {}.'.format(\n                self.last_epoch, self.__class__.__name__, self.last_lr))\n    def get_lr(self):",
+        "type": "code",
+        "location": "/paddlevideo/solver/custom_lr.py:306-332"
+    },
+    "8171": {
+        "file_id": 602,
+        "content": "The code defines a custom learning rate scheduler, CustomWarmupAdjustDecay, which adjusts the learning rate based on epoch number. It initializes the scheduler and provides a step method for updating the learning rate after optimizer.step is called. The get_lr method returns the current learning rate. The last_epoch variable keeps track of the current epoch. If no epoch is specified, it auto-increments from the last_epoch value. If an epoch is provided, the last_epoch is set to that value. Finally, if verbose is True, it prints the current epoch and the learning rate set.",
+        "type": "comment"
+    },
+    "8172": {
+        "file_id": 602,
+        "content": "        if self.last_epoch < self.warmup_epochs:\n            lr = self.step_base_lr * (self.last_epoch + 1) / self.warmup_epochs\n        else:\n            lr = self.step_base_lr * (self.lr_decay_rate**np.sum(\n                self.last_epoch >= np.array(self.boundaries)))\n        return lr",
+        "type": "code",
+        "location": "/paddlevideo/solver/custom_lr.py:333-338"
+    },
+    "8173": {
+        "file_id": 602,
+        "content": "This code calculates the learning rate based on whether the current epoch is within the warmup phase or not. If in warmup, it linearly increases the base learning rate. Otherwise, it applies a decay rate to determine the learning rate.",
+        "type": "comment"
+    },
+    "8174": {
+        "file_id": 603,
+        "content": "/paddlevideo/solver/lr.py",
+        "type": "filepath"
+    },
+    "8175": {
+        "file_id": 603,
+        "content": "This code constructs a learning rate scheduler based on the 'OPTIMIZER' configuration provided, returns it with specified iterations, and handles custom cases such as converting 'learning_rate' to a custom object.",
+        "type": "summary"
+    },
+    "8176": {
+        "file_id": 603,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom typing import Dict\nfrom paddle.optimizer.lr import LRScheduler\nfrom . import custom_lr\ndef build_lr(cfg: Dict, num_iters: int) -> LRScheduler:\n    \"\"\"Build a learning rate scheduler accroding to ```OPTIMIZER``` configuration, and it always pass into the optimizer.\n    In configuration:\n    learning_rate:\n        name: 'PiecewiseDecay'\n        boundaries: [20, 60]\n        values: [0.00025, 0.000025, 0.0000025]",
+        "type": "code",
+        "location": "/paddlevideo/solver/lr.py:1-28"
+    },
+    "8177": {
+        "file_id": 603,
+        "content": "This code is building a learning rate scheduler according to the \"OPTIMIZER\" configuration provided in the cfg dictionary. The scheduler is based on the 'PiecewiseDecay' name, and has boundaries and values for adjusting the learning rate at specified iterations.",
+        "type": "comment"
+    },
+    "8178": {
+        "file_id": 603,
+        "content": "    Args:\n        cfg (Dict): learning rate configuration.\n        num_iters (int): The number of iterations that may be used when calculating the learning rate\n    Returns:\n        LRScheduler: learning rate scheduler.\n    \"\"\"\n    cfg_copy = cfg.copy()\n    #when learning_rate is LRScheduler\n    if cfg_copy.get('learning_rate') and isinstance(cfg_copy['learning_rate'],\n                                                    dict):\n        cfg_copy['learning_rate'] = build_lr(\n            cfg_copy['learning_rate'],\n            num_iters)  #not support only inner iter_step\n    lr_name = cfg_copy.pop('name')\n    if cfg_copy.get('iter_step'):\n        cfg_copy['num_iters'] = num_iters\n        cfg_copy.pop('iter_step')\n    return getattr(custom_lr, lr_name)(**cfg_copy)",
+        "type": "code",
+        "location": "/paddlevideo/solver/lr.py:30-52"
+    },
+    "8179": {
+        "file_id": 603,
+        "content": "This function takes a learning rate configuration and the number of iterations, and returns a learning rate scheduler. If the configuration includes a 'learning_rate' key with a dictionary value, it converts it to a custom learning rate object using the build_lr() function. It also handles cases where 'iter_step' is present in the configuration, replacing it with 'num_iters'. The returned scheduler is obtained from the 'custom_lr' module with the specified 'name'.",
+        "type": "comment"
+    },
+    "8180": {
+        "file_id": 604,
+        "content": "/paddlevideo/solver/optimizer.py",
+        "type": "filepath"
+    },
+    "8181": {
+        "file_id": 604,
+        "content": "This code initializes optimizer configurations, handles weight decay, grad clip, and excludes parameters for L2 decay. It sets learning rate with LRScheduler, supports multi-precision, and creates an optimizer based on inputs.",
+        "type": "summary"
+    },
+    "8182": {
+        "file_id": 604,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport inspect\n# for python3.11\nif not hasattr(inspect, 'getargspec'):\n    inspect.getargspec = inspect.getfullargspec\nfrom typing import Dict\nimport paddle\nfrom paddle.optimizer.lr import LRScheduler\nfrom paddle.regularizer import L1Decay, L2Decay\nfrom paddlevideo.utils import get_logger\ndef build_optimizer(cfg: Dict,\n                    lr_scheduler: LRScheduler,\n                    model: paddle.nn.Layer,\n                    use_amp: bool = False,",
+        "type": "code",
+        "location": "/paddlevideo/solver/optimizer.py:1-31"
+    },
+    "8183": {
+        "file_id": 604,
+        "content": "This code is from the \"optimizer.py\" file in the PaddleVideo library, and it's responsible for building an optimizer. It imports necessary modules, checks compatibility with Python versions, defines a function build_optimizer that takes parameters such as configuration (cfg), learning rate scheduler (lr_scheduler), model, and optional AMP usage (use_amp). This file also includes some license information and comments.",
+        "type": "comment"
+    },
+    "8184": {
+        "file_id": 604,
+        "content": "                    amp_level: str = None) -> paddle.optimizer.Optimizer:\n    \"\"\"Build an optimizer and learning rate scheduler to optimize parameters accroding to ```OPTIMIZER``` field in configuration.\n    In configuration:\n    OPTIMIZER:\n        name: Momentum\n        momentum: 0.9\n        weight_decay: 0.001\n    or\n    OPTIMIZER:\n        name: Momentum\n        momentum: 0.9\n        weight_decay:\n            name: \"L1\"\n            value: 0.001\n    Momentum optimizer will be applied to optimize network and L1Decay regularizer will be applied to avoid overfit.\n    OPTIMIZER:\n        name: Adam\n        weight_decay:\n            name: \"L2\"\n            value: 0.001\n    Adam optimizer will be applied to optimize network and L2Decay regularizer will applied to avoid overfit.\n    Refer to ```https://www.paddlepaddle.org.cn/documentation/docs/en/develop/api/paddle/regularizer/L2Decay_en.html``` for more details.\n    Args:\n        cfg (Dict): optimizer configuration.\n        lr_scheduler (LRScheduler): learning rate scheduler.",
+        "type": "code",
+        "location": "/paddlevideo/solver/optimizer.py:32-63"
+    },
+    "8185": {
+        "file_id": 604,
+        "content": "Builds an optimizer and learning rate scheduler according to the OPTIMIZER field in the configuration. The Momentum or Adam optimizers are applied to optimize the network, and L1Decay or L2Decay regularizers are used to avoid overfitting. The function takes optimizer configuration (cfg) and learning rate scheduler (lr_scheduler) as arguments.",
+        "type": "comment"
+    },
+    "8186": {
+        "file_id": 604,
+        "content": "        model (paddle.nn.Layer, optional): model which contains parameters to be optimized. Defaults to None.\n        use_amp (bool, optional): Whether use amp. Defaults to False.\n        amp_level (str, optional): amp level when amp is enabled. Defaults to None.\n    Returns:\n        paddle.optimizer.Optimizer: an optimizer for the input model.\n    \"\"\"\n    logger = get_logger(\"paddlevideo\")\n    cfg_copy = cfg.copy()\n    # NOTE: check none and illegal cfg!!!\n    opt_name = cfg_copy.pop('name')\n    # deal with weight decay\n    if cfg_copy.get('weight_decay'):\n        if isinstance(cfg_copy.get('weight_decay'),\n                      float):  # just an float factor\n            cfg_copy['weight_decay'] = cfg_copy.get('weight_decay')\n        elif 'L1' in cfg_copy.get('weight_decay').get(\n                'name').upper():  # specify L2 wd and it's float factor\n            cfg_copy['weight_decay'] = L1Decay(\n                cfg_copy.get('weight_decay').get('value'))\n        elif 'L2' in cfg_copy.get('weight_decay').get(",
+        "type": "code",
+        "location": "/paddlevideo/solver/optimizer.py:64-85"
+    },
+    "8187": {
+        "file_id": 604,
+        "content": "This code defines a function that creates an optimizer for a given model. It accepts parameters such as the model, whether to use AMP or not, and the AMP level. The function also handles weight decay by checking if a 'weight_decay' configuration is present and applying the appropriate settings (L1 or L2 decay).",
+        "type": "comment"
+    },
+    "8188": {
+        "file_id": 604,
+        "content": "                'name').upper():  # specify L1 wd and it's float factor\n            cfg_copy['weight_decay'] = L2Decay(\n                cfg_copy.get('weight_decay').get('value'))\n        else:\n            raise ValueError\n    # deal with grad clip\n    if cfg_copy.get('grad_clip'):\n        if isinstance(cfg_copy.get('grad_clip'), float):\n            cfg_copy['grad_clip'] = cfg_copy.get('grad_clip').get('value')\n        elif 'global' in cfg_copy.get('grad_clip').get('name').lower():\n            cfg_copy['grad_clip'] = paddle.nn.ClipGradByGlobalNorm(\n                cfg_copy.get('grad_clip').get('value'))\n        else:\n            raise ValueError\n    # Set for optimizers that cannot be applied to l2decay, i.e. AdamW\n    if cfg_copy.get('no_weight_decay_name'):\n        no_weight_decay_name = cfg_copy.pop('no_weight_decay_name')\n        no_weight_decay_name_list = no_weight_decay_name.split(' ')\n        # NOTE: use param.name not name\n        no_weight_decay_param_list = [\n            param.name for name, param in model.named_parameters()",
+        "type": "code",
+        "location": "/paddlevideo/solver/optimizer.py:86-109"
+    },
+    "8189": {
+        "file_id": 604,
+        "content": "This code is initializing the configuration for an optimizer, handling L1 and L2 weight decay, grad clip, and no_weight_decay parameters. If 'name' is specified for L1 wd, it sets the 'weight_decay' to the float factor. For grad clip, if a float value is given, it is set as the 'grad_clip', or if 'global' in name, creates a ClipGradByGlobalNorm object. If 'no_weight_decay_name' is specified, it extracts the list of parameters to exclude from L2 decay.",
+        "type": "comment"
+    },
+    "8190": {
+        "file_id": 604,
+        "content": "            if any(key_word in name for key_word in no_weight_decay_name_list)\n        ]  # get the full param name of no weight decay\n        _apply_decay_param_fun = lambda name: name not in no_weight_decay_param_list\n        cfg_copy['apply_decay_param_fun'] = _apply_decay_param_fun\n        logger.info(\n            f\"No weight Decay list :({len(no_weight_decay_param_list)})\",\n            no_weight_decay_param_list)\n    cfg_copy.pop('learning_rate')\n    # set multi_precision\n    optimizer_setting = {\n        'learning_rate': lr_scheduler,\n        'parameters': model.parameters(),\n        **cfg_copy\n    }\n    optimizer_init_args = inspect.getargspec(\n        getattr(paddle.optimizer, opt_name).__init__).args\n    if use_amp and amp_level == \"O2\" and \"multi_precision\" in optimizer_init_args:\n        # support \"multi_precision\" arg in optimizer's __init__ function.\n        optimizer_setting.update({\"multi_precision\": True})\n        logger.info(\n            \"Set multi_precision=True for optimizer when use_amp=True and amp_level='O2'\"",
+        "type": "code",
+        "location": "/paddlevideo/solver/optimizer.py:110-133"
+    },
+    "8191": {
+        "file_id": 604,
+        "content": "This code checks if there are any parameters without weight decay, and sets the learning rate using a LRScheduler. It also handles multi-precision for optimizer when use_amp is True and amp_level is 'O2'. The code updates the optimizer_setting with no_weight_decay_param_list and \"multi_precision\" if required, logging relevant information throughout.",
+        "type": "comment"
+    },
+    "8192": {
+        "file_id": 604,
+        "content": "        )\n    return getattr(paddle.optimizer, opt_name)(**optimizer_setting)",
+        "type": "code",
+        "location": "/paddlevideo/solver/optimizer.py:134-136"
+    },
+    "8193": {
+        "file_id": 604,
+        "content": "This code is creating and returning an optimizer based on the given \"opt_name\" and \"optimizer_setting\". The optimizer type is determined by using \"paddle.optimizer[opt_name]\" and the parameters are passed through **optimizer_settings** to initialize the optimizer object.",
+        "type": "comment"
+    },
+    "8194": {
+        "file_id": 605,
+        "content": "/paddlevideo/tasks/__init__.py",
+        "type": "filepath"
+    },
+    "8195": {
+        "file_id": 605,
+        "content": "This code is the initialization file for PaddleVideo's tasks module. It imports functions from various task-specific modules and adds them to `__all__` for export. The code also includes a license notice, copyright information, and a disclaimer.",
+        "type": "summary"
+    },
+    "8196": {
+        "file_id": 605,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .train import train_model\nfrom .test import test_model\nfrom .train_dali import train_dali\nfrom .train_multigrid import train_model_multigrid\n__all__ = ['train_model', 'test_model', 'train_dali', 'train_model_multigrid']",
+        "type": "code",
+        "location": "/paddlevideo/tasks/__init__.py:1-20"
+    },
+    "8197": {
+        "file_id": 605,
+        "content": "This code is the initialization file for PaddleVideo's tasks module. It imports functions from various task-specific modules and adds them to `__all__` for export. The code also includes a license notice, copyright information, and a disclaimer.",
+        "type": "comment"
+    },
+    "8198": {
+        "file_id": 606,
+        "content": "/paddlevideo/tasks/test.py",
+        "type": "filepath"
+    },
+    "8199": {
+        "file_id": 606,
+        "content": "This Python function uses PaddlePaddle to test models, enabling parallel processing and logging. It initializes the device, constructs model, dataset, and dataloader in test mode with adjustable parameters. The code builds a dataloader, loads state_dicts, sets up metrics, and iterates over batches for output or metric updates before accumulating the final result.",
+        "type": "summary"
+    }
+}

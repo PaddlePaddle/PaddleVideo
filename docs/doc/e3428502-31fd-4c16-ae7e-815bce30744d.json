@@ -1,0 +1,10 @@
+{
+    "summary": "Class MoViNetHead extends BaseHead and registers itself with the HEADS registry. It initializes without any specific parameters and its forward function simply returns input 'x' without any modifications.",
+    "details": [
+        {
+            "comment": "Class MoViNetHead extends BaseHead and registers itself with the HEADS registry. It initializes without any specific parameters and its forward function simply returns input 'x' without any modifications.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/heads/movinet_head.py\":0-14",
+            "content": "import collections.abc\ncontainer_abcs = collections.abc\nfrom ..registry import HEADS\nfrom .base import BaseHead\nfrom ..builder import build_loss\n@HEADS.register()\nclass MoViNetHead(BaseHead):\n    def __init__(self):\n        super().__init__()\n    def forward(self, x, *args):\n        return x"
+        }
+    ]
+}

@@ -1,0 +1,542 @@
+{
+    "2800": {
+        "file_id": 222,
+        "content": "# 视频质量评价模型\n---\n## 内容\n- [模型简介](#模型简介)\n- [数据准备](#数据准备)\n- [模型训练](#模型训练)\n- [模型测试](#模型测试)\n- [模型优化](#模型优化)\n- [模型部署](#模型部署)\n- [参考论文](#参考论文)\n## 模型简介\n该代码库主要基于paddle2.1版本开发，主要是在ppTSM网络模型的基础上修改的一种无参考视频质量评估方法，通过读入视频的视频帧来判断该视频的质量。\n针对视频内容的理解，可以自动分析视频内容的质量，帮助选出最优的关键帧或关键片段作为视频封面，提升视频的点击转换和用户体验。\n本项目目前支持Linux下的GPU单卡和多卡运行环境。\n## 数据准备\n```\n数据集来自公开数据集KonVid-150k，共153842个ugc视频，其中训练集(KonVid-150k-A)152265个，验证集(KonVid-150k-B)1577个\n示例数据集以及数据集官网地址: datasets/dataset_url.list\n数据集标注文件为dataset中的train.txt和eval.txt\n```\n## 模型训练\n环境安装：\n- PaddlePaddle >= 2.1.0\n- Python >= 3.7\n- PaddleX >= 2.0.0\n- CUDA >= 10.1\n- cuDNN >= 7.6.4\n- nccl >= 2.1.2\n安装Python依赖库：\nPython依赖库在[requirements.txt](https://github.com/PaddlePaddle/PaddleVideo/blob/master/requirements.txt)中给出，可通过如下命令安装：\n```\npython3.7 -m pip install --upgrade pip\npip3.7 install --upgrade -r requirements.txt\n```\n使用`paddle.distributed.launch`启动模型训练和测试脚本（`main.py`），可以更方便地启动多卡训练与测试，或直接运行(./run.sh)\n```shell\nsh run.sh\n```\n我们将所有标准的启动命令都放在了```run.sh```中，注意选择想要运行的脚本。\n参考如下方式启动模型训练，`paddle.distributed.launch`通过设置`gpus`指定GPU运行卡号，",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/README.md:1-58"
+    },
+    "2801": {
+        "file_id": 222,
+        "content": "This code is for a video quality assessment model developed using PaddlePaddle 2.1. It uses the ppTSM network and is trained on KonVid-150k dataset, which contains 153842 UGC videos. The model can analyze video content to determine its quality, improve video previews, and enhance user experience. Requires specific environment setup and dependencies like Python 3.7, CUDA 10.1, and cuDNN 7.6.4.",
+        "type": "comment"
+    },
+    "2802": {
+        "file_id": 222,
+        "content": "指定`--validate`来启动训练时评估。\n```bash\n# PaddleVideo通过launch方式启动多卡多进程训练\nexport CUDA_VISIBLE_DEVICES=0,1,2,3\npython3 -m paddle.distributed.launch \\\n    --gpus=\"0,1,2,3\" \\\n    --log_dir=log_pptsm \\\n    main.py \\\n    --amp \\\n    --validate \\\n    -c ./configs/recognition/tsm/pptsm_regression.yaml\n```\n其中，`-c`用于指定配置文件的路径，可通过配置文件修改相关训练配置信息，也可以通过添加`-o`参数来更新配置：\n```bash\npython -m paddle.distributed.launch \\\n    --gpus=\"0,1,2,3\" \\\n    main.py \\\n    -c ./configs/recognition/tsm/pptsm_regression.yaml \\\n    --validate \\\n    -o DATASET.batch_size=16\n```\n`-o`用于指定需要修改或者添加的参数，其中`-o DATASET.batch_size=16`表示更改batch_size大小为16。\n运行上述命令，将会输出运行日志，并默认保存在./log目录下，如：`worker.0` , `worker.1` ... , worker日志文件对应每张卡上的输出\n【train阶段】打印当前时间，当前epoch/epoch总数，当前batch id，评估指标，耗时，ips等信息：\n    [11/16 04:40:37] epoch:[  1/1  ] train step:100  loss: 5.31382 lr: 0.000250 batch_cost: 0.73082 sec, reader_cost: 0.38075 sec, ips: 5.47330 instance/sec.\n【eval阶段】打印当前时间，当前epoch/epoch总数，当前batch id，评估指标，耗时，ips等信息：\n    [11/16 04:40:37] epoch:[  1/1  ] val step:0    loss: 4.42741 batch_cost: 1.37882 sec, reader_cost: 0.00000 sec, ips: 2.90104 instance/sec.",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/README.md:59-98"
+    },
+    "2803": {
+        "file_id": 222,
+        "content": "This code is running PaddleVideo's multigpu distributed training in launch mode. It specifies the GPU devices to use, sets up the log directory, and uses AMP for mixed precision training. The `--validate` flag starts the evaluation during training and allows for updating configurations using the `-o` parameter. It also prints various metrics like loss, learning rate, batch cost, reader cost, and instances per second during train and eval phases.",
+        "type": "comment"
+    },
+    "2804": {
+        "file_id": 222,
+        "content": "【epoch结束】打印当前时间，学习率，评估指标，耗时，ips等信息：\n    [11/16 04:40:37] lr=0.00012487\n    [11/16 04:40:37] train_SROCC=0.4456697876616565\n    [11/16 04:40:37] train_PLCC=0.48071880604403616\n    [11/16 04:40:37] END epoch:1   val loss_avg: 5.21620 avg_batch_cost: 0.04321 sec, avg_reader_cost: 0.00000 sec, batch_cost_sum: 112.69575 sec, avg_ips: 8.41203 instance/sec.\n当前为评估结果最好的epoch时，打印最优精度：\n    [11/16 04:40:57] max_SROCC=0.7116468111328617\n    [11/16 04:40:57] max_PLCC=0.733503995526737\n### 模型恢复训练\n如果训练任务终止，可以加载断点权重文件(优化器-学习率参数，断点文件)继续训练。\n需要指定`-o resume_epoch`参数，该参数表示从```resume_epoch```轮开始继续训练.\n```bash\nexport CUDA_VISIBLE_DEVICES=0,1,2,3\npython3 -m paddle.distributed.launch \\\n    --gpus=\"0,1,2,3\" \\\n    main.py \\\n    --amp \\\n    -c ./configs/recognition/tsm/pptsm_regression.yaml \\\n    --validate \\\n    -o resume_epoch=5\n```\n### 模型微调\n进行模型微调（Finetune），对自定义数据集进行模型微调，需要指定 `--weights` 参数来加载预训练模型。\n```bash\nexport CUDA_VISIBLE_DEVICES=0,1,2,3\npython3 -m paddle.distributed.launch \\\n    --gpus=\"0,1,2,3\" \\\n    main.py \\\n    --amp \\\n    -c ./configs/recognition/tsm/pptsm_regression.yaml \\",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/README.md:101-144"
+    },
+    "2805": {
+        "file_id": 222,
+        "content": "Epoch completion: Prints current time, learning rate, evaluation metrics, training duration, and instances per second.\nBest epoch detection: Prints best precision achieved during training.\nResuming training: Loads checkpoint weights to continue training from a specified epoch.\nModel fine-tuning: Loads pre-trained model for custom dataset fine-tuning.",
+        "type": "comment"
+    },
+    "2806": {
+        "file_id": 222,
+        "content": "    --validate \\\n    --weights=./output/model_name/ppTSM_best.pdparams\n```\nPaddleVideo会自动**不加载**shape不匹配的参数\n## 模型测试\n需要指定 `--test`来启动测试模式，并指定`--weights`来加载预训练模型。\n```bash\npython3 -m paddle.distributed.launch \\\n    --gpus=\"0,1,2,3\" \\\n    main.py \\\n    -c ./configs/recognition/tsm/pptsm_regression.yaml \\\n    --test \\\n    --weights=./output/model_name/ppTSM_best.pdparams\n```\n## 模型优化\n在实际使用场景中可根据视频质量以及尺寸尝试优化策略\n- 可通过原图输入来替换RandomCrop:224操作，准确率由SROCC=0.8176,PLCC=0.8361提升到SROCC=0.8617,PLCC=0.8910,不同模型以及特征增强操作的效果对比如下表所示\n  |  模型  |                  特征增强                   | val_SROCC | val_PLCC |\n  | :----: | :-----------------------------------------: | :-------: | :------: |\n  | GSTVQA |                  原图输入                   |  0.7932   |  0.8006  |\n  | ppTSM  | train--RandomCrop=224  val--center_crop=224 |  0.8176   |  0.8361  |\n  | ppTSM  | train--RandomCrop=512  val--center_crop=512 |  0.8603   |  0.8822  |\n  | ppTSM  |                  原图输入                   |  0.8617   |  0.8910  |\n- 考虑应用场景视频的 aspect ratio 大都为 16：9 和 4：3 等，同时为了避免非均匀缩放拉伸带来的干扰 ，可以采用了（224x3）x(224x2)=672x448 的输入尺寸来更充分得利用有限的输入尺寸。 ",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/README.md:145-179"
+    },
+    "2807": {
+        "file_id": 222,
+        "content": "The code is launching PaddleVideo application for video quality assessment. It uses the TSM model with regression and loads the best trained weights from \"./output/model_name/ppTSM_best.pdparams\". The --test flag is used to run the model in test mode. The code also suggests optimizing strategies like using original input instead of RandomCrop, changing input size for better performance, and considering aspect ratios of 16:9 and 4:3 for improved results.",
+        "type": "comment"
+    },
+    "2808": {
+        "file_id": 222,
+        "content": "## 模型部署\n本代码解决方案在官方验证集(KonVid-150k-B)上的指标效果为SROCC=0.8176,PLCC=0.8361。\n## 参考论文\n- [TSM: Temporal Shift Module for Efficient Video Understanding](https://arxiv.org/pdf/1811.08383.pdf), Ji Lin, Chuang Gan, Song Han\n- [Quality Assessment of In-the-Wild Videos](https://dl.acm.org/citation.cfm?doid=3343031.3351028), Dingquan Li, Tingting Jiang, and Ming Jiang",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/README.md:181-189"
+    },
+    "2809": {
+        "file_id": 222,
+        "content": "This code provides a solution for video quality assessment with SROCC and PLCC scores on official validation dataset. It references two papers: TSM: Temporal Shift Module for Efficient Video Understanding and Quality Assessment of In-the-Wild Videos.",
+        "type": "comment"
+    },
+    "2810": {
+        "file_id": 223,
+        "content": "/applications/VideoQualityAssessment/main.py",
+        "type": "filepath"
+    },
+    "2811": {
+        "file_id": 223,
+        "content": "This code trains PaddleVideo models, imports libraries, defines command line arguments, and supports distributed training/testing based on --test argument.",
+        "type": "summary"
+    },
+    "2812": {
+        "file_id": 223,
+        "content": "\"\"\"\n# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport paddle\nimport argparse\nfrom paddlevideo.utils import get_config\nfrom paddlevideo.tasks import train_model, test_model\nfrom paddlevideo.utils import get_dist_info\ndef parse_args():\n    \"\"\"parse_args\"\"\"\n    parser = argparse.ArgumentParser(\"PaddleVideo train script\")\n    parser.add_argument('-c',\n                        '--config',\n                        type=str,\n                        default='configs/example.yaml',",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/main.py:1-30"
+    },
+    "2813": {
+        "file_id": 223,
+        "content": "This code snippet is the beginning of a Python script for PaddleVideo, specifically for training models. It imports necessary libraries and modules, defines a function to parse command line arguments, and sets up the argument parser.",
+        "type": "comment"
+    },
+    "2814": {
+        "file_id": 223,
+        "content": "                        help='config file path')\n    parser.add_argument('-o',\n                        '--override',\n                        action='append',\n                        default=[],\n                        help='config options to be overridden')\n    parser.add_argument('--test',\n                        action='store_true',\n                        help='whether to test a model')\n    parser.add_argument('--train_dali',\n                        action='store_true',\n                        help='whether to use dali to speed up training')\n    parser.add_argument('--multigrid',\n                        action='store_true',\n                        help='whether to use multigrid training')\n    parser.add_argument('-w',\n                        '--weights',\n                        type=str,\n                        help='weights for finetuning or testing')\n    parser.add_argument('--fleet',\n                        action='store_true',\n                        help='whether to use fleet run distributed training')",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/main.py:31-52"
+    },
+    "2815": {
+        "file_id": 223,
+        "content": "This code uses the ArgumentParser class to define and parse command-line arguments for a video quality assessment application. It allows specifying config file paths, overriding config options, testing a model, using DALI for training speedup, multigrid training, weights for finetuning or testing, and whether to use distributed training via fleet.",
+        "type": "comment"
+    },
+    "2816": {
+        "file_id": 223,
+        "content": "    parser.add_argument('--amp',\n                        action='store_true',\n                        help='whether to open amp training.')\n    parser.add_argument(\n        '--validate',\n        action='store_true',\n        help='whether to evaluate the checkpoint during training')\n    args = parser.parse_args()\n    return args\ndef main():\n    \"\"\"main\"\"\"\n    args = parse_args()\n    cfg = get_config(args.config, overrides=args.override)\n    _, world_size = get_dist_info()\n    parallel = world_size != 1\n    if parallel:\n        paddle.distributed.init_parallel_env()\n    if args.test:\n        test_model(cfg, weights=args.weights, parallel=parallel)\n    else:\n        train_model(cfg,\n                    weights=args.weights,\n                    parallel=parallel,\n                    validate=args.validate,\n                    fleet=args.fleet,\n                    amp=args.amp)\nif __name__ == '__main__':\n    main()",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/main.py:53-88"
+    },
+    "2817": {
+        "file_id": 223,
+        "content": "This code defines command line arguments for training and testing models, and initializes distributed parallel environment if necessary. Then it calls appropriate functions based on the --test argument value.",
+        "type": "comment"
+    },
+    "2818": {
+        "file_id": 224,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/__init__.py",
+        "type": "filepath"
+    },
+    "2819": {
+        "file_id": 224,
+        "content": "This code snippet is a license notice and import statement for the PaddleVideo library in Python. It sets the copyright, licensing information, and imports the version module from the same directory.",
+        "type": "summary"
+    },
+    "2820": {
+        "file_id": 224,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom .version import paddlevideo_version",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/__init__.py:1-17"
+    },
+    "2821": {
+        "file_id": 224,
+        "content": "This code snippet is a license notice and import statement for the PaddleVideo library in Python. It sets the copyright, licensing information, and imports the version module from the same directory.",
+        "type": "comment"
+    },
+    "2822": {
+        "file_id": 225,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/loader/__init__.py",
+        "type": "filepath"
+    },
+    "2823": {
+        "file_id": 225,
+        "content": "This file is a Python module for video dataset loading and processing in PaddleVideo. It contains functions to build datasets, data loaders, and batch pipelines, along with the VideoDataset class.",
+        "type": "summary"
+    },
+    "2824": {
+        "file_id": 225,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom .builder import build_dataset, build_dataloader, build_batch_pipeline\nfrom .dataset import VideoDataset\n__all__ = [\n    'build_dataset', 'build_dataloader', 'build_batch_pipeline', 'VideoDataset'\n]",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/__init__.py:1-21"
+    },
+    "2825": {
+        "file_id": 225,
+        "content": "This file is a Python module for video dataset loading and processing in PaddleVideo. It contains functions to build datasets, data loaders, and batch pipelines, along with the VideoDataset class.",
+        "type": "comment"
+    },
+    "2826": {
+        "file_id": 226,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/loader/builder.py",
+        "type": "filepath"
+    },
+    "2827": {
+        "file_id": 226,
+        "content": "This Python file utilizes PaddleVideo and PaddlePaddle library to construct video pipelines, defining functions for dataset, pipeline, and dataloader creation. It also includes signal handlers to terminate child processes upon receiving specific signals.",
+        "type": "summary"
+    },
+    "2828": {
+        "file_id": 226,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport signal\nimport os\nimport paddle\nfrom paddle.io import DataLoader, DistributedBatchSampler\nfrom .registry import DATASETS, PIPELINES\nfrom ..utils.build_utils import build\nfrom .pipelines.compose import Compose\nfrom paddlevideo.utils import get_logger\nimport numpy as np\nlogger = get_logger(\"paddlevideo\")\ndef build_pipeline(cfg):\n    \"\"\"Build pipeline.\n    Args:\n        cfg (dict): root config dict.\n    \"\"\"",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/builder.py:1-33"
+    },
+    "2829": {
+        "file_id": 226,
+        "content": "This code is a Python file for building video pipeline in PaddleVideo, which uses PaddlePaddle library. It imports necessary modules and defines a function to build the pipeline according to the provided configuration. The logger is used for logging purposes, and numpy is imported for numerical operations.",
+        "type": "comment"
+    },
+    "2830": {
+        "file_id": 226,
+        "content": "    return Compose(cfg)\ndef build_dataset(cfg):\n    \"\"\"Build dataset.\n    Args:\n        cfg (dict): root config dict.\n    Returns:\n        dataset: dataset.\n    \"\"\"\n    #XXX: ugly code here!\n    cfg_dataset, cfg_pipeline = cfg\n    cfg_dataset.pipeline = build_pipeline(cfg_pipeline)\n    dataset = build(cfg_dataset, DATASETS, key=\"format\")\n    return dataset\ndef build_batch_pipeline(cfg):\n    \"\"\"build batch pipeline\"\"\"\n    batch_pipeline = build(cfg, PIPELINES)\n    return batch_pipeline\ndef build_dataloader(dataset,\n                     batch_size,\n                     num_workers,\n                     places,\n                     shuffle=True,\n                     drop_last=True,\n                     multigrid=False,\n                     collate_fn_cfg=None,\n                     **kwargs):\n    \"\"\"Build Paddle Dataloader.\n    XXX explain how the dataloader work!\n    Args:\n        dataset (paddle.dataset): A PaddlePaddle dataset object.\n        batch_size (int): batch size on single card.\n        num_worker (int): num_worker",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/builder.py:34-74"
+    },
+    "2831": {
+        "file_id": 226,
+        "content": "This code defines functions to build a dataset, batch pipeline, and dataloader for PaddleVideo's Video Quality Assessment application. The build_dataset function constructs the dataset using cfg config dictionary. The build_batch_pipeline function builds the batch pipeline. Lastly, the build_dataloader function creates a Paddle Dataloader using the constructed dataset and other parameters like batch size, num_workers, etc.",
+        "type": "comment"
+    },
+    "2832": {
+        "file_id": 226,
+        "content": "        shuffle(bool): whether to shuffle the data at every epoch.\n    \"\"\"\n    sampler = DistributedBatchSampler(dataset,\n                                      batch_size=batch_size,\n                                      shuffle=shuffle,\n                                      drop_last=drop_last)\n    #NOTE(shipping): when switch the mix operator on, such as: mixup, cutmix.\n    # batch like: [[img, label, attibute, ...], [imgs, label, attribute, ...], ...] will recollate to:\n    # [[img, img, ...], [label, label, ...], [attribute, attribute, ...], ...] as using numpy.transpose.\n    def mix_collate_fn(batch):\n        \"\"\"mix collate fn\"\"\"\n        pipeline = build_batch_pipeline(collate_fn_cfg)\n        batch = pipeline(batch)\n        slots = []\n        for items in batch:\n            for i, item in enumerate(items):\n                if len(slots) < len(items):\n                    slots.append([item])\n                else:\n                    slots[i].append(item)\n        return [np.stack(slot, axis=0) for slot in slots]",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/builder.py:75-97"
+    },
+    "2833": {
+        "file_id": 226,
+        "content": "The code creates a DistributedBatchSampler for dataset with optional shuffle and drop_last parameters, and defines a mix_collate_fn function that applies a predefined collate_fn_cfg to batch data and returns it in a specific format using build_batch_pipeline.",
+        "type": "comment"
+    },
+    "2834": {
+        "file_id": 226,
+        "content": "    #if collate_fn_cfg is not None:\n    #ugly code here. collate_fn is mix op config\n    #    collate_fn = mix_collate_fn(collate_fn_cfg)\n    data_loader = DataLoader(\n        dataset,\n        batch_sampler=sampler,\n        places=places,\n        num_workers=num_workers,\n        collate_fn=mix_collate_fn if collate_fn_cfg is not None else None,\n        return_list=True,\n        **kwargs)\n    return data_loader\ndef term_mp(sig_num, frame):\n    \"\"\" kill all child processes\n    \"\"\"\n    pid = os.getpid()\n    pgid = os.getpgid(os.getpid())\n    logger.info(\"main proc {} exit, kill process group \" \"{}\".format(pid, pgid))\n    os.killpg(pgid, signal.SIGKILL)\n    return\nsignal.signal(signal.SIGINT, term_mp)\nsignal.signal(signal.SIGTERM, term_mp)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/builder.py:99-126"
+    },
+    "2835": {
+        "file_id": 226,
+        "content": "The code defines a function that returns a DataLoader object. If collate_fn_cfg is not None, it creates a mix_collate_fn and assigns it to the collate_fn variable. The returned DataLoader has its collate_fn set according to the value of collate_fn_cfg. The code also sets up signal handlers for SIGINT and SIGTERM, calling the term_mp function on receipt of either signal. The term_mp function kills all child processes in the current process group.",
+        "type": "comment"
+    },
+    "2836": {
+        "file_id": 227,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/loader/dataset/__init__.py",
+        "type": "filepath"
+    },
+    "2837": {
+        "file_id": 227,
+        "content": "This code is a Python module for video and frame datasets in PaddleVideo. It includes the VideoDataset class, FrameRecDataset class (from frame_rec module), and defines __all__.",
+        "type": "summary"
+    },
+    "2838": {
+        "file_id": 227,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom .video import VideoDataset\n#from .frame import FrameDataset\nfrom .frame_rec import FrameRecDataset\n__all__ = ['VideoDataset', 'FrameRecDataset']",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/dataset/__init__.py:1-21"
+    },
+    "2839": {
+        "file_id": 227,
+        "content": "This code is a Python module for video and frame datasets in PaddleVideo. It includes the VideoDataset class, FrameRecDataset class (from frame_rec module), and defines __all__.",
+        "type": "comment"
+    },
+    "2840": {
+        "file_id": 228,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/loader/dataset/base.py",
+        "type": "filepath"
+    },
+    "2841": {
+        "file_id": 228,
+        "content": "This code defines a dataset class for loading video information, requires subclassing to define load_file and prepare_train/test methods, prepares data for training/testing, and addresses DataLoader's dict type handling limitation.",
+        "type": "summary"
+    },
+    "2842": {
+        "file_id": 228,
+        "content": "\"\"\"\n# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport os.path as osp\nimport copy\nimport numpy as np\nfrom abc import ABC, abstractmethod\nimport paddle\nfrom paddle.io import Dataset\nclass BaseDataset(Dataset, ABC):\n    \"\"\"Base class for datasets\n    All datasets should subclass it.\n    All subclass should overwrite:\n    - Method: `load_file`, load info from index file.\n    - Method: `prepare_train`, providing train data.\n    - Method: `prepare_test`, providing test data.",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/dataset/base.py:1-34"
+    },
+    "2843": {
+        "file_id": 228,
+        "content": "Base class for datasets, subclass it. Subclasses should overwrite load_file (load info from index file), prepare_train (provide train data), and prepare_test (provide test data).",
+        "type": "comment"
+    },
+    "2844": {
+        "file_id": 228,
+        "content": "    Args:\n        file_path (str): index file path.\n        pipeline (Sequence XXX)\n        data_prefix (str): directory path of the data. Default: None.\n        test_mode (bool): whether to build test dataset. Default: False.\n    \"\"\"\n    def __init__(self, file_path, pipeline, data_prefix=None, test_mode=False):\n        super().__init__()\n        self.file_path = file_path\n        self.data_prefix = osp.realpath(data_prefix) if \\\n            data_prefix is not None and osp.isdir(data_prefix) else data_prefix\n        self.test_mode = test_mode\n        self.pipeline = pipeline\n        self.info = self.load_file()\n    @abstractmethod\n    def load_file(self):\n        \"\"\"load the video information from the index file path.\"\"\"\n        pass\n    def prepare_train(self, idx):\n        \"\"\"TRAIN & VALID. Prepare the data for training/valid given the index.\"\"\"\n        #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here\n        results = copy.deepcopy(self.info[idx])\n        results = self.pipeline(results)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/dataset/base.py:36-62"
+    },
+    "2845": {
+        "file_id": 228,
+        "content": "This code defines a class for loading video information from an index file path. It takes arguments such as the file_path, pipeline, data_prefix, and test_mode. The load_file method abstractly loads the video information from the index file. The prepare_train method prepares data for training/valid given the index. Note: DataLoader cannot support dict type retval, so it converts to list.",
+        "type": "comment"
+    },
+    "2846": {
+        "file_id": 228,
+        "content": "        #unsqueeze label to list\n        return results['imgs'], np.array([results['labels']])\n    def prepare_test(self, idx):\n        \"\"\"TEST: Prepare the data for test given the index.\"\"\"\n        #Note: For now, paddle.io.DataLoader cannot support dict type retval, so convert to list here\n        results = copy.deepcopy(self.info[idx])\n        results = self.pipeline(results)\n        #unsqueeze label to list\n        return results['imgs'], np.array([results['labels']])\n    def __len__(self):\n        \"\"\"get the size of the dataset.\"\"\"\n        return len(self.info)\n    def __getitem__(self, idx):\n        \"\"\" Get the sample for either training or testing given index\"\"\"\n        if self.test_mode:\n            return self.prepare_test(idx)\n        else:\n            return self.prepare_train(idx)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/dataset/base.py:63-83"
+    },
+    "2847": {
+        "file_id": 228,
+        "content": "The code defines a dataset class with methods for preparing data for training and testing, as well as returning the size of the dataset. The test_mode flag is used to determine whether to use the prepare_test or prepare_train method when accessing the dataset. Paddle.io.DataLoader cannot currently handle dict type return values, so they are converted to lists within these methods.",
+        "type": "comment"
+    },
+    "2848": {
+        "file_id": 229,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/loader/dataset/frame_rec.py",
+        "type": "filepath"
+    },
+    "2849": {
+        "file_id": 229,
+        "content": "The code introduces FrameRecDataset class for PaddleVideo, loading raw frames and applying transformations. Another class reads index files, initializes base class with parameters, and handles missing frame file exceptions during training/validation.",
+        "type": "summary"
+    },
+    "2850": {
+        "file_id": 229,
+        "content": "\"\"\"\n# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport os.path as osp\nimport copy\nimport random\nimport numpy as np\nfrom ..registry import DATASETS\nfrom .base import BaseDataset\nfrom ...utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@DATASETS.register()\nclass FrameRecDataset(BaseDataset):\n    \"\"\"Rawframe dataset for action recognition.\n    The dataset loads raw frames from frame files, and apply specified transform operatation them.\n    The ind",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/dataset/frame_rec.py:1-32"
+    },
+    "2851": {
+        "file_id": 229,
+        "content": "This code is part of the PaddleVideo library and defines a FrameRecDataset class for action recognition. It loads raw frames from frame files, applies specified transform operations to them, and registers the dataset with the DATASETS registry.",
+        "type": "comment"
+    },
+    "2852": {
+        "file_id": 229,
+        "content": "ecx file is a text file with multiple lines, and each line indicates the directory of frames of a video, toatl frames of the video, and its label, which split with a whitespace.\n    Example of an index file:\n    .. code-block:: txt\n        file_path-1 150 1\n        file_path-2 160 1\n        file_path-3 170 2\n        file_path-4 180 2\n    Args:\n        file_path (str): Path to the index file.\n        pipeline(XXX):\n        data_prefix (str): directory path of the data. Default: None.\n        test_mode (bool): Whether to bulid the test dataset. Default: False.\n        suffix (str): suffix of file. Default: 'img_{:05}.jpg'.\n    \"\"\"\n    def __init__(self,\n                 file_path,\n                 pipeline,\n                 num_retries=5,\n                 data_prefix=None,\n                 test_mode=False,\n                 suffix='img_{:05}.jpg'):\n        self.num_retries = num_retries\n        self.suffix = suffix\n        super().__init__(file_path, pipeline, data_prefix, test_mode)\n    def load_file(self):\n        \"\"\"Load index file to get video information.\"\"\"",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/dataset/frame_rec.py:32-62"
+    },
+    "2853": {
+        "file_id": 229,
+        "content": "This code defines a class that loads index files containing video information. The class takes an index file path, pipeline, data prefix (optional), test mode (optional) and suffix (optional) as arguments. It initializes the base class with these parameters and then has a method load_file() to read the index file and get the video information.",
+        "type": "comment"
+    },
+    "2854": {
+        "file_id": 229,
+        "content": "        info = []\n        with open(self.file_path, 'r') as fin:\n            for line in fin:\n                line_split = line.strip().split()\n                mp4_path, frame_dir, frames_len, labels = line_split\n                if self.data_prefix is not None:\n                    frame_dir = osp.join(self.data_prefix, frame_dir)\n                info.append(\n                    dict(frame_dir=frame_dir,\n                         suffix=self.suffix,\n                         frames_len=frames_len,\n                         labels=float(labels)))\n        return info\n    def prepare_train(self, idx):\n        \"\"\"Prepare the frames for training/valid given index. \"\"\"\n        #Try to catch Exception caused by reading missing frames files\n        for ir in range(self.num_retries):\n            try:\n                results = copy.deepcopy(self.info[idx])\n                results = self.pipeline(results)\n            except Exception as e:\n                logger.info(e)\n                if ir < self.num_retries - 1:\n                    logger.info(",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/dataset/frame_rec.py:63-88"
+    },
+    "2855": {
+        "file_id": 229,
+        "content": "This code reads a file and parses each line into frame path, directory, number of frames, and labels. It returns a list of dictionaries containing this information. The \"prepare_train\" function tries to prepare the frames for training/validation multiple times in case an exception occurs while reading the frames files.",
+        "type": "comment"
+    },
+    "2856": {
+        "file_id": 229,
+        "content": "                        \"Error when loading {}, have {} trys, will try again\".\n                        format(results['frame_dir'], ir))\n                idx = random.randint(0, len(self.info) - 1)\n                continue\n            return results['imgs'], np.array([results['labels']])\n    def prepare_test(self, idx):\n        \"\"\"Prepare the frames for test given index. \"\"\"\n        #Try to catch Exception caused by reading missing frames files\n        for ir in range(self.num_retries):\n            try:\n                results = copy.deepcopy(self.info[idx])\n                results = self.pipeline(results)\n            except Exception as e:\n                logger.info(e)\n                if ir < self.num_retries - 1:\n                    logger.info(\n                        \"Error when loading {}, have {} trys, will try again\".\n                        format(results['frame_dir'], ir))\n                idx = random.randint(0, len(self.info) - 1)\n                continue\n            return results['imgs'], np.array([results['labels']])",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/dataset/frame_rec.py:89-110"
+    },
+    "2857": {
+        "file_id": 229,
+        "content": "The code handles exceptions caused by reading missing frames files. It attempts to load the frames multiple times if there are errors, and keeps track of the number of retries. If an error occurs, it logs the error message and continues with a different index from the dataset until it successfully loads the frames.",
+        "type": "comment"
+    },
+    "2858": {
+        "file_id": 230,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/loader/dataset/video.py",
+        "type": "filepath"
+    },
+    "2859": {
+        "file_id": 230,
+        "content": "The code introduces a PaddleVideo class in Python for loading and processing video datasets, reading index files, applying transforms, handles corrupted files with retries, and provides error logging during training/validation.",
+        "type": "summary"
+    },
+    "2860": {
+        "file_id": 230,
+        "content": "\"\"\"\n# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport os.path as osp\nimport copy\nimport random\nimport numpy as np\nfrom ..registry import DATASETS\nfrom .base import BaseDataset\nfrom ...utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@DATASETS.register()\nclass VideoDataset(BaseDataset):\n    \"\"\"Video dataset for action recognition\n       The dataset loads raw videos and apply specified transforms on them.\n       The index file is a file with multiple lines, and each line indicates",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/dataset/video.py:1-32"
+    },
+    "2861": {
+        "file_id": 230,
+        "content": "This code is a Python class defining a video dataset for action recognition. It loads raw videos and applies specified transforms on them using an index file with multiple lines, each indicating the properties of a video. The code is part of the PaddleVideo library.",
+        "type": "comment"
+    },
+    "2862": {
+        "file_id": 230,
+        "content": "       a sample video with the filepath and label, which are split with a whitesapce.\n       Example of a inde file:\n       .. code-block:: txt\n           path/000.mp4 1\n           path/001.mp4 1\n           path/002.mp4 2\n           path/003.mp4 2\n       Args:\n           file_path(str): Path to the index file.\n           pipeline(XXX): A sequence of data transforms.\n           **kwargs: Keyword arguments for ```BaseDataset```.\n    \"\"\"\n    def __init__(self, file_path, pipeline, num_retries=5, **kwargs):\n        self.num_retries = num_retries\n        super().__init__(file_path, pipeline, **kwargs)\n    def load_file(self):\n        \"\"\"Load index file to get video information.\"\"\"\n        info = []\n        with open(self.file_path, 'r') as fin:\n            for line in fin:\n                line_split = line.strip().split()\n                filename, labels = line_split\n                #TODO(hj): Required suffix format: may mp4/avi/wmv\n                filename = filename + '.avi'\n                if self.data_prefix is not None:",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/dataset/video.py:33-58"
+    },
+    "2863": {
+        "file_id": 230,
+        "content": "This code initializes a dataset class, which reads an index file containing paths to video files and their labels. It loads the index file line by line and processes each line to append video information into a list called \"info\". The filename is assumed to have .avi suffix in this case. If there is a data_prefix assigned, it will be added to the filename.",
+        "type": "comment"
+    },
+    "2864": {
+        "file_id": 230,
+        "content": "                    filename = osp.join(self.data_prefix, filename)\n                info.append(dict(filename=filename, labels=int(labels)))\n        return info\n    def prepare_train(self, idx):\n        \"\"\"TRAIN & VALID. Prepare the data for training/valid given the index.\"\"\"\n        #Try to catch Exception caused by reading corrupted video file\n        for ir in range(self.num_retries):\n            try:\n                results = copy.deepcopy(self.info[idx])\n                results = self.pipeline(results)\n            except Exception as e:\n                logger.info(e)\n                if ir < self.num_retries - 1:\n                    logger.info(\n                        \"Error when loading {}, have {} trys, will try again\".\n                        format(results['filename'], ir))\n                idx = random.randint(0, len(self.info) - 1)\n                continue\n            return results['imgs'], np.array([results['labels']])\n    def prepare_test(self, idx):\n        \"\"\"TEST. Prepare the data for test given the index.\"\"\"",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/dataset/video.py:59-81"
+    },
+    "2865": {
+        "file_id": 230,
+        "content": "The code is a part of a video dataset loader. It handles preparing data for training, validation, and testing in a dataset with potential corrupted files. It joins filenames to the prefix, stores them along with labels in a list (info). For training/validation, it tries a set number of times to read each file due to possible corruption, applies a pipeline to the data, logs exceptions if they occur, and tries again with a random index if needed. In testing, it simply returns the prepared data without retries or error handling.",
+        "type": "comment"
+    },
+    "2866": {
+        "file_id": 230,
+        "content": "        #Try to catch Exception caused by reading corrupted video file\n        for ir in range(self.num_retries):\n            try:\n                results = copy.deepcopy(self.info[idx])\n                results = self.pipeline(results)\n            except Exception as e:\n                logger.info(e)\n                if ir < self.num_retries - 1:\n                    logger.info(\n                        \"Error when loading {}, have {} trys, will try again\".\n                        format(results['filename'], ir))\n                idx = random.randint(0, len(self.info) - 1)\n                continue\n            return results['imgs'], np.array([results['labels']])",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/dataset/video.py:82-95"
+    },
+    "2867": {
+        "file_id": 230,
+        "content": "This code attempts to read a video file and catch any exceptions caused by reading corrupted files. It uses a retry mechanism with a maximum number of retries (self.num_retries) to handle potential errors. If an exception occurs, the error is logged, and if there are more retries left, it tries again with a different random index from self.info. Once successful, it returns the images and labels as numpy arrays.",
+        "type": "comment"
+    },
+    "2868": {
+        "file_id": 231,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/__init__.py",
+        "type": "filepath"
+    },
+    "2869": {
+        "file_id": 231,
+        "content": "The code imports PaddleVideo library functions for data augmentation, composition, decoding, and sampling in video analysis tasks, while using a list of pipeline modules to perform operations like mixing, cropping, and scaling.",
+        "type": "summary"
+    },
+    "2870": {
+        "file_id": 231,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom .augmentations import (\n    Scale,\n    RandomCrop,\n    CenterCrop,\n    RandomFlip,\n    Image2Array,\n    Normalization,\n    JitterScale,\n    MultiCrop,\n    PackOutput,\n)\nfrom .compose import Compose\nfrom .decode import VideoDecoder, FrameDecoder\nfrom .sample import Sampler\nfrom .mix import Mixup, Cutmix\n__all__ = [\n    'Scale',\n    'RandomCrop',\n    'CenterCrop',\n    'RandomFlip',\n    'Image2Array',\n    'Normalization',",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/__init__.py:1-40"
+    },
+    "2871": {
+        "file_id": 231,
+        "content": "This code imports various functions and classes from different modules in the PaddleVideo library, which are used for data augmentation, composition, decoding, and sampling in video analysis tasks.",
+        "type": "comment"
+    },
+    "2872": {
+        "file_id": 231,
+        "content": "    'Compose',\n    'VideoDecoder',\n    'FrameDecoder',\n    'Sampler',\n    'Mixup',\n    'Cutmix',\n    'JitterScale',\n    'MultiCrop',\n    'PackOutput',\n]",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/__init__.py:41-50"
+    },
+    "2873": {
+        "file_id": 231,
+        "content": "The code above is a list of pipeline modules used in the PaddleVideo framework for video processing tasks. These modules perform various operations such as data augmentation, mixing, cropping, and scaling before feeding into the model for training or evaluation.",
+        "type": "comment"
+    },
+    "2874": {
+        "file_id": 232,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/augmentations.py",
+        "type": "filepath"
+    },
+    "2875": {
+        "file_id": 232,
+        "content": "The code introduces a \"Scale\" class for image scaling and a MultiScaleCrop pipeline in PaddleVideo. It supports random or multi-crop based on test mode, maintaining aspect ratio while resizing/cropping images. A slower pathway is created by selecting specific frames from the fast_pathway array, rearranging dimensions, and then combined with the original for a list of frames before adding to 'results' dictionary.",
+        "type": "summary"
+    },
+    "2876": {
+        "file_id": 232,
+        "content": "\"\"\"\n#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport random\nimport numpy as np\nimport math\nfrom PIL import Image\nfrom ..registry import PIPELINES\nfrom collections.abc import Sequence\n@PIPELINES.register()\nclass Scale(object):\n    \"\"\"\n    Scale images.\n    Args:\n        short_size(float | int): Short size of an image will be scaled to the short_size.\n    \"\"\"\n    def __init__(self, short_size):\n        self.short_size = short_size\n    def __call__(self, results):",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/augmentations.py:1-35"
+    },
+    "2877": {
+        "file_id": 232,
+        "content": "This code registers a new class \"Scale\" for image scaling in PaddleVideo's VideoQualityAssessment module. The Scale class takes a short_size parameter and scales the images accordingly. It is registered as part of the PIPELINES in the application.",
+        "type": "comment"
+    },
+    "2878": {
+        "file_id": 232,
+        "content": "        \"\"\"\n        Performs resize operations.\n        Args:\n            imgs (Sequence[PIL.Image]): List where each item is a PIL.Image.\n            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]\n        return:\n            resized_imgs: List where each item is a PIL.Image after scaling.\n        \"\"\"\n        imgs = results['imgs']\n        resized_imgs = []\n        for i in range(len(imgs)):\n            img = imgs[i]\n            w, h = img.size\n            if (w <= h and w == self.short_size) or (h <= w\n                                                     and h == self.short_size):\n                resized_imgs.append(img)\n                continue\n            if w < h:\n                ow = self.short_size\n                oh = int(self.short_size * 4.0 / 3.0)\n                resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))\n            else:\n                oh = self.short_size\n                ow = int(self.short_size * 4.0 / 3.0)\n                resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/augmentations.py:36-61"
+    },
+    "2879": {
+        "file_id": 232,
+        "content": "The code defines a function that resizes PIL.Image objects in a list according to their aspect ratios and the short_size provided. If an image's width is less than or equal to its height, it is appended to resized_imgs without any modification. Otherwise, if the width is greater than the height, the image is scaled to fit within a square with the given short_size, maintaining aspect ratio using bilinear interpolation. If the height is greater than the width, the image is also scaled to fit within a square with the given short_size, again maintaining aspect ratio using bilinear interpolation.",
+        "type": "comment"
+    },
+    "2880": {
+        "file_id": 232,
+        "content": "        results['imgs'] = resized_imgs\n        return results\n@PIPELINES.register()\nclass RandomCrop(object):\n    \"\"\"\n    Random crop images.\n    Args:\n        target_size(int): Random crop a square with the target_size from an image.\n    \"\"\"\n    def __init__(self, target_size):\n        self.target_size = target_size\n    def __call__(self, results):\n        \"\"\"\n        Performs random crop operations.\n        Args:\n            imgs: List where each item is a PIL.Image.\n            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]\n        return:\n            crop_imgs: List where each item is a PIL.Image after random crop.\n        \"\"\"\n        imgs = results['imgs']\n        w, h = imgs[0].size\n        th, tw = self.target_size, self.target_size\n        assert (w >= self.target_size) and (h >= self.target_size), \\\n            \"image width({}) and height({}) should be larger than crop size {}\".format(\n                w, h, self.target_size)\n        crop_images = []\n        x1 = random.randint(0, w - tw)\n        y1 = random.randint(0, h - th)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/augmentations.py:62-95"
+    },
+    "2881": {
+        "file_id": 232,
+        "content": "The code registers a custom pipeline for random cropping of images in PaddleVideo. It takes a target size as an argument and initializes the class with that target size. The __call__ method is used to perform random crop operations on a list of images. It first retrieves the original image sizes, ensures they are larger than the target size, then randomly selects x1 and y1 coordinates for the crop region, and appends the cropped image to a new list which is returned at the end.",
+        "type": "comment"
+    },
+    "2882": {
+        "file_id": 232,
+        "content": "        for img in imgs:\n            if w == tw and h == th:\n                crop_images.append(img)\n            else:\n                crop_images.append(img.crop((x1, y1, x1 + tw, y1 + th)))\n        results['imgs'] = crop_images\n        return results\n@PIPELINES.register()\nclass CenterCrop(object):\n    \"\"\"\n    Center crop images.\n    Args:\n        target_size(int): Center crop a square with the target_size from an image.\n    \"\"\"\n    def __init__(self, target_size):\n        self.target_size = target_size\n    def __call__(self, results):\n        \"\"\"\n        Performs Center crop operations.\n        Args:\n            imgs: List where each item is a PIL.Image.\n            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]\n        return:\n            ccrop_imgs: List where each item is a PIL.Image after Center crop.\n        \"\"\"\n        imgs = results['imgs']\n        ccrop_imgs = []\n        for img in imgs:\n            w, h = img.size\n            th, tw = self.target_size, self.target_size\n            assert (w >= self.target_size) and (h >= self.target_size), \\",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/augmentations.py:97-130"
+    },
+    "2883": {
+        "file_id": 232,
+        "content": "This code performs center cropping of images to a specified target size. It iterates through the list of images, checks if they are already at the target size, and appends them to the crop_images list. If the image is not at the target size, it crops the image to the center square of the original image and adds it to the crop_images list. The final results dictionary contains the list of cropped images. The class CenterCrop initializes with a target_size parameter and defines a __call__ method for applying the center crop operation on input images.",
+        "type": "comment"
+    },
+    "2884": {
+        "file_id": 232,
+        "content": "                \"image width({}) and height({}) should be larger than crop size {}\".format(\n                    w, h, self.target_size)\n            x1 = int(round((w - tw) / 2.))\n            y1 = int(round((h - th) / 2.))\n            ccrop_imgs.append(img.crop((x1, y1, x1 + tw, y1 + th)))\n        results['imgs'] = ccrop_imgs\n        return results\n@PIPELINES.register()\nclass MultiScaleCrop(object):\n    def __init__(\n            self,\n            target_size,  #NOTE: named target size now, but still pass short size in it!\n            scales=None,\n            max_distort=1,\n            fix_crop=True,\n            more_fix_crop=True):\n        self.target_size = target_size\n        self.scales = scales if scales else [1, .875, .75, .66]\n        self.max_distort = max_distort\n        self.fix_crop = fix_crop\n        self.more_fix_crop = more_fix_crop\n    def __call__(self, results):\n        \"\"\"\n        Performs MultiScaleCrop operations.\n        Args:\n            imgs: List where wach item is a PIL.Image.\n            XXX:",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/augmentations.py:131-160"
+    },
+    "2885": {
+        "file_id": 232,
+        "content": "MultiScaleCrop applies image resizing and cropping to an input image. The target size, scales, max_distort, fix_crop, and more_fix_crop parameters are used for image manipulation. Images are cropped into smaller ones with varying sizes based on the defined scales.",
+        "type": "comment"
+    },
+    "2886": {
+        "file_id": 232,
+        "content": "        results:\n        \"\"\"\n        imgs = results['imgs']\n        input_size = [self.target_size, self.target_size]\n        im_size = imgs[0].size\n        # get random crop offset\n        def _sample_crop_size(im_size):\n            image_w, image_h = im_size[0], im_size[1]\n            base_size = min(image_w, image_h)\n            crop_sizes = [int(base_size * x) for x in self.scales]\n            crop_h = [\n                input_size[1] if abs(x - input_size[1]) < 3 else x\n                for x in crop_sizes\n            ]\n            crop_w = [\n                input_size[0] if abs(x - input_size[0]) < 3 else x\n                for x in crop_sizes\n            ]\n            pairs = []\n            for i, h in enumerate(crop_h):\n                for j, w in enumerate(crop_w):\n                    if abs(i - j) <= self.max_distort:\n                        pairs.append((w, h))\n            crop_pair = random.choice(pairs)\n            if not self.fix_crop:\n                w_offset = random.randint(0, image_w - crop_pair[0])",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/augmentations.py:161-192"
+    },
+    "2887": {
+        "file_id": 232,
+        "content": "This code defines a function to sample random crop sizes for image augmentation. It first calculates the possible crop sizes based on input size and scales, then filters pairs that have a difference within max_distort. Finally, it randomly chooses one of the filtered pairs for cropping and optionally adds a random offset if fix_crop is False.",
+        "type": "comment"
+    },
+    "2888": {
+        "file_id": 232,
+        "content": "                h_offset = random.randint(0, image_h - crop_pair[1])\n            else:\n                w_step = (image_w - crop_pair[0]) / 4\n                h_step = (image_h - crop_pair[1]) / 4\n                ret = list()\n                ret.append((0, 0))  # upper left\n                if w_step != 0:\n                    ret.append((4 * w_step, 0))  # upper right\n                if h_step != 0:\n                    ret.append((0, 4 * h_step))  # lower left\n                if h_step != 0 and w_step != 0:\n                    ret.append((4 * w_step, 4 * h_step))  # lower right\n                if h_step != 0 or w_step != 0:\n                    ret.append((2 * w_step, 2 * h_step))  # center\n                if self.more_fix_crop:\n                    ret.append((0, 2 * h_step))  # center left\n                    ret.append((4 * w_step, 2 * h_step))  # center right\n                    ret.append((2 * w_step, 4 * h_step))  # lower center\n                    ret.append((2 * w_step, 0 * h_step))  # upper center\n                    ret.append((1 * w_step, 1 * h_step))  # upper left quarter",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/augmentations.py:193-215"
+    },
+    "2889": {
+        "file_id": 232,
+        "content": "This code generates a list of crop positions for an image. If the image height is greater than the second value in the crop pair, it randomly selects a horizontal offset. Otherwise, it calculates step sizes for width and height, and creates a list of crop positions using these steps. Additional crop positions are added if self.more_fix_crop is True.",
+        "type": "comment"
+    },
+    "2890": {
+        "file_id": 232,
+        "content": "                    ret.append((3 * w_step, 1 * h_step))  # upper right quarter\n                    ret.append((1 * w_step, 3 * h_step))  # lower left quarter\n                    ret.append((3 * w_step, 3 * h_step))  # lower righ quarter\n                w_offset, h_offset = random.choice(ret)\n            return crop_pair[0], crop_pair[1], w_offset, h_offset\n        crop_w, crop_h, offset_w, offset_h = _sample_crop_size(im_size)\n        crop_img_group = [\n            img.crop((offset_w, offset_h, offset_w + crop_w, offset_h + crop_h))\n            for img in imgs\n        ]\n        ret_img_group = [\n            img.resize((input_size[0], input_size[1]), Image.BILINEAR)\n            for img in crop_img_group\n        ]\n        results['imgs'] = ret_img_group\n        return results\n@PIPELINES.register()\nclass RandomFlip(object):\n    \"\"\"\n    Random Flip images.\n    Args:\n        p(float): Random flip images with the probability p.\n    \"\"\"\n    def __init__(self, p=0.5):\n        self.p = p\n    def __call__(self, results):",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/augmentations.py:216-247"
+    },
+    "2891": {
+        "file_id": 232,
+        "content": "The code randomly samples crop sizes from a set of predefined ratios, crops the input images accordingly, resizes them to the desired input size, and adds the flipped or cropped images to the results dictionary. It also includes an optional RandomFlip pipeline that randomly flips the image with a given probability.",
+        "type": "comment"
+    },
+    "2892": {
+        "file_id": 232,
+        "content": "        \"\"\"\n        Performs random flip operations.\n        Args:\n            imgs: List where each item is a PIL.Image.\n            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]\n        return:\n            flip_imgs: List where each item is a PIL.Image after random flip.\n        \"\"\"\n        imgs = results['imgs']\n        v = random.random()\n        if v < self.p:\n            results['imgs'] = [\n                img.transpose(Image.FLIP_LEFT_RIGHT) for img in imgs\n            ]\n        else:\n            results['imgs'] = imgs\n        return results\n@PIPELINES.register()\nclass Image2Array(object):\n    \"\"\"\n    transfer PIL.Image to Numpy array and transpose dimensions from 'dhwc' to 'dchw'.\n    Args:\n        transpose: whether to transpose or not, default True, False for slowfast.\n    \"\"\"\n    def __init__(self, transpose=True):\n        self.transpose = transpose\n    def __call__(self, results):\n        \"\"\"\n        Performs Image to NumpyArray operations.\n        Args:\n            imgs: List where each item is a PIL.Image.",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/augmentations.py:248-281"
+    },
+    "2893": {
+        "file_id": 232,
+        "content": "This code defines two classes: \"RandomFlip\" and \"Image2Array\". RandomFlip performs random flips on a list of PIL images, while Image2Array converts a PIL image to a numpy array with optional transpose. Both are registered as pipelines using @PIPELINES.",
+        "type": "comment"
+    },
+    "2894": {
+        "file_id": 232,
+        "content": "            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]\n        return:\n            np_imgs: Numpy array.\n        \"\"\"\n        imgs = results['imgs']\n        np_imgs = (np.stack(imgs)).astype('float32')\n        if self.transpose:\n            np_imgs = np_imgs.transpose(0, 3, 1, 2)  #nchw\n        results['imgs'] = np_imgs\n        return results\n@PIPELINES.register()\nclass Normalization(object):\n    \"\"\"\n    Normalization.\n    Args:\n        mean(Sequence[float]): mean values of different channels.\n        std(Sequence[float]): std values of different channels.\n        tensor_shape(list): size of mean, default [3,1,1]. For slowfast, [1,1,1,3]\n    \"\"\"\n    def __init__(self, mean, std, tensor_shape=[3, 1, 1]):\n        if not isinstance(mean, Sequence):\n            raise TypeError(\n                'Mean must be list, tuple or np.ndarray, but got {type(mean)}')\n        if not isinstance(std, Sequence):\n            raise TypeError(\n                'Std must be list, tuple or np.ndarray, but got {type(std)}')\n        self.mean = np.array(mean).reshape(tensor_shape).astype(np.float32)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/augmentations.py:282-310"
+    },
+    "2895": {
+        "file_id": 232,
+        "content": "This function converts a list of PIL images to a numpy array, optionally transposes it if needed, and stores the result in the 'imgs' key of the results dictionary. Additionally, the Normalization class initializes with mean and std values for normalization and reshapes them to fit the tensor shape.",
+        "type": "comment"
+    },
+    "2896": {
+        "file_id": 232,
+        "content": "        self.std = np.array(std).reshape(tensor_shape).astype(np.float32)\n    def __call__(self, results):\n        \"\"\"\n        Performs normalization operations.\n        Args:\n            imgs: Numpy array.\n        return:\n            np_imgs: Numpy array after normalization.\n        \"\"\"\n        imgs = results['imgs']\n        norm_imgs = imgs / 255.\n        norm_imgs -= self.mean\n        norm_imgs /= self.std\n        results['imgs'] = norm_imgs\n        return results\n@PIPELINES.register()\nclass JitterScale(object):\n    \"\"\"\n    Scale image, while the target short size is randomly select between min_size and max_size.\n    Args:\n        min_size: Lower bound for random sampler.\n        max_size: Higher bound for random sampler.\n    \"\"\"\n    def __init__(self,\n                 min_size,\n                 max_size,\n                 short_cycle_factors=[0.5, 0.7071],\n                 default_min_size=256):\n        self.default_min_size = default_min_size\n        self.orig_min_size = self.min_size = min_size\n        self.max_size = max_size",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/augmentations.py:311-344"
+    },
+    "2897": {
+        "file_id": 232,
+        "content": "The code is a part of the PaddleVideo library's VideoQualityAssessment module. It performs normalization operations on image arrays and registers a JitterScale class for image scaling with random short size selection between min_size and max_size, also including cycling factors for default minimum size functionality.",
+        "type": "comment"
+    },
+    "2898": {
+        "file_id": 232,
+        "content": "        self.short_cycle_factors = short_cycle_factors\n    def __call__(self, results):\n        \"\"\"\n        Performs jitter resize operations.\n        Args:\n            imgs (Sequence[PIL.Image]): List where each item is a PIL.Image.\n            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]\n        return:\n            resized_imgs: List where each item is a PIL.Image after scaling.\n        \"\"\"\n        short_cycle_idx = results.get('short_cycle_idx')\n        if short_cycle_idx in [0, 1]:\n            self.min_size = int(\n                round(self.short_cycle_factors[short_cycle_idx] *\n                      self.default_min_size))\n        else:\n            self.min_size = self.orig_min_size\n        imgs = results['imgs']\n        size = int(round(np.random.uniform(self.min_size, self.max_size)))\n        assert (len(imgs) >= 1) , \\\n            \"len(imgs):{} should be larger than 1\".format(len(imgs))\n        width, height = imgs[0].size\n        if (width <= height and width == size) or (height <= width\n                                                   and height == size):",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/loader/pipelines/augmentations.py:345-370"
+    },
+    "2899": {
+        "file_id": 232,
+        "content": "This code performs jitter resize operations and applies random scaling. It takes a sequence of PIL.Image, scales each item based on min_size, max_size, and short_cycle_factors. If the number of images is less than 1, it throws an error. The size is determined by randomly selecting values between min_size and max_size.",
+        "type": "comment"
+    }
+}

@@ -1,0 +1,20 @@
+{
+    "summary": "The code is a part of PaddleVideo's TableTennis application, containing an AttrDict class and parse_config function for parsing YAML configuration files using yaml and ast libraries. It also imports the logger module for logging purposes, and logs a separator string to indicate context changes.",
+    "details": [
+        {
+            "comment": "The code is part of the PaddleVideo TableTennis application and contains a class called AttrDict that extends the Python dictionary functionality. The file also includes the parse_config function, which likely reads and parses configuration files. The code uses the yaml and ast libraries for processing configuration data in a format-agnostic manner. Additionally, it defines a list of configuration types (CONFIG_SECS) and utilizes the logger module for logging purposes.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/TableTennis/predict/action_detect/utils/config_utils.py\":0-46",
+            "content": "\"\"\"\nconfig_utils\n\"\"\"\n#  Copyright (c) 2018 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport yaml\nimport ast\nimport logger\nlogger = logger.Logger()\nCONFIG_SECS = [\n    'train',\n    'valid',\n    'test',\n    'infer',\n]\nclass AttrDict(dict):\n    \"\"\"\n    AttrDict\n    \"\"\"\n    def __getattr__(self, key):\n        return self[key]\n    def __setattr__(self, key, value):\n        if key in self.__dict__:\n            self.__dict__[key] = value\n        else:\n            self[key] = value\ndef parse_config(cfg_file):"
+        },
+        {
+            "comment": "This code imports the yaml library and loads a configuration file into an AttrDict object, allowing for easier manipulation of nested dictionary data. It also includes functions to create an AttrDict from a string and print the configurations in a formatted manner.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/TableTennis/predict/action_detect/utils/config_utils.py\":47-79",
+            "content": "    \"\"\"Load a config file into AttrDict\"\"\"\n    import yaml\n    with open(cfg_file, 'r') as fopen:\n        yaml_config = AttrDict(yaml.load(fopen, Loader=yaml.Loader))\n    create_attr_dict(yaml_config)\n    return yaml_config\ndef create_attr_dict(yaml_config):\n    \"\"\"create_attr_dict\"\"\"\n    for key, value in yaml_config.items():\n        if isinstance(value, dict):\n            yaml_config[key] = value = AttrDict(value)\n        if isinstance(value, str):\n            try:\n                value = ast.literal_eval(value)\n            except BaseException:\n                pass\n        if isinstance(value, AttrDict):\n            create_attr_dict(yaml_config[key])\n        else:\n            yaml_config[key] = value\n    return\ndef print_configs(cfg, mode):\n    \"\"\"print_configs\"\"\"\n    logger.info(\n        \"---------------- {:>5} Arguments ----------------\".format(mode))\n    for sec, sec_items in cfg.items():\n        logger.info(\"{}:\".format(sec))\n        for k, v in sec_items.items():\n            logger.info(\"    {}:{}\".format(k, v))"
+        },
+        {
+            "comment": "This code snippet logs a separator string to the logger, indicating a change in context or section within the program.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/TableTennis/predict/action_detect/utils/config_utils.py\":80-80",
+            "content": "    logger.info(\"-------------------------------------------------\")"
+        }
+    ]
+}

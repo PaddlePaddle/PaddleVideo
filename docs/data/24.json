@@ -1,0 +1,547 @@
+{
+    "2400": {
+        "file_id": 187,
+        "content": "                ghost_clusters=ghost_clusters[\"text\"],\n            )\n            self.text_bert = BertModel.from_pretrained('bert-base-uncased')\n            text_dim = self.text_pooling.out_dim\n        self.ce = CEModule(\n            text_dim=text_dim,\n            expert_dims=expert_dims,\n            vlad_feat_sizes=vlad_feat_sizes,\n            mimic_ce_dims=mimic_ce_dims,\n            use_mish=use_mish,\n            same_dim=ce_shared_dim,\n        )\n    def forward(self,\n                experts,\n                ind,\n                cap_id=None,\n                att_mask=None,\n                text=None,\n                raw_captions=None,\n                text_token_mask=None):\n        aggregated_experts = OrderedDict()\n        # Handle all nan-checks\n        for mod in self.expert_dims:\n            experts[mod] = drop_nans(x=experts[mod],\n                                     ind=ind[mod],\n                                     validate_missing=True)\n            aggregated_experts[mod] = experts[mod]\n        start = time.time()",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/model.py:99-130"
+    },
+    "2401": {
+        "file_id": 187,
+        "content": "The code initializes a model with specified expert dimensions, and handles nan-checks for the experts. It also creates a time estimation start point.",
+        "type": "comment"
+    },
+    "2402": {
+        "file_id": 187,
+        "content": "        # When pooling multiple captions for a single video, we treat them as separate\n        # members of the minibatch, so the total pooling op does the following:\n        # pooling: B x captions_per_video x max_sentence_length x text_feat_dim\n        # -> B x captions_per_video (cluster_dim * text_feat_dim)\n        B, captions_per_video, max_words, text_feat_dim = text.shape\n        text = text.reshape([B * captions_per_video, max_words, text_feat_dim])\n        if isinstance(self.text_pooling, NetVLAD):\n            kwargs = {\"mask\": text_token_mask}\n        else:\n            kwargs = {}\n        cap_id = cap_id.reshape([B * captions_per_video, -1])\n        att_mask = att_mask.reshape([B * captions_per_video, -1])\n        att_mask = att_mask.unsqueeze(axis=[1, 2])\n        bert_out = self.text_bert(cap_id,\n                                  token_type_ids=None,\n                                  attention_mask=att_mask)\n        text = bert_out[0]\n        text, _, save_ass = self.text_pooling(text, **kwargs)",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/model.py:131-148"
+    },
+    "2403": {
+        "file_id": 187,
+        "content": "This code is reshaping the input text tensor to account for multiple captions per video, applying a pooling operation specific to the chosen text_pooling method (NetVLAD in this case), and then passing the text through a BERT model before performing pooling again. The resulting output is shaped according to the required format for further processing.",
+        "type": "comment"
+    },
+    "2404": {
+        "file_id": 187,
+        "content": "        text = text.reshape([B, captions_per_video, -1])\n        return self.ce(text, aggregated_experts, ind, raw_captions,\n                       self.text_pooling, start)\ndef _get_clones(module, N):\n    return nn.LayerList([copy.deepcopy(module) for i in range(N)])\nclass TransformerLayer(nn.Layer):\n    def __init__(self,\n                 d_model,\n                 nhead,\n                 dim_feedforward=2048,\n                 dropout=0.1,\n                 activation=\"relu\",\n                 normalize_before=True):\n        super().__init__()\n        self.self_attn = nn.MultiHeadAttention(d_model, nhead, dropout=dropout)\n        # Implementation of Feedforward model\n        self.linear1 = nn.Linear(d_model, dim_feedforward)\n        self.dropout = nn.Dropout(dropout)\n        self.linear2 = nn.Linear(dim_feedforward, d_model)\n        self.norm1 = nn.LayerNorm(d_model)\n        self.norm2 = nn.LayerNorm(d_model)\n        self.dropout1 = nn.Dropout(dropout)\n        self.dropout2 = nn.Dropout(dropout)\n        self.activation = F.relu",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/model.py:149-179"
+    },
+    "2405": {
+        "file_id": 187,
+        "content": "The given code contains a function that performs multi-head attention, feedforward model implementation, and LayerNorm normalization in Transformer layers. The `nn.MultiHeadAttention` applies the self-attention mechanism, while `nn.Linear` layers are used for linear transformations. Dropout and ReLU activations are also applied to prevent overfitting and introduce nonlinearity respectively.",
+        "type": "comment"
+    },
+    "2406": {
+        "file_id": 187,
+        "content": "        self.normalize_before = normalize_before\n    def with_pos_embed(self, tensor, pos: Optional[Tensor]):\n        return tensor if pos is None else tensor + pos\n    def forward_post(self,\n                     src,\n                     src_mask: Optional[Tensor] = None,\n                     pos: Optional[Tensor] = None):\n        q = k = self.with_pos_embed(src, pos)\n        q = q.transpose([1, 0, 2])\n        k = k.transpose([1, 0, 2])\n        src = src.transpose([1, 0, 2])\n        src2 = self.self_attn(q, k, value=src, attn_mask=src_mask)\n        src2 = src2.transpose([1, 0, 2])\n        src = src + self.dropout1(src2)\n        src = self.norm1(src)\n        src2 = self.linear2(self.dropout(self.activation(self.linear1(src))))\n        src = src + self.dropout2(src2)\n        src = self.norm2(src)\n        return src\n    def forward_pre(self,\n                    src,\n                    src_mask: Optional[Tensor] = None,\n                    pos: Optional[Tensor] = None):\n        src2 = self.norm1(src)\n        q = k = self.with_pos_embed(src2, pos)",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/model.py:180-207"
+    },
+    "2407": {
+        "file_id": 187,
+        "content": "This code defines a class with three forward functions: `forward_post`, `forward_pre`, and an undefined `forward`. The `forward_post` function applies self-attention to the input source tensor, while the `forward_pre` function normalizes the input source tensor before applying self-attention. Both functions take an optional mask and position embedding for the input tensor. The code also includes a class attribute `normalize_before` that determines whether to normalize the input tensor or not.",
+        "type": "comment"
+    },
+    "2408": {
+        "file_id": 187,
+        "content": "        q = q.transpose([1, 0, 2])\n        k = k.transpose([1, 0, 2])\n        src2 = src2.transpose([1, 0, 2])\n        src2 = self.self_attn(q, key=k, value=src2, attn_mask=src_mask)\n        src2 = src2.transpose([1, 0, 2])\n        src = src + self.dropout1(src2)\n        src2 = self.norm2(src)\n        src2 = self.linear2(self.dropout(self.activation(self.linear1(src2))))\n        src = src + self.dropout2(src2)\n        return src\n    def forward(self,\n                src,\n                src_mask: Optional[Tensor] = None,\n                pos: Optional[Tensor] = None):\n        if self.normalize_before:\n            return self.forward_pre(src, src_mask, pos)\n        return self.forward_post(src, src_mask, pos)\nclass Transformer(nn.Layer):\n    def __init__(self, encoder_layer, num_layers, norm=None):\n        super().__init__()\n        self.layers = _get_clones(encoder_layer, num_layers)\n        self.num_layers = num_layers\n        self.norm = norm\n        self._reset_parameters()\n    def _reset_parameters(self):\n        for p in self.parameters():  # may have a problem",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/model.py:208-237"
+    },
+    "2409": {
+        "file_id": 187,
+        "content": "The code defines a Transformer class that performs multi-head self-attention and feedforward operations. The class takes an encoder_layer as input and num_layers as parameters, allowing for multiple layers of transformation. The Transformer class has a forward function that can perform the transformations before or after normalization depending on the value of normalize_before flag. The _reset_parameters function is used to reset the parameters of the class.",
+        "type": "comment"
+    },
+    "2410": {
+        "file_id": 187,
+        "content": "            if p.dim() > 1:\n                nn.initializer.XavierUniform(p)\n    def forward(self,\n                src,\n                mask: Optional[Tensor] = None,\n                pos: Optional[Tensor] = None):\n        output = src\n        for layer in self.layers:\n            output = layer(output)\n        if self.norm is not None:\n            output = self.norm(output)\n        return output\nclass CEModule(nn.Layer):\n    def __init__(self, expert_dims, text_dim, use_mish, mimic_ce_dims,\n                 vlad_feat_sizes, same_dim):\n        super().__init__()\n        modalities = list(expert_dims.keys())\n        self.expert_dims = expert_dims\n        self.modalities = modalities\n        self.mimic_ce_dims = mimic_ce_dims\n        self.same_dim = same_dim\n        self.use_mish = use_mish\n        self.vlad_feat_sizes = vlad_feat_sizes\n        self.reduce_dim = 64\n        self.moe_cg = ContextGating\n        self.vis_transformer = True\n        if self.use_mish:\n            self.non_lin = Mish()\n        else:\n            self.non_lin = nn.ReLU()",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/model.py:238-275"
+    },
+    "2411": {
+        "file_id": 187,
+        "content": "This code defines a CEModule class with expert_dims, modalities, mimic_ce_dims, vlad_feat_sizes, and same_dim parameters. It uses the Mish function for non-linear activation if use_mish is True, otherwise using ReLU. It also includes a ContextGating object and a VisTransformer boolean.",
+        "type": "comment"
+    },
+    "2412": {
+        "file_id": 187,
+        "content": "        num_mods = len(expert_dims)\n        self.moe_fc = nn.Linear(text_dim, len(expert_dims))\n        self.moe_weights = paddle.ones([1, num_mods]) / num_mods\n        # The batch size of the face input can vary (due to missing inputs), so we\n        # probably shouldn't use BN on this branch. It's probably fine to leave it\n        # n for the corresponding text inputs, (but we should switch to GN)\n        use_bns = [True for modality in self.modalities]\n        # NOTE: When use_ce is not used, the text features are projected to\n        # subspaces of different dimensions.  When use_ce is used, they must all\n        # be projected to `same_dim` (to allow fusion). The only excpetion is for an\n        # ablation in which we mimic the `same_dim` reduction to measure whether this\n        # projection influences overall performance.\n        self.repeat_temporal = {}\n        for mod in modalities:\n            self.repeat_temporal[mod] = 1\n        in_dims = [\n            expert_dims[mod][0] * self.repeat_temporal[mod]",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/model.py:277-297"
+    },
+    "2413": {
+        "file_id": 187,
+        "content": "This code is initializing a MOE (Multi-Output Expert) model with specified modalities and dimensions, setting up the linear layer, weights, and batch normalization flags. It also defines the temporal repeat for each modality and calculates the input dimensions based on expert dimensions and temporal repetitions.",
+        "type": "comment"
+    },
+    "2414": {
+        "file_id": 187,
+        "content": "            for mod in modalities\n        ]\n        agg_dims = [\n            expert_dims[mod][1] * self.repeat_temporal[mod]\n            for mod in modalities\n        ]\n        feat_dims = [\n            expert_dims[mod][0] // self.vlad_feat_sizes[mod]\n            for mod in modalities\n        ]\n        if self.vis_transformer:\n            num_encoder_layers = 1\n            d_model = 768\n            nhead = 4\n            dim_feedforward = 768\n            dropout = 0  #dropout=0.1\n            normalize_before = True\n            encoder_layer = TransformerLayer(d_model, nhead, dim_feedforward,\n                                             dropout)\n            encoder_norm = nn.LayerNorm(d_model) if normalize_before else None\n            self.transformers = Transformer(encoder_layer, num_encoder_layers,\n                                            encoder_norm)\n        if self.mimic_ce_dims:\n            dim_reducers = [ReduceDim(in_dim, same_dim) for in_dim in feat_dims]\n            self.video_dim_reduce = nn.LayerList(dim_reducers)",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/model.py:298-323"
+    },
+    "2415": {
+        "file_id": 187,
+        "content": "The code initializes and prepares model components for modalities, including dimensions for expert features and feature sizes. It also creates a transformer if visual transformation is enabled, and sets up feature reducers if cross-entropy loss dims are mimicked.",
+        "type": "comment"
+    },
+    "2416": {
+        "file_id": 187,
+        "content": "        gated_vid_embds = [\n            GatedEmbeddingUnit(in_dim, same_dim, use_bn=True)\n            for in_dim in feat_dims\n        ]\n        text_out_dims = [same_dim for _ in agg_dims]\n        self.video_GU = nn.LayerList(gated_vid_embds)\n        gated_text_embds = [\n            GatedEmbeddingUnit(text_dim, dim, use_bn=True)\n            for dim in text_out_dims\n        ]\n        self.text_GU = nn.LayerList(gated_text_embds)\n    def compute_moe_weights(self, text, ind):\n        # compute weights for all captions (including when assigned K captions to\n        # the same video)\n        B, K, D = text.shape\n        M = len(self.modalities)\n        msg = f\"expected between 1 and 10 modalities, found {M} ({self.modalities})\"\n        assert 1 <= M <= 10, msg\n        # Treat each caption independently in the softmax (which runs over modalities)\n        text = text.reshape([B * K, D])\n        moe_weights = self.moe_fc(text)  # BK x D -> BK x M\n        moe_weights = F.softmax(moe_weights, axis=1)\n        moe_weights = moe_weights.reshape([B, K, M])",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/model.py:325-350"
+    },
+    "2417": {
+        "file_id": 187,
+        "content": "The code creates GatedEmbeddingUnit instances for both video and text features of different dimensions, initializes LayerLists to store them as video_GU and text_GU. The compute_moe_weights function calculates softmax weights for multiple captions (K) assigned to the same video, with an assertion for 1-10 modalities. Text is reshaped before applying MOE fully connected layer, then reshaped back to BxKxM shape.",
+        "type": "comment"
+    },
+    "2418": {
+        "file_id": 187,
+        "content": "        return moe_weights\n    def forward(self, text, experts, ind, raw_captions, vis_vlad, stime):\n        \"\"\"Compute joint embeddings and, if requested, a confusion matrix between\n        video and text representations in the minibatch.\n        Notation: B = batch size, M = number of modalities\n        \"\"\"\n        # Pass text embeddings through gated units\n        text_embd = {}\n        # Unroll repeated captions into present minibatch\n        B, captions_per_video, feat_dim = text.shape\n        text = text.reshape([B * captions_per_video, feat_dim])\n        for modality, layer in zip(self.modalities, self.text_GU):\n            # NOTE: Due to the batch norm, the gated units are sensitive to passing\n            # in a lot of zeroes, so we do the masking step after the forwards pass\n            text_ = layer(text)\n            # We always assume that text is available for retrieval\n            text_ = text_.reshape([B, captions_per_video, -1])\n            text_embd[modality] = text_\n        text = text.reshape([B, captions_per_video, -1])",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/model.py:351-374"
+    },
+    "2419": {
+        "file_id": 187,
+        "content": "This code is implementing a method for passing text embeddings through gated units. It first reshapes the input text, then iterates over the modalities and gated units to compute the text embeddings, which are stored in a dictionary. Finally, it reshapes the result back to its original shape.",
+        "type": "comment"
+    },
+    "2420": {
+        "file_id": 187,
+        "content": "        # vladded nans are handled earlier (during pooling)\n        # We also avoid zeroing random features, since this will leak information\n        # exclude = list(self.vlad_feat_sizes.keys()) + list(self.random_feats)\n        # experts = self.mask_missing_embeddings(experts, ind, exclude=exclude)\n        # MOE weights computation + normalization - note that we use the first caption\n        # sample to predict the weights\n        moe_weights = self.compute_moe_weights(text, ind=ind)\n        text_local = text.reshape([B * captions_per_video, -1])\n        vis_local = {}\n        for modality in self.modalities:\n            vis_local[modality] = experts[modality]\n        all_vis_feat = []\n        if hasattr(self, \"video_dim_reduce\"):\n            # Embed all features to a common dimension\n            for modality, layer in zip(self.modalities, self.video_dim_reduce):\n                all_vis_feat.append(layer(vis_local[modality]))\n        all_vis_feat = paddle.concat(all_vis_feat, axis=1)\n        if self.vis_transformer:",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/model.py:376-397"
+    },
+    "2421": {
+        "file_id": 187,
+        "content": "This code section is performing MOE weights computation and feature extraction for a Multi-Modal Video Analysis task. It excludes specific features to handle NAN values, then computes the MOE weights using text data and reshapes it accordingly. The visual features are extracted for each modality, then all the visual features are concatenated along the dimension. Finally, if vis_transformer is present, it is applied on the extracted visual features.",
+        "type": "comment"
+    },
+    "2422": {
+        "file_id": 187,
+        "content": "            experts_tensor = all_vis_feat\n            experts_tensor = experts_tensor.transpose([1, 0, 2])\n            att_out = self.transformers(experts_tensor, mask=None, pos=None)\n            all_vis_feat = att_out.transpose([1, 0, 2])\n        vis_local, _, save_ass = vis_vlad(all_vis_feat, freeze=True)\n        cross_view_conf_matrix_tv = paddle.matmul(text_local, vis_local.t())\n        for modality in self.modalities:\n            experts[modality] = experts[modality].max(axis=1)\n        for modality, layer in zip(self.modalities, self.video_GU):\n            experts[modality] = layer(experts[modality])\n        cross_view_conf_matrix = sharded_cross_view_inner_product(\n            ind=ind,\n            vid_embds=experts,\n            text_embds=text_embd,\n            text_weights=moe_weights,\n            subspaces=self.modalities,\n            raw_captions=raw_captions,\n        )\n        cross_view_conf_matrix = 0.5 * cross_view_conf_matrix + 0.5 * cross_view_conf_matrix_tv\n        return {\n            \"modalities\": self.modalities,",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/model.py:398-422"
+    },
+    "2423": {
+        "file_id": 187,
+        "content": "This code performs cross-view video localization by calculating the cross-view confidence matrix using VLAD and MOE weights. It also applies transformers, max pooling, and sharded inner products for each modality. The result is a dictionary containing the modalities used in the computation.",
+        "type": "comment"
+    },
+    "2424": {
+        "file_id": 187,
+        "content": "            \"cross_view_conf_matrix\": cross_view_conf_matrix,\n        }\nclass GatedEmbeddingUnit(nn.Layer):\n    def __init__(self, input_dimension, output_dimension, use_bn):\n        super(GatedEmbeddingUnit, self).__init__()\n        self.fc = nn.Linear(input_dimension, output_dimension)\n        self.cg = ContextGating(output_dimension, add_batch_norm=use_bn)\n    def forward(self, x):\n        x = self.fc(x)\n        x = self.cg(x)\n        x = F.normalize(x)\n        return x\nclass ReduceDim(nn.Layer):\n    def __init__(self, input_dimension, output_dimension):\n        super(ReduceDim, self).__init__()\n        self.fc = nn.Linear(input_dimension, output_dimension)\n    def forward(self, x):\n        x = self.fc(x)\n        x = F.normalize(x, axis=-1)\n        return x\nclass ContextGating(nn.Layer):\n    def __init__(self, dimension, add_batch_norm=True):\n        super(ContextGating, self).__init__()\n        self.fc = nn.Linear(dimension, dimension)\n        self.add_batch_norm = add_batch_norm\n        self.batch_norm = nn.BatchNorm1D(dimension)",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/model.py:423-456"
+    },
+    "2425": {
+        "file_id": 187,
+        "content": "This code defines several neural network layers: \"GatedEmbeddingUnit\", \"ReduceDim\", and \"ContextGating\". These layers are used for feature extraction, normalization, and context gating in the T2VLAD model. The GatedEmbeddingUnit layer combines a linear transformation and context gating to produce normalized output. The ReduceDim layer reduces the dimension of input features through a linear transformation followed by normalization. The ContextGating layer performs a linear transformation and optional batch normalization for context gating.",
+        "type": "comment"
+    },
+    "2426": {
+        "file_id": 187,
+        "content": "    def forward(self, x):\n        x1 = self.fc(x)\n        if self.add_batch_norm:\n            x1 = self.batch_norm(x1)\n        x = paddle.concat([x, x1], axis=1)\n        return F.glu(x, axis=1)\ndef sharded_cross_view_inner_product(vid_embds,\n                                     text_embds,\n                                     text_weights,\n                                     subspaces,\n                                     ind,\n                                     tol=1E-5,\n                                     raw_captions=None):\n    \"\"\"Compute a similarity matrix from sharded vectors.\n    Args:\n        embds1 (dict[str:paddle.Tensor]): the set of sub-embeddings that, when\n            concatenated, form the whole. The ith shard has shape `B x K x F_i`\n            (i.e. they can differ in the last dimension).\n        embds2 (dict[str:paddle.Tensor]): same format.\n        weights2 (paddle.Tensor): weights for the shards in `embds2`.\n    Returns:\n        (paddle.tensor): similarity matrix of size `BK x BK`.\n    NOTE: If multiple captions are provided, we can aggregate their similarities to",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/model.py:458-485"
+    },
+    "2427": {
+        "file_id": 187,
+        "content": "This code defines a function for computing the similarity matrix between two sets of embeddings, which are divided into smaller shards. The function takes these sharded embeddings and weights for each set, and returns a similarity matrix of size BK x BK. The code includes batch normalization and global pooling operations in its forward pass.",
+        "type": "comment"
+    },
+    "2428": {
+        "file_id": 187,
+        "content": "    provide a single video-text similarity score.\n    \"\"\"\n    B = vid_embds[subspaces[0]].shape[0]\n    T, num_caps, _ = text_embds[subspaces[0]].shape\n    # unroll separate captions onto first dimension and treat them separately\n    sims = paddle.zeros([T * num_caps, B])\n    text_weights = text_weights.reshape([T * num_caps, -1])\n    if True:\n        mus = [round(x, 3) for x in text_weights.mean(0).numpy().tolist()]\n        stds = [round(x, 3) for x in text_weights.std(0).numpy().tolist()]\n        summary = \">>>\"\n        for mod, mu, std in zip(subspaces, mus, stds):\n            summary += f\"{mod}: {mu} +/- {std} \"\n    # mark expert availabilities along the second axis\n    available = paddle.ones([1, B, len(subspaces)], dtype=text_weights.dtype)\n    for ii, modality in enumerate(subspaces):\n        ind[modality] = paddle.to_tensor(ind[modality], dtype='float32')\n        available[:, :, ii] = ind[modality]\n    msg = \"expected `available` modality mask to only contain 0s or 1s\"\n    assert set(paddle.unique(available).cpu().numpy()).issubset(set([0,",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/model.py:486-507"
+    },
+    "2429": {
+        "file_id": 187,
+        "content": "This code calculates video-text similarity scores and handles the modalities of available experts. It initializes variables for storing similarity scores (sims) and text weights (text_weights). The code also calculates mean and standard deviation for text_weights, and stores these values as mus and stds respectively. Then it creates an availability mask for each modality, marking them either 0 or 1, with the assertion that the mask should only contain 0s or 1s.",
+        "type": "comment"
+    },
+    "2430": {
+        "file_id": 187,
+        "content": "                                                                     1])), msg\n    # set the text weights along the first axis and combine with availabilities to\n    # produce a <T x B x num_experts> tensor\n    text_weight_tensor = text_weights.reshape([T * num_caps, 1,\n                                               len(subspaces)]) * available\n    # normalise to account for missing experts\n    normalising_weights = text_weight_tensor.sum(2).reshape(\n        [T * num_caps, B, 1])\n    text_weight_tensor = paddle.divide(text_weight_tensor, normalising_weights)\n    l2_mass_text, l2_mass_vid = 1, 1\n    for idx, modality in enumerate(subspaces):\n        vid_embd_ = vid_embds[modality].reshape([B, -1]) / l2_mass_vid\n        text_embd_ = text_embds[modality].reshape([T * num_caps, -1])\n        msg = \"expected weights to be applied to text embeddings\"\n        assert text_embd_.shape[0] == text_weights.shape[0], msg\n        text_embd_ = text_embd_ / l2_mass_text\n        weighting = text_weight_tensor[:, :, idx]",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/model.py:508-526"
+    },
+    "2431": {
+        "file_id": 187,
+        "content": "This code reshapes the text_weights and combines them with availabilities to produce a tensor of size T x B x num_experts. It then normalizes these weights by accounting for missing experts. Lastly, it calculates the L2-masses for both video and text embeddings and applies the weights to the corresponding embeddings. The code also includes an assertion message to ensure correct shape matching between text_embd_ and text_weights.",
+        "type": "comment"
+    },
+    "2432": {
+        "file_id": 187,
+        "content": "        sims += weighting * paddle.matmul(text_embd_,\n                                          vid_embd_.t())  # (T x num_caps) x (B)\n    if paddle.isnan(sims).sum().item():\n        raise ValueError(\"Found nans in similarity matrix!\")\n    return sims",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/model.py:527-533"
+    },
+    "2433": {
+        "file_id": 187,
+        "content": "This code calculates the similarity between text and video embeddings, multiplying them together with a weighting factor. It then checks for NaN values in the resulting similarity matrix and raises a ValueError if any are found.",
+        "type": "comment"
+    },
+    "2434": {
+        "file_id": 188,
+        "content": "/applications/T2VLAD/model/net_vlad.py",
+        "type": "filepath"
+    },
+    "2435": {
+        "file_id": 188,
+        "content": "The NetVLAD class in PaddleVideo's \"T2VLAD\" model initializes neural network parameters, performs checks and calculations for VLAD representations with batch size x dimension K.",
+        "type": "summary"
+    },
+    "2436": {
+        "file_id": 188,
+        "content": "\"\"\"NetVLAD implementation.\n\"\"\"\n# Copyright 2021 Antoine Miech All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#      http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS-IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport math\nimport paddle\nimport numpy as np\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nclass NetVLAD(nn.Layer):\n    def __init__(self, cluster_size, feature_size, ghost_clusters=0,\n                 add_batch_norm=True):\n        super().__init__()\n        self.feature_size = feature_size\n        self.cluster_size = cluster_size\n        self.ghost_clusters = ghost_clusters\n        init_sc = (1 / math.sqrt(feature_size))",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/net_vlad.py:1-33"
+    },
+    "2437": {
+        "file_id": 188,
+        "content": "NetVLAD is a class for implementing the NetVLAD algorithm. It takes parameters such as cluster_size, feature_size, ghost_clusters, and add_batch_norm. The feature_size represents the size of each feature, while the cluster_size represents the number of clusters. Ghost_clusters determines whether to include extra clusters for better performance. Add_batch_norm is a boolean value that decides whether or not to use batch normalization in the network.",
+        "type": "comment"
+    },
+    "2438": {
+        "file_id": 188,
+        "content": "        init_sc = paddle.to_tensor(init_sc)\n        clusters = cluster_size + ghost_clusters\n        # The `clusters` weights are the `(w,b)` in the paper\n        self.clusters = paddle.create_parameter([feature_size, clusters], dtype='float32', default_initializer=nn.initializer.Assign(paddle.randn([feature_size, clusters]) * init_sc))\n        self.batch_norm1 = nn.BatchNorm1D(clusters) if add_batch_norm else None\n        self.batch_norm2 = nn.BatchNorm1D(clusters) if add_batch_norm else None\n        # The `clusters2` weights are the visual words `c_k` in the paper\n        self.clusters1 = paddle.create_parameter([1, feature_size, cluster_size], dtype='float32', default_initializer=nn.initializer.Assign(paddle.randn([1, feature_size, cluster_size]) * init_sc))\n        self.clusters2 = paddle.create_parameter([1, feature_size, cluster_size], dtype='float32', default_initializer=nn.initializer.Assign(paddle.randn([1, feature_size, cluster_size]) * init_sc)) \n        self.out_dim = self.cluster_size * feature_size",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/net_vlad.py:34-44"
+    },
+    "2439": {
+        "file_id": 188,
+        "content": "This code initializes the neural network parameters for a VLAD model. It creates two sets of cluster weights, and assigns random values within a certain range to these weights using Paddle's `paddle.randn` function with a specified initialization scale (`init_sc`). Additionally, it creates batch normalization layers (`BatchNorm1D`) for the clusters if `add_batch_norm` is True. The code also defines the output dimension as the product of cluster size and feature size.",
+        "type": "comment"
+    },
+    "2440": {
+        "file_id": 188,
+        "content": "    def sanity_checks(self, x):\n        \"\"\"Catch any nans in the inputs/clusters\"\"\"\n        if paddle.isnan(paddle.sum(x)):\n            raise ValueError(\"nan inputs\")\n        if paddle.isnan(self.clusters[0][0]): \n            raise ValueError(\"nan clusters\")\n    def forward(self, x, freeze=False, mask=None):\n        \"\"\"Aggregates feature maps into a fixed size representation.  In the following\n        notation, B = batch_size, N = num_features, K = num_clusters, D = feature_size.\n        Args:\n            x (th.Tensor): B x N x D\n        Returns:\n            (th.Tensor): B x DK\n        \"\"\"\n        self.sanity_checks(x)\n        max_sample = x.shape[1] \n        x = x.reshape([-1, self.feature_size]) # B x N x D -> BN x D\n        if freeze == True:\n            clusters = self.clusters.detach()\n            clusters2 = self.clusters1\n            batch_norm =  self.batch_norm1\n        else:\n            clusters = self.clusters\n            clusters2 = self.clusters2\n            batch_norm =  self.batch_norm2\n        assignment = paddle.matmul(x, clusters) # (BN x D) x (D x (K+G)) -> BN x (K+G)",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/net_vlad.py:46-76"
+    },
+    "2441": {
+        "file_id": 188,
+        "content": "The code snippet is a part of the \"T2VLAD\" model in PaddleVideo. It performs sanity checks to ensure there are no NaN inputs or clusters, and then proceeds with the forward pass. In the forward function, it reshapes input, applies batch normalization, and calculates the assignment between input features and clusters. This is used for aggregating feature maps into a fixed-size representation.",
+        "type": "comment"
+    },
+    "2442": {
+        "file_id": 188,
+        "content": "        if batch_norm:\n            assignment = batch_norm(assignment)\n        assignment = F.softmax(assignment, axis=1) # BN x (K+G) -> BN x (K+G)\n        save_ass = assignment.reshape([-1, max_sample, self.cluster_size+1])\n        assignment = assignment[:, :self.cluster_size]\n        assignment = assignment.reshape([-1, max_sample, self.cluster_size]) # -> B x N x K\n        a_sum = paddle.sum(assignment, axis=1, keepdim=True) # B x N x K -> B x 1 x K\n        a = a_sum * self.clusters2\n        assignment = assignment.transpose([0, 2, 1])  # B x N x K -> B x K x N\n        x = x.reshape([-1, max_sample, self.feature_size]) # BN x D -> B x N x D\n        vlad = paddle.matmul(assignment, x) # (B x K x N) x (B x N x D) -> B x K x D\n        vlad = vlad.transpose([0, 2, 1]) # -> B x D x K\n        vlad = vlad - a\n        # L2 intra norm\n        vlad_ = F.normalize(vlad)\n        # flattening + L2 norm\n        vlad = vlad_.reshape([-1, self.cluster_size * self.feature_size])  # -> B x DK\n        vlad = F.normalize(vlad)",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/net_vlad.py:77-99"
+    },
+    "2443": {
+        "file_id": 188,
+        "content": "In this code snippet, it performs batch normalization on the assignment matrix, applies softmax for normalization, reshapes the assignment matrix multiple times, calculates a sum of clusters and multiplies by cluster centers, performs matrix multiplication to generate a VLAD representation, normalizes the intra-cluster L2 norm, and finally reshapes and applies normalization for the final VLAD representation.",
+        "type": "comment"
+    },
+    "2444": {
+        "file_id": 188,
+        "content": "        return vlad, vlad_, save_ass  # B x DK",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/net_vlad.py:100-100"
+    },
+    "2445": {
+        "file_id": 188,
+        "content": "The code is returning the VLAD (Vector of Locally Aggregated Descriptors) feature representations and their respective variables for Batch size x Dimension K.",
+        "type": "comment"
+    },
+    "2446": {
+        "file_id": 189,
+        "content": "/applications/T2VLAD/model/text.py",
+        "type": "filepath"
+    },
+    "2447": {
+        "file_id": 189,
+        "content": "The TextEmbedding interface utilizes Word2Vec for embedding video descriptions and queries. It initializes with model, dimensionality, and optional parameters, providing methods for GPT or Word2Vec extraction while ensuring CPU-only execution. The code initializes an OpenAI GPT model, tokenizes input, converts to vocabulary indices, obtains embeddings from hidden states, and returns squeezed dimensions.",
+        "type": "summary"
+    },
+    "2448": {
+        "file_id": 189,
+        "content": "\"\"\"This module defines the TextEmbedding interface for converting video descriptions and\nqueries into embeddings.\n\"\"\"\nimport zipfile\nimport functools\nfrom abc import abstractmethod\nfrom pathlib import Path\nimport numpy as np\nimport paddle\nimport gensim\nimport requests\nimport transformers\nfrom typeguard import typechecked\nfrom zsvision.zs_utils import BlockTimer\nfrom model.s3dg import S3D\nclass TextEmbedding:\n    def __init__(self, model, dim: int):\n        self.model = model\n        self.dim = dim\n        #self.device = None\n    @abstractmethod\n    def text2vec(self, text: str) -> np.ndarray:\n        \"\"\"Convert a string of text into an embedding.\n        Args:\n            text: the content to be embedded\n        Returns:\n            (d x n) array, where d is the dimensionality of the embedding and `n` is the\n                number of words that were successfully parsed from the text string.\n        NOTE: For some text embedding models (such as word2vec), not all words are\n        converted to vectors (e.g. certain kinds of stop words) - these are dropped from",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/text.py:1-37"
+    },
+    "2449": {
+        "file_id": 189,
+        "content": "This module defines the TextEmbedding interface for converting video descriptions and queries into embeddings. The class, TextEmbedding, initializes with a model and dimensionality of embedding. It has an abstract method, text2vec, that converts a string of text into an embedding, returning a (d x n) array, where d is the dimensionality of the embedding and `n` is the number of words successfully parsed from the text string. Some text embedding models may drop certain kinds of stop words.",
+        "type": "comment"
+    },
+    "2450": {
+        "file_id": 189,
+        "content": "        the output.\n        \"\"\"\n        raise NotImplementedError\n    #@typechecked\n    #def set_device(self, device: torch.device):\n    #    self.model = self.model.to(device)\n    #    self.device = device\n@functools.lru_cache(maxsize=64, typed=False)\ndef load_w2v_model_from_cache(\n        w2v_weights: Path,\n) -> gensim.models.keyedvectors.Word2VecKeyedVectors:\n    with BlockTimer(\"Loading w2v from disk\"):\n        model = gensim.models.KeyedVectors.load_word2vec_format(\n            fname=w2v_weights,\n            binary=True,\n        )\n    return model\n@typechecked\ndef fetch_model(url: str, weights_path: Path):\n    weights_path.parent.mkdir(exist_ok=True, parents=True)\n    with BlockTimer(f\"Fetching weights {url} -> {weights_path}\"):\n        resp = requests.get(url, verify=False)\n        with open(weights_path, \"wb\") as f:\n            f.write(resp.content)\nclass W2VEmbedding(TextEmbedding):\n    \"\"\"This model embeds text using the google-released implementation of the word2vec\n    model introduced in:\n        Mikolov, T., Sutskever, I., Chen, K., Corrado, G. S., & Dean, J. (2013).",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/text.py:38-73"
+    },
+    "2451": {
+        "file_id": 189,
+        "content": "This code defines a class for the W2VEmbedding model, which embeds text using the Word2Vec algorithm. It has methods for loading pre-trained Word2Vec models from disk or fetching them online. The set_device method allows specifying the device to use (CPU or GPU). The load_w2v_model_from_cache function loads a Word2Vec model from disk, and the fetch_model function downloads it from a given URL.",
+        "type": "comment"
+    },
+    "2452": {
+        "file_id": 189,
+        "content": "        Distributed representations of words and phrases and their compositionality.\n        In Advances in neural information processing systems (pp. 3111-3119).\n    For words that are present in the w2v vocabulary, a 300-dimensional embedding is\n    produced via a lookup table.\n    \"\"\"\n    @typechecked\n    def __init__(\n            self,\n            dim: int,\n            mirror: str,\n            weights_path: Path,\n            fetch_weights: bool = True,\n    ):\n        if not weights_path.exists():\n            if fetch_weights:\n                fetch_model(url=mirror, weights_path=weights_path)\n            else:\n                raise ValueError(f\"w2v weights missing at {weights_path}\")\n        model = load_w2v_model_from_cache(weights_path)\n        super().__init__(model=model, dim=dim)\n    @typechecked\n    def text2vec(self, text: str) -> np.ndarray:\n        # convert the text string to tokens that can be processed by w2v.  We handle\n        # 'a' as a special case.\n        tokens = [x for x in text.split(\" \") if x != \"a\" and x in self.model.vocab]",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/text.py:74-101"
+    },
+    "2453": {
+        "file_id": 189,
+        "content": "The code initializes a class with dimensions, mirror, and weights_path parameters. If the weights path doesn't exist, it fetches them or raises an error. It then loads the word2vec model from the cache and initializes the superclass. The text2vec method converts input text to tokens processed by w2v, excluding 'a' and tokens not in vocab.",
+        "type": "comment"
+    },
+    "2454": {
+        "file_id": 189,
+        "content": "        embeddings = []\n        for token in tokens:\n            embeddings.append(self.model.get_vector(token))\n        embeddings = np.array(embeddings)\n        # For empty sequences, we use zeros with the dimensionality of the features on\n        # the second dimension (this is the format expected by the CE codebase)\n        if embeddings.size == 0:\n            embeddings = np.zeros((0, self.dim))\n        return embeddings\n    #@typechecked\n    #def set_device(self, device: torch.device):\n    #    msg = f\"w2v only supports CPU-based execution found {device.type}\"\n    #    assert device.type == \"cpu\", msg\nclass OpenAI_GPT(TextEmbedding):\n    \"\"\"This model produces 768-embeddings using a pretrained GPT model, introduced\n    in the paper:\n    Radford, A., Narasimhan, K., Salimans, T., & Sutskever, I. (2018).\n    Improving language understanding by generative pre-training,\n    https://cdn.openai.com/research-covers/language-unsupervised/language_understanding\n    _paper.pdf\n    \"\"\"\n    def __init__(self):\n        self.tokenizer = transformers.OpenAIGPTTokenizer.from_pretrained(\"openai-gpt\")",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/text.py:103-130"
+    },
+    "2455": {
+        "file_id": 189,
+        "content": "The code defines a class \"TextEmbedding\" that provides methods to extract embeddings from text tokens using either the GPT model or Word2Vec. The \"get_vector\" method returns embeddings in the expected format for the CE codebase, and it handles empty sequences by returning zeros with the correct dimensionality. The class also includes a \"set_device\" method that asserts the device type is CPU-only, as GPT model only supports CPU execution.",
+        "type": "comment"
+    },
+    "2456": {
+        "file_id": 189,
+        "content": "        model = transformers.OpenAIGPTModel.from_pretrained(\"openai-gpt\")\n        model.eval()\n        super().__init__(model=model)\n    @typechecked\n    def text2vec(self, text: str) -> np.ndarray:\n        tokenized_text = self.tokenizer.tokenize(text)\n        # Convert token to vocabulary indices\n        indexed_tokens = self.tokenizer.convert_tokens_to_ids(tokenized_text)\n        tokens_tensor = paddle.to_tensor(indexed_tokens, dtype='int64') #tokens_tensor = torch.LongTensor([indexed_tokens]).to(self.model.device)\n        with paddle.no_grad():\n            hidden_states = self.model(tokens_tensor)\n            embeddings = hidden_states[0].numpy()\n        return embeddings.squeeze(0)",
+        "type": "code",
+        "location": "/applications/T2VLAD/model/text.py:131-146"
+    },
+    "2457": {
+        "file_id": 189,
+        "content": "This code initializes an OpenAI GPT model, tokenizes text input, converts tokens to vocabulary indices, and obtains embeddings from the model's hidden states. The embeddings are then returned after squeezing dimensions.",
+        "type": "comment"
+    },
+    "2458": {
+        "file_id": 190,
+        "content": "/applications/T2VLAD/parse_config.py",
+        "type": "filepath"
+    },
+    "2459": {
+        "file_id": 190,
+        "content": "The \"ConfigParser\" initializes argument parsers, handles slave mode, and sets directories. It manages config parsing, experiment settings, and data loaders with logging capabilities. The code includes two functions for accessing and modifying values in a nested object using a sequence of keys.",
+        "type": "summary"
+    },
+    "2460": {
+        "file_id": 190,
+        "content": "# Copyright 2021 Antoine Miech All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#      http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS-IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os\nimport time\nimport paddle\nimport pprint\nimport logging\nfrom typing import Dict\nfrom pathlib import Path\nfrom datetime import datetime\nfrom operator import getitem\nfrom functools import reduce\nfrom mergedeep import Strategy, merge\nfrom zsvision.zs_utils import set_nested_key_val\nfrom typeguard import typechecked\nfrom utils import read_json, write_json\nfrom logger import setup_logging\nclass ConfigParser:\n    def __init__(self, args, options='', timestamp=True, slave_mode=False):",
+        "type": "code",
+        "location": "/applications/T2VLAD/parse_config.py:1-35"
+    },
+    "2461": {
+        "file_id": 190,
+        "content": "This code snippet is the beginning of a Python class, \"ConfigParser,\" which appears to be part of a larger project. The class takes in an \"args\" parameter (possibly command line arguments) and two optional parameters: \"options\" and \"timestamp\". It also has a boolean parameter named \"slave_mode\". The code imports various modules and defines the class but no specific functionality is provided in this section.",
+        "type": "comment"
+    },
+    "2462": {
+        "file_id": 190,
+        "content": "        # slave_mode - when calling the config parser form an existing process, we\n        # avoid reinitialising the logger and ignore sys.argv when argparsing.\n        # parse default and custom cli options\n        for opt in options:\n            args.add_argument(*opt.flags, default=None, type=opt.type)\n        if slave_mode:\n            args = args.parse_args(args=[])\n        else:\n            args = args.parse_args()\n        if args.resume and not slave_mode:\n            self.resume = Path(args.resume)\n        else:\n            msg_no_cfg = \"Config file must be specified\"\n            assert args.config is not None, msg_no_cfg\n            self.resume = None\n        self.cfg_fname = Path(args.config)\n        config = self.load_config(self.cfg_fname)\n        self._config = _update_config(config, options, args)\n        if self._config.get(\"eval_config\", False):\n            # validate path to evaluation file\n            eval_cfg_path = self._config.get(\"eval_config\")\n            msg = f\"eval_config was specified, but `{eval_cfg_path}` does not exist\"",
+        "type": "code",
+        "location": "/applications/T2VLAD/parse_config.py:36-62"
+    },
+    "2463": {
+        "file_id": 190,
+        "content": "The code initializes the argument parser, adds options to parse default and custom CLI options, handles slave mode (avoiding reinitializing logger), parses arguments, checks for a config file, and loads the configuration. If an evaluation config is specified, it validates the path to the evaluation file.",
+        "type": "comment"
+    },
+    "2464": {
+        "file_id": 190,
+        "content": "            assert Path(self._config.get(\"eval_config\")).exists(), msg\n        # set save_dir where trained model and log will be saved.\n        if \"tester\" in self.config:\n            save_dir = Path(self.config['tester']['save_dir'])\n        else:\n            save_dir = Path(self.config['trainer']['save_dir'])\n        timestamp = datetime.now().strftime(r\"%Y-%m-%d_%H-%M-%S\") if timestamp else \"\"\n        if slave_mode:\n            timestamp = f\"{timestamp}-eval-worker\"\n        exper_name = self.set_exper_name(args, config=config)\n        if getattr(args, \"group_id\", False):\n            subdir = Path(args.group_id) / f\"seed-{args.group_seed}\" / timestamp\n        else:\n            subdir = timestamp\n        self._save_dir = save_dir / 'models' / exper_name / subdir\n        self._log_dir = save_dir / 'log' / exper_name / subdir\n        self._exper_name = exper_name\n        self._args = args\n        # if set, remove all previous experiments with the current config\n        if vars(args).get(\"purge_exp_dir\", False):",
+        "type": "code",
+        "location": "/applications/T2VLAD/parse_config.py:63-88"
+    },
+    "2465": {
+        "file_id": 190,
+        "content": "The code sets the save directory for the trained model and logs based on whether \"tester\" or \"trainer\" is specified in the configuration. It also creates a timestamp to differentiate experiments, handles slave mode, sets the experiment name using given arguments, and if group_id and group_seed are provided, it generates subdirectories accordingly. Additionally, it checks if the user wants to purge previous experiments with the current config and removes them if true.",
+        "type": "comment"
+    },
+    "2466": {
+        "file_id": 190,
+        "content": "            for dirpath in (self._save_dir, self._log_dir):\n                config_dir = dirpath.parent\n                existing = list(config_dir.glob(\"*\"))\n                print(f\"purging {len(existing)} directories from config_dir...\")\n                tic = time.time()\n                os.system(f\"rm -rf {config_dir}\")\n                print(f\"Finished purge in {time.time() - tic:.3f}s\")\n        self.save_dir.mkdir(parents=True, exist_ok=True)\n        self.log_dir.mkdir(parents=True, exist_ok=True)\n        # save updated config file to the checkpoint dir\n        write_json(self.config, self.save_dir / 'config.json')\n        # configure logging module\n        if not slave_mode:\n            self.log_path = setup_logging(self.log_dir)\n        self.log_levels = {0: logging.WARNING, 1: logging.INFO, 2: logging.DEBUG}\n    def set_exper_name(self, args, config):\n        # We assume that the config files are organised into directories such that\n        # each directory has the name of the dataset.\n        dataset_name = self.cfg_fname.parent.stem",
+        "type": "code",
+        "location": "/applications/T2VLAD/parse_config.py:89-112"
+    },
+    "2467": {
+        "file_id": 190,
+        "content": "The code is purging directories from a specified directory and then recreates the save_dir and log_dir directories. It writes the updated config file to the checkpoint dir, sets up logging if not in slave mode, and assumes that config files are organized into directories with the name of the dataset.",
+        "type": "comment"
+    },
+    "2468": {
+        "file_id": 190,
+        "content": "        exper_name = f\"{dataset_name}-{self.cfg_fname.stem}\"\n        if args.custom_args:\n            key_val_lists = args.custom_args.split(\"+\")\n            for key_val_pair in key_val_lists:\n                print(f\"parsing key-val pair : {key_val_pair}\")\n                key, val = key_val_pair.split(\"@\")\n                set_nested_key_val(key, val, self._config)\n                # remove periods from key names\n                key_ = key.replace(\"_.\", \"--\")\n                # remove commas from value names\n                val = val.replace(\",\", \"--\")\n                custom_tag = \"-\".join(key_.split(\".\")[-2:])\n                exper_name = f\"{exper_name}-{custom_tag}-{val}\"\n        if getattr(args, \"disable_workers\", False):\n            print(\"Disabling data loader workers....\")\n            config[\"data_loader\"][\"args\"][\"num_workers\"] = 0\n        if getattr(args, \"train_single_epoch\", False):\n            print(\"Restricting training to a single epoch....\")\n            config[\"trainer\"][\"epochs\"] = 1\n            config[\"trainer\"][\"save_period\"] = 1",
+        "type": "code",
+        "location": "/applications/T2VLAD/parse_config.py:113-134"
+    },
+    "2469": {
+        "file_id": 190,
+        "content": "This code block handles configuration parsing, custom arguments, and some optional settings. It sets the experiment name based on dataset and config file name, then processes custom arguments to set nested keys in the configuration dictionary. The code also checks for disabled data loader workers and restricts training to a single epoch if specified.",
+        "type": "comment"
+    },
+    "2470": {
+        "file_id": 190,
+        "content": "            config[\"trainer\"][\"skip_first_n_saves\"] = 0\n            exper_name = f\"{exper_name}-train-single-epoch\"\n        return exper_name\n    @staticmethod\n    @typechecked\n    def load_config(cfg_fname: Path) -> Dict:\n        config = read_json(cfg_fname)\n        # apply inheritance through config hierarchy\n        descendant, ancestors = config, []\n        while \"inherit_from\" in descendant:\n            parent_config = read_json(Path(descendant[\"inherit_from\"]))\n            ancestors.append(parent_config)\n            descendant = parent_config\n        for ancestor in ancestors:\n            merge(ancestor, config, strategy=Strategy.REPLACE)\n            config = ancestor\n        return config\n    def init(self, name, module, *args, **kwargs):\n        \"\"\"Finds a function handle with the name given as 'type' in config, and returns\n        the instance initialized with corresponding keyword args given as 'args'.\n        \"\"\"\n        module_name = self[name]['type']\n        module_args = dict(self[name]['args'])",
+        "type": "code",
+        "location": "/applications/T2VLAD/parse_config.py:135-159"
+    },
+    "2471": {
+        "file_id": 190,
+        "content": "This code snippet defines a function that loads and processes a configuration file, initializes an instance of a class with a specific name and arguments, and returns the initialized instance. The configuration loading process applies inheritance through a config hierarchy and allows skipping the first saves in training.",
+        "type": "comment"
+    },
+    "2472": {
+        "file_id": 190,
+        "content": "        msg = (f\"Fail for {module_name}\\n\"\n               f\"overwriting kwargs given in config file is not allowed\\n\"\n               f\"passed kwargs: {kwargs}\\n\"\n               f\"for module_args: {module_args})\")\n        assert all([k not in module_args for k in kwargs]), msg\n        module_args.update(kwargs)\n        return getattr(module, module_name)(*args, **module_args)\n    def __getitem__(self, name):\n        return self.config[name]\n    def __len__(self):\n        # NOTE: This is used for boolean checking deep inside ray.tune, so we required it\n        # to be defined.\n        return len(self.config)\n    def __setitem__(self, name, value):\n        self.config[name] = value\n    def __contains__(self, name):\n        return name in self.config\n    def get(self, name, default):\n        return self.config.get(name, default)\n    def keys(self):\n        return self.config.keys()\n    def get_logger(self, name, verbosity=2):\n        msg_verbosity = \"verbosity option {} is invalid. Valid options are {}.\"\n        msg_verbosity = msg_verbosity.format(verbosity, self.log_levels.keys())",
+        "type": "code",
+        "location": "/applications/T2VLAD/parse_config.py:160-190"
+    },
+    "2473": {
+        "file_id": 190,
+        "content": "Function checks if any overwriting kwargs are present in the module_args and raises an error if so. It then updates the module_args with all kwargs, returns a function call using the updated args. The code also provides functionality to access, set, check containment, get keys of the config, and get values with default option.",
+        "type": "comment"
+    },
+    "2474": {
+        "file_id": 190,
+        "content": "        assert verbosity in self.log_levels, msg_verbosity\n        logger = logging.getLogger(name)\n        logger.setLevel(self.log_levels[verbosity])\n        return logger\n    # setting read-only attributes\n    @property\n    def config(self):\n        return self._config\n    @property\n    def save_dir(self):\n        return self._save_dir\n    @property\n    def log_dir(self):\n        return self._log_dir\n    def __repr__(self):\n        return pprint.PrettyPrinter().pformat(self.__dict__)\n    def items(self):\n        return self._config.items()\n# helper functions used to update config dict with custom cli options\ndef _update_config(config, options, args):\n    for opt in options:\n        value = getattr(args, _get_opt_name(opt.flags))\n        if value is not None:\n            _set_by_path(config, opt.target, value)\n    return config\ndef _get_opt_name(flags):\n    for flg in flags:\n        if flg.startswith('--'):\n            return flg.replace('--', '')\n    return flags[0].replace('--', '')\ndef _set_by_path(tree, keys, value):",
+        "type": "code",
+        "location": "/applications/T2VLAD/parse_config.py:191-232"
+    },
+    "2475": {
+        "file_id": 190,
+        "content": "This code snippet defines a class with properties for config, save_dir, and log_dir. It also has methods to iterate over items in the config dictionary and helper functions to update the config with custom CLI options. The logger is set based on the verbosity level provided.",
+        "type": "comment"
+    },
+    "2476": {
+        "file_id": 190,
+        "content": "    \"\"\"Set a value in a nested object in tree by sequence of keys.\"\"\"\n    _get_by_path(tree, keys[:-1])[keys[-1]] = value\ndef _get_by_path(tree, keys):\n    \"\"\"Access a nested object in tree by sequence of keys.\"\"\"\n    return reduce(getitem, keys, tree)",
+        "type": "code",
+        "location": "/applications/T2VLAD/parse_config.py:233-239"
+    },
+    "2477": {
+        "file_id": 190,
+        "content": "This code snippet defines two functions, `_get_by_path` and `set_in_nested`, for accessing and modifying values in a nested object using a sequence of keys. The `_get_by_path` function uses the `reduce` function with `getitem` as the function argument to iterate through the keys and return the nested object's value, while `set_in_nested` sets a new value in a nested object by first accessing the nested object using the provided keys and then setting the final key's value.",
+        "type": "comment"
+    },
+    "2478": {
+        "file_id": 191,
+        "content": "/applications/T2VLAD/test.py",
+        "type": "filepath"
+    },
+    "2479": {
+        "file_id": 191,
+        "content": "The PaddleVideo library's function compresses predictions based on query masks and similarity scores. The code initializes a Paddle model, prepares data loaders, sets evaluation mode, processes samples, calculates metrics, evaluates models, and runs the \"evaluation\" function.",
+        "type": "summary"
+    },
+    "2480": {
+        "file_id": 191,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport copy\nimport random\nimport paddle\nimport logging\nimport argparse\nimport numpy as np\nimport model.model as module_arch\nimport model.metric as module_metric\nimport data_loader.data_loaders as module_data\nfrom typing import Tuple\nfrom pathlib import Path\nfrom typeguard import typechecked\nfrom mergedeep import Strategy, merge\nfrom parse_config import ConfigParser\nfrom trainer.trainer import verbose, ctxt_mgr\nfrom utils.util import compute_dims, compute_trn_config\n@typechecked\ndef compress_predictions(query_masks: np.ndarray, sims: np.ndarray, topk: int = 10):",
+        "type": "code",
+        "location": "/applications/T2VLAD/test.py:1-33"
+    },
+    "2481": {
+        "file_id": 191,
+        "content": "This code is part of the PaddleVideo library and contains a function named `compress_predictions`. It imports necessary libraries, defines function parameters, and utilizes various modules from the PaddleVideo library. The function compresses predictions based on query masks and similarity scores (`sims`) with optional top k values. It is type checked for data integrity.",
+        "type": "comment"
+    },
+    "2482": {
+        "file_id": 191,
+        "content": "    \"\"\"We store the indices of the top-k predictions, rather than the full similarity\n    matrix, to reduce storage requirements.\n    NOTE: The similarity matrix contains `num_queries x num_videos` elements, where\n    `num_queries = num_videos x max_num_queries_per_video`.  We first mask out\n    locations in the similarity matrix that correspond to invalid queries (these are\n    produced by videos with fewer than `max_num_queries_per_video` descriptions).\n    \"\"\"\n    # validate the input shapes\n    assert query_masks.ndim == 2, \"Expected query_masks to be a matrix\"\n    query_num_videos, query_max_per_video = query_masks.shape\n    sims_queries, sims_num_videos = sims.shape\n    msg = (f\"Expected sims and query masks to represent the same number of videos \"\n           f\"(found {sims_num_videos} v {query_num_videos}\")\n    assert query_num_videos == sims_num_videos, msg\n    msg = (f\"Expected sims and query masks to represent the same number of queries \"\n           f\"(found {sims_queries} v {query_num_videos * query_max_per_video}\")",
+        "type": "code",
+        "location": "/applications/T2VLAD/test.py:34-51"
+    },
+    "2483": {
+        "file_id": 191,
+        "content": "Code validates input shapes, ensuring that sims and query_masks represent the same number of videos and queries. It asserts the correct dimensions for sims and query_masks to ensure compatibility in further computations, preventing potential errors.",
+        "type": "comment"
+    },
+    "2484": {
+        "file_id": 191,
+        "content": "    assert query_max_per_video * query_num_videos == sims_queries, msg\n    valid_sims = sims[query_masks.flatten().astype(np.bool)]\n    ranks = np.argsort(-valid_sims, axis=1)\n    return ranks[:, :topk]\n@typechecked\ndef get_model_and_data_loaders(\n        config: ConfigParser,\n        logger: logging.Logger,\n        model_path: Path,\n) -> Tuple[paddle.nn.Layer, module_data.ExpertDataLoader]:\n    expert_dims, raw_input_dims = compute_dims(config)\n    trn_config = compute_trn_config(config)\n    data_loaders = config.init(\n        name='data_loader',\n        module=module_data,\n        logger=logger,\n        raw_input_dims=raw_input_dims,\n        text_feat=config[\"experts\"][\"text_feat\"],\n        text_dim=config[\"experts\"][\"text_dim\"],\n        text_agg=config[\"experts\"][\"text_agg\"],\n        use_zeros_for_missing=config[\"experts\"].get(\"use_zeros_for_missing\", False),\n        eval_only=True,\n    )\n    model = config.init(\n        name='arch',\n        module=module_arch,\n        expert_dims=expert_dims,\n        text_dim=config[\"experts\"][\"text_dim\"],",
+        "type": "code",
+        "location": "/applications/T2VLAD/test.py:52-84"
+    },
+    "2485": {
+        "file_id": 191,
+        "content": "This code defines a function that takes a configuration, logger, and model path as input, returns a tuple containing a Paddle.js layer model and an ExpertDataLoader object for training data. The function first computes the expert dimensions and raw input dimensions based on the provided config, then initializes the train data loaders using the same config and returns the model and data loader tuple. The code also handles cases where some features might be missing by allowing the use of zeros to fill in such gaps.",
+        "type": "comment"
+    },
+    "2486": {
+        "file_id": 191,
+        "content": "        ce_shared_dim=config[\"experts\"].get(\"ce_shared_dim\", None),\n        feat_aggregation=config[\"data_loader\"][\"args\"][\"feat_aggregation\"],\n    )\n    model_path = config._args.resume\n    logger.info(f\"Loading checkpoint: {model_path} ...\")\n    checkpoint = paddle.load(model_path)\n    state_dict = checkpoint\n    if config['n_gpu'] > 1:\n        model = paddle.DataParallel(model)\n    model.load_dict(state_dict)\n    return model, data_loaders\ndef evaluation(config, logger=None, trainer=None):\n    if logger is None:\n        logger = config.get_logger('test')\n    if getattr(config._args, \"eval_from_training_config\", False):\n        eval_conf = copy.deepcopy(config)\n        merge(eval_conf._config, config[\"eval_settings\"], strategy=Strategy.REPLACE)\n        config = eval_conf\n    logger.info(\"Running evaluation with configuration:\")\n    logger.info(config)\n    # Set the random initial seeds\n    seed = config[\"seed\"]\n    logger.info(f\"Setting experiment random seed to {seed}\")\n    random.seed(seed)\n    np.random.seed(seed)",
+        "type": "code",
+        "location": "/applications/T2VLAD/test.py:85-116"
+    },
+    "2487": {
+        "file_id": 191,
+        "content": "This code is initializing a model and preparing it for evaluation. It loads a checkpoint from the specified model path, creates a data loader, and performs an evaluation with the given configuration. The random seed is set to ensure reproducibility of results.",
+        "type": "comment"
+    },
+    "2488": {
+        "file_id": 191,
+        "content": "    paddle.seed(seed)\n    model, data_loaders = get_model_and_data_loaders(\n        config=config,\n        logger=logger,\n        model_path=Path(config._args.resume),\n    )\n    logger.info(model)\n    metrics = [getattr(module_metric, met) for met in config['metrics']]\n    # prepare model for testing.  Note that some datasets fail to fit the retrieval\n    # set on the GPU, so we run them on the CPU\n    model.eval()\n    with paddle.no_grad():\n        samples, meta = data_loaders[\"retrieval\"]\n        #import pdb; pdb.set_trace()\n        # To use the nan-checks safely, we need make temporary copies of the data\n        all_text_num = samples['text'].shape[0]\n        text_keys = ['text', 'cap_id', 'att_mask', 'text_token_mask']\n        chk = 100\n        tck = 100 \n        if samples['text'].shape[0] % chk == 0:\n            vid_batch = samples['text'].shape[0] // chk\n        else:\n            vid_batch = samples['text'].shape[0] // chk + 1\n        if samples['text'].shape[0] % tck == 0:\n            text_batch  =  samples['text'].shape[0] // tck",
+        "type": "code",
+        "location": "/applications/T2VLAD/test.py:117-146"
+    },
+    "2489": {
+        "file_id": 191,
+        "content": "The code snippet initializes the Paddle model, data loaders, and sets the model to evaluation mode. It also prepares the retrieval dataset by checking for nan values and making temporary copies of relevant data elements based on their shape. The code then determines the number of video batches and text batches based on the dataset size.",
+        "type": "comment"
+    },
+    "2490": {
+        "file_id": 191,
+        "content": "        else: \n            text_batch  =  samples['text'].shape[0] // tck + 1\n        sub_sims = []\n        for idx in range(text_batch):\n            if idx % 5 == 0:\n                print(idx,'/',text_batch)\n            sub_samples = {}\n            for key in text_keys:\n                sub_samples.update({key: samples[key][idx*tck:idx*tck+tck]})\n            subsub_sims = []\n            for vid in range(vid_batch):\n                sub_samples['experts'] = {}\n                sub_samples['ind'] = {}\n                for expert in samples['experts'].keys():\n                    sub_samples['experts'][expert] = samples['experts'][expert][vid*chk:vid*chk+chk]\n                    sub_samples['ind'][expert] = samples['ind'][expert][vid*chk:vid*chk+chk]\n                with ctxt_mgr(sub_samples) as valid:\n                    output = model(**valid)\n                subsub_sims.append(output[\"cross_view_conf_matrix\"].cpu())\n            subsub_sims = paddle.concat(subsub_sims, axis=1)\n            sub_sims.append(subsub_sims)",
+        "type": "code",
+        "location": "/applications/T2VLAD/test.py:147-167"
+    },
+    "2491": {
+        "file_id": 191,
+        "content": "This code slices samples into sub-samples and processes them for multiple videos. It then concatenates the processed results along axis 1, storing each result in the list \"sub_sims\". This process is repeated for a batch of text and video samples. The code also includes progress printing and utilizes context management to run model operations efficiently.",
+        "type": "comment"
+    },
+    "2492": {
+        "file_id": 191,
+        "content": "        sub_sims = paddle.concat(sub_sims, axis=0)\n        sims = paddle.to_tensor(sub_sims, dtype='float32').numpy()\n        dataset = data_loaders.dataset_name\n        nested_metrics = {}\n        for metric in metrics:\n            metric_name = metric.__name__\n            res = metric(sims, query_masks=meta[\"query_masks\"])\n            verbose(epoch=0, metrics=res, name=dataset, mode=metric_name)\n            if trainer is not None:\n                if not trainer.mini_train:\n                    trainer.writer.set_step(step=0, mode=\"val\")\n                # avoid tensboard folding by prefixing\n                metric_name_ = f\"test_{metric_name}\"\n                trainer.log_metrics(res, metric_name=metric_name_, mode=\"val\")\n            nested_metrics[metric_name] = res\n    log = {}\n    for subkey, subval in nested_metrics.items():\n        for subsubkey, subsubval in subval.items():\n            log[f\"test_{subkey}_{subsubkey}\"] = subsubval\n    for key, value in log.items():\n        logger.info(\" {:15s}: {}\".format(str(key), value))",
+        "type": "code",
+        "location": "/applications/T2VLAD/test.py:168-190"
+    },
+    "2493": {
+        "file_id": 191,
+        "content": "This code calculates metrics for a dataset, concatenates sub-similarities, converts to numpy array, iterates through metrics and computes results for each metric using sims and query_masks. The results are logged for further analysis and information display.",
+        "type": "comment"
+    },
+    "2494": {
+        "file_id": 191,
+        "content": "if __name__ == '__main__':\n    args = argparse.ArgumentParser(description='PyTorch Template')\n    args.add_argument('--config', default=None, type=str, help=\"config file path\")\n    args.add_argument('--resume', default=None, help='path to checkpoint for evaluation')\n    args.add_argument('--eval_from_training_config', action=\"store_true\",\n                      help=\"if true, evaluate directly from a training config file.\")\n    args.add_argument(\"--custom_args\", help=\"qualified key,val pairs\")\n    eval_config = ConfigParser(args)\n    cfg_msg = \"For evaluation, a model checkpoint must be specified via the --resume flag\"\n    assert eval_config._args.resume, cfg_msg\n    if eval_config._config.get(\"eval_settings\", False):\n        merge(eval_config._config, eval_config[\"eval_settings\"], strategy=Strategy.REPLACE)\n        evaluation(eval_config)",
+        "type": "code",
+        "location": "/applications/T2VLAD/test.py:193-206"
+    },
+    "2495": {
+        "file_id": 191,
+        "content": "This code sets up argument parsing and configuration loading for evaluation. It checks if a model checkpoint is specified via --resume flag, then merges the main config file with eval_settings (if provided), finally calling the \"evaluation\" function.",
+        "type": "comment"
+    },
+    "2496": {
+        "file_id": 192,
+        "content": "/applications/T2VLAD/train.py",
+        "type": "filepath"
+    },
+    "2497": {
+        "file_id": 192,
+        "content": "This code imports libraries, initializes an experiment, defines functions for training a video analysis model, handles command-line arguments and ensures checkpoints are saved before running the training process.",
+        "type": "summary"
+    },
+    "2498": {
+        "file_id": 192,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport os\nimport time\nimport copy\nimport socket\nimport paddle\nimport argparse\nimport warnings\nimport numpy as np\nimport model.loss as module_loss\nimport model.model as module_arch\nimport model.metric as module_metric\nimport data_loader.data_loaders as module_data\nfrom pathlib import Path\nfrom utils import set_seeds\nfrom trainer import Trainer\nfrom test import evaluation\nfrom mergedeep import merge, Strategy\nfrom parse_config import ConfigParser\nfrom logger.log_parser import log_summary\nfrom utils import compute_dims, compute_trn_config",
+        "type": "code",
+        "location": "/applications/T2VLAD/train.py:1-35"
+    },
+    "2499": {
+        "file_id": 192,
+        "content": "The code imports necessary libraries, modules and packages for the PaddleVideo project. It also handles copyright and license information, sets seeds to ensure reproducibility, and includes utility functions for logging, model training, and data loading. It defines a Trainer class and an evaluation function, as well as parsing configuration files.",
+        "type": "comment"
+    }
+}

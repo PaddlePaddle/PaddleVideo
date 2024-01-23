@@ -1,0 +1,15 @@
+{
+    "summary": "This code imports diverse loss functions from different modules, such as CrossEntropyLoss, BMNLoss, and TransNetV2Loss for PaddleVideo's video recognition, segmentation tasks, providing a comprehensive list of usable losses. The PaddleVideo model uses BaseWeightedLoss, ASRFLoss, DistillationCELoss, and DistillationDMLLoss for audio-visual speech recognition, distillation-based learning, and region-specific loss computation.",
+    "details": [
+        {
+            "comment": "This code imports different types of loss functions from various modules, such as CrossEntropyLoss, BMNLoss, and TransNetV2Loss. These losses are used in PaddleVideo for various applications like video recognition, segmentation, and more. The code provides a comprehensive list of loss functions that can be used depending on the specific task.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/losses/__init__.py\":0-25",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .base import BaseWeightedLoss\nfrom .bmn_loss import BMNLoss\nfrom .cross_entropy_loss import CrossEntropyLoss\nfrom .depth_loss import ADDSLoss\nfrom .transnetv2_loss import TransNetV2Loss\nfrom .actbert_loss import ActBertLoss\nfrom .asrf_loss import ASRFLoss\nfrom .distillation_loss import DistillationCELoss, DistillationDMLLoss\nfrom .yowo_loss import RegionLoss\n__all__ = [\n    'CrossEntropyLoss', 'BMNLoss', 'TransNetV2Loss', 'ActBertLoss', 'ADDSLoss',"
+        },
+        {
+            "comment": "The code defines a list of loss functions used in the PaddleVideo model. These losses include BaseWeightedLoss, ASRFLoss, DistillationCELoss, and DistillationDMLLoss for various tasks like audio-visual speech recognition, distillation-based learning, and region-specific loss computation.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/losses/__init__.py\":26-28",
+            "content": "    'BaseWeightedLoss', 'ASRFLoss', 'DistillationCELoss', 'DistillationDMLLoss',\n    'RegionLoss'\n]"
+        }
+    ]
+}

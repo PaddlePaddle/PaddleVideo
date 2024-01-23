@@ -1,0 +1,15 @@
+{
+    "summary": "The code defines a RandomIdentitySampler class that randomly samples N identities and K instances from a dataset, generating a random sample of identities and instances with the ability to replace or not while selecting new instances.",
+    "details": [
+        {
+            "comment": "This code defines a RandomIdentitySampler class that randomly samples N identities and then K instances from a given dataset, resulting in a batch size of N*K. It imports necessary libraries and initializes class variables. The __iter__ method generates a random permutation of the identities.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/Ma-Net/dataloaders/samplers.py\":0-30",
+            "content": "from __future__ import absolute_import\nfrom collections import defaultdict\nimport numpy as np\nimport paddle\nfrom paddle.io import Sampler\nclass RandomIdentitySampler(Sampler):\n    \"\"\"\n    Randomly sample N identities, then for each identity,\n    randomly sample K instances, therefore batch size is N*K.\n    Code imported from https://github.com/Cysu/open-reid/blob/master/reid/utils/data/sampler.py.\n    Args:\n        data_source (Dataset): dataset to sample from.\n        num_instances (int): number of instances per identity.\n    \"\"\"\n    def __init__(self, sample_list, num_instances=1):\n        self.sample_list = sample_list\n        self.num_instances = num_instances\n        self.index_dic = defaultdict(list)\n        for index, tmp_dic in enumerate(self.sample_list):\n            pid = tmp_dic['seq_name']\n            self.index_dic[pid].append(index)\n        self.pids = list(self.index_dic.keys())\n        self.num_identities = len(self.pids)\n    def __iter__(self):\n        indices = np.random.permutation(self.num_identities)"
+        },
+        {
+            "comment": "This code generates a random sample of identities and instances from a given list of indices. It checks if the length of the current index is greater than or equal to the number of desired instances, and then chooses either to replace or not while selecting new instances. The selected instances are stored in a list and returned as an iterator. The method also provides the total number of samples by multiplying the number of identities with the number of instances.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/Ma-Net/dataloaders/samplers.py\":31-41",
+            "content": "        ret = []\n        for i in indices:\n            pid = self.pids[i]\n            t = self.index_dic[pid]\n            replace = False if len(t) >= self.num_instances else True\n            t = np.random.choice(t, size=self.num_instances, replace=replace)\n            ret.extend(t)\n        return iter(ret)\n    def __len__(self):\n        return self.num_identities * self.num_instances"
+        }
+    ]
+}

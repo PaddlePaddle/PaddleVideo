@@ -1,0 +1,20 @@
+{
+    "summary": "The code imports libraries, registers a backbone model in PaddleVideo, initializes an ASRF class for computer vision tasks, and sets layer biases using init_bias function. The ASRF forward method performs convolution on input x and iterates through shared layers before returning the output.",
+    "details": [
+        {
+            "comment": "This code block is importing necessary libraries and modules, as well as registering a backbone model within the PaddleVideo framework. It also includes references to external repositories for inspiration or implementation guidance.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/backbones/asrf.py\":0-29",
+            "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n# https://github.com/yabufarha/ms-tcn/blob/master/model.py\n# https://github.com/yiskw713/asrf/libs/models/tcn.py\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nimport numpy as np\nimport copy\nimport random\nimport math\nfrom paddle import ParamAttr\nfrom ..registry import BACKBONES\nfrom ..weight_init import weight_init_\nfrom .ms_tcn import DilatedResidualLayer\nfrom ..framework.segmenters.utils import init_bias, KaimingUniform_like_torch"
+        },
+        {
+            "comment": "The ASRF class is a type of backbone model for computer vision tasks. It initializes convolutional layers and shared dilated residual layers, and sets their weights using KaimingUniform initialization. The number of features, stages, and layers are configurable parameters.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/backbones/asrf.py\":32-64",
+            "content": "@BACKBONES.register()\nclass ASRF(nn.Layer):\n    def __init__(self, in_channel, num_features, num_classes, num_stages,\n                 num_layers):\n        super().__init__()\n        self.in_channel = in_channel\n        self.num_features = num_features\n        self.num_classes = num_classes\n        self.num_stages = num_stages\n        self.num_layers = num_layers\n        # define layers\n        self.conv_in = nn.Conv1D(self.in_channel, self.num_features, 1)\n        shared_layers = [\n            DilatedResidualLayer(2**i, self.num_features, self.num_features)\n            for i in range(self.num_layers)\n        ]\n        self.shared_layers = nn.LayerList(shared_layers)\n        self.init_weights()\n    def init_weights(self):\n        \"\"\"\n        initialize model layers' weight\n        \"\"\"\n        # init weight\n        for layer in self.sublayers():\n            if isinstance(layer, nn.Conv1D):\n                layer.weight.set_value(\n                    KaimingUniform_like_torch(layer.weight).astype('float32'))\n                if layer.bias is not None:"
+        },
+        {
+            "comment": "This code sets the initial values of layer biases using init_bias function. The ASRF forward method performs convolution on input x, then iterates through shared layers to modify the output before returning it.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/backbones/asrf.py\":65-74",
+            "content": "                    layer.bias.set_value(\n                        init_bias(layer.weight, layer.bias).astype('float32'))\n    def forward(self, x):\n        \"\"\" ASRF forward\n        \"\"\"\n        out = self.conv_in(x)\n        for layer in self.shared_layers:\n            out = layer(out)\n        return out"
+        }
+    ]
+}

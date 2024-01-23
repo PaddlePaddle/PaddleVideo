@@ -1,0 +1,551 @@
+{
+    "500": {
+        "file_id": 54,
+        "content": "                if ('head.' + k) not in model.state_dict().keys():\n                    print(f'pretrained -----{k} -------is not in model')\n        write_dict(state_dicts, 'model_for_infer.txt', **cfg)\n        model.set_state_dict(state_dicts)\n        inter_file = open(\n            os.path.join(\n                cfg.get(\"output_dir\", f\"./output/{cfg['model_name']}\"),\n                'inter_file.txt'), 'w')\n        seen_seq = False\n        with paddle.no_grad():\n            # Get the current iteration scribbles\n            for scribbles, first_scribble in get_scribbles():\n                t_total = timeit.default_timer()\n                f, h, w = images.shape[:3]\n                if 'prev_label_storage' not in locals().keys():\n                    prev_label_storage = paddle.zeros([f, h, w])\n                if len(annotated_frames(scribbles)) == 0:\n                    final_masks = prev_label_storage\n                    # ToDo To AP-kai: save_path传过来了\n                    submit_masks(cfg[\"save_path\"], final_masks.numpy(), images)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py:88-109"
+    },
+    "501": {
+        "file_id": 54,
+        "content": "This code segment checks if certain keys are present in the model's state dictionary. If not, it prints a message and writes the state dictionaries to a file named 'model_for_infer.txt'. It then sets the model's state dict with the state dictionaries, opens an inter_file.txt for writing, and initializes a variable 'seen_seq' as False. Inside a no_grad context, it retrieves scribbles and iterates over them, calculating total time, image shape, and checks if there are any annotated frames. If not, it assigns the previous label storage as final masks and submits those masks to the specified save path with corresponding images.",
+        "type": "comment"
+    },
+    "502": {
+        "file_id": 54,
+        "content": "                    continue\n                # if no scribbles return, keep masks in previous round\n                start_annotated_frame = annotated_frames(scribbles)[0]\n                pred_masks = []\n                pred_masks_reverse = []\n                if first_scribble:  # If in the first round, initialize memories\n                    n_interaction = 1\n                    eval_global_map_tmp_dic = {}\n                    local_map_dics = ({}, {})\n                    total_frame_num = f\n                else:\n                    n_interaction += 1\n                inter_file.write(sequence + ' ' + 'interaction' +\n                                 str(n_interaction) + ' ' + 'frame' +\n                                 str(start_annotated_frame) + '\\n')\n                if first_scribble:  # if in the first round, extract pixel embbedings.\n                    if not seen_seq:\n                        seen_seq = True\n                        inter_turn = 1\n                        embedding_memory = []\n                        places = paddle.set_device('cpu')",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py:110-134"
+    },
+    "503": {
+        "file_id": 54,
+        "content": "The code handles the first round of scribbles and initializes memory for future interactions. It writes information to an inter_file, extracts pixel embeddings if it's the first round, and sets up variables for tracking interactions and embedding memories.",
+        "type": "comment"
+    },
+    "504": {
+        "file_id": 54,
+        "content": "                        for imgs in images:\n                            if cfg['PIPELINE'].get('test'):\n                                imgs = paddle.to_tensor([\n                                    build_pipeline(cfg['PIPELINE'].test)({\n                                        'img1':\n                                            imgs\n                                    })['img1']\n                                ])\n                            else:\n                                imgs = paddle.to_tensor([imgs])\n                            if parallel:\n                                for c in model.children():\n                                    frame_embedding = c.head.extract_feature(\n                                        imgs)\n                            else:\n                                frame_embedding = model.head.extract_feature(\n                                    imgs)\n                            embedding_memory.append(frame_embedding)\n                        del frame_embedding\n                        embedding_memory = paddle.concat(embedding_memory, 0)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py:136-157"
+    },
+    "505": {
+        "file_id": 54,
+        "content": "This code is iterating through each image in a batch and applying a pipeline transformation if testing mode is enabled. It then creates frame embeddings either by looping over model children or directly from the model head. The frame embeddings are appended to a list, concatenated, and stored as embedding_memory.",
+        "type": "comment"
+    },
+    "506": {
+        "file_id": 54,
+        "content": "                        _, _, emb_h, emb_w = embedding_memory.shape\n                        ref_frame_embedding = embedding_memory[\n                            start_annotated_frame]\n                        ref_frame_embedding = ref_frame_embedding.unsqueeze(0)\n                    else:\n                        inter_turn += 1\n                        ref_frame_embedding = embedding_memory[\n                            start_annotated_frame]\n                        ref_frame_embedding = ref_frame_embedding.unsqueeze(0)\n                else:\n                    ref_frame_embedding = embedding_memory[\n                        start_annotated_frame]\n                    ref_frame_embedding = ref_frame_embedding.unsqueeze(0)\n                ########\n                scribble_masks = scribbles2mask(scribbles, (emb_h, emb_w))\n                scribble_label = scribble_masks[start_annotated_frame]\n                scribble_sample = {'scribble_label': scribble_label}\n                scribble_sample = ToTensor_manet()(scribble_sample)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py:158-176"
+    },
+    "507": {
+        "file_id": 54,
+        "content": "The code initializes the reference frame embedding and handles cases where the annotation is present or not. It extracts the reference frame embedding from the embedding memory, reshapes it, and then creates a scribble sample with the scribble label for further processing.",
+        "type": "comment"
+    },
+    "508": {
+        "file_id": 54,
+        "content": "                #                     print(ref_frame_embedding, ref_frame_embedding.shape)\n                scribble_label = scribble_sample['scribble_label']\n                scribble_label = scribble_label.unsqueeze(0)\n                model_name = cfg['model_name']\n                output_dir = cfg.get(\"output_dir\", f\"./output/{model_name}\")\n                inter_file_path = os.path.join(\n                    output_dir, sequence, 'interactive' + str(n_interaction),\n                                          'turn' + str(inter_turn))\n                if is_save_image:\n                    ref_scribble_to_show = scribble_label.squeeze().numpy()\n                    im_ = Image.fromarray(\n                        ref_scribble_to_show.astype('uint8')).convert('P', )\n                    im_.putpalette(_palette)\n                    ref_img_name = str(start_annotated_frame)\n                    if not os.path.exists(inter_file_path):\n                        os.makedirs(inter_file_path)\n                    im_.save(",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py:177-195"
+    },
+    "509": {
+        "file_id": 54,
+        "content": "This code snippet is responsible for saving an interactive scribble image. It first retrieves the scribble label, then constructs the file path to save the image based on configuration settings and iteration parameters. If the directory doesn't exist, it creates one. Finally, it saves the scribble image using a specific palette.",
+        "type": "comment"
+    },
+    "510": {
+        "file_id": 54,
+        "content": "                        os.path.join(inter_file_path,\n                                     'inter_' + ref_img_name + '.png'))\n                if first_scribble:\n                    prev_label = None\n                    prev_label_storage = paddle.zeros([f, h, w])\n                else:\n                    prev_label = prev_label_storage[start_annotated_frame]\n                    prev_label = prev_label.unsqueeze(0).unsqueeze(0)\n                # check if no scribbles.\n                if not first_scribble and paddle.unique(\n                        scribble_label).shape[0] == 1:\n                    print(\n                        'not first_scribble and paddle.unique(scribble_label).shape[0] == 1'\n                    )\n                    print(paddle.unique(scribble_label))\n                    final_masks = prev_label_storage\n                    submit_masks(cfg[\"save_path\"], final_masks.numpy(), images)\n                    continue\n                ###inteaction segmentation head\n                if parallel:",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py:196-216"
+    },
+    "511": {
+        "file_id": 54,
+        "content": "This code segment is part of a video modeling framework. It deals with handling scribbles and generating masks based on them. If there are no scribbles after the first one, it prints a message and continues execution by submitting the previous label storage as final masks. This code also checks for parallel processing and seems to be part of an interaction segmentation head.",
+        "type": "comment"
+    },
+    "512": {
+        "file_id": 54,
+        "content": "                    for c in model.children():\n                        tmp_dic, local_map_dics = c.head.int_seghead(\n                            ref_frame_embedding=ref_frame_embedding,\n                            ref_scribble_label=scribble_label,\n                            prev_round_label=prev_label,\n                            global_map_tmp_dic=eval_global_map_tmp_dic,\n                            local_map_dics=local_map_dics,\n                            interaction_num=n_interaction,\n                            seq_names=[sequence],\n                            gt_ids=paddle.to_tensor([obj_nums]),\n                            frame_num=[start_annotated_frame],\n                            first_inter=first_scribble)\n                else:\n                    tmp_dic, local_map_dics = model.head.int_seghead(\n                        ref_frame_embedding=ref_frame_embedding,\n                        ref_scribble_label=scribble_label,\n                        prev_round_label=prev_label,\n                        global_map_tmp_dic=eval_global_map_tmp_dic,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py:217-234"
+    },
+    "513": {
+        "file_id": 54,
+        "content": "This code is part of the Manet_Stage1 segmentation model in PaddleVideo. It iterates through the children of the model and calls the 'int_seghead' function to generate temporary dictionaries and local map dictionaries for each child. The 'int_seghead' function takes various parameters such as reference frame embedding, previous round label, global map temporary dictionary, etc., and returns a tuple containing the temporary dictionary and local map dictionaries. If there are no children in the model, it directly calls the 'int_seghead' function on the model's head for the same set of parameters.",
+        "type": "comment"
+    },
+    "514": {
+        "file_id": 54,
+        "content": "                        local_map_dics=local_map_dics,\n                        interaction_num=n_interaction,\n                        seq_names=[sequence],\n                        gt_ids=paddle.to_tensor([obj_nums]),\n                        frame_num=[start_annotated_frame],\n                        first_inter=first_scribble)\n                pred_label = tmp_dic[sequence]\n                pred_label = nn.functional.interpolate(pred_label,\n                                                       size=(h, w),\n                                                       mode='bilinear',\n                                                       align_corners=True)\n                pred_label = paddle.argmax(pred_label, axis=1)\n                pred_masks.append(float_(pred_label))\n                # np.unique(pred_label)\n                # array([0], dtype=int64)\n                prev_label_storage[start_annotated_frame] = float_(\n                    pred_label[0])\n                if is_save_image:  # save image\n                    pred_label_to_save = pred_label.squeeze(0).numpy()",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py:235-254"
+    },
+    "515": {
+        "file_id": 54,
+        "content": "Creates a temporary dictionary with local maps and other parameters. Obtains the predicted label for the sequence, interpolates it to original size, gets the argument of maximum value along axis 1, adds it to prediction masks list, stores the first predicted label for current frame in prev_label_storage if saving images, converts pred_label to numpy array and displays unique elements.",
+        "type": "comment"
+    },
+    "516": {
+        "file_id": 54,
+        "content": "                    im = Image.fromarray(\n                        pred_label_to_save.astype('uint8')).convert('P', )\n                    im.putpalette(_palette)\n                    imgname = str(start_annotated_frame)\n                    while len(imgname) < 5:\n                        imgname = '0' + imgname\n                    if not os.path.exists(inter_file_path):\n                        os.makedirs(inter_file_path)\n                    im.save(os.path.join(inter_file_path, imgname + '.png'))\n                #######################################\n                if first_scribble:\n                    scribble_label = rough_ROI(scribble_label)\n                ##############################\n                ref_prev_label = pred_label.unsqueeze(0)\n                prev_label = pred_label.unsqueeze(0)\n                prev_embedding = ref_frame_embedding\n                for ii in range(start_annotated_frame + 1, total_frame_num):\n                    current_embedding = embedding_memory[ii]\n                    current_embedding = current_embedding.unsqueeze(0)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py:255-274"
+    },
+    "517": {
+        "file_id": 54,
+        "content": "The code segment is generating annotated images from predicted labels and creating scribble-based reference labels. It saves the images in a specified folder path, and initializes variables for iterating through the frames of the video.",
+        "type": "comment"
+    },
+    "518": {
+        "file_id": 54,
+        "content": "                    prev_label = prev_label\n                    if parallel:\n                        for c in model.children():\n                            tmp_dic, eval_global_map_tmp_dic, local_map_dics = c.head.prop_seghead(\n                                ref_frame_embedding,\n                                prev_embedding,\n                                current_embedding,\n                                scribble_label,\n                                prev_label,\n                                normalize_nearest_neighbor_distances=True,\n                                use_local_map=True,\n                                seq_names=[sequence],\n                                gt_ids=paddle.to_tensor([obj_nums]),\n                                k_nearest_neighbors=cfg['knns'],\n                                global_map_tmp_dic=eval_global_map_tmp_dic,\n                                local_map_dics=local_map_dics,\n                                interaction_num=n_interaction,\n                                start_annotated_frame=start_annotated_frame,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py:275-292"
+    },
+    "519": {
+        "file_id": 54,
+        "content": "The code iterates over the model's children and calls `prop_seghead` on each child, passing relevant embeddings and labels to calculate local maps and global maps for segmentation. It also takes into account nearest neighbors, interaction numbers, and annotated frame start.",
+        "type": "comment"
+    },
+    "520": {
+        "file_id": 54,
+        "content": "                                frame_num=[ii],\n                                dynamic_seghead=c.head.dynamic_seghead)\n                    else:\n                        tmp_dic, eval_global_map_tmp_dic, local_map_dics = model.head.prop_seghead(\n                            ref_frame_embedding,\n                            prev_embedding,\n                            current_embedding,\n                            scribble_label,\n                            prev_label,\n                            normalize_nearest_neighbor_distances=True,\n                            use_local_map=True,\n                            seq_names=[sequence],\n                            gt_ids=paddle.to_tensor([obj_nums]),\n                            k_nearest_neighbors=cfg['knns'],\n                            global_map_tmp_dic=eval_global_map_tmp_dic,\n                            local_map_dics=local_map_dics,\n                            interaction_num=n_interaction,\n                            start_annotated_frame=start_annotated_frame,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py:293-310"
+    },
+    "521": {
+        "file_id": 54,
+        "content": "Code segment is part of a larger function in PaddleVideo library. It checks if frame number is the start_annotated_frame, if so, it extracts the current embedding, else it calls head.prop_seghead to get temporary dictionary, global map temporary dictionary and local maps based on reference frame embedding, previous embedding, current embedding, scribble label and previous label using Paddle (a deep learning framework). It also considers K nearest neighbors and interaction number while performing its operation.",
+        "type": "comment"
+    },
+    "522": {
+        "file_id": 54,
+        "content": "                            frame_num=[ii],\n                            dynamic_seghead=model.head.dynamic_seghead)\n                    pred_label = tmp_dic[sequence]\n                    pred_label = nn.functional.interpolate(pred_label,\n                                                           size=(h, w),\n                                                           mode='bilinear',\n                                                           align_corners=True)\n                    pred_label = paddle.argmax(pred_label, axis=1)\n                    pred_masks.append(float_(pred_label))\n                    prev_label = pred_label.unsqueeze(0)\n                    prev_embedding = current_embedding\n                    prev_label_storage[ii] = float_(pred_label[0])\n                    if is_save_image:\n                        pred_label_to_save = pred_label.squeeze(0).numpy()\n                        im = Image.fromarray(\n                            pred_label_to_save.astype('uint8')).convert('P', )\n                        im.putpalette(_palette)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py:311-327"
+    },
+    "523": {
+        "file_id": 54,
+        "content": "This code segment is responsible for predicting the labels, creating masks and storing them in a list, and possibly saving an image. The predicted label is interpolated to match the frame size, converted to mask and added to the list of masks. This process continues for each frame. If saving images, the predicted labels are converted to an image format and saved as a grayscale PALETTE image.",
+        "type": "comment"
+    },
+    "524": {
+        "file_id": 54,
+        "content": "                        imgname = str(ii)\n                        while len(imgname) < 5:\n                            imgname = '0' + imgname\n                        if not os.path.exists(inter_file_path):\n                            os.makedirs(inter_file_path)\n                        im.save(os.path.join(inter_file_path,\n                                             imgname + '.png'))\n                #######################################\n                prev_label = ref_prev_label\n                prev_embedding = ref_frame_embedding\n                #######\n                # Propagation <-\n                for ii in range(start_annotated_frame):\n                    current_frame_num = start_annotated_frame - 1 - ii\n                    current_embedding = embedding_memory[current_frame_num]\n                    current_embedding = current_embedding.unsqueeze(0)\n                    prev_label = prev_label\n                    if parallel:\n                        for c in model.children():\n                            tmp_dic, eval_global_map_tmp_dic, local_map_dics = c.head.prop_seghead(",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py:328-347"
+    },
+    "525": {
+        "file_id": 54,
+        "content": "Code snippet saves frames to disk, initializes variables for propagation loop, and begins the propagation process by iterating through frames from start_annotated_frame down to 0. The model's children are then processed in parallel for segmentation head propagation.",
+        "type": "comment"
+    },
+    "526": {
+        "file_id": 54,
+        "content": "                                ref_frame_embedding,\n                                prev_embedding,\n                                current_embedding,\n                                scribble_label,\n                                prev_label,\n                                normalize_nearest_neighbor_distances=True,\n                                use_local_map=True,\n                                seq_names=[sequence],\n                                gt_ids=paddle.to_tensor([obj_nums]),\n                                k_nearest_neighbors=cfg['knns'],\n                                global_map_tmp_dic=eval_global_map_tmp_dic,\n                                local_map_dics=local_map_dics,\n                                interaction_num=n_interaction,\n                                start_annotated_frame=start_annotated_frame,\n                                frame_num=[current_frame_num],\n                                dynamic_seghead=c.head.dynamic_seghead)\n                    else:\n                        tmp_dic, eval_global_map_tmp_dic, local_map_dics = model.head.prop_seghead(",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py:348-365"
+    },
+    "527": {
+        "file_id": 54,
+        "content": "This code appears to be part of a deep learning model for video segmentation. It is calling the \"prop_seghead\" function from the \"model.head\" object with specific parameters including reference frame embedding, previous and current embeddings, scribble label, and previous label. If certain conditions are met, additional parameters such as normalize nearest neighbor distances, use local map, sequence names, ground truth IDs, number of nearest neighbors, start annotated frame, and dynamic seghead are passed. The function returns a temporary dictionary, evaluation global map temporary dictionary, and local map dictionaries.",
+        "type": "comment"
+    },
+    "528": {
+        "file_id": 54,
+        "content": "                            ref_frame_embedding,\n                            prev_embedding,\n                            current_embedding,\n                            scribble_label,\n                            prev_label,\n                            normalize_nearest_neighbor_distances=True,\n                            use_local_map=True,\n                            seq_names=[sequence],\n                            gt_ids=paddle.to_tensor([obj_nums]),\n                            k_nearest_neighbors=cfg['knns'],\n                            global_map_tmp_dic=eval_global_map_tmp_dic,\n                            local_map_dics=local_map_dics,\n                            interaction_num=n_interaction,\n                            start_annotated_frame=start_annotated_frame,\n                            frame_num=[current_frame_num],\n                            dynamic_seghead=model.head.dynamic_seghead)\n                    pred_label = tmp_dic[sequence]\n                    pred_label = nn.functional.interpolate(pred_label,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py:366-383"
+    },
+    "529": {
+        "file_id": 54,
+        "content": "This code is calculating the predictions for a specific sequence by using various embeddings, labels, and configurations. It involves interacting with multiple dictionaries, tensor operations, and a dynamic seghead model. The predicted label is then interpolated to match the resolution of the original frame.",
+        "type": "comment"
+    },
+    "530": {
+        "file_id": 54,
+        "content": "                                                           size=(h, w),\n                                                           mode='bilinear',\n                                                           align_corners=True)\n                    pred_label = paddle.argmax(pred_label, axis=1)\n                    pred_masks_reverse.append(float_(pred_label))\n                    prev_label = pred_label.unsqueeze(0)\n                    prev_embedding = current_embedding\n                    ####\n                    prev_label_storage[current_frame_num] = float_(\n                        pred_label[0])\n                    ###\n                    if is_save_image:\n                        pred_label_to_save = pred_label.squeeze(0).numpy()\n                        im = Image.fromarray(\n                            pred_label_to_save.astype('uint8')).convert('P', )\n                        im.putpalette(_palette)\n                        imgname = str(current_frame_num)\n                        while len(imgname) < 5:",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py:384-402"
+    },
+    "531": {
+        "file_id": 54,
+        "content": "This code snippet is part of an image segmentation model. It extracts predictions from the model, converts them to masks, and stores previous label information for each frame. Additionally, it saves visualizations of these predictions as palette-colored images.",
+        "type": "comment"
+    },
+    "532": {
+        "file_id": 54,
+        "content": "                            imgname = '0' + imgname\n                        if not os.path.exists(inter_file_path):\n                            os.makedirs(inter_file_path)\n                        im.save(os.path.join(inter_file_path,\n                                             imgname + '.png'))\n                pred_masks_reverse.reverse()\n                pred_masks_reverse.extend(pred_masks)\n                final_masks = paddle.concat(pred_masks_reverse, 0)\n                submit_masks(cfg[\"save_path\"], final_masks.numpy(), images)\n                t_end = timeit.default_timer()\n                print('Total time for single interaction: ' +\n                      str(t_end - t_total))\n        inter_file.close()\n        return None",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/manet_stage1.py:403-417"
+    },
+    "533": {
+        "file_id": 54,
+        "content": "This code saves images and their corresponding masks, creates final masks, and writes the total time for a single interaction. It handles non-existent folders by creating them before saving images.",
+        "type": "comment"
+    },
+    "534": {
+        "file_id": 55,
+        "content": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py",
+        "type": "filepath"
+    },
+    "535": {
+        "file_id": 55,
+        "content": "This function computes L2 distances, applies nearest neighbor attention and feature extraction, considers padding, uses local search windows and average pooling. It introduces a custom layer, calculates nearest neighbor features with embeddings, updates global map dictionaries, and processes inputs to return output dictionaries after calculations on local distance maps for each frame. The code segment updates global and local map dictionaries, calculates frame embeddings and masks, obtains segmentation predictions, and processes data for improved video processing accuracy.",
+        "type": "summary"
+    },
+    "536": {
+        "file_id": 55,
+        "content": "import numpy as np\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nfrom EIVideo.paddlevideo.utils.manet_utils import int_, float_, long_, load\nfrom EIVideo.paddlevideo.utils.manet_utils import kaiming_normal_\n#############################################################GLOBAL_DIST_MAP\nMODEL_UNFOLD = True\nWRONG_LABEL_PADDING_DISTANCE = 1e20\ndef _pairwise_distances(x, y, ys=None):\n    \"\"\"Computes pairwise squared l2 distances between tensors x and y.\n    Args:\n    x: Tensor of shape [n, feature_dim].\n    y: Tensor of shape [m, feature_dim].\n    Returns:\n    Float32 distances tensor of shape [n, m].\n    \"\"\"\n    xs = paddle.sum(x * x, 1)\n    xs = xs.unsqueeze(1)\n    if ys is None:\n        ys = paddle.sum(y * y, 1)\n        ys = ys.unsqueeze(0)\n    else:\n        ys = ys\n    d = xs + ys - 2. * paddle.matmul(x, paddle.t(y))\n    return d, ys\n##################\ndef _flattened_pairwise_distances(reference_embeddings, query_embeddings, ys):\n    \"\"\"Calculates flattened tensor of pairwise distances between ref and query.",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:1-37"
+    },
+    "537": {
+        "file_id": 55,
+        "content": "This code defines a function that calculates pairwise squared L2 distances between two tensors. It takes in two tensors, x and y, and optionally a third tensor ys. The function first computes the sum of squares for each row in tensor x and stores them in xs. If ys is None, it then computes the sum of squares for each row in tensor y and stores them in ys. Otherwise, it uses the provided ys. Finally, the function calculates the pairwise distances using the formula xs + ys - 2 * paddle.matmul(x, paddle.t(y)).",
+        "type": "comment"
+    },
+    "538": {
+        "file_id": 55,
+        "content": "    Args:\n    reference_embeddings: Tensor of shape [..., embedding_dim],\n      the embedding vectors for the reference frame\n    query_embeddings: Tensor of shape [n_query_images, height, width,\n      embedding_dim], the embedding vectors for the query frames.\n    Returns:\n    A distance tensor of shape [reference_embeddings.size / embedding_dim,\n    query_embeddings.size / embedding_dim]\n    \"\"\"\n    embedding_dim = query_embeddings.shape[-1]\n    reference_embeddings = reference_embeddings.reshape([-1, embedding_dim])\n    first_dim = -1\n    query_embeddings = query_embeddings.reshape([first_dim, embedding_dim])\n    dists, ys = _pairwise_distances(query_embeddings, reference_embeddings, ys)\n    return dists, ys\ndef _nn_features_per_object_for_chunk(reference_embeddings, query_embeddings,\n                                      wrong_label_mask, k_nearest_neighbors,\n                                      ys):\n    \"\"\"Extracts features for each object using nearest neighbor attention.\n  Args:\n    reference_embeddings: Tensor of shape [n_chunk, embedding_dim],",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:38-60"
+    },
+    "539": {
+        "file_id": 55,
+        "content": "This function takes reference and query embeddings as input, calculates pairwise distances between them using the _pairwise_distances function, and returns the distances in dists and ys. The _nn_features_per_object_for_chunk function extracts features for each object using nearest neighbor attention, taking reference embeddings, query embeddings, wrong_label_mask, k_nearest_neighbors, and ys as input.",
+        "type": "comment"
+    },
+    "540": {
+        "file_id": 55,
+        "content": "      the embedding vectors for the reference frame.\n    query_embeddings: Tensor of shape [m_chunk, embedding_dim], the embedding\n      vectors for the query frames.\n    wrong_label_mask:\n    k_nearest_neighbors: Integer, the number of nearest neighbors to use.\n  Returns:\n    nn_features: A float32 tensor of nearest neighbor features of shape\n      [m_chunk, n_objects, feature_dim].\n    \"\"\"\n    #    reference_embeddings_key = reference_embeddings\n    #    query_embeddings_key = query_embeddings\n    dists, ys = _flattened_pairwise_distances(reference_embeddings,\n                                              query_embeddings, ys)\n    dists = (paddle.unsqueeze(dists, 1) +\n             paddle.unsqueeze(float_(wrong_label_mask), 0) *\n             WRONG_LABEL_PADDING_DISTANCE)\n    if k_nearest_neighbors == 1:\n        features = paddle.min(dists, 2, keepdim=True)\n    else:\n        dists, _ = paddle.topk(-dists, k=k_nearest_neighbors, axis=2)\n        dists = -dists\n        valid_mask = (dists < WRONG_LABEL_PADDING_DISTANCE)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:61-83"
+    },
+    "541": {
+        "file_id": 55,
+        "content": "This function calculates the pairwise distances between reference and query embeddings, selects the nearest neighbors based on those distances, and returns the nearest neighbor features. It handles cases with different numbers of reference and query embeddings by padding with a specified distance value for missing embeddings.",
+        "type": "comment"
+    },
+    "542": {
+        "file_id": 55,
+        "content": "        masked_dists = dists * valid_mask.float()\n        pad_dist = paddle.max(masked_dists, axis=2, keepdim=True)[0].tile(\n            (1, 1, masked_dists.shape[-1]))\n        dists = paddle.where(valid_mask, dists, pad_dist)\n        # take mean of distances\n        features = paddle.mean(dists, axis=2, keepdim=True)\n    return features, ys\n###\ndef _selected_pixel(ref_labels_flat, ref_emb_flat):\n    index_list = paddle.arange(len(ref_labels_flat))\n    index_list = index_list\n    index_ = paddle.masked_select(index_list, ref_labels_flat != -1)\n    index_ = long_(index_)\n    ref_labels_flat = paddle.index_select(ref_labels_flat, index_, 0)\n    ref_emb_flat = paddle.index_select(ref_emb_flat, index_, 0)\n    return ref_labels_flat, ref_emb_flat\n###\ndef _nearest_neighbor_features_per_object_in_chunks(reference_embeddings_flat,\n                                                    query_embeddings_flat,\n                                                    reference_labels_flat,\n                                                    ref_obj_ids,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:84-113"
+    },
+    "543": {
+        "file_id": 55,
+        "content": "The code calculates the mean of distances between valid points and assigns the result to \"features\". The function _selected_pixel() selects pixels from flattened arrays where reference labels are not -1. The function _nearest_neighbor_features_per_object_in_chunks() operates on flattened embeddings, labels, and object ids to compute nearest neighbor features per object in chunks.",
+        "type": "comment"
+    },
+    "544": {
+        "file_id": 55,
+        "content": "                                                    k_nearest_neighbors,\n                                                    n_chunks, **cfg):\n    \"\"\"Calculates the nearest neighbor features per object in chunks to save mem.\n    Uses chunking to bound the memory use.\n    Args:\n    reference_embeddings_flat: Tensor of shape [n, embedding_dim],\n      the embedding vectors for the reference frame.\n    query_embeddings_flat: Tensor of shape [m, embedding_dim], the embedding\n      vectors for the query frames.\n    reference_labels_flat: Tensor of shape [n], the class labels of the\n      reference frame.\n    ref_obj_ids: int tensor of unique object ids in the reference labels.\n    k_nearest_neighbors: Integer, the number of nearest neighbors to use.\n    n_chunks: Integer, the number of chunks to use to save memory\n      (set to 1 for no chunking).\n    Returns:\n    nn_features: A float32 tensor of nearest neighbor features of shape\n      [m, n_objects, feature_dim].\n    \"\"\"\n    # reference_embeddings_flat = reference_embeddings_flat.cpu()",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:114-134"
+    },
+    "545": {
+        "file_id": 55,
+        "content": "This function calculates the nearest neighbor features per object in chunks to save memory, using chunking for bounding memory usage. It takes embedding vectors for reference and query frames, their class labels, unique object IDs, number of nearest neighbors, and number of chunks as input. The function returns a tensor of nearest neighbor features for the query frames.",
+        "type": "comment"
+    },
+    "546": {
+        "file_id": 55,
+        "content": "    # query_embeddings_flat = query_embeddings_flat.cpu()\n    # reference_labels_flat = reference_labels_flat.cpu()\n    # ref_obj_ids = ref_obj_ids.cpu()\n    chunk_size = int_(\n        np.ceil((float_(query_embeddings_flat.shape[0]) / n_chunks).numpy()))\n    if cfg.get('test_mode'):\n        reference_labels_flat, reference_embeddings_flat = _selected_pixel(\n            reference_labels_flat, reference_embeddings_flat)\n    wrong_label_mask = (reference_labels_flat != paddle.unsqueeze(\n        ref_obj_ids, 1))\n    all_features = []\n    for n in range(n_chunks):\n        if n == 0:\n            ys = None\n        if n_chunks == 1:\n            query_embeddings_flat_chunk = query_embeddings_flat\n        else:\n            chunk_start = n * chunk_size\n            chunk_end = (n + 1) * chunk_size\n            query_embeddings_flat_chunk = query_embeddings_flat[\n                chunk_start:chunk_end]\n        features, ys = _nn_features_per_object_for_chunk(\n            reference_embeddings_flat, query_embeddings_flat_chunk,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:135-158"
+    },
+    "547": {
+        "file_id": 55,
+        "content": "This code splits the query embeddings into multiple chunks, depending on the number of chunks specified. It then applies a function to each chunk and appends the results to the all_features list. If in test mode, it selects pixels from the reference and query embeddings. It also creates a wrong label mask for the reference labels and query embeddings.",
+        "type": "comment"
+    },
+    "548": {
+        "file_id": 55,
+        "content": "            wrong_label_mask, k_nearest_neighbors, ys)\n        all_features.append(features)\n    if n_chunks == 1:\n        nn_features = all_features[0]\n    else:\n        nn_features = paddle.concat(all_features, axis=0)\n    return nn_features\ndef nearest_neighbor_features_per_object(reference_embeddings,\n                                         query_embeddings,\n                                         reference_labels,\n                                         k_nearest_neighbors,\n                                         gt_ids=None,\n                                         n_chunks=100,\n                                         **cfg):\n    \"\"\"Calculates the distance to the nearest neighbor per object.\n    For every pixel of query_embeddings calculate the distance to the\n    nearest neighbor in the (possibly subsampled) reference_embeddings per object.\n    Args:\n    reference_embeddings: Tensor of shape [height, width, embedding_dim],\n      the embedding vectors for the reference frame.\n    query_embeddings: Tensor of shape [n_query_images, height, width,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:159-181"
+    },
+    "549": {
+        "file_id": 55,
+        "content": "This code calculates the nearest neighbor features per object using reference embeddings, query embeddings, and reference labels. It takes into account k-nearest neighbors and can handle a specified number of chunks for subsampling. The function returns the nearest neighbor features in the form of a tensor.",
+        "type": "comment"
+    },
+    "550": {
+        "file_id": 55,
+        "content": "      embedding_dim], the embedding vectors for the query frames.\n    reference_labels: Tensor of shape [height, width, 1], the class labels of\n      the reference frame.\n    max_neighbors_per_object: Integer, the maximum number of candidates\n      for the nearest neighbor query per object after subsampling,\n      or 0 for no subsampling.\n    k_nearest_neighbors: Integer, the number of nearest neighbors to use.\n    gt_ids: Int tensor of shape [n_objs] of the sorted unique ground truth\n      ids in the first frame. If None, it will be derived from\n      reference_labels.\n    n_chunks: Integer, the number of chunks to use to save memory\n      (set to 1 for no chunking).\n    Returns:\n    nn_features: A float32 tensor of nearest neighbor features of shape\n      [n_query_images, height, width, n_objects, feature_dim].\n    gt_ids: An int32 tensor of the unique sorted object ids present\n      in the reference labels.\n    \"\"\"\n    # reference_embeddings = reference_embeddings.detach().cpu()\n    # query_embeddings = query_embeddings.detach().cpu()",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:182-201"
+    },
+    "551": {
+        "file_id": 55,
+        "content": "This code calculates nearest neighbors for query frames based on the given embedding vectors. It takes input parameters like reference frame class labels, maximum number of candidates, and number of nearest neighbors to use. The function returns nearest neighbor features, unique sorted object ids present in the reference labels, and potentially gt_ids if provided.",
+        "type": "comment"
+    },
+    "552": {
+        "file_id": 55,
+        "content": "    # reference_labels = reference_labels.detach().cpu()\n    assert (reference_embeddings.shape[:2] == reference_labels.shape[:2])\n    h, w, _ = query_embeddings.shape\n    reference_labels_flat = reference_labels.reshape([-1])\n    if gt_ids is None:\n        ref_obj_ids = paddle.unique(reference_labels_flat)[-1]\n        ref_obj_ids = np.arange(0, ref_obj_ids + 1)\n        gt_ids = paddle.to_tensor(ref_obj_ids)\n        gt_ids = int_(gt_ids)\n    else:\n        gt_ids = int_(paddle.arange(0, gt_ids + 1))\n    embedding_dim = query_embeddings.shape[-1]\n    query_embeddings_flat = query_embeddings.reshape([-1, embedding_dim])\n    reference_embeddings_flat = reference_embeddings.reshape(\n        [-1, embedding_dim])\n    nn_features = _nearest_neighbor_features_per_object_in_chunks(\n        reference_embeddings_flat, query_embeddings_flat,\n        reference_labels_flat, gt_ids, k_nearest_neighbors, n_chunks, **cfg)\n    nn_features_dim = nn_features.shape[-1]\n    nn_features = nn_features.reshape(\n        [1, h, w, gt_ids.shape[0], nn_features_dim])",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:202-224"
+    },
+    "553": {
+        "file_id": 55,
+        "content": "This code is reshaping tensors and calculating nearest neighbor features for each object in chunks. It first reshapes the embeddings, then applies a function to find the closest neighbors and returns a tensor of these features. This process is done in chunks for efficiency and memory management.",
+        "type": "comment"
+    },
+    "554": {
+        "file_id": 55,
+        "content": "    return nn_features.cuda(), gt_ids\n########################################################################LOCAL_DIST_MAP\ndef local_pairwise_distances2(x, y, max_distance=9):\n    \"\"\"Computes pairwise squared l2 distances using a local search window.\n    Naive implementation using map_fn.\n    Used as a slow fallback for when correlation_cost is not available.\n    Args:\n    x: Float32 tensor of shape [height, width, feature_dim].\n    y: Float32 tensor of shape [height, width, feature_dim].\n    max_distance: Integer, the maximum distance in pixel coordinates\n      per dimension which is considered to be in the search window.\n    Returns:\n    Float32 distances tensor of shape\n      [height, width, (2 * max_distance + 1) ** 2].\n    \"\"\"\n    ori_h, ori_w, _ = x.shape\n    x = paddle.transpose(x, [2, 0, 1]).unsqueeze(0)\n    x = F.avg_pool2d(x, (2, 2), (2, 2))\n    y = paddle.transpose(y, [2, 0, 1]).unsqueeze(0)\n    y = F.avg_pool2d(y, (2, 2), (2, 2))\n    _, channels, height, width = x.shape\n    padding_val = 1e20\n    padded_y = F.pad(y,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:225-252"
+    },
+    "555": {
+        "file_id": 55,
+        "content": "This function calculates pairwise squared L2 distances using a local search window, with naive implementation using map_fn. It is used as a fallback when correlation_cost is not available. Inputs are tensors x and y of shape [height, width, feature\\_dim]. It returns a tensor of squared distance values shaped [height, width, (2 * max\\_distance + 1) ** 2], where max\\_distance is an integer representing the maximum distance in pixel coordinates per dimension. The function also applies average pooling with a 2x2 filter and pads the tensors x and y before calculating the distances.",
+        "type": "comment"
+    },
+    "556": {
+        "file_id": 55,
+        "content": "                     (max_distance, max_distance, max_distance, max_distance),\n                     mode='constant',\n                     value=padding_val)\n    offset_y = F.unfold(padded_y, kernel_sizes=[height, width]).reshape(\n        [1, channels, height, width, -1])\n    x = x.reshape([1, channels, height, width, 1])\n    minus = x - offset_y\n    dists = paddle.sum(paddle.multiply(minus, minus),\n                       axis=1).reshape([1, height, width,\n                                        -1]).transpose([0, 3, 1, 2])\n    dists = (paddle.nn.functional.sigmoid(dists) - 0.5) * 2\n    dists = F.interpolate(dists,\n                          size=[ori_h, ori_w],\n                          mode='bilinear',\n                          align_corners=True)\n    dists = dists.squeeze(0).transpose([1, 2, 0])\n    return dists\ndef local_previous_frame_nearest_neighbor_features_per_object(\n        prev_frame_embedding,\n        query_embedding,\n        prev_frame_labels,\n        gt_ids,\n        max_distance=12):\n    \"\"\"Computes nearest neighbor features while only allowing local matches.",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:253-278"
+    },
+    "557": {
+        "file_id": 55,
+        "content": "This code calculates the nearest neighbor features for local matches in a video. It takes in parameters like previous frame embedding, query embedding, previous frame labels, and ground truth IDs. The function computes distances between frames using Sigmoid activation and bilinear interpolation. Max distance determines the maximum allowed distance for a match to be considered valid.",
+        "type": "comment"
+    },
+    "558": {
+        "file_id": 55,
+        "content": "  Args:\n    prev_frame_embedding: Tensor of shape [height, width, embedding_dim],\n      the embedding vectors for the last frame.\n    query_embedding: Tensor of shape [height, width, embedding_dim],\n      the embedding vectors for the query frames.\n    prev_frame_labels: Tensor of shape [height, width, 1], the class labels of\n      the previous frame.\n    gt_ids: Int Tensor of shape [n_objs] of the sorted unique ground truth\n      ids in the first frame.\n    max_distance: Integer, the maximum distance allowed for local matching.\n  Returns:\n    nn_features: A float32 np.array of nearest neighbor features of shape\n      [1, height, width, n_objects, 1].\n    \"\"\"\n    #     print(query_embedding.shape, prev_frame_embedding.shape)\n    #     print(query_embedding.place, prev_frame_embedding.place)\n    #     query_embedding = query_embedding.cpu()\n    #     prev_frame_embedding = prev_frame_embedding.cpu()\n    #     prev_frame_labels = prev_frame_labels.cpu()\n    #     print(prev_frame_labels.place, prev_frame_embedding.place, query_embedding.place)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:279-298"
+    },
+    "559": {
+        "file_id": 55,
+        "content": "This code calculates the nearest neighbor features by comparing embedding vectors of query frames with the last frame. It takes input tensors for embedding vectors, previous frame labels, and ground truth IDs along with a maximum distance limit. The function returns the nearest neighbor features in a specific shape.",
+        "type": "comment"
+    },
+    "560": {
+        "file_id": 55,
+        "content": "    d = local_pairwise_distances2(query_embedding,\n                                  prev_frame_embedding,\n                                  max_distance=max_distance)\n    height, width = prev_frame_embedding.shape[:2]\n    if MODEL_UNFOLD:\n        labels = float_(prev_frame_labels).transpose([2, 0, 1]).unsqueeze(0)\n        padded_labels = F.pad(labels, (\n            2 * max_distance,\n            2 * max_distance,\n            2 * max_distance,\n            2 * max_distance,\n        ))\n        offset_labels = F.unfold(padded_labels,\n                                 kernel_sizes=[height, width],\n                                 strides=[2,\n                                          2]).reshape([height, width, -1, 1])\n        offset_masks = paddle.equal(\n            offset_labels,\n            float_(gt_ids).unsqueeze(0).unsqueeze(0).unsqueeze(0))\n    else:\n        masks = paddle.equal(prev_frame_labels,\n                             gt_ids.unsqueeze(0).unsqueeze(0))\n        padded_masks = nn.functional.pad(masks, (",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:300-325"
+    },
+    "561": {
+        "file_id": 55,
+        "content": "Code snippet performs local pairwise distance calculation between query and previous frame embeddings. If MODEL_UNFOLD is enabled, it generates offset labels by unfolding padded labels with kernel sizes matching height and width of the previous frame embedding. It then creates offset masks by checking equality between offset labels and gt_ids. If MODEL_UNFOLD is not enabled, it directly creates masks by comparing previous frame labels and gt_ids. Finally, it pads the masks using nn.functional.pad with specified padding values.",
+        "type": "comment"
+    },
+    "562": {
+        "file_id": 55,
+        "content": "            0,\n            0,\n            max_distance,\n            max_distance,\n            max_distance,\n            max_distance,\n        ))\n        offset_masks = []\n        for y_start in range(2 * max_distance + 1):\n            y_end = y_start + height\n            masks_slice = padded_masks[y_start:y_end]\n            for x_start in range(2 * max_distance + 1):\n                x_end = x_start + width\n                offset_mask = masks_slice[:, x_start:x_end]\n                offset_masks.append(offset_mask)\n        offset_masks = paddle.stack(offset_masks, axis=2)\n    d_tiled = d.unsqueeze(-1).tile((1, 1, 1, gt_ids.shape[0]))\n    pad = paddle.ones_like(d_tiled)\n    d_masked = paddle.where(offset_masks, d_tiled, pad)\n    dists = paddle.min(d_masked, axis=2)\n    dists = dists.reshape([1, height, width, gt_ids.shape[0], 1])\n    return dists\n##############################################################\n#################\nclass _res_block(nn.Layer):\n    def __init__(self, in_dim, out_dim, **cfg):\n        super(_res_block, self).__init__()",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:326-358"
+    },
+    "563": {
+        "file_id": 55,
+        "content": "The code is performing feature extraction and masking for a specific model. It first tiles input data, then applies offset masks to selected regions, and finally extracts minimum distances using the tiled and masked data. The result is a new set of distances which are then reshaped for further processing.",
+        "type": "comment"
+    },
+    "564": {
+        "file_id": 55,
+        "content": "        self.conv1 = nn.Conv2D(in_dim,\n                               out_dim,\n                               kernel_size=3,\n                               stride=1,\n                               padding=1)\n        self.relu1 = nn.ReLU()\n        self.bn1 = paddle.nn.BatchNorm2D(out_dim, momentum=cfg['train_bn_mom'])\n        self.conv2 = nn.Conv2D(out_dim,\n                               out_dim,\n                               kernel_size=3,\n                               stride=1,\n                               padding=1)\n        self.relu2 = nn.ReLU()\n        self.bn2 = paddle.nn.BatchNorm2D(out_dim, momentum=cfg['train_bn_mom'])\n    def forward(self, x):\n        res = x\n        x = self.conv1(x)\n        x = self.bn1(x)\n        x = self.relu1(x)\n        x = self.conv2(x)\n        x = self.bn2(x)\n        x = self.relu2(x)\n        x += res\n        return x\n####################\nclass IntSegHead(nn.Layer):\n    def __init__(self, in_dim, emb_dim, **cfg):\n        super(IntSegHead, self).__init__()\n        self.conv1 = nn.Conv2D(in_dim,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:359-390"
+    },
+    "565": {
+        "file_id": 55,
+        "content": "This code defines a convolutional neural network (CNN) architecture for image processing tasks. The class `IntVOS` contains two 2D convolutions, batch normalization, and ReLU activations in its forward pass. The `IntSegHead` class initializes another CNN with different parameters, which seems to be a part of the overall model. Both classes extend `nn.Layer`, indicating they are PaddlePaddle's version of PyTorch layers.",
+        "type": "comment"
+    },
+    "566": {
+        "file_id": 55,
+        "content": "                               emb_dim,\n                               kernel_size=7,\n                               stride=1,\n                               padding=3)\n        self.bn1 = paddle.nn.BatchNorm2D(emb_dim, momentum=cfg['train_bn_mom'])\n        self.relu1 = nn.ReLU(True)\n        self.res1 = _res_block(emb_dim, emb_dim, **cfg)\n        self.res2 = _res_block(emb_dim, emb_dim, **cfg)\n        self.conv2 = nn.Conv2D(256,\n                               emb_dim,\n                               kernel_size=3,\n                               stride=1,\n                               padding=1)\n        self.bn2 = paddle.nn.BatchNorm2D(emb_dim, momentum=cfg['train_bn_mom'])\n        self.relu2 = nn.ReLU(True)\n        self.conv3 = nn.Conv2D(emb_dim, 1, 1, 1)\n    def forward(self, x):\n        x = self.conv1(x)\n        x = self.bn1(x)\n        x = self.relu1(x)\n        x = self.res1(x)\n        x = self.res2(x)\n        x = self.conv2(x)\n        x = self.bn2(x)\n        x = self.relu2(x)\n        x = self.conv3(x)\n        return x",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:391-418"
+    },
+    "567": {
+        "file_id": 55,
+        "content": "This code defines a custom Convolutional Neural Network (CNN) layer for extracting features from input images. It consists of multiple convolutions, batch normalizations, and ReLU activations. The input image is first passed through several convolution layers with different configurations, followed by batch normalization and ReLU activation functions to improve model performance. Finally, the output is returned after passing it through a single convolution layer and another batch normalization and ReLU activation.",
+        "type": "comment"
+    },
+    "568": {
+        "file_id": 55,
+        "content": "class _split_separable_conv2d(nn.Layer):\n    def __init__(self, in_dim, out_dim, kernel_size=7, **cfg):\n        super(_split_separable_conv2d, self).__init__()\n        self.conv1 = nn.Conv2D(in_dim,\n                               in_dim,\n                               kernel_size=kernel_size,\n                               stride=1,\n                               padding=int((kernel_size - 1) / 2),\n                               groups=in_dim)\n        self.relu1 = nn.ReLU(True)\n        self.bn1 = paddle.nn.BatchNorm2D(in_dim, momentum=cfg['train_bn_mom'])\n        self.conv2 = nn.Conv2D(in_dim, out_dim, kernel_size=1, stride=1)\n        self.relu2 = nn.ReLU(True)\n        self.bn2 = paddle.nn.BatchNorm2D(out_dim, momentum=cfg['train_bn_mom'])\n        kaiming_normal_(self.conv1.weight, mode='fan_out', nonlinearity='relu')\n        kaiming_normal_(self.conv2.weight, mode='fan_out', nonlinearity='relu')\n    def forward(self, x):\n        x = self.conv1(x)\n        x = self.bn1(x)\n        x = self.relu1(x)\n        x = self.conv2(x)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:421-442"
+    },
+    "569": {
+        "file_id": 55,
+        "content": "This code defines a custom layer _split_separable_conv2d, which consists of two convolutional layers followed by ReLU and batch normalization. The first convolution is performed with the same number of input and output channels, while the second has fewer output channels than input dimensions. This architecture helps to reduce parameters and computational cost in a deep learning model for image processing tasks.",
+        "type": "comment"
+    },
+    "570": {
+        "file_id": 55,
+        "content": "        x = self.bn2(x)\n        x = self.relu2(x)\n        return x\nclass DynamicSegHead(nn.Layer):\n    def __init__(self, in_dim, embed_dim, **cfg):\n        super(DynamicSegHead, self).__init__()\n        self.layer1 = _split_separable_conv2d(in_dim, embed_dim, **cfg)\n        self.layer2 = _split_separable_conv2d(embed_dim, embed_dim, **cfg)\n        self.layer3 = _split_separable_conv2d(embed_dim, embed_dim, **cfg)\n        self.layer4 = _split_separable_conv2d(embed_dim, embed_dim, **cfg)\n        self.conv = nn.Conv2D(embed_dim, 1, 1, 1)\n        kaiming_normal_(self.conv.weight, mode='fan_out', nonlinearity='relu')\n    def forward(self, x):\n        x = self.layer1(x)\n        x = self.layer2(x)\n        x = self.layer3(x)\n        x = self.layer4(x)\n        x = self.conv(x)\n        return x\nfrom ..registry import HEADS\n\"\"\"\n覆盖原理\nclass c1:\n    def __init__(self):\n        self.a = 1\nclass c2(c1):\n    def __init__(self):\n        super(c2, self).__init__()\n        self.a = 2\nc = c2()\nprint(c.a)\n\"\"\"\n@HEADS.register()\nclass IntVOS(nn.Layer):",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:443-488"
+    },
+    "571": {
+        "file_id": 55,
+        "content": "The code defines two classes: IntVOS and DynamicSegHead. IntVOS is a subclass of nn.Layer and utilizes the DynamicSegHead class as its segmentation head. DynamicSegHead is also a subclass of nn.Layer and consists of several layers (layer1, layer2, layer3, layer4) that apply separable convolutions to the input. Finally, there's a nn.Conv2D layer with Kaiming initialization for the output. This architecture can be used for segmentation tasks in computer vision applications.",
+        "type": "comment"
+    },
+    "572": {
+        "file_id": 55,
+        "content": "    def __init__(self, feature_extracter, **cfg):\n        super(IntVOS, self).__init__()\n        self.feature_extracter = feature_extracter  ##embedding extractor\n        self.feature_extracter.cls_conv = nn.Sequential()\n        self.feature_extracter.upsample4 = nn.Sequential()\n        self.semantic_embedding = None\n        self.seperate_conv = nn.Conv2D(cfg['model_aspp_outdim'],\n                                       cfg['model_aspp_outdim'],\n                                       kernel_size=3,\n                                       stride=1,\n                                       padding=1,\n                                       groups=cfg['model_aspp_outdim'])\n        self.bn1 = paddle.nn.BatchNorm2D(cfg['model_aspp_outdim'],\n                                         momentum=cfg['train_bn_mom'])\n        self.relu1 = nn.ReLU(True)\n        self.embedding_conv = nn.Conv2D(cfg['model_aspp_outdim'],\n                                        cfg['model_semantic_embedding_dim'], 1,\n                                        1)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:489-506"
+    },
+    "573": {
+        "file_id": 55,
+        "content": "This code defines a class called IntVOS. The constructor takes in a feature_extracter and **cfg parameters, initializes the instance variables, and adds layers to the feature_extracter if required. It also initializes the embedding convolution layer for semantic embedding extraction.",
+        "type": "comment"
+    },
+    "574": {
+        "file_id": 55,
+        "content": "        self.relu2 = nn.ReLU(True)\n        self.bn2 = paddle.nn.BatchNorm2D(cfg['model_semantic_embedding_dim'],\n                                         momentum=cfg['train_bn_mom'])\n        self.semantic_embedding = nn.Sequential(*[\n            self.seperate_conv, self.bn1, self.relu1, self.embedding_conv,\n            self.bn2, self.relu2\n        ])\n        for m in self.semantic_embedding:\n            if isinstance(m, nn.Conv2D):\n                kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')\n        self.dynamic_seghead = DynamicSegHead(\n            in_dim=cfg['model_semantic_embedding_dim'] + 3,\n            embed_dim=cfg['model_head_embedding_dim'],\n            **cfg)  # propagation segm head\n        if cfg['model_useintseg']:\n            self.inter_seghead = IntSegHead(\n                in_dim=cfg['model_semantic_embedding_dim'] + 3,\n                emb_dim=cfg['model_head_embedding_dim'],\n                **cfg)\n        else:\n            self.inter_seghead = DynamicSegHead(\n                in_dim=cfg['model_semantic_embedding_dim'] + 2,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:507-530"
+    },
+    "575": {
+        "file_id": 55,
+        "content": "The code initializes and configures the layers for semantic segmentation. It creates a ReLU activation function, a batch normalization layer with specified parameters, and a sequential neural network containing the separate convolution, first batch norm, first ReLU, embedding convolution, second batch norm, and second ReLU. The code also initializes the dynamic segmentation head and (optionally) an inter-segmentation head depending on the config's 'model_useintseg' flag.",
+        "type": "comment"
+    },
+    "576": {
+        "file_id": 55,
+        "content": "                embed_dim=cfg['model_head_embedding_dim'],\n                **cfg)  # interaction segm head\n        self.pretrained = cfg.get('pretrained', None)\n        self.cfg = cfg\n    def init_weights(self):\n        if isinstance(self.pretrained, str) and self.pretrained.strip() != \"\":\n            self.set_state_dict(load(self.pretrained, self.state_dict()))\n            print('loaded pretrained model')\n    def loss(self, **kwargs):\n        return self.loss_func(**kwargs)\n    def forward(self,\n                x=None,\n                ref_scribble_label=None,\n                previous_frame_mask=None,\n                normalize_nearest_neighbor_distances=True,\n                use_local_map=True,\n                seq_names=None,\n                gt_ids=None,\n                k_nearest_neighbors=1,\n                global_map_tmp_dic=None,\n                local_map_dics=None,\n                interaction_num=None,\n                start_annotated_frame=None,\n                frame_num=None):\n        x = self.extract_feature(x)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:531-559"
+    },
+    "577": {
+        "file_id": 55,
+        "content": "This code defines a class for a model head that takes input, initializes weights (loading pretrained if available), and calculates the loss during forward pass. It uses various input parameters such as x, ref_scribble_label, previous_frame_mask, etc. The forward function extracts features from the input, and is responsible for losses related to the model head.",
+        "type": "comment"
+    },
+    "578": {
+        "file_id": 55,
+        "content": "        #         print('extract_feature:', x.mean().item())\n        ref_frame_embedding, previous_frame_embedding, current_frame_embedding = paddle.split(\n            x, num_or_sections=3, axis=0)\n        if global_map_tmp_dic is None:\n            dic = self.prop_seghead(\n                ref_frame_embedding,\n                previous_frame_embedding,\n                current_frame_embedding,\n                ref_scribble_label,\n                previous_frame_mask,\n                normalize_nearest_neighbor_distances,\n                use_local_map,\n                seq_names,\n                gt_ids,\n                k_nearest_neighbors,\n                global_map_tmp_dic,\n                local_map_dics,\n                interaction_num,\n                start_annotated_frame,\n                frame_num,\n                self.dynamic_seghead,\n            )\n            return dic\n        else:\n            dic, global_map_tmp_dic = self.prop_seghead(\n                ref_frame_embedding,\n                previous_frame_embedding,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:560-588"
+    },
+    "579": {
+        "file_id": 55,
+        "content": "This code is splitting input feature x into three parts (ref, previous, current frame embeddings), then calling the prop_seghead function to compute a dictionary of results. If global_map_tmp_dic is None, it returns only the dictionary; otherwise, it also updates global_map_tmp_dic and returns both.",
+        "type": "comment"
+    },
+    "580": {
+        "file_id": 55,
+        "content": "                current_frame_embedding,\n                ref_scribble_label,\n                previous_frame_mask,\n                normalize_nearest_neighbor_distances,\n                use_local_map,\n                seq_names,\n                gt_ids,\n                k_nearest_neighbors,\n                global_map_tmp_dic,\n                local_map_dics,\n                interaction_num,\n                start_annotated_frame,\n                frame_num,\n                self.dynamic_seghead,\n            )\n            return dic, global_map_tmp_dic\n    def extract_feature(self, x):\n        x = self.feature_extracter(x)\n        x = self.semantic_embedding(x)\n        return x\n    def prop_seghead(\n        self,\n        ref_frame_embedding=None,\n        previous_frame_embedding=None,\n        current_frame_embedding=None,\n        ref_scribble_label=None,\n        previous_frame_mask=None,\n        normalize_nearest_neighbor_distances=True,\n        use_local_map=True,\n        seq_names=None,\n        gt_ids=None,\n        k_nearest_neighbors=1,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:589-622"
+    },
+    "581": {
+        "file_id": 55,
+        "content": "This code defines a class with three methods: \"IntVOS\", \"extract_feature\", and \"prop_seghead\". The \"IntVOS\" function returns two dictionaries after performing some operations. The \"extract_feature\" method extracts features from input image using feature extracter and semantic embedding. The \"prop_seghead\" method takes various inputs, including frame embeddings, scribble label, and mask, and performs propagation segmentation head task with optional normalization and local map usage.",
+        "type": "comment"
+    },
+    "582": {
+        "file_id": 55,
+        "content": "        global_map_tmp_dic=None,\n        local_map_dics=None,\n        interaction_num=None,\n        start_annotated_frame=None,\n        frame_num=None,\n        dynamic_seghead=None,\n    ):\n        \"\"\"return: feature_embedding,global_match_map,local_match_map,previous_frame_mask\"\"\"\n        ###############\n        cfg = self.cfg\n        global_map_tmp_dic = global_map_tmp_dic\n        dic_tmp = {}\n        bs, c, h, w = current_frame_embedding.shape\n        if cfg.get('test_mode'):\n            scale_ref_scribble_label = float_(ref_scribble_label)\n        else:\n            scale_ref_scribble_label = paddle.nn.functional.interpolate(\n                float_(ref_scribble_label), size=(h, w), mode='nearest')\n        scale_ref_scribble_label = int_(scale_ref_scribble_label)\n        scale_previous_frame_label = paddle.nn.functional.interpolate(\n            float_(previous_frame_mask), size=(h, w), mode='nearest')\n        scale_previous_frame_label = int_(scale_previous_frame_label)\n        for n in range(bs):\n            seq_current_frame_embedding = current_frame_embedding[n]",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:623-646"
+    },
+    "583": {
+        "file_id": 55,
+        "content": "This function takes in various parameters and returns feature_embedding, global_match_map, local_match_map, and previous_frame_mask. It initializes global_map_tmp_dic, dic_tmp, bs, c, h, w from current_frame_embedding, checks if it is in test mode, scales ref_scribble_label and previous_frame_mask using interpolation for matching dimensions, and then iterates through a range of bs, performing operations on seq_current_frame_embedding.",
+        "type": "comment"
+    },
+    "584": {
+        "file_id": 55,
+        "content": "            seq_ref_frame_embedding = ref_frame_embedding[n]\n            seq_prev_frame_embedding = previous_frame_embedding[n]\n            seq_ref_frame_embedding = seq_ref_frame_embedding.transpose(\n                [1, 2, 0])\n            seq_current_frame_embedding = seq_current_frame_embedding.transpose(\n                [1, 2, 0])\n            seq_ref_scribble_label = scale_ref_scribble_label[n].transpose(\n                [1, 2, 0])\n            #########Global Map\n            nn_features_n, ref_obj_ids = nearest_neighbor_features_per_object(\n                reference_embeddings=seq_ref_frame_embedding,\n                query_embeddings=seq_current_frame_embedding,\n                reference_labels=seq_ref_scribble_label,\n                k_nearest_neighbors=k_nearest_neighbors,\n                gt_ids=gt_ids[n],\n                n_chunks=10)\n            if normalize_nearest_neighbor_distances:\n                nn_features_n = (paddle.nn.functional.sigmoid(nn_features_n) -\n                                 0.5) * 2",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:647-665"
+    },
+    "585": {
+        "file_id": 55,
+        "content": "This code calculates nearest neighbor features for each object using reference and current frame embeddings, and scribble labels. It transposes the embeddings and label to match the global map format and uses k-nearest neighbors to find the corresponding features. If normalization is enabled, it applies a sigmoid function to normalize the distances.",
+        "type": "comment"
+    },
+    "586": {
+        "file_id": 55,
+        "content": "            #             print(nn_features_n)\n            ###\n            if global_map_tmp_dic is not None:  ###when testing, use global map memory\n                if seq_names[n] not in global_map_tmp_dic:\n                    global_map_tmp_dic[seq_names[n]] = paddle.ones_like(\n                        nn_features_n).tile([1000, 1, 1, 1, 1])\n                nn_features_n = paddle.where(\n                    nn_features_n <= global_map_tmp_dic[seq_names[n]][\n                        frame_num[n]].unsqueeze(0), nn_features_n,\n                    global_map_tmp_dic[seq_names[n]][frame_num[n]].unsqueeze(\n                        0))\n                #                 print('detach 1')\n                #                 print(nn_features_n.shape)\n                # nn_features_n = nn_features_n.detach()\n                global_map_tmp_dic[seq_names[n]][\n                    frame_num[n]] = nn_features_n.detach()[0]\n            #########################Local dist map\n            seq_prev_frame_embedding = seq_prev_frame_embedding.transpose(",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:667-687"
+    },
+    "587": {
+        "file_id": 55,
+        "content": "This code section checks if a sequence name exists in the global map dictionary, and if not, creates an entry for it. It then compares the current frame's features to the corresponding value in the global map for that sequence. If the current frame's features are less than or equal to the stored value, they remain unchanged; otherwise, they get updated with the stored value. Finally, it updates the global map entry with the new frame's features.",
+        "type": "comment"
+    },
+    "588": {
+        "file_id": 55,
+        "content": "                [1, 2, 0])\n            seq_previous_frame_label = scale_previous_frame_label[n].transpose(\n                [1, 2, 0])\n            if use_local_map:\n                prev_frame_nn_features_n = local_previous_frame_nearest_neighbor_features_per_object(\n                    prev_frame_embedding=seq_prev_frame_embedding,\n                    query_embedding=seq_current_frame_embedding,\n                    prev_frame_labels=seq_previous_frame_label,\n                    gt_ids=ref_obj_ids,\n                    max_distance=cfg['model_max_local_distance'])\n            else:\n                prev_frame_nn_features_n, _ = nearest_neighbor_features_per_object(\n                    reference_embeddings=seq_prev_frame_embedding,\n                    query_embeddings=seq_current_frame_embedding,\n                    reference_labels=seq_previous_frame_label,\n                    k_nearest_neighbors=k_nearest_neighbors,\n                    gt_ids=gt_ids[n],\n                    n_chunks=20)\n                prev_frame_nn_features_n = (",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:688-707"
+    },
+    "589": {
+        "file_id": 55,
+        "content": "This code is finding the nearest neighbor features for the previous frame's embedding, based on whether local mapping is used or not. If local mapping is used, it calls a separate function `local_previous_frame_nearest_neighbor_features_per_object` to get the features and labels. Otherwise, it uses the `nearest_neighbor_features_per_object` function with specified parameters to find the nearest neighbors. The resulting features are stored in `prev_frame_nn_features_n`.",
+        "type": "comment"
+    },
+    "590": {
+        "file_id": 55,
+        "content": "                    paddle.nn.functional.sigmoid(prev_frame_nn_features_n) -\n                    0.5) * 2\n            #             print(prev_frame_nn_features_n.mean().item(), prev_frame_nn_features_n.shape, interaction_num)  # o\n            #############\n            if local_map_dics is not None:  ##When testing, use local map memory\n                local_map_tmp_dic, local_map_dist_dic = local_map_dics\n                if seq_names[n] not in local_map_dist_dic:\n                    print(seq_names[n], 'not in local_map_dist_dic')\n                    local_map_dist_dic[seq_names[n]] = paddle.zeros(1000, 9)\n                if seq_names[n] not in local_map_tmp_dic:\n                    print(seq_names[n], 'not in local_map_tmp_dic')\n                    local_map_tmp_dic[seq_names[n]] = paddle.zeros_like(\n                        prev_frame_nn_features_n).unsqueeze(0).tile(\n                            [1000, 9, 1, 1, 1, 1])\n                #                 print(local_map_dist_dic[seq_names[n]].shape)\n                #                 print('detach 2')",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:708-724"
+    },
+    "591": {
+        "file_id": 55,
+        "content": "This code is checking if the local map dictionaries are not None, indicating testing with local map memory. If a specific sequence name isn't in the local map distance dictionary or temporary map dictionary, it prints an error message and creates a new zero tensor to store the data.",
+        "type": "comment"
+    },
+    "592": {
+        "file_id": 55,
+        "content": "                # prev_frame_nn_features_n = prev_frame_nn_features_n.detach()\n                local_map_dist_dic[seq_names[n]][\n                    frame_num[n], interaction_num -\n                    1] = 1.0 / (abs(frame_num[n] - start_annotated_frame)\n                                )  # bugs fixed.\n                local_map_tmp_dic[seq_names[n]][\n                    frame_num[n],\n                    interaction_num - 1] = prev_frame_nn_features_n.squeeze(\n                        0).detach()  # bugs fixed.\n                if interaction_num == 1:\n                    prev_frame_nn_features_n = local_map_tmp_dic[seq_names[n]][\n                        frame_num[n]][interaction_num - 1]\n                    prev_frame_nn_features_n = prev_frame_nn_features_n.unsqueeze(\n                        0)\n                else:\n                    if local_map_dist_dic[seq_names[n]][frame_num[n]][interaction_num - 1] > \\\n                            local_map_dist_dic[seq_names[n]][frame_num[n]][interaction_num - 2]:",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:725-741"
+    },
+    "593": {
+        "file_id": 55,
+        "content": "This code segment appears to be part of a larger function that processes video frames and interactions. It stores the distance from the current frame to the first annotated frame in the local_map_dist_dic dictionary, as well as the corresponding previous frame features in the local_map_tmp_dic. The code also updates the value of prev_frame_nn_features_n based on certain conditions involving interaction numbers and distances between frames.",
+        "type": "comment"
+    },
+    "594": {
+        "file_id": 55,
+        "content": "                        prev_frame_nn_features_n = local_map_tmp_dic[\n                            seq_names[n]][frame_num[n]][interaction_num - 1]\n                        prev_frame_nn_features_n = prev_frame_nn_features_n.unsqueeze(\n                            0)\n                    else:\n                        prev_frame_nn_features_n = local_map_tmp_dic[\n                            seq_names[n]][frame_num[n]][interaction_num - 2]\n                        prev_frame_nn_features_n = prev_frame_nn_features_n.unsqueeze(\n                            0)\n                local_map_dics = (local_map_tmp_dic, local_map_dist_dic)\n            to_cat_previous_frame = (\n                float_(seq_previous_frame_label) == float_(ref_obj_ids)\n            )  # float comparision?\n            to_cat_current_frame_embedding = current_frame_embedding[\n                n].unsqueeze(0).tile((ref_obj_ids.shape[0], 1, 1, 1))\n            to_cat_nn_feature_n = nn_features_n.squeeze(0).transpose(\n                [2, 3, 0, 1])\n            to_cat_previous_frame = float_(",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:742-763"
+    },
+    "595": {
+        "file_id": 55,
+        "content": "This code appears to be part of a video modeling process. It seems to involve local map dictionaries and interaction numbers, comparing previous frames with current ones for float comparisons, unsqueezing and reshaping features and labels, and potentially using these operations in some video modeling or analysis task.",
+        "type": "comment"
+    },
+    "596": {
+        "file_id": 55,
+        "content": "                to_cat_previous_frame.unsqueeze(-1).transpose([2, 3, 0, 1]))\n            to_cat_prev_frame_nn_feature_n = prev_frame_nn_features_n.squeeze(\n                0).transpose([2, 3, 0, 1])\n            to_cat = paddle.concat(\n                (to_cat_current_frame_embedding, to_cat_nn_feature_n,\n                 to_cat_prev_frame_nn_feature_n, to_cat_previous_frame), 1)\n            pred_ = dynamic_seghead(to_cat)\n            pred_ = pred_.transpose([1, 0, 2, 3])\n            dic_tmp[seq_names[n]] = pred_\n        if global_map_tmp_dic is None:\n            return dic_tmp\n        else:\n            if local_map_dics is None:\n                return dic_tmp, global_map_tmp_dic\n            else:\n                return dic_tmp, global_map_tmp_dic, local_map_dics\n    def int_seghead(self,\n                    ref_frame_embedding=None,\n                    ref_scribble_label=None,\n                    prev_round_label=None,\n                    normalize_nearest_neighbor_distances=True,\n                    global_map_tmp_dic=None,",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:764-787"
+    },
+    "597": {
+        "file_id": 55,
+        "content": "This code is defining a function \"int_seghead\" that takes in various inputs and returns output dictionaries. It concatenates embeddings and features, passes them to the dynamic_seghead function, transposes the result, and stores it in a dictionary. If global_map_tmp_dic is not None, the function also returns other dictionaries.",
+        "type": "comment"
+    },
+    "598": {
+        "file_id": 55,
+        "content": "                    local_map_dics=None,\n                    interaction_num=None,\n                    seq_names=None,\n                    gt_ids=None,\n                    k_nearest_neighbors=1,\n                    frame_num=None,\n                    first_inter=True):\n        dic_tmp = {}\n        bs, c, h, w = ref_frame_embedding.shape\n        scale_ref_scribble_label = paddle.nn.functional.interpolate(\n            float_(ref_scribble_label), size=(h, w), mode='nearest')\n        scale_ref_scribble_label = int_(scale_ref_scribble_label)\n        if not first_inter:\n            scale_prev_round_label = paddle.nn.functional.interpolate(\n                float_(prev_round_label), size=(h, w), mode='nearest')\n            scale_prev_round_label = int_(scale_prev_round_label)\n        n_chunks = 500\n        for n in range(bs):\n            gt_id = paddle.arange(0, gt_ids[n] + 1)\n            gt_id = int_(gt_id)\n            seq_ref_frame_embedding = ref_frame_embedding[n]\n            ########################Local dist map",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/modeling/heads/IntVOS.py:788-813"
+    },
+    "599": {
+        "file_id": 55,
+        "content": "This code snippet calculates the local distance map for each frame in the batch and possibly a previous round if it's not the first interaction. The function takes in various parameters such as ref_frame_embedding, prev_round_label, gt_ids, etc., and performs interpolation to resize the reference scribble label and previous round label. It then iterates over each frame in the batch, creating a gt_id array, and calculating the local distance map for the current frame's embedding. This process may involve interpolation and integer conversion of the resized labels.",
+        "type": "comment"
+    }
+}

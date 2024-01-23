@@ -1,0 +1,15 @@
+{
+    "summary": "This code defines a Softmax class with an Inplace_Run method that applies softmax function in-place to iterator ranges of float vectors. The code also includes a virtual function for postprocessing operations in the PaddleVideo library.",
+    "details": [
+        {
+            "comment": "This code defines a class Softmax that contains a method Inplace_Run. The method takes an iterator range of a vector of floats and applies softmax function in-place to the values within this range.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/deploy/cpp_infer/include/postprocess_op.h\":0-38",
+            "content": "// Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n//\n// Licensed under the Apache License, Version 2.0 (the \"License\");\n// you may not use this file except in compliance with the License.\n// You may obtain a copy of the License at\n//\n//     http://www.apache.org/licenses/LICENSE-2.0\n//\n// Unless required by applicable law or agreed to in writing, software\n// distributed under the License is distributed on an \"AS IS\" BASIS,\n// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n// See the License for the specific language governing permissions and\n// limitations under the License.\n#pragma once\n#include \"opencv2/core.hpp\"\n#include \"opencv2/imgcodecs.hpp\"\n#include \"opencv2/imgproc.hpp\"\n#include <chrono>\n#include <iomanip>\n#include <iostream>\n#include <ostream>\n#include <vector>\n#include <cstring>\n#include <fstream>\n#include <numeric>\n#include \"include/utility.h\"\nnamespace PaddleVideo\n{\n    class Softmax\n    {\n    public:\n        virtual void Inplace_Run(const std::vector<float>::iterator &_begin, const std::vector<float>::iterator &_end);"
+        },
+        {
+            "comment": "This code defines a virtual function that takes in two iterators to a vector of floats and returns a vector of floats as output. It is part of the PaddleVideo library's postprocessing operation namespace.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/deploy/cpp_infer/include/postprocess_op.h\":39-42",
+            "content": "        virtual std::vector<float> Run(const std::vector<float>::iterator &_begin, const std::vector<float>::iterator &_end);\n    };\n} // namespace PaddleVideo"
+        }
+    ]
+}

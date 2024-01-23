@@ -1,0 +1,12 @@
+Usefull Action Recognition Datasets.
+
+    AVA,  https://arxiv.org/abs/1705.08421
+    Kinetics, https://arxiv.org/abs/1705.06950
+    YouTube-8M, https://arxiv.org/abs/1609.08675
+    ActivityNet, http://www.cv-foundation.org/openaccess/content_cvpr_2015/html/Heilbron_ActivityNet_A_Large-Scale_2015_CVPR_paper.html
+    Moments in Time, https://arxiv.org/pdf/1801.03150.pdf
+    Charades, https://arxiv.org/abs/1604.01753
+    EPIC-Kitchens, https://arxiv.org/abs/1804.02748
+    THUMOS, https://arxiv.org/abs/1604.06182
+    UCF-101, http://crcv.ucf.edu/papers/UCF101_CRCV-TR-12-01.pdf
+    HMDB51, http://serre-lab.clps.brown.edu/wp-content/uploads/2012/08/Kuehne_etal_iccv11.pdf

@@ -1,0 +1,543 @@
+{
+    "4000": {
+        "file_id": 338,
+        "content": "English | [简体中文](./readme.md)\n# Model service deployment\n## Introduction\n[Paddle Serving](https://github.com/PaddlePaddle/Serving) aims to help deep learning developers easily deploy online prediction services, support one-click deployment of industrial-grade service capabilities, high concurrency between client and server Efficient communication and support for developing clients in multiple programming languages.\nThis section takes the HTTP prediction service deployment as an example to introduce how to use PaddleServing to deploy the model service in PaddleVideo. Currently, only Linux platform deployment is supported, and Windows platform is not currently supported.\n## Serving installation\nThe Serving official website recommends using docker to install and deploy the Serving environment. First, you need to pull the docker environment and create a Serving-based docker.\n```bash\n# start GPU docker\ndocker pull paddlepaddle/serving:0.7.0-cuda10.2-cudnn7-devel\nnvidia-docker run -p 9292:9292 --name test -dit paddlepaddle/serving:0.7.0-cuda10.2-cudnn7-devel bash",
+        "type": "code",
+        "location": "/deploy/cpp_serving/readme_en.md:1-17"
+    },
+    "4001": {
+        "file_id": 338,
+        "content": "This code introduces the installation process for PaddleServing. It uses Docker to pull a GPU-based docker environment and creates a Serving-based Docker named \"test\". The port 9292 is mapped to access the serving environment, and this setup supports Linux platforms, with Windows currently unsupported.",
+        "type": "comment"
+    },
+    "4002": {
+        "file_id": 338,
+        "content": "nvidia-docker exec -it test bash\n# start CPU docker\ndocker pull paddlepaddle/serving:0.7.0-devel\ndocker run -p 9292:9292 --name test -dit paddlepaddle/serving:0.7.0-devel bash\ndocker exec -it test bash\n```\nAfter entering docker, you need to install Serving-related python packages.\n```bash\npython3.7 -m pip install paddle-serving-client==0.7.0\npython3.7 -m pip install paddle-serving-app==0.7.0\n#If it is a CPU deployment environment:\npython3.7 -m pip install paddle-serving-server==0.7.0 #CPU\npython3.7 -m pip install paddlepaddle==2.2.0 # CPU\n#If it is a GPU deployment environment\npython3.7 -m pip install paddle-serving-server-gpu==0.7.0.post102 # GPU with CUDA10.2 + TensorRT6\npython3.7 -m pip install paddlepaddle-gpu==2.2.0 # GPU with CUDA10.2\n#Other GPU environments need to confirm the environment and then choose which one to execute\npython3.7 -m pip install paddle-serving-server-gpu==0.7.0.post101 # GPU with CUDA10.1 + TensorRT6\npython3.7 -m pip install paddle-serving-server-gpu==0.7.0.post112 # GPU with CUDA11.2 + TensorRT8",
+        "type": "code",
+        "location": "/deploy/cpp_serving/readme_en.md:18-41"
+    },
+    "4003": {
+        "file_id": 338,
+        "content": "Code installs necessary packages for PaddlePaddle serving client, app, server (CPU/GPU) and PaddlePaddle (CPU/GPU) in a Docker container using pip. The GPU versions are specified with different CUDA and TensorRT versions.",
+        "type": "comment"
+    },
+    "4004": {
+        "file_id": 338,
+        "content": "```\n* If the installation speed is too slow, you can change the source through `-i https://pypi.tuna.tsinghua.edu.cn/simple` to speed up the installation process.\n* For more environment and corresponding installation packages, see: https://github.com/PaddlePaddle/Serving/blob/v0.9.0/doc/Install_Linux_Env_CN.md\n## Action recognition service deployment\n### Model conversion\nWhen using PaddleServing for service deployment, you need to convert the saved inference model into a Serving model. The following uses the PP-TSM model as an example to introduce how to deploy the action recognition service.\n- Download PP-TSM inference model and convert to Serving model:\n  ```bash\n  # Enter PaddleVideo directory\n  cd PaddleVideo\n  # Download the inference model and extract it to ./inference\n  mkdir ./inference\n  pushd ./inference\n  wget https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM.zip\n  unzip ppTSM.zip\n  popd\n  # Convert to Serving model\n  pushd deploy/cpp_serving\n  python3.7 -m paddle_serving_client.convert \\",
+        "type": "code",
+        "location": "/deploy/cpp_serving/readme_en.md:42-65"
+    },
+    "4005": {
+        "file_id": 338,
+        "content": "This code snippet provides instructions for speeding up the installation process and deploying an action recognition service using PaddleServing. It explains how to convert a saved inference model into a Serving model, using PP-TSM as an example.",
+        "type": "comment"
+    },
+    "4006": {
+        "file_id": 338,
+        "content": "  --dirname ../../inference/ppTSM \\\n  --model_filename ppTSM.pdmodel \\\n  --params_filename ppTSM.pdiparams \\\n  --serving_server ./ppTSM_serving_server \\\n  --serving_client ./ppTSM_serving_client\n  popd\n  ```\n  | parameter | type | default value | description |\n  | ----------------- | ---- | ------------------ | ------- -------------------------------------------------- --- |\n  | `dirname` | str | - | The storage path of the model file to be converted. The program structure file and parameter file are saved in this directory. |\n  | `model_filename` | str | None | The name of the file storing the model Inference Program structure that needs to be converted. If set to None, use `__model__` as the default filename |\n  | `params_filename` | str | None | File name where all parameters of the model to be converted are stored. It needs to be specified if and only if all model parameters are stored in a single binary file. If the model parameters are stored in separate files, set it to None |\n  | `serving_",
+        "type": "code",
+        "location": "/deploy/cpp_serving/readme_en.md:66-79"
+    },
+    "4007": {
+        "file_id": 338,
+        "content": "The code is specifying the directory, model filename, and parameters filename for a PaddleVideo inference program conversion. It also sets the serving server and client executables to be used after the conversion. The `dirname` parameter holds the storage path of the converted model files. If no specific filenames are provided (model_filename or params_filename), the code defaults to \"None\" which will use default filenames (\"__model__\" and None respectively). The serving server and client executables are specified in the code to be used after the conversion process, allowing the model to be served for inference.",
+        "type": "comment"
+    },
+    "4008": {
+        "file_id": 338,
+        "content": "server` | str | `\"serving_server\"` | The storage path of the converted model files and configuration files. Default is serving_server |\n  | `serving_client` | str | `\"serving_client\"` | The converted client configuration file storage path. Default is serving_client |\n- After the inference model conversion is completed, two folders, `ppTSM_serving_client` and `ppTSM_serving_server` will be generated under the `deploy/cpp_serving` folder, with the following formats:\n  ```bash\n  PaddleVideo/deploy/cpp_serving\n  ├── ppTSM_serving_client\n  │   ├── serving_client_conf.prototxt\n  │   └── serving_client_conf.stream.prototxt\n  └── ppTSM_serving_server\n      ├── ppTSM.pdiparams\n      ├── ppTSM.pdmodel\n      ├── serving_server_conf.prototxt\n      └── serving_server_conf.stream.prototxt\n  ```\n  After getting the model file, you need to modify `serving_client_conf.prototxt` under `ppTSM_serving_client` and `serving_server_conf.prototxt` under `ppTSM_serving_server` respectively, and change `alias_name` under `fetch_var` in both files to `outputs`",
+        "type": "code",
+        "location": "/deploy/cpp_serving/readme_en.md:79-94"
+    },
+    "4009": {
+        "file_id": 338,
+        "content": "The code specifies two paths, \"serving_server\" and \"serving_client\", representing the storage locations for model files and configuration files. After model conversion, it generates two folders with associated file formats in the specified folder. Upon obtaining the model files, modify two specific text files to change `alias_name` under `fetch_var`.",
+        "type": "comment"
+    },
+    "4010": {
+        "file_id": 338,
+        "content": "  **Remarks**: In order to be compatible with the deployment of different models, Serving provides the function of input and output renaming. In this way, when different models are inferred and deployed, they only need to modify the `alias_name` of the configuration file, and the inference deployment can be completed without modifying the code.\n  The modified `serving_server_conf.prototxt` looks like this:\n  ```yaml\n  feed_var {\n    name: \"data_batch_0\"\n    alias_name: \"data_batch_0\"\n    is_lod_tensor: false\n    feed_type: 1\n    shape: 8\n    shape: 3\n    shape: 224\n    shape: 224\n  }\n  fetch_var {\n    name: \"linear_2.tmp_1\"\n    alias_name: \"outputs\"\n    is_lod_tensor: false\n    fetch_type: 1\n    shape: 400\n  }\n  ```\n### Service deployment and requests\nThe `cpp_serving` directory contains the code for starting the pipeline service, the C++ serving service and sending the prediction request, including:\n  ```bash\n  run_cpp_serving.sh # Start the script on the C++ serving server side\n  pipeline_http_client.py # The script on the client side to send data and get the prediction results",
+        "type": "code",
+        "location": "/deploy/cpp_serving/readme_en.md:96-122"
+    },
+    "4011": {
+        "file_id": 338,
+        "content": "This code demonstrates a rename function for compatibility in model deployment. The modified `serving_server_conf.prototxt` shows how to alias the input and output names in the configuration file. This allows different models to be inferred and deployed without modifying the code, only by altering the `alias_name`. The `cpp_serving` directory contains scripts for starting the pipeline service, C++ serving service, and sending prediction requests.",
+        "type": "comment"
+    },
+    "4012": {
+        "file_id": 338,
+        "content": "  paddle_env_install.sh # Install C++ serving environment script\n  preprocess_ops.py # file to store preprocessing functions\n  ```\n#### C++ Serving\n- Go to the working directory:\n  ```bash\n  cd deploy/cpp_serving\n  ```\n- Start the service:\n  ```bash\n  # Start in the background, the logs printed during the process will be redirected and saved to nohup.txt\n  bash run_cpp_serving.sh\n  ```\n- Send the request and get the result:\n```bash\npython3.7 serving_client.py \\\n-n PPTSM \\\n-c ./ppTSM_serving_client/serving_client_conf.prototxt \\\n--input_file=../../data/example.avi\n```\nAfter a successful run, the results of the model prediction will be printed in the cmd window, and the results are as follows:\n  ```bash\n  I0510 04:33:00.110025 37097 naming_service_thread.cpp:202] brpc::policy::ListNamingService(\"127.0.0.1:9993\"): added 1\n  I0510 04:33:01.904764 37097 general_model.cpp:490] [client]logid=0,client_cost=1640.96ms,server_cost=1623.21ms.\n   {'class_id': '[5]', 'prob': '[0.9907387495040894]'}\n   ```\n**If an error is re",
+        "type": "code",
+        "location": "/deploy/cpp_serving/readme_en.md:123-152"
+    },
+    "4013": {
+        "file_id": 338,
+        "content": "This code provides instructions for setting up and running a C++ serving environment for PaddleVideo. It explains how to navigate to the deployment directory, start the service, send requests using serving_client.py, and obtain the model prediction results. If an error occurs during execution, it will display the corresponding log information.",
+        "type": "comment"
+    },
+    "4014": {
+        "file_id": 338,
+        "content": "ported during the process and it shows that libnvinfer.so.6 cannot be found, you can execute the script `paddle_env_install.sh` to install the relevant environment**\n   ```bash\n   bash paddle_env_install.sh\n   ```\n## FAQ\n**Q1**: No result is returned after the request is sent or an output decoding error is prompted\n**A1**: Do not set the proxy when starting the service and sending the request. You can close the proxy before starting the service and sending the request. The command to close the proxy is:\n```\nunset https_proxy\nunset http_proxy\n```",
+        "type": "code",
+        "location": "/deploy/cpp_serving/readme_en.md:152-165"
+    },
+    "4015": {
+        "file_id": 338,
+        "content": "This code provides instructions for installing the necessary environment and resolving an issue where no result is returned or a decoding error occurs due to proxy settings. Users are advised not to set proxies when starting the service and sending requests, and should use the provided commands to close proxies beforehand. The script `paddle_env_install.sh` can be executed to install relevant environment requirements.",
+        "type": "comment"
+    },
+    "4016": {
+        "file_id": 339,
+        "content": "/deploy/cpp_serving/run_cpp_serving.sh",
+        "type": "filepath"
+    },
+    "4017": {
+        "file_id": 339,
+        "content": "This script runs PaddleVideo server using either PP-TSM or PP-TSN models on different ports. It uses the paddle_serving_server module and is executed as a background process with nohup command.",
+        "type": "summary"
+    },
+    "4018": {
+        "file_id": 339,
+        "content": "## sample script\n# run paddlevideo server with PP-TSM:\nnohup python3.7 -m paddle_serving_server.serve \\\n--model ./ppTSM_serving_server \\\n--port 9993 &\n## run paddlevideo server with PP-TSN:\n# nohup python3.7 -m paddle_serving_server.serve \\\n# --model ./ppTSN_serving_server \\\n# --port 9993 &",
+        "type": "code",
+        "location": "/deploy/cpp_serving/run_cpp_serving.sh:1-10"
+    },
+    "4019": {
+        "file_id": 339,
+        "content": "This script runs PaddleVideo server using either PP-TSM or PP-TSN models on different ports. It uses the paddle_serving_server module and is executed as a background process with nohup command.",
+        "type": "comment"
+    },
+    "4020": {
+        "file_id": 340,
+        "content": "/deploy/cpp_serving/serving_client.py",
+        "type": "filepath"
+    },
+    "4021": {
+        "file_id": 340,
+        "content": "This code uses Paddle Serving for postprocessing and PaddleVideo framework for video processing, initializing client, preprocessing input, sending data to server, receiving prediction, and printing output.",
+        "type": "summary"
+    },
+    "4022": {
+        "file_id": 340,
+        "content": "# Copyright (c) 2021 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport argparse\nfrom typing import Any, Dict\nimport numpy as np\nfrom paddle_serving_client import Client\nfrom preprocess_ops import get_preprocess_func, np_softmax\ndef postprocess(fetch_map: Dict[str, np.ndarray]) -> Dict[str, Any]:\n    \"\"\"postprocess\n    Args:\n        fetch_map (Dict[str, np.ndarray]): raw prediction\n    Returns:\n        Dict[str, Any]: postprocessed prediction\n    \"\"\"\n    score_list = fetch_map[\"outputs\"]  # [b,num_classes]",
+        "type": "code",
+        "location": "/deploy/cpp_serving/serving_client.py:1-32"
+    },
+    "4023": {
+        "file_id": 340,
+        "content": "This code snippet is importing necessary libraries and defining a function for postprocessing prediction outputs from a Paddle Serving client. The function takes raw predictions in the form of a numpy array and returns the postprocessed prediction as a dictionary containing any desired data.",
+        "type": "comment"
+    },
+    "4024": {
+        "file_id": 340,
+        "content": "    fetch_dict = {\"class_id\": [], \"prob\": []}\n    for score in score_list:\n        score = np_softmax(score, axis=0)\n        score = score.tolist()\n        max_score = max(score)\n        fetch_dict[\"class_id\"].append(score.index(max_score))\n        fetch_dict[\"prob\"].append(max_score)\n    fetch_dict[\"class_id\"] = str(fetch_dict[\"class_id\"])\n    fetch_dict[\"prob\"] = str(fetch_dict[\"prob\"])\n    return fetch_dict\ndef parse_args():\n    # general params\n    parser = argparse.ArgumentParser(\"PaddleVideo CPP Serving model script\")\n    parser.add_argument(\"-n\",\n                        \"--name\",\n                        type=str,\n                        default=\"PPTSM\",\n                        help=\"model's name, such as PPTSM, PPTSN...\")\n    parser.add_argument(\n        \"-c\",\n        \"--config\",\n        type=str,\n        help=\"serving client config file(serving_client_conf.prototxt) path\")\n    parser.add_argument(\"--url\",\n                        type=str,\n                        default=\"127.0.0.1:9993\",\n                        help=\"url to access cpp serving\")",
+        "type": "code",
+        "location": "/deploy/cpp_serving/serving_client.py:33-62"
+    },
+    "4025": {
+        "file_id": 340,
+        "content": "The code defines a function that calculates the class id and probability based on scores, converts them to strings, and returns a dictionary with these values. It also includes a function for parsing arguments such as model name, serving client config file path, and URL to access the CPP serving.",
+        "type": "comment"
+    },
+    "4026": {
+        "file_id": 340,
+        "content": "    parser.add_argument(\"--logid\", type=int, default=\"10000\", help=\"log id\")\n    parser.add_argument(\"--input_file\",\n                        type=str,\n                        default=\"../../data/example.avi\",\n                        help=\"input video file\")\n    return parser.parse_args()\nif __name__ == \"__main__\":\n    # parse args\n    args = parse_args()\n    url = args.url\n    logid = args.logid\n    input_file_path = args.input_file\n    model_name = args.name\n    # get preprocess by model name\n    preprocess = get_preprocess_func(model_name)\n    # initialize client object & connect\n    client = Client()\n    client.load_client_config(args.config)\n    client.connect([url])\n    # preprocess\n    feed, fetch = preprocess(input_file_path)\n    # send data & get prediction from server\n    fetch_map = client.predict(feed=feed, fetch=fetch)\n    # postprocess & output\n    result = postprocess(fetch_map)\n    print(result)",
+        "type": "code",
+        "location": "/deploy/cpp_serving/serving_client.py:63-95"
+    },
+    "4027": {
+        "file_id": 340,
+        "content": "This code is a Python function that parses command line arguments, initializes a client object for video processing, preprocesses input video file, sends data to server, receives prediction, post-processes results and prints output. It uses the PaddleVideo framework with specific model configuration file and preprocessing function based on input name.",
+        "type": "comment"
+    },
+    "4028": {
+        "file_id": 341,
+        "content": "/deploy/paddle2onnx/predict_onnx.py",
+        "type": "filepath"
+    },
+    "4029": {
+        "file_id": 341,
+        "content": "The code imports modules, sets up environment, creates an ONNX predictor for video object detection, and performs inference on batches of input files while supporting benchmarking if enabled.",
+        "type": "summary"
+    },
+    "4030": {
+        "file_id": 341,
+        "content": "# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport argparse\nimport os\nimport sys\nfrom os import path as osp\n__dir__ = os.path.dirname(os.path.abspath(__file__))\nsys.path.append(os.path.abspath(os.path.join(__dir__, '../../tools')))\nfrom utils import build_inference_helper, get_config\ndef parse_args():\n    def str2bool(v):\n        return v.lower() in (\"true\", \"t\", \"1\")\n    # general params\n    parser = argparse.ArgumentParser(\"PaddleVideo Inference model script\")",
+        "type": "code",
+        "location": "/deploy/paddle2onnx/predict_onnx.py:1-31"
+    },
+    "4031": {
+        "file_id": 341,
+        "content": "This code imports necessary modules and defines a function for parsing command-line arguments. It sets up the environment to execute PaddleVideo Inference model scripts. The code also includes license information, ensuring compliance with the Apache License, Version 2.0.",
+        "type": "comment"
+    },
+    "4032": {
+        "file_id": 341,
+        "content": "    parser.add_argument('-c',\n                        '--config',\n                        type=str,\n                        default='configs/example.yaml',\n                        help='config file path')\n    parser.add_argument(\"-i\", \"--input_file\", type=str, help=\"input file path\")\n    parser.add_argument(\"--onnx_file\", type=str, help=\"onnx model file path\")\n    # params for onnx predict\n    parser.add_argument(\"-b\", \"--batch_size\", type=int, default=1)\n    parser.add_argument(\"--use_gpu\",\n                        type=str2bool,\n                        default=False,\n                        help=\"set to False when using onnx\")\n    parser.add_argument(\"--precision\", type=str, default=\"fp32\")\n    parser.add_argument(\"--ir_optim\", type=str2bool, default=True)\n    parser.add_argument(\"--enable_benchmark\",\n                        type=str2bool,\n                        default=False,\n                        help=\"set to False when using onnx\")\n    parser.add_argument(\"--cpu_threads\", type=int, default=4)\n    return parser.parse_args()",
+        "type": "code",
+        "location": "/deploy/paddle2onnx/predict_onnx.py:32-54"
+    },
+    "4033": {
+        "file_id": 341,
+        "content": "This code snippet is parsing command line arguments for config file, input file path, and ONNX model file path. It also includes parameters for ONNX prediction like batch size, use of GPU, precision, IR optimization, enable benchmark, and CPU threads.",
+        "type": "comment"
+    },
+    "4034": {
+        "file_id": 341,
+        "content": "def create_onnx_predictor(args, cfg=None):\n    import onnxruntime as ort\n    onnx_file = args.onnx_file\n    config = ort.SessionOptions()\n    if args.use_gpu:\n        raise ValueError(\n            \"onnx inference now only supports cpu! please set `use_gpu` to False.\"\n        )\n    else:\n        config.intra_op_num_threads = args.cpu_threads\n        if args.ir_optim:\n            config.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL\n    predictor = ort.InferenceSession(onnx_file, sess_options=config)\n    return config, predictor\ndef parse_file_paths(input_path: str) -> list:\n    if osp.isfile(input_path):\n        files = [\n            input_path,\n        ]\n    else:\n        files = os.listdir(input_path)\n        files = [\n            file for file in files\n            if (file.endswith(\".avi\") or file.endswith(\".mp4\"))\n        ]\n        files = [osp.join(input_path, file) for file in files]\n    return files\ndef main():\n    \"\"\"predict using onnx model\n    \"\"\"\n    args = parse_args()\n    cfg = get_config(args.config, show=False)",
+        "type": "code",
+        "location": "/deploy/paddle2onnx/predict_onnx.py:57-92"
+    },
+    "4035": {
+        "file_id": 341,
+        "content": "The code defines a function to create an ONNX predictor by loading an ONNX file and setting configuration options. It also includes functions for parsing file paths and handling command-line arguments. This code is used for onnx model inference, specifically for video object detection tasks. The main function calls other utility functions to parse the input file path and load configuration settings before executing the actual prediction using the created ONNX predictor.",
+        "type": "comment"
+    },
+    "4036": {
+        "file_id": 341,
+        "content": "    model_name = cfg.model_name\n    print(f\"Inference model({model_name})...\")\n    InferenceHelper = build_inference_helper(cfg.INFERENCE)\n    inference_config, predictor = create_onnx_predictor(args)\n    # get input_tensor and output_tensor\n    input_names = predictor.get_inputs()[0].name\n    output_names = predictor.get_outputs()[0].name\n    # get the absolute file path(s) to be processed\n    files = parse_file_paths(args.input_file)\n    if args.enable_benchmark:\n        test_video_num = 12\n        num_warmup = 3\n        # instantiate auto log\n        try:\n            import auto_log\n        except ImportError as e:\n            print(f\"{e}, [git+https://github.com/LDOUBLEV/AutoLog] \"\n                  f\"package and it's dependencies is required for \"\n                  f\"python-inference when enable_benchmark=True.\")\n        pid = os.getpid()\n        autolog = auto_log.AutoLogger(\n            model_name=cfg.model_name,\n            model_precision=args.precision,\n            batch_size=args.batch_size,\n            data_shape=\"dynamic\",",
+        "type": "code",
+        "location": "/deploy/paddle2onnx/predict_onnx.py:94-122"
+    },
+    "4037": {
+        "file_id": 341,
+        "content": "This code builds an inference helper, creates an ONNX predictor, gets input and output names, processes file paths, performs benchmarking, and initializes an auto log for the given model.",
+        "type": "comment"
+    },
+    "4038": {
+        "file_id": 341,
+        "content": "            save_path=\"./output/auto_log.lpg\",\n            inference_config=inference_config,\n            pids=pid,\n            process_name=None,\n            gpu_ids=None,\n            time_keys=['preprocess_time', 'inference_time', 'postprocess_time'],\n            warmup=num_warmup)\n        files = [args.input_file for _ in range(test_video_num + num_warmup)]\n    # Inferencing process\n    batch_num = args.batch_size\n    for st_idx in range(0, len(files), batch_num):\n        ed_idx = min(st_idx + batch_num, len(files))\n        # auto log start\n        if args.enable_benchmark:\n            autolog.times.start()\n        # Pre process batched input\n        batched_inputs = InferenceHelper.preprocess_batch(files[st_idx:ed_idx])\n        # get pre process time cost\n        if args.enable_benchmark:\n            autolog.times.stamp()\n        # run inference\n        batched_outputs = predictor.run(\n            output_names=[output_names],\n            input_feed={input_names: batched_inputs[0]})\n        # get inference process time cost",
+        "type": "code",
+        "location": "/deploy/paddle2onnx/predict_onnx.py:123-153"
+    },
+    "4039": {
+        "file_id": 341,
+        "content": "Code snippet performs video inference on batches of input files using a predictor. It preprocesses the batch inputs, runs inference for each batch, and records pre-processing and inference time costs if benchmarking is enabled.",
+        "type": "comment"
+    },
+    "4040": {
+        "file_id": 341,
+        "content": "        if args.enable_benchmark:\n            autolog.times.stamp()\n        InferenceHelper.postprocess(batched_outputs, not args.enable_benchmark)\n        # get post process time cost\n        if args.enable_benchmark:\n            autolog.times.end(stamp=True)\n        # time.sleep(0.01)  # sleep for T4 GPU\n    # report benchmark log if enabled\n    if args.enable_benchmark:\n        autolog.report()\nif __name__ == \"__main__\":\n    main()",
+        "type": "code",
+        "location": "/deploy/paddle2onnx/predict_onnx.py:154-171"
+    },
+    "4041": {
+        "file_id": 341,
+        "content": "The code segment is controlling the benchmark execution. If `args.enable_benchmark` is True, it stamps the current time using autolog, then calls postprocess function on batched outputs with `not args.enable_benchmark`. After that, it ends the timer using autolog and reports the benchmark log if `args.enable_benchmark` is still True.",
+        "type": "comment"
+    },
+    "4042": {
+        "file_id": 342,
+        "content": "/deploy/paddle2onnx/readme.md",
+        "type": "filepath"
+    },
+    "4043": {
+        "file_id": 342,
+        "content": "This code converts a PaddlePaddle model to ONNX for inference using paddle2onnx and ONNXRuntime. The ONNX format enables similar usage to Paddle, with results matching Paddle predictions.",
+        "type": "summary"
+    },
+    "4044": {
+        "file_id": 342,
+        "content": "# paddle2onnx 模型转化与预测\n本章节介绍 PP-TSN 模型如何转化为 ONNX 模型，并基于 ONNX 引擎预测。\n## 1. 环境准备\n需要准备 Paddle2ONNX 模型转化环境，和 ONNX 模型预测环境。\nPaddle2ONNX 支持将 PaddlePaddle 模型格式转化到 ONNX 模型格式，算子目前稳定支持导出 ONNX Opset 9~11，部分Paddle算子支持更低的ONNX Opset转换。\n更多细节可参考 [Paddle2ONNX](https://github.com/PaddlePaddle/Paddle2ONNX/blob/develop/README_zh.md)\n- 安装 Paddle2ONNX\n```bash\npython3.7 -m pip install paddle2onnx\n```\n- 安装 ONNXRuntime\n```bash\n# 建议安装 1.9.0 版本，可根据环境更换版本号\npython3.7 -m pip install onnxruntime==1.9.0\n```\n## 2. 模型转换\n- PP-TSN inference模型下载\n    ```bash\n    # 下载inference模型到PaddleVideo/inference/ppTSN/ 目录下\n    mkdir -p ./inference\n    wget -P ./inference/ https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSN.zip\n    # 解压inference模型\n    pushd ./inference\n    unzip ppTSN.zip\n    popd\n    ```\n- 模型转换\n    使用 Paddle2ONNX 将 Paddle inference模型转换为 ONNX 格式模型：\n    ```bash\n    paddle2onnx \\\n    --model_dir=./inference/ppTSN \\\n    --model_filename=ppTSN.pdmodel \\\n    --params_filename=ppTSN.pdiparams \\\n    --save_file=./inference/ppTSN/ppTSN.onnx \\\n    --opset_version=10 \\",
+        "type": "code",
+        "location": "/deploy/paddle2onnx/readme.md:1-48"
+    },
+    "4045": {
+        "file_id": 342,
+        "content": "This code demonstrates the process of converting a PaddlePaddle model to an ONNX model for inference using Paddle2ONNX and ONNXRuntime. It first installs the necessary packages, downloads the PP-TSN inference model, and then uses paddle2onnx to convert the model to the ONNX format while specifying the opset version.",
+        "type": "comment"
+    },
+    "4046": {
+        "file_id": 342,
+        "content": "    --enable_onnx_checker=True\n    ```\n执行完毕后，可以发现 `./inference/ppTSN` 目录下生成了一个 ONNX 格式的模型文件 `ppTSN.onnx`\n## 3. onnx 预测\n接下来就可以用 ONNX 格式模型进行预测，其用法与paddle 预测模型类似\n执行如下命令：\n```bash\npython3.7 deploy/paddle2onnx/predict_onnx.py \\\n--input_file data/example.avi \\\n--config configs/recognition/pptsn/pptsn_k400_videos.yaml \\\n--onnx_file=./inference/ppTSN/ppTSN.onnx\n```\n结果如下：\n```bash\nCurrent video file: data/example.avi\n        top-1 class: 5\n        top-1 score: 0.9998553991317749\n```\n可以验证该结果与Paddle inference的预测结果完全一致",
+        "type": "code",
+        "location": "/deploy/paddle2onnx/readme.md:49-70"
+    },
+    "4047": {
+        "file_id": 342,
+        "content": "Enables ONNX checker to generate ONNX format model file for inference. Usage of ONNX model is similar to Paddle, and results match with Paddle inference predictions.",
+        "type": "comment"
+    },
+    "4048": {
+        "file_id": 343,
+        "content": "/deploy/paddle2onnx/readme_en.md",
+        "type": "filepath"
+    },
+    "4049": {
+        "file_id": 343,
+        "content": "This code utilizes Paddle2ONNX to convert PP-TSN model, and demonstrates prediction using ONNX engine. Environment setup involves installing necessary packages and downloading the inference model for conversion & prediction. The code generates output for video files with top-1 class and score.",
+        "type": "summary"
+    },
+    "4050": {
+        "file_id": 343,
+        "content": "# paddle2onnx model conversion and prediction\nThis chapter describes how the PP-TSN model is transformed into an ONNX model and predicted based on the ONNX engine.\n## 1. Environment preparation\nNeed to prepare Paddle2ONNX model conversion environment, and ONNX model prediction environment.\nPaddle2ONNX supports converting the PaddlePaddle model format to the ONNX model format. The operator currently supports exporting ONNX Opset 9~11 stably, and some Paddle operators support lower ONNX Opset conversion.\nFor more details, please refer to [Paddle2ONNX](https://github.com/PaddlePaddle/Paddle2ONNX/blob/develop/README_zh.md)\n- Install Paddle2ONNX\n```bash\npython3.7 -m pip install paddle2onnx\n```\n- Install ONNXRuntime\n```bash\n# It is recommended to install version 1.9.0, and the version number can be changed according to the environment\npython3.7 -m pip install onnxruntime==1.9.0\n```\n## 2. Model conversion\n- PP-TSN inference model download\n    ```bash\n    # Download the inference model to the PaddleVideo/inference/ppTSN/ directory",
+        "type": "code",
+        "location": "/deploy/paddle2onnx/readme_en.md:1-28"
+    },
+    "4051": {
+        "file_id": 343,
+        "content": "This code describes how to convert a PaddlePaddle (PP-TSN) model into an ONNX model and predict using the ONNX engine. It requires environment preparation by installing Paddle2ONNX and ONNXRuntime. Afterward, PP-TSN inference model should be downloaded for conversion and prediction.",
+        "type": "comment"
+    },
+    "4052": {
+        "file_id": 343,
+        "content": "    mkdir -p ./inference\n    wget -P ./inference/ https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSN.zip\n    # Decompress the inference model\n    pushd ./inference\n    unzip ppTSN.zip\n    popd\n    ```\n- Model conversion\n    Convert Paddle inference models to ONNX format models using Paddle2ONNX:\n    ```bash\n    paddle2onnx \\\n    --model_dir=./inference/ppTSN \\\n    --model_filename=ppTSN.pdmodel \\\n    --params_filename=ppTSN.pdiparams \\\n    --save_file=./inference/ppTSN/ppTSN.onnx \\\n    --opset_version=10 \\\n    --enable_onnx_checker=True\n    ```\nAfter execution, you can find that a model file `ppTSN.onnx` in ONNX format is generated in the `./inference/ppTSN` directory\n## 3. onnx prediction\nNext, you can use the ONNX format model for prediction, which is similar to the paddle prediction model\nExecute the following command:\n```bash\npython3.7 deploy/paddle2onnx/predict_onnx.py \\\n--input_file data/example.avi \\\n--config configs/recognition/pptsn/pptsn_k400_videos.yaml \\\n--onnx_file=./inference/ppTSN/ppTSN.onnx",
+        "type": "code",
+        "location": "/deploy/paddle2onnx/readme_en.md:29-61"
+    },
+    "4053": {
+        "file_id": 343,
+        "content": "The provided code is for model conversion and prediction using Paddle2ONNX. First, it downloads an inference model from a URL, decompresses it, and then converts the Paddle inference model to ONNX format. Finally, it executes an example prediction using the converted ONNX model.",
+        "type": "comment"
+    },
+    "4054": {
+        "file_id": 343,
+        "content": "```\nThe result is as follows:\n```bash\nCurrent video file: data/example.avi\n        top-1 class: 5\n        top-1 score: 0.9998553991317749\n```\nIt can be verified that the result is completely consistent with the prediction result of Paddle inference",
+        "type": "code",
+        "location": "/deploy/paddle2onnx/readme_en.md:62-70"
+    },
+    "4055": {
+        "file_id": 343,
+        "content": "This code demonstrates how to generate an output for a video file using PaddleVideo. The top-1 class and score are displayed, which can be verified with the result of Paddle inference.",
+        "type": "comment"
+    },
+    "4056": {
+        "file_id": 344,
+        "content": "/deploy/python_serving/pipeline_http_client.py",
+        "type": "filepath"
+    },
+    "4057": {
+        "file_id": 344,
+        "content": "This Python script serves models in PaddleVideo framework, parses command-line arguments, and sends video data via HTTP requests using argparse, json, and requests libraries. It converts videos to numpy arrays, encodes as base64 strings, and sends to specific URL endpoints.",
+        "type": "summary"
+    },
+    "4058": {
+        "file_id": 344,
+        "content": "# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport argparse\nimport json\nimport requests\nfrom utils import numpy_to_base64, parse_file_paths, video_to_numpy\ndef parse_args():\n    # general params\n    parser = argparse.ArgumentParser(\"PaddleVideo Web Serving model script\")\n    parser.add_argument('-c',\n                        '--config',\n                        type=str,\n                        default='configs/PP-TSM.yaml',\n                        help='serving config file path')",
+        "type": "code",
+        "location": "/deploy/python_serving/pipeline_http_client.py:1-30"
+    },
+    "4059": {
+        "file_id": 344,
+        "content": "The code is a Python script that parses command-line arguments and defines functions for model serving in the PaddleVideo framework. It imports necessary libraries, including argparse for argument handling, json for data manipulation, requests for HTTP communication, and utils module for converting video to numpy format.",
+        "type": "comment"
+    },
+    "4060": {
+        "file_id": 344,
+        "content": "    parser.add_argument('-ptn',\n                        '--port_number',\n                        type=int,\n                        default=18080,\n                        help='http port number')\n    parser.add_argument('-i',\n                        '--input_file',\n                        type=str,\n                        help='input file path or directory path')\n    return parser.parse_args()\nif __name__ == \"__main__\":\n    args = parse_args()\n    url = f\"http://127.0.0.1:{args.port_number}/video/prediction\"\n    files_list = parse_file_paths(args.input_file)\n    for file_path in files_list:\n        # decoding video and get stacked frames as ndarray\n        decoded_frames = video_to_numpy(file_path=file_path)\n        # encode ndarray to base64 string for transportation.\n        decoded_frames_base64 = numpy_to_base64(decoded_frames)\n        # generate dict & convert to json.\n        data = {\n            \"key\": [\"frames\", \"frames_shape\"],\n            \"value\": [decoded_frames_base64,\n                      str(decoded_frames.shape)]",
+        "type": "code",
+        "location": "/deploy/python_serving/pipeline_http_client.py:31-62"
+    },
+    "4061": {
+        "file_id": 344,
+        "content": "This code defines command-line arguments for port number and input file path or directory, parses the arguments, and uses them to send video data to a server via HTTP requests. It decodes videos into frames as numpy arrays, encodes them to base64 strings, generates dictionaries with keys \"key\" and \"value\", and sends the data to a specific URL endpoint.",
+        "type": "comment"
+    },
+    "4062": {
+        "file_id": 344,
+        "content": "        }\n        data = json.dumps(data)\n        # transport to server & get get results.\n        r = requests.post(url=url, data=data, timeout=100)\n        # print result\n        print(r.json())",
+        "type": "code",
+        "location": "/deploy/python_serving/pipeline_http_client.py:63-70"
+    },
+    "4063": {
+        "file_id": 344,
+        "content": "This code snippet sends a POST request to the specified URL with the data in JSON format. It uses Python's requests library to transport the data and waits for 100 seconds for a response. The response is then printed as JSON.",
+        "type": "comment"
+    },
+    "4064": {
+        "file_id": 345,
+        "content": "/deploy/python_serving/pipeline_rpc_client.py",
+        "type": "filepath"
+    },
+    "4065": {
+        "file_id": 345,
+        "content": "This code imports required modules, handles web serving for PaddleVideo models and includes a client to make predictions by passing encoded frames and shape to the predict method. It outputs labels and probabilities as results.",
+        "type": "summary"
+    },
+    "4066": {
+        "file_id": 345,
+        "content": "# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\ntry:\n    from paddle_serving_server_gpu.pipeline import PipelineClient\nexcept ImportError:\n    from paddle_serving_server.pipeline import PipelineClient\nimport argparse\nfrom utils import numpy_to_base64, parse_file_paths, video_to_numpy\ndef parse_args():\n    # general params\n    parser = argparse.ArgumentParser(\"PaddleVideo Web Serving model script\")\n    parser.add_argument('-c',\n                        '--config',",
+        "type": "code",
+        "location": "/deploy/python_serving/pipeline_rpc_client.py:1-29"
+    },
+    "4067": {
+        "file_id": 345,
+        "content": "This code is importing necessary modules, defining a function to parse command line arguments, and setting up a parser for those arguments. The main purpose of this file seems to be handling the execution of the PaddleVideo model in a web serving environment.",
+        "type": "comment"
+    },
+    "4068": {
+        "file_id": 345,
+        "content": "                        type=str,\n                        default='configs/PP-TSM.yaml',\n                        help='serving config file path')\n    parser.add_argument('-ptn',\n                        '--port_number',\n                        type=int,\n                        default=9993,\n                        help='rpc port number')\n    parser.add_argument('-i',\n                        '--input_file',\n                        type=str,\n                        help='input file path or directory path')\n    return parser.parse_args()\nif __name__ == \"__main__\":\n    args = parse_args()\n    client = PipelineClient()\n    client.connect([f'127.0.0.1:{args.port_number}'])\n    files_list = parse_file_paths(args.input_file)\n    for file_path in files_list:\n        # decoding video and get stacked frames as ndarray\n        decoded_frames = video_to_numpy(file_path=file_path)\n        # encode ndarray to base64 string for transportation.\n        decoded_frames_base64 = numpy_to_base64(decoded_frames)\n        # transport to server & get get results.",
+        "type": "code",
+        "location": "/deploy/python_serving/pipeline_rpc_client.py:30-60"
+    },
+    "4069": {
+        "file_id": 345,
+        "content": "This code sets up command line arguments for the serving config file path, RPC port number, and input file/directory path. It then connects to a server at the specified port, processes the input files (decoding videos and converting ndarrays to base64 strings), and transports the data to the server for processing.",
+        "type": "comment"
+    },
+    "4070": {
+        "file_id": 345,
+        "content": "        ret = client.predict(feed_dict={\n            \"frames\": decoded_frames_base64,\n            \"frames_shape\": str(decoded_frames.shape)\n        },\n                             fetch=[\"label\", \"prob\"])\n        # print result\n        print(ret)",
+        "type": "code",
+        "location": "/deploy/python_serving/pipeline_rpc_client.py:61-68"
+    },
+    "4071": {
+        "file_id": 345,
+        "content": "This code snippet uses a PaddleVideo client to make a prediction. It passes base64 encoded frames and their shape to the client's predict method, fetching both labels and probabilities as results. The print statement outputs these results.",
+        "type": "comment"
+    },
+    "4072": {
+        "file_id": 346,
+        "content": "/deploy/python_serving/readme.md",
+        "type": "filepath"
+    },
+    "4073": {
+        "file_id": 346,
+        "content": "This code deploys a PaddlePaddle model for serving using PaddleServing in PaddleVideo, supporting GPU and CPU installations on Linux platforms. Input/output variables are set for Python serving, and the RPC method is used for prediction. Results are displayed in cmd window.",
+        "type": "summary"
+    },
+    "4074": {
+        "file_id": 346,
+        "content": "简体中文 | [English](./readme_en.md)\n# 模型服务化部署\n## 简介\n[Paddle Serving](https://github.com/PaddlePaddle/Serving) 旨在帮助深度学习开发者轻松部署在线预测服务，支持一键部署工业级的服务能力、客户端和服务端之间高并发和高效通信、并支持多种编程语言开发客户端。\n该部分以 HTTP 预测服务部署为例，介绍怎样在 PaddleVideo 中使用 PaddleServing 部署模型服务。目前只支持 Linux 平台部署，暂不支持 Windows 平台。\n## Serving 安装\nServing 官网推荐使用 docker 安装并部署 Serving 环境。首先需要拉取 docker 环境并创建基于 Serving 的 docker。\n```bash\n# 启动GPU docker\ndocker pull paddlepaddle/serving:0.7.0-cuda10.2-cudnn7-devel\nnvidia-docker run -p 9292:9292 --name test -dit paddlepaddle/serving:0.7.0-cuda10.2-cudnn7-devel bash\nnvidia-docker exec -it test bash\n# 启动CPU docker\ndocker pull paddlepaddle/serving:0.7.0-devel\ndocker run -p 9292:9292 --name test -dit paddlepaddle/serving:0.7.0-devel bash\ndocker exec -it test bash\n```\n进入 docker 后，需要安装 Serving 相关的 python 包。\n```bash\npython3.7 -m pip install paddle-serving-client==0.7.0\npython3.7 -m pip install paddle-serving-app==0.7.0\npython3.7 -m pip install faiss-cpu==1.7.1post2\n#若为CPU部署环境:\npython3.7 -m pip install paddle-serving-server==0.7.0  # CPU",
+        "type": "code",
+        "location": "/deploy/python_serving/readme.md:1-32"
+    },
+    "4075": {
+        "file_id": 346,
+        "content": "This code provides instructions on how to deploy a model service using PaddleServing in the PaddleVideo platform. It starts by explaining that this deployment example uses an HTTP prediction server and is currently only supported on Linux platforms. The instructions then cover how to install Serving, specifying steps for both GPU-accelerated docker installation and CPU-only docker installation, as well as installing the necessary Python packages.",
+        "type": "comment"
+    },
+    "4076": {
+        "file_id": 346,
+        "content": "python3.7 -m pip install paddlepaddle==2.2.0           # CPU\n#若为GPU部署环境\npython3.7 -m pip install paddle-serving-server-gpu==0.7.0.post102  # GPU with CUDA10.2 + TensorRT6\npython3.7 -m pip install paddlepaddle-gpu==2.2.0                   # GPU with CUDA10.2\n#其他GPU环境需要确认环境再选择执行哪一条\npython3.7 -m pip install paddle-serving-server-gpu==0.7.0.post101  # GPU with CUDA10.1 + TensorRT6\npython3.7 -m pip install paddle-serving-server-gpu==0.7.0.post112  # GPU with CUDA11.2 + TensorRT8\n```\n* 如果安装速度太慢，可以通过 `-i https://pypi.tuna.tsinghua.edu.cn/simple` 更换源，加速安装过程\n* 更多环境和对应的安装包详见：https://github.com/PaddlePaddle/Serving/blob/v0.9.0/doc/Install_Linux_Env_CN.md\n## 行为识别服务部署\n### 模型转换\n使用 PaddleServing 做服务化部署时，需要将保存的 inference 模型转换为 Serving 模型。下面以 PP-TSM 模型为例，介绍如何部署行为识别服务。\n- 下载训练好的 PP-TSM 的模型，并转化为推理模型：\n  ```bash\n  # 进入PaddleVideo目录\n  cd PaddleVideo\n  wget -P data/ https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform.pdparams\n  python3.7 tools/export_model.py \\\n  -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml \\",
+        "type": "code",
+        "location": "/deploy/python_serving/readme.md:33-58"
+    },
+    "4077": {
+        "file_id": 346,
+        "content": "Install PaddlePaddle for CPU and GPU environments.",
+        "type": "comment"
+    },
+    "4078": {
+        "file_id": 346,
+        "content": "  -p data/ppTSM_k400_uniform.pdparams \\\n  -o inference/ppTSM\n  ```\n- 我们也提供了转换好的推理模型，按以下命令下载并解压\n  ```bash\n  mkdir ./inference\n  wget -nc -P ./inference https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM.zip --no-check-certificate\n  pushd ./inference\n  unzip ppTSM.zip\n  popd\n  ```\n- 用 paddle_serving_client 把转换好的推理模型再转换成易于 Server 部署的模型格式：\n  ```bash\n  python3.7 -m paddle_serving_client.convert \\\n  --dirname inference/ppTSM \\\n  --model_filename ppTSM.pdmodel \\\n  --params_filename ppTSM.pdiparams \\\n  --serving_server ./deploy/python_serving/ppTSM_serving_server/ \\\n  --serving_client ./deploy/python_serving/ppTSM_serving_client/\n  ```\n  | 参数              | 类型 | 默认值             | 描述                                                         |\n  | ----------------- | ---- | ------------------ | ------------------------------------------------------------ |\n  | `dirname`         | str  | -                  | 需要转换的模型文件存储路径，Program结构文件和参数文件均保存在此目录。 |\n  | `model_filename`  | str  | None               | 存储需要转换的模型Inference Program结构的文件名称。如果设置为None，则使用 `__model__` 作为默认的文件名 |",
+        "type": "code",
+        "location": "/deploy/python_serving/readme.md:59-83"
+    },
+    "4079": {
+        "file_id": 346,
+        "content": "This code is converting a pre-trained PaddlePaddle model to a format suitable for serving on the server. It downloads and unzips the pre-trained model, then uses paddle_serving_client to convert it into the correct format for deployment with specified directories for serving server and client. The `dirname` specifies where the pre-trained model files are stored, while `model_filename` names the Inference Program structure file, defaulting to \"__model__\" if not specified.",
+        "type": "comment"
+    },
+    "4080": {
+        "file_id": 346,
+        "content": "  | `params_filename` | str  | None               | 存储需要转换的模型所有参数的文件名称。当且仅当所有模型参数被保>存在一个单独的二进制文件中，它才需要被指定。如果模型参数是存储在各自分离的文件中，设置它的值为None |\n  | `serving_server`  | str  | `\"serving_server\"` | 转换后的模型文件和配置文件的存储路径。默认值为serving_server |\n  | `serving_client`  | str  | `\"serving_client\"` | 转换后的客户端配置文件存储路径。默认值为serving_client       |\nPP-TSM 推理模型转换完成后，会在当前文件夹多出 `ppTSM_serving_server` 和 `ppTSM_serving_client` 的文件夹，具备如下格式：\n  ```bash\n  PaddleVideo/deploy/python_serving\n  ├── ppTSM_serving_server\n      ├── ppTSM.pdiparams\n      ├── ppTSM.pdmodel\n      ├── serving_server_conf.prototxt\n      └── serving_server_conf.stream.prototxt\n  ├── ppTSM_serving_client\n      ├── serving_client_conf.prototxt\n      └── serving_client_conf.stream.prototxt\n  ```\n得到模型文件之后，需要分别修改 `ppTSM_serving_server` 和 `ppTSM_serving_client` 下的文件 `serving_server_conf.prototxt`，将 两份文件中`fetch_var` 下的 `alias_name` 均改为 `outputs`\n**备注**:  Serving 为了兼容不同模型的部署，提供了输入输出重命名的功能。这样，不同的模型在推理部署时，只需要修改配置文件的`alias_name`即可，无需修改代码即可完成推理部署。\n修改后的`serving_server_conf.prototxt`如下所示:",
+        "type": "code",
+        "location": "/deploy/python_serving/readme.md:84-103"
+    },
+    "4081": {
+        "file_id": 346,
+        "content": "The code provides parameters for the PP-TSM model transformation, including a parameter file name (params_filename), and paths to store the converted model files (serving_server) and client configuration files (serving_client). The resulting files will be organized in separate folders (ppTSM_serving_server and ppTSM_serving_client), with specific formats. The alias names 'outputs' must be set for both fetch_var in serving_server_conf.prototxt to ensure compatibility and easy deployment of different models without modifying the code.",
+        "type": "comment"
+    },
+    "4082": {
+        "file_id": 346,
+        "content": "```yaml\nfeed_var {\n  name: \"data_batch_0\"\n  alias_name: \"data_batch_0\"\n  is_lod_tensor: false\n  feed_type: 1\n  shape: 8\n  shape: 3\n  shape: 224\n  shape: 224\n}\nfetch_var {\n  name: \"linear_2.tmp_1\"\n  alias_name: \"outputs\"\n  is_lod_tensor: false\n  fetch_type: 1\n  shape: 400\n}\n```\n### 服务部署和请求\n`python_serving` 目录包含了启动 pipeline 服务、C++ serving服务(TODO)和发送预测请求的代码，具体包括：\n```bash\n__init__.py\nconfigs/xxx.yaml            # 启动pipeline服务的配置文件\npipeline_http_client.py     # http方式发送pipeline预测请求的python脚本\npipeline_rpc_client.py      # rpc方式发送pipeline预测请求的python脚本\nrecognition_web_service.py  # 启动pipeline服务端的python脚本\nutils.py                    # 储存预测过程中常用的函数，如parse_file_paths, numpy_to_base64, video_to_numpy\n```\n#### Python Serving\n- 进入工作目录：\n```bash\ncd deploy/python_serving\n```\n- 启动服务：\n```bash\n# 在当前命令行窗口启动并保持在前端\npython3.7 recognition_web_service.py -n PPTSM -c configs/PP-TSM.yaml\n# 在后台启动，过程中打印输出的日志会重定向保存到log.txt中\npython3.7 recognition_web_service.py -n PPTSM -c configs/PP-TSM.yaml &>log.txt &\n```\n- 发送请求：\n```bash\n# 以http方式的发送预测请求并接受结果\npython3.7 pipeline_http_client.py -i ../../data/example.avi",
+        "type": "code",
+        "location": "/deploy/python_serving/readme.md:105-152"
+    },
+    "4083": {
+        "file_id": 346,
+        "content": "The code represents the configuration for input (\"feed_var\") and output (\"fetch_var\") variables in the PaddleVideo deployment's Python serving. The input variable has a shape of 8,3,224,224 and the output variable has a shape of 400. This code is part of the setup process for sending prediction requests to the PaddleVideo pipeline service using either HTTP or RPC methods.",
+        "type": "comment"
+    },
+    "4084": {
+        "file_id": 346,
+        "content": "# 以rpc方式的发送预测请求并接受结果\npython3.7 pipeline_rpc_client.py -i ../../data/example.avi\n```\n成功运行后，模型预测的结果会打印在 cmd 窗口中，结果如下：\n```bash\n# http方式打印的结果\n{'err_no': 0, 'err_msg': '', 'key': ['label', 'prob'], 'value': [\"['archery']\", '[0.9907388687133789]'], 'tensors': []}\n# rpc方式打印的结果\nPipelineClient::predict pack_data time:1645631086.764019\nPipelineClient::predict before time:1645631086.8485317\nkey: \"label\"\nkey: \"prob\"\nvalue: \"[\\'archery\\']\"\nvalue: \"[0.9907388687133789]\"\n```\n## FAQ\n**Q1**： 发送请求后没有结果返回或者提示输出解码报错\n**A1**： 启动服务和发送请求时不要设置代理，可以在启动服务前和发送请求前关闭代理，关闭代理的命令是：\n```\nunset https_proxy\nunset http_proxy\n```\n**Q2**： 服务端启动后没有反应，一直停在`start proxy service`不动\n**A2**： 很可能是启动过程中遇到了问题，可以在`./deploy/python_serving/PipelineServingLogs/pipeline.log`日志文件中查看详细报错信息\n更多的服务部署类型，如 `RPC 预测服务` 等，可以参考 Serving 的[github 官网](https://github.com/PaddlePaddle/Serving/tree/v0.7.0/examples)",
+        "type": "code",
+        "location": "/deploy/python_serving/readme.md:154-185"
+    },
+    "4085": {
+        "file_id": 346,
+        "content": "This code demonstrates running the PaddleVideo model for prediction using the RPC (Remote Procedure Call) method. The command \"python3.7 pipeline_rpc_client.py -i ../../data/example.avi\" is used to execute the prediction, and the results are printed in the cmd window.",
+        "type": "comment"
+    },
+    "4086": {
+        "file_id": 347,
+        "content": "/deploy/python_serving/readme_en.md",
+        "type": "filepath"
+    },
+    "4087": {
+        "file_id": 347,
+        "content": "This code shows deploying PaddleServing for deep learning model prediction via HTTP using PP-TSM models and Docker on Linux. Issues with proxy, no response; check log file for errors at \"./deploy/python_serving/PipelineServingLogs/pipeline.log\". Refer to Serving's GitHub for more deployment types like RPC prediction service.",
+        "type": "summary"
+    },
+    "4088": {
+        "file_id": 347,
+        "content": "English | [简体中文](./readme.md)\n# Model service deployment\n## Introduction\n[Paddle Serving](https://github.com/PaddlePaddle/Serving) aims to help deep learning developers easily deploy online prediction services, support one-click deployment of industrial-grade service capabilities, high concurrency between client and server Efficient communication and support for developing clients in multiple programming languages.\nThis section takes the HTTP prediction service deployment as an example to introduce how to use PaddleServing to deploy the model service in PaddleVideo. Currently, only Linux platform deployment is supported, and Windows platform is not currently supported.\n## Serving installation\nThe Serving official website recommends using docker to install and deploy the Serving environment. First, you need to pull the docker environment and create a Serving-based docker.\n```bash\n# start GPU docker\ndocker pull paddlepaddle/serving:0.7.0-cuda10.2-cudnn7-devel\nnvidia-docker run -p 9292:9292 --name test -dit paddlepaddle/serving:0.7.0-cuda10.2-cudnn7-devel bash",
+        "type": "code",
+        "location": "/deploy/python_serving/readme_en.md:1-16"
+    },
+    "4089": {
+        "file_id": 347,
+        "content": "This code provides an overview of deploying a model service using PaddleServing for deep learning predictions. It uses HTTP prediction service deployment as an example and suggests installing Serving through Docker on Linux platforms, while Windows is currently not supported.",
+        "type": "comment"
+    },
+    "4090": {
+        "file_id": 347,
+        "content": "nvidia-docker exec -it test bash\n# start CPU docker\ndocker pull paddlepaddle/serving:0.7.0-devel\ndocker run -p 9292:9292 --name test -dit paddlepaddle/serving:0.7.0-devel bash\ndocker exec -it test bash\n```\nAfter entering docker, you need to install Serving-related python packages.\n```bash\npython3.7 -m pip install paddle-serving-client==0.7.0\npython3.7 -m pip install paddle-serving-app==0.7.0\npython3.7 -m pip install faiss-cpu==1.7.1post2\n#If it is a CPU deployment environment:\npython3.7 -m pip install paddle-serving-server==0.7.0 #CPU\npython3.7 -m pip install paddlepaddle==2.2.0 # CPU\n#If it is a GPU deployment environment\npython3.7 -m pip install paddle-serving-server-gpu==0.7.0.post102 # GPU with CUDA10.2 + TensorRT6\npython3.7 -m pip install paddlepaddle-gpu==2.2.0 # GPU with CUDA10.2\n#Other GPU environments need to confirm the environment and then choose which one to execute\npython3.7 -m pip install paddle-serving-server-gpu==0.7.0.post101 # GPU with CUDA10.1 + TensorRT6\npython3.7 -m pip install paddle-serving-server-gpu==0.7.0.post112 # GPU with CUDA11.2 + TensorRT8",
+        "type": "code",
+        "location": "/deploy/python_serving/readme_en.md:17-41"
+    },
+    "4091": {
+        "file_id": 347,
+        "content": "Install PaddleServing server and client packages for CPU and GPU environments, depending on the deployment type.",
+        "type": "comment"
+    },
+    "4092": {
+        "file_id": 347,
+        "content": "```\n* If the installation speed is too slow, you can change the source through `-i https://pypi.tuna.tsinghua.edu.cn/simple` to speed up the installation process\n* For more environment and corresponding installation packages, see: https://github.com/PaddlePaddle/Serving/blob/v0.9.0/doc/Install_Linux_Env_CN.md\n## Behavior recognition service deployment\n### Model conversion\nWhen using PaddleServing for service deployment, you need to convert the saved inference model into a Serving model. The following uses the PP-TSM model as an example to introduce how to deploy the behavior recognition service.\n- Download the trained PP-TSM model and convert it into an inference model:\n  ```bash\n  # Enter PaddleVideo directory\n  cd PaddleVideo\n  wget -P data/ https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform.pdparams\n  python3.7 tools/export_model.py \\\n  -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml \\\n  -p data/ppTSM_k400_uniform.pdparams \\\n  -o inference/ppTSM\n  ```\n- We also provide the converted inference model, download and unzip by the following command",
+        "type": "code",
+        "location": "/deploy/python_serving/readme_en.md:42-63"
+    },
+    "4093": {
+        "file_id": 347,
+        "content": "This code snippet provides instructions on how to deploy a behavior recognition service using PaddleServing. It explains that the model must be converted into a Serving model and provides an example of PP-TSM model conversion process. The user is guided to enter the PaddleVideo directory, download the trained PP-TSM model, convert it into an inference model, and finally, provide an option to download a pre-converted inference model if desired.",
+        "type": "comment"
+    },
+    "4094": {
+        "file_id": 347,
+        "content": "  ```bash\n  mkdir ./inference\n  wget -nc -P ./inference https://videotag.bj.bcebos.com/PaddleVideo-release2.3/ppTSM.zip --no-check-certificate\n  pushd ./inference\n  unzip ppTSM.zip\n  popd\n  ```\n- Use paddle_serving_client to convert the converted inference model into a model format that is easy for server deployment:\n  ```bash\n  python3.7 -m paddle_serving_client.convert \\\n  --dirname inference/ppTSM \\\n  --model_filename ppTSM.pdmodel \\\n  --params_filename ppTSM.pdiparams \\\n  --serving_server ./deploy/python_serving/ppTSM_serving_server/ \\\n  --serving_client ./deploy/python_serving/ppTSM_serving_client/\n  ```\n  | parameter | type | default value | description |\n  | ----------------- | ---- | ------------------ | ------- -------------------------------------------------- --- |\n  | `dirname` | str | - | The storage path of the model file to be converted. The program structure file and parameter file are saved in this directory. |\n  | `model_filename` | str | None | The name of the file storing the model In",
+        "type": "code",
+        "location": "/deploy/python_serving/readme_en.md:64-83"
+    },
+    "4095": {
+        "file_id": 347,
+        "content": "This code downloads a pre-trained model and converts it into a format suitable for server deployment using paddle_serving_client. The converted model is saved in the specified directory with the corresponding program and parameter files.",
+        "type": "comment"
+    },
+    "4096": {
+        "file_id": 347,
+        "content": "ference Program structure that needs to be converted. If set to None, use `__model__` as the default filename |\n  | `params_filename` | str | None | File name where all parameters of the model to be converted are stored. It needs to be specified if and only if all model parameters are stored in a single binary file. If the model parameters are stored in separate files, set it to None |\n  | `serving_server` | str | `\"serving_server\"` | The storage path of the converted model files and configuration files. Default is serving_server |\n  | `serving_client` | str | `\"serving_client\"` | The converted client configuration file storage path. Default is serving_client |\nAfter the PP-TSM inference model is converted, there will be additional folders of `ppTSM_serving_server` and `ppTSM_serving_client` in the current folder, with the following formats:\n  ```bash\n  PaddleVideo/deploy/python_serving\n  ├── ppTSM_serving_server\n      ├── ppTSM.pdiparams\n      ├── ppTSM.pdmodel\n      ├── serving_server_conf.prototxt",
+        "type": "code",
+        "location": "/deploy/python_serving/readme_en.md:83-94"
+    },
+    "4097": {
+        "file_id": 347,
+        "content": "This code defines the required parameters for converting a PaddleVideo PP-TSM inference model. Upon successful conversion, it creates `ppTSM_serving_server` and `ppTSM_serving_client` folders with necessary files for the converted model's serving.",
+        "type": "comment"
+    },
+    "4098": {
+        "file_id": 347,
+        "content": "      └── serving_server_conf.stream.prototxt\n  ├── ppTSM_serving_client\n      ├── serving_client_conf.prototxt\n      └── serving_client_conf.stream.prototxt\n  ```\nAfter getting the model files, you need to modify the files `serving_server_conf.prototxt` under `ppTSM_serving_server` and `ppTSM_serving_client` respectively, and change `alias_name` under `fetch_var` in both files to `outputs`\n**Remarks**: In order to be compatible with the deployment of different models, Serving provides the function of input and output renaming. In this way, when different models are inferred and deployed, they only need to modify the `alias_name` of the configuration file, and the inference deployment can be completed without modifying the code.\nThe modified `serving_server_conf.prototxt` looks like this:\n```yaml\nfeed_var {\n  name: \"data_batch_0\"\n  alias_name: \"data_batch_0\"\n  is_lod_tensor: false\n  feed_type: 1\n  shape: 8\n  shape: 3\n  shape: 224\n  shape: 224\n}\nfetch_var {\n  name: \"linear_2.tmp_1\"\n  alias_name: \"outputs\"\n  is_lod_tensor: false",
+        "type": "code",
+        "location": "/deploy/python_serving/readme_en.md:95-119"
+    },
+    "4099": {
+        "file_id": 347,
+        "content": "This code snippet is modifying the model configuration files `serving_server_conf.prototxt` and `serving_client_conf.stream.prototxt`. It changes the `alias_name` under `fetch_var` to \"outputs\" in both files for compatibility with different models during deployment. This allows the inference and deployment of various models without modifying the code, simply by updating the configuration file's alias names.",
+        "type": "comment"
+    }
+}

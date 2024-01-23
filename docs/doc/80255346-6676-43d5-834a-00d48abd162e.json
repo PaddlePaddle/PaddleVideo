@@ -1,0 +1,20 @@
+{
+    "summary": "This code utilizes two functions: \"numpy_to_base64\" converts numpy arrays to base64 strings and \"video_to_numpy\" reads video frames with OpenCV, returning a stack of frames as a numpy array. The parse_file_paths function retrieves file paths or directories containing .avi/.mp4 files and joins them.",
+    "details": [
+        {
+            "comment": "This code contains two functions: \"numpy_to_base64\" and \"video_to_numpy\". The first function converts a numpy array to a base64 encoded string. The second function decodes a video file using OpenCV (cv2) and returns a stack of frames as a numpy array.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/deploy/python_serving/utils.py\":0-36",
+            "content": "# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport base64\nimport os\nimport os.path as osp\nimport cv2\nimport numpy as np\ndef numpy_to_base64(array: np.ndarray) -> str:\n    \"\"\"numpy_to_base64\n    Args:\n        array (np.ndarray): input ndarray.\n    Returns:\n        bytes object: encoded str.\n    \"\"\"\n    return base64.b64encode(array).decode('utf8')\ndef video_to_numpy(file_path: str) -> np.ndarray:\n    \"\"\"decode video with cv2 and return stacked frames\n       as numpy."
+        },
+        {
+            "comment": "The code reads video frames from a file path and returns them as numpy array. The parse_file_paths function retrieves either the file path or directory containing .avi/.mp4 files.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/deploy/python_serving/utils.py\":38-77",
+            "content": "    Args:\n        file_path (str): video file path.\n    Returns:\n        np.ndarray: [T,H,W,C] in uint8.\n    \"\"\"\n    cap = cv2.VideoCapture(file_path)\n    videolen = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))\n    decoded_frames = []\n    for i in range(videolen):\n        ret, frame = cap.read()\n        # maybe first frame is empty\n        if ret is False:\n            continue\n        img = frame[:, :, ::-1]\n        decoded_frames.append(img)\n    decoded_frames = np.stack(decoded_frames, axis=0)\n    return decoded_frames\ndef parse_file_paths(input_path: str) -> list:\n    \"\"\"get data pathes from input_path\n    Args:\n        input_path (str): input file path or directory which contains input file(s).\n    Returns:\n        list: path(es) of input file(s)\n    \"\"\"\n    assert osp.exists(input_path), \\\n        f\"{input_path} did not exists!\"\n    if osp.isfile(input_path):\n        files = [\n            input_path,\n        ]\n    else:\n        files = os.listdir(input_path)\n        files = [\n            file for file in files\n            if (file.endswith(\".avi\") or file.endswith(\".mp4\"))"
+        },
+        {
+            "comment": "This code is joining the input_path with each file in the files list and returning the resulting list of file paths.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/deploy/python_serving/utils.py\":78-80",
+            "content": "        ]\n        files = [osp.join(input_path, file) for file in files]\n    return files"
+        }
+    ]
+}

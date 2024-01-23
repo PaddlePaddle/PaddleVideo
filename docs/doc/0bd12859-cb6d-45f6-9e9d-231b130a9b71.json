@@ -1,0 +1,10 @@
+{
+    "summary": "Downloading and extracting datasets for MSRVTT dataset from remote server.",
+    "details": [
+        {
+            "comment": "Downloading and extracting datasets for MSRVTT dataset from remote server.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/T2VLAD/data/download_features.sh\":0-8",
+            "content": "mkdir MSRVTT\ncd MSRVTT\nwget https://videotag.bj.bcebos.com/Data/MSRVTT/aggregated_text_feats.tar\nwget https://videotag.bj.bcebos.com/Data/MSRVTT/mmt_feats.tar\nwget https://videotag.bj.bcebos.com/Data/MSRVTT/raw-captions.pkl\nwget https://videotag.bj.bcebos.com/Data/MSRVTT/train_list_jsfusion.txt\nwget https://videotag.bj.bcebos.com/Data/MSRVTT/val_list_jsfusion.txt\ntar -xvf aggregated_text_feats.tar\ntar -xvf mmt_feats.tar"
+        }
+    ]
+}

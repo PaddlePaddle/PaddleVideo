@@ -1,0 +1,10 @@
+{
+    "summary": "The code is a Python script that initializes a QApplication object, creates an instance of the BuildGUI class from the QEIVideo module, displays it, and executes the application's event loop. It is likely used to launch a graphical user interface (GUI) for a video processing or analysis application. The author is credited, and the code includes a copyright notice requesting proper attribution if reused.",
+    "details": [
+        {
+            "comment": "The code is a Python script that initializes a QApplication object, creates an instance of the BuildGUI class from the QEIVideo module, displays it, and executes the application's event loop. It is likely used to launch a graphical user interface (GUI) for a video processing or analysis application. The author is credited, and the code includes a copyright notice requesting proper attribution if reused.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/EIVideo/QEIVideo/start.py\":0-19",
+            "content": "# Author: AP-Kai\n# Datetime: 2022/1/7\n# Copyright belongs to the author.\n# Please indicate the source for reprinting.\nimport sys\nfrom QEIVideo.build_gui import BuildGUI\nfrom PyQt5.QtWidgets import QApplication\ndef run():\n    app = QApplication(sys.argv)\n    demo = BuildGUI()\n    demo.show()\n    sys.exit(app.exec())\nif __name__ == '__main__':\n    run()"
+        }
+    ]
+}

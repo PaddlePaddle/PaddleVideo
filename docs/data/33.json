@@ -1,0 +1,541 @@
+{
+    "3300": {
+        "file_id": 280,
+        "content": "/applications/VideoQualityAssessment/save_model.sh",
+        "type": "filepath"
+    },
+    "3301": {
+        "file_id": 280,
+        "content": "The code is executing a Python script (tools/export_model.py) with specific parameters to export the best model from ./configs/recognition/tsm/pptsm.yaml, save it as ./output/ppTSM/ppTSM\\_best.pdparams and store the inference files in ./inference/. It will use 32 segments for processing.",
+        "type": "summary"
+    },
+    "3302": {
+        "file_id": 280,
+        "content": "python tools/export_model.py \\\n  -c ./configs/recognition/tsm/pptsm.yaml \\\n  -p ./output/ppTSM/ppTSM_best.pdparams \\\n  -o ./inference/ \\\n  --num_seg=32 ",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/save_model.sh:1-5"
+    },
+    "3303": {
+        "file_id": 280,
+        "content": "The code is executing a Python script (tools/export_model.py) with specific parameters to export the best model from ./configs/recognition/tsm/pptsm.yaml, save it as ./output/ppTSM/ppTSM\\_best.pdparams and store the inference files in ./inference/. It will use 32 segments for processing.",
+        "type": "comment"
+    },
+    "3304": {
+        "file_id": 281,
+        "content": "/applications/VideoQualityAssessment/setup.py",
+        "type": "filepath"
+    },
+    "3305": {
+        "file_id": 281,
+        "content": "This Python package, \"paddlevideo\", utilizes PaddlePaddle toolkits for video understanding and supports multiple Python versions. It is set up using setuptools and includes dependencies and documentation.",
+        "type": "summary"
+    },
+    "3306": {
+        "file_id": 281,
+        "content": "\"\"\"\n# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom setuptools import setup\nfrom io import open\nwith open('requirements.txt', encoding=\"utf-8-sig\") as f:\n    requirements = f.readlines()\ndef readme():\n    \"\"\"readme\"\"\"\n    with open('docs/en/whl_en.md', encoding=\"utf-8-sig\") as f:\n        README = f.read()\n    return README\nsetup(\n    name='paddlevideo', #name of .whl file\n    packages=['ppvideo'], #install package name\n    package_dir={'ppvideo': ''},\n    include_package_data=True, #Accept all data files and directories matched by MANIFEST.in",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/setup.py:1-34"
+    },
+    "3307": {
+        "file_id": 281,
+        "content": "This code is setting up a Python package using setuptools for the PaddleVideo library, specifying its name as \"paddlevideo\". It includes the necessary dependencies listed in the \"requirements.txt\" file and provides a README file located at 'docs/en/whl_en.md' for documentation purposes.",
+        "type": "comment"
+    },
+    "3308": {
+        "file_id": 281,
+        "content": "    install_requires=requirements,\n    entry_points={\"console_scripts\": [\"ppvideo= ppvideo.tools.paddlevideo_clas:main\"]},\n    version='0.0.1',\n    license='Apache License 2.0',\n    description='Awesome Video toolkits based on PaddlePaddle ',\n    long_description=readme(),\n    long_description_content_type='text/markdown',\n    url='https://github.com/PaddlePaddle/PaddleVideo',\n    download_url='https://github.com/PaddlePaddle/PaddleVideo.git',\n    keywords=[\n    'A treasure chest for video understanding powered by PaddlePaddle.'\n    ],\n    classifiers=[\n        'Intended Audience :: Developers', 'Operating System :: OS Independent',\n        'Natural Language :: Chinese (Simplified)',\n        'Programming Language :: Python :: 3',\n        'Programming Language :: Python :: 3.2',\n        'Programming Language :: Python :: 3.3',\n        'Programming Language :: Python :: 3.4',\n        'Programming Language :: Python :: 3.5',\n        'Programming Language :: Python :: 3.6',\n        'Programming Language :: Python :: 3.7', 'Topic :: Utilities'",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/setup.py:35-56"
+    },
+    "3309": {
+        "file_id": 281,
+        "content": "This code is a setup file for a Python package named \"ppvideo\" that utilizes PaddlePaddle toolkits for video understanding. It specifies installation requirements, entry points, version, license, description, URL, download link, keywords, and classifiers. The package supports multiple versions of Python and is categorized under the Utilities topic.",
+        "type": "comment"
+    },
+    "3310": {
+        "file_id": 281,
+        "content": "    ],)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/setup.py:57-57"
+    },
+    "3311": {
+        "file_id": 281,
+        "content": "This code is creating a tuple with empty elements. The specific purpose or usage of this tuple in the context of the setup.py file might require more information to provide an accurate and relevant comment.",
+        "type": "comment"
+    },
+    "3312": {
+        "file_id": 282,
+        "content": "/applications/VideoTag/FineTune.md",
+        "type": "filepath"
+    },
+    "3313": {
+        "file_id": 282,
+        "content": "This guide details fine-tuning the VideoTag model using custom data, covering AttentionLSTM and TSN models, feature extraction, and multi/single GPU support. The code trains, evaluates, predicts with TSN, requires specific weight files, allows save directories, and preprocesses videos into images.",
+        "type": "summary"
+    },
+    "3314": {
+        "file_id": 282,
+        "content": "# 模型微调指南\n---\n## 内容\n参考本文档，您可以使用自己的训练数据在VideoTag预训练模型上进行fine-tune，训练出自己的模型。\n文档内容包括:\n- [原理解析](#原理解析)\n- [对AttentionLSTM模型进行微调](#对AttentionLSTM模型进行微调)\n- [对TSN模型进行微调](#对TSN模型进行微调)\n- [扩展内容](#扩展内容)\n- [参考论文](#参考论文)\n## 原理解析\nVideoTag采用两阶段建模方式，由两个模型组成: TSN + AttentionLSTM。\nTemporal Segment Network (TSN) 是经典的基于2D-CNN的视频分类模型。该模型通过稀疏采样视频帧的方式，在捕获视频时序信息的同时降低了计算量。详细内容请参考论文[Temporal Segment Networks: Towards Good Practices for Deep Action Recognition](https://arxiv.org/abs/1608.00859)\nAttentionLSTM以视频的特征向量作为输入，采用双向长短时记忆网络（LSTM）对所有帧特征进行编码，并增加Attention层，将每个时刻的隐状态输出与自适应权重线性加权得到最终分类向量。详细内容请参考论文[AttentionCluster](https://arxiv.org/abs/1711.09550)\nVideoTag训练时分两个阶段: 第一阶段使用少量视频样本（十万级别）训练大规模视频特征提取模型(TSN)；第二阶段使用千万级数据训练预测器(AttentionLSTM)。\nVideoTag预测时也分两个阶段: 第一阶段以视频文件作为输入，经过去除了全连接层以及损失函数层的TSN网络后得到输出特征向量；第二阶段以TSN网络输出的特征向量作为输入，经过AttentionLSTM后得到最终的分类结果。\n基于我们的预模型，您可以使用自己的训练数据进行fine-tune:\n- [对AttentionLSTM模型进行微调](#对AttentionLSTM模型进行微调)\n- [对TSN模型进行微调](#对TSN模型进行微调)\n## 对AttentionLSTM模型进行微调\nAttentionLSTM以视频特征作为输入，显存占用少，训练速度较TSN更快，因此推荐优先对AttentionLSTM模型进行微调。输入视频首先经过TSN预训练模型提取特征向量，然后将特征向量作为训练输入数据，微调AttentionLSTM模型。",
+        "type": "code",
+        "location": "/applications/VideoTag/FineTune.md:1-32"
+    },
+    "3315": {
+        "file_id": 282,
+        "content": "This is a guide for fine-tuning the VideoTag pre-trained model with custom training data, covering AttentionLSTM and TSN models, principle explanations, and reference papers.",
+        "type": "comment"
+    },
+    "3316": {
+        "file_id": 282,
+        "content": "### TSN预模型提取特征向量\n#### 数据准备\n- 预训练权重下载: 参考[样例代码运行指南-数据准备-预训练权重下载](./Run.md)\n- 准备训练数据: 准备好待训练的视频数据，并在video\\_tag/data/TsnExtractor.list文件中指定待训练的文件路径，内容格式如下:\n```\nmy_video_path/my_video_file1.mp4\nmy_video_path/my_video_file2.mp4\n...\n```\n#### 特征提取\n特征提取脚本如下:\n```\npython tsn_extractor.py --model_name=TSN --config=./configs/tsn.yaml --weights=./weights/tsn.pdparams\n```\n- 通过--weights可指定TSN权重参数的存储路径，默认为video\\_tag/weights/tsn.pdparams\n- 通过--save\\_dir可指定特征向量保存路径，默认为video\\_tag/data/tsn\\_features，不同输入视频的特征向量提取结果分文件保存在不同的npy文件中，目录形式为:\n```\nvideo_tag\n  ├──data\n    ├──tsn_features\n      ├── my_feature_file1.npy\n      ├── my_feature_file2.npy\n      ...\n```\n- tsn提取的特征向量维度为```帧数*特征维度```，默认为300 * 2048。\n### AttentionLSTM模型Fine-tune\n#### 数据准备\nVideoTag中的AttentionLSTM以TSN模型提取的特征向量作为输入。在video\\_tag/data/dataset/attention\\_lstm/train.list文件中指定待训练的文件路径和对应的标签，内容格式如下:\n```\nmy_feature_path/my_feature_file1.npy label1 label2\nmy_feature_path/my_feature_file2.npy label1\n...\n```\n- 一个输入视频可以有多个标签，标签索引为整型数据，文件名与标签之间、多个标签之间以一个空格分隔；\n- 标签索引与标签名称的之间的对应关系以list文件指定，可参考VideoTag用到的label_3396.txt文件构造，行索引对应标签索引;",
+        "type": "code",
+        "location": "/applications/VideoTag/FineTune.md:34-81"
+    },
+    "3317": {
+        "file_id": 282,
+        "content": "Extract features from TSN pre-trained model, save the extracted features in specified directory. AttentionLSTM model fine-tuning requires TSN extracted features with corresponding labels in the train.list file. Label indices are defined in a separate text file, e.g., label_3396.txt.",
+        "type": "comment"
+    },
+    "3318": {
+        "file_id": 282,
+        "content": "- 验证集、测试集以及预测数据集的构造方式同训练集类似，仅需要在video\\_tag/data/attention\\_lstm/目录下对应的list文件中指定相关文件路径/标签即可。\n#### 模型训练\n使用VideoTag中的AttentionLSTM预模型进行fine-tune训练脚本如下:\n```\nexport CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7\npython train.py --model_name=AttentionLSTM --config=./configs/attention_lstm.yaml --pretrain=./weights/attention_lstm\n```\n- AttentionLSTM模型默认使用8卡训练，总的batch size数是1024。若使用单卡训练，请修改环境变量，脚本如下:\n```\nexport CUDA_VISIBLE_DEVICES=0\npython train.py --model_name=AttentionLSTM --config=./configs/attention_lstm-single.yaml --pretrain=./weights/attention_lstm\n```\n- 请确保训练样本数大于batch_size数\n- 通过--pretrain参数可指定AttentionLSTM预训练模型的路径，默认为./weights/attention\\_lstm；\n- 模型相关配置写在video_tag/configs/attention\\_lstm.yaml文件中，可以方便的调节各项超参数；\n- 通过--save_dir参数可指定训练模型参数的保存路径，默认为./data/checkpoints；\n#### 模型评估\n可用如下方式进行模型评估:\n```\npython eval.py --model_name=AttentionLSTM --config=./configs/attention_lstm.yaml --weights=./data/checkpoints/AttentionLSTM_epoch9.pdparams\n```\n- 通过--weights参数可指定评估需要的权重，默认为./data/checkpoints/AttentionLSTM_epoch9.pdparams；\n- 评估结果以log的形式直接打印输出GAP、Hit@1等精度指标。",
+        "type": "code",
+        "location": "/applications/VideoTag/FineTune.md:83-113"
+    },
+    "3319": {
+        "file_id": 282,
+        "content": "This code chunk is for fine-tuning the AttentionLSTM model in PaddleVideo's VideoTag application. It provides instructions for training the model with multiple GPUs or a single GPU, and specifies the configuration file and pretrained weights required. The code also demonstrates how to evaluate the trained model using eval.py script. The precision metrics printed include GAP and Hit@1.",
+        "type": "comment"
+    },
+    "3320": {
+        "file_id": 282,
+        "content": "#### 模型推断\n可用如下方式进行模型推断:\n```\npython predict.py --model_name=AttentionLSTM --config=./configs/attention_lstm.yaml --weights=./data/checkpoints/AttentionLSTM_epoch9.pdparams\n```\n- 通过--weights参数可指定推断需要的权重，默认为./data/checkpoints/AttentionLSTM_epoch9.pdparams；\n- 通过--label_file参数指定标签文件，请根据自己的数据修改，默认为./label_3396.txt;\n- 预测结果会以日志形式打印出来，同时也保存在json文件中，通过--save_dir参数可指定预测结果保存路径，默认为./data/predict_results/attention_lstm。\n## 对TSN模型进行微调\nVideoTag中使用的TSN模型以mp4文件为输入，backbone为ResNet101。\n### 数据准备\n准备好训练视频文件后，在video\\_tag/data/dataset/tsn/train.list文件中指定待训练的文件路径和对应的标签即可，内容格式如下:\n```\nmy_video_path/my_video_file1.mp4 label1\nmy_video_path/my_video_file2.mp4 label2\n...\n```\n- 一个输入视频只能有一个标签，标签索引为整型数据，标签索引与文件名之间以一个空格分隔；\n- 验证集、测试集以及预测数据集的构造方式同训练集类似，仅需要在video\\_tag/data/dataset/tsn目录下对应的list文件中指定相关文件路径/标签即可。\n#### 模型训练\n使用VideoTag中的TSN预模型进行fine-tune训练脚本如下:\n```\nexport CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7\npython train.py --model_name=TSN --config=./configs/tsn.yaml --pretrain=./weights/tsn\n```\n- TSN模型默认使用8卡训练，总的batch size数是256。若使用单卡训练，请修改环境变量，脚本如下:\n```",
+        "type": "code",
+        "location": "/applications/VideoTag/FineTune.md:115-152"
+    },
+    "3321": {
+        "file_id": 282,
+        "content": "This code provides instructions for model inference and fine-tuning using the PaddleVideo framework's VideoTag application. It explains how to specify the model, configuration file, weights, label files, and save directory for prediction results. Additionally, it outlines the steps for preparing data, training, and executing a pre-trained TSN model in the VideoTag application.",
+        "type": "comment"
+    },
+    "3322": {
+        "file_id": 282,
+        "content": "export CUDA_VISIBLE_DEVICES=0\npython train.py --model_name=TSN --config=./configs/tsn-single.yaml --pretrain=./weights/tsn\n```\n- 通过--pretrain参数可指定TSN预训练模型的路径，示例为./weights/tsn；\n- 模型相关配置写在video_tag/configs/tsn.yaml文件中，可以方便的调节各项超参数；\n- 通过--save_dir参数可指定训练模型参数的保存路径，默认为./data/checkpoints；\n#### 模型评估\n可用如下方式进行模型评估:\n```\npython eval.py --model_name=TSN --config=./configs/tsn.yaml --weights=./data/checkpoints/TSN_epoch44.pdparams\n```\n- 通过--weights参数可指定评估需要的权重，示例为./data/checkpoints/TSN_epoch44.pdparams；\n- 评估结果以log的形式直接打印输出TOP1_ACC、TOP5_ACC等精度指标。\n#### 模型推断\n可用如下方式进行模型推断:\n```\npython predict.py --model_name=TSN --config=./configs/tsn.yaml --weights=./data/checkpoints/TSN_epoch44.pdparams --save_dir=./data/predict_results/tsn/\n```\n- 通过--weights参数可指定推断需要的权重，示例为./data/checkpoints/TSN_epoch44.pdparams；\n- 通过--label_file参数指定标签文件，请根据自己的数据修改，默认为./label_3396.txt;\n- 预测结果会以日志形式打印出来，同时也保存在json文件中，通过--save_dir参数可指定预测结果保存路径，示例为./data/predict_results/tsn。\n### 训练加速\nTSN模型默认以mp4的视频文件作为输入，训练时需要先对视频文件解码，再将解码后的数据送入网络进行训练，如果视频文件很大，这个过程将会很耗时。\n为加速训练，可以先将视频解码成图片，然后保存下来，训练时直接根据索引读取帧图片作为输入，加快训练过程。",
+        "type": "code",
+        "location": "/applications/VideoTag/FineTune.md:153-188"
+    },
+    "3323": {
+        "file_id": 282,
+        "content": "This code is for training, evaluating and predicting with the TSN model. It uses different Python scripts (train.py, eval.py, and predict.py) along with a configuration file (tsn.yaml). The TSN model requires specific weight files saved at certain locations. It also has options to specify save directories for checkpoints, evaluation results, and prediction outputs. To speed up the training process, videos can be preprocessed into images before training.",
+        "type": "comment"
+    },
+    "3324": {
+        "file_id": 282,
+        "content": "- 数据准备: 首先将视频解码，存成帧图片；然后生成帧图片的文件路径列表。实现过程可参考[ucf-101数据准备](../../../../dygraph/tsn/data/dataset/ucf101/README.md)\n- 修改配置文件: 修改配置文件./config/tsn.yaml，其中MODEL.format值改为\"frames\"，不同模式下的filelist值改为对应的帧图片文件list。\n## 扩展内容\n- 更多关于TSN模型的内容可参考PaddleCV视频库[TSN视频分类模型](https://github.com/PaddlePaddle/models/blob/develop/PaddleCV/video/models/tsn/README.md)。\n- 更多关于AttentionLSTM模型的内容可参考PaddleCV视频库[AttentionLSTM视频分类模型](https://github.com/PaddlePaddle/models/tree/develop/PaddleCV/video/models/attention_lstm)。\n## 参考论文\n- [Temporal Segment Networks: Towards Good Practices for Deep Action Recognition](https://arxiv.org/abs/1608.00859), Limin Wang, Yuanjun Xiong, Zhe Wang, Yu Qiao, Dahua Lin, Xiaoou Tang, Luc Van Gool\n- [Beyond Short Snippets: Deep Networks for Video Classification](https://arxiv.org/abs/1503.08909) Joe Yue-Hei Ng, Matthew Hausknecht, Sudheendra Vijayanarasimhan, Oriol Vinyals, Rajat Monga, George Toderici",
+        "type": "code",
+        "location": "/applications/VideoTag/FineTune.md:190-206"
+    },
+    "3325": {
+        "file_id": 282,
+        "content": "The code is preparing the data by decoding videos into frames and generating a file path list for these frames. It modifies the configuration file, changing the model format to \"frames\" and updating the filelist accordingly. Additional information about TSN and AttentionLSTM models can be found in their respective PaddleCV repositories, with references provided to the original papers as well.",
+        "type": "comment"
+    },
+    "3326": {
+        "file_id": 283,
+        "content": "/applications/VideoTag/README.md",
+        "type": "filepath"
+    },
+    "3327": {
+        "file_id": 283,
+        "content": "This code is for the VideoTag, a large-scale video classification model developed by PaddlePaddle. It uses two stages of modeling - image modeling and sequence learning - to classify videos in large scale scenarios. The model involves data processing, TSN network training for feature extraction, and attention clusters, LSTM, Nextvlad for sequence learning. Results are predicted by combining multiple models, leading to increased accuracy.",
+        "type": "summary"
+    },
+    "3328": {
+        "file_id": 283,
+        "content": "# VideoTag 飞桨大规模视频分类模型\n---\n## 内容\n- [模型简介](#模型简介)\n- [使用方法](#使用方法)\n## 模型简介\n飞桨大规模视频分类模型VideoTag基于百度短视频业务千万级数据，支持3000个源于产业实践的实用标签，具有良好的泛化能力，非常适用于国内大规模（千万/亿/十亿级别）短视频分类场景的应用。VideoTag采用两阶段建模方式，即图像建模和序列学习。第一阶段，使用少量视频样本（十万级别）训练大规模视频特征提取模型(Extractor)；第二阶段，使用千万级数据训练预测器(Predictor)，最终实现在超大规模（千万/亿/十亿级别）短视频上产业应用，其原理示意如下图所示。\n<p align=\"center\">\n<img src=\"images.png\" height=220 width=800 hspace='10'/> <br />\nVideoTag模型示意图\n</p>\n- 数据处理：视频是按特定顺序排列的一组图像的集合，这些图像也称为帧。视频分类任务需要先对短视频进行解码，然后再将输出的图像帧序列灌入到VideoTag中进行训练和预测。\n- 图像建模：先从训练数据中，对每个类别均匀采样少量样本数据，构成十万量级的训练视频。然后使用TSN网络进行训练，提取所有视频帧的TSN模型分类层前一层的特征数据。在这个过程中，每一帧都被转化成相应的特征向量，一段视频被转化成一个特征序列。\n- 序列学习：采用Attention clusters、LSTM和Nextvlad对特征序列进行建模，学习各个特征之间的组合方式，进一步提高模型准确率。由于序列学习相比于图像建模耗时更短，因此可以融合多个具有互补性的序列模型。示例代码仅使用Attention\\_LSTM网络进行序列特征预测。\n- 预测结果：融合多个模型结果实现视频分类，进一步提高分类准确率。\n## 使用方法\n- [1. 如何运行样例代码](./Run.md)\n- [2. 如何使用自己的数据进行测试](./Test.md)\n- [3. 如何进行模型fine-tune](./FineTune.md)",
+        "type": "code",
+        "location": "/applications/VideoTag/README.md:1-31"
+    },
+    "3329": {
+        "file_id": 283,
+        "content": "This code is for the VideoTag, a large-scale video classification model developed by PaddlePaddle. It uses two stages of modeling - image modeling and sequence learning - to classify videos in large scale scenarios. The model involves data processing, TSN network training for feature extraction, and attention clusters, LSTM, Nextvlad for sequence learning. Results are predicted by combining multiple models, leading to increased accuracy.",
+        "type": "comment"
+    },
+    "3330": {
+        "file_id": 284,
+        "content": "/applications/VideoTag/Run.md",
+        "type": "filepath"
+    },
+    "3331": {
+        "file_id": 284,
+        "content": "This code installs PaddleVideo's VideoTag app, provides instructions for data preparation and model inference, and represents a dictionary containing information about classified video objects.",
+        "type": "summary"
+    },
+    "3332": {
+        "file_id": 284,
+        "content": "# 样例代码运行指南\n---\n## 内容\n参考本文档，您可以快速熟悉VideoTag的使用方法，观察VideoTag的预训练模型在示例视频上的预测结果。\n文档内容包括:\n- [安装说明](#安装说明)\n- [数据准备](#数据准备)\n- [模型推断](#模型推断)\n## 安装说明\n### 环境依赖：\n```\n    CUDA >= 9.0\n    cudnn >= 7.5\n```\n### 依赖安装:\n- 1.7.0 <= PaddlePaddle版本 <= 2.0.0: pip install paddlepaddle-gpu==1.8.4.post97 -i https://mirror.baidu.com/pypi/simple\n- opencv版本 >= 4.1.0: pip install opencv-python==4.2.0.32\n## 数据准备\n### 预训练权重下载\n我们提供了[TSN](https://videotag.bj.bcebos.com/video_tag_tsn.tar)和[AttentionLSTM](https://videotag.bj.bcebos.com/video_tag_lstm.tar)预训练权重，请在video\\_tag目录下新建weights目录，并将下载解压后的参数文件放在weights目录下:\n```\n    mkdir weights\n    cd weights\n    wget https://videotag.bj.bcebos.com/video_tag_tsn.tar\n    wget https://videotag.bj.bcebos.com/video_tag_lstm.tar\n    tar -zxvf video_tag_tsn.tar\n    tar -zxvf video_tag_lstm.tar\n    rm video_tag_tsn.tar -rf\n    rm video_tag_lstm.tar -rf\n    mv video_tag_tsn/* .\n    mv attention_lstm/* .\n    rm video_tag_tsn/ -rf\n    rm attention_lstm -rf\n```\n所得目录结构如下：\n```\nvideo_tag\n  ├──weights\n    ├── attention_lstm.pdmodel\n    ├── attention_lstm.pdopt  ",
+        "type": "code",
+        "location": "/applications/VideoTag/Run.md:1-54"
+    },
+    "3333": {
+        "file_id": 284,
+        "content": "This code provides installation instructions for PaddleVideo's VideoTag application, including dependencies and downloading pre-trained weights. It also outlines the data preparation process.",
+        "type": "comment"
+    },
+    "3334": {
+        "file_id": 284,
+        "content": "    ├── attention_lstm.pdparams\n    ├── tsn.pdmodel\n    ├── tsn.pdopt\n    └── tsn.pdparams\n```\n### 示例视频下载\n我们提供了[样例视频](https://videotag.bj.bcebos.com/mp4.tar)方便用户测试，请下载后解压，并将视频文件放置在video\\_tag/data/mp4目录下:\n```\n    cd data/\n    wget https://videotag.bj.bcebos.com/mp4.tar\n    tar -zxvf mp4.tar\n    rm mp4.tar -rf\n```\n所得目录结构如下：\n```\nvideo_tag\n  ├──data\n    ├── mp4\n      ├── 1.mp4\n      ├── 2.mp4\n      └── ...\n```\n## 模型推断\n模型推断的启动方式如下：\n    python videotag_test.py\n- 预测结果会以日志方式打印，示例如下:\n```\n[========video_id [ data/mp4/1.mp4 ] , topk(20) preds: ========]\nclass_id: 3110, class_name: 训练 ,  probability:  0.97730666399\nclass_id: 2159, class_name: 蹲 ,  probability:  0.945082366467\n...\n[========video_id [ data/mp4/2.mp4 ] , topk(20) preds: ========]\nclass_id: 2773, class_name: 舞蹈 ,  probability:  0.850423932076\nclass_id: 1128, class_name: 表演艺术 ,  probability:  0.0446354188025\n...\n```\n- 通过--save\\_dir可指定预测结果存储路径，默认为video\\_tag/data/VideoTag\\_results，不同输入视频的预测结果分文件保存在不同的json文件中，文件的内容格式为：\n```\n    [file_path,\n     {\"class_name\": class_name1, \"probability\": probability1, \"class_id\": class_id1},",
+        "type": "code",
+        "location": "/applications/VideoTag/Run.md:55-105"
+    },
+    "3335": {
+        "file_id": 284,
+        "content": "This code provides instructions on how to download an example video for testing, how to run model inference, and how to save the results. The example video can be downloaded from a provided link and should be extracted into a specific directory structure. The model inference script is named videotag_test.py and prints prediction probabilities. Users can specify a different output directory using the --save\\_dir parameter. The predictions are saved as JSON files in the specified directory, with each file corresponding to a video.",
+        "type": "comment"
+    },
+    "3336": {
+        "file_id": 284,
+        "content": "     {\"class_name\": class_name2, \"probability\": probability2, \"class_id\": class_id2},\n     ...\n    ]\n```",
+        "type": "code",
+        "location": "/applications/VideoTag/Run.md:106-109"
+    },
+    "3337": {
+        "file_id": 284,
+        "content": "This code represents a dictionary containing information about a classified video object. The 'class_name' key holds the name of the class, 'probability' stores the confidence level of the classification, and 'class_id' contains the identifier of the recognized class. These dictionaries are stored in an array, potentially for multiple classifications within the same video or different videos.",
+        "type": "comment"
+    },
+    "3338": {
+        "file_id": 285,
+        "content": "/applications/VideoTag/Test.md",
+        "type": "filepath"
+    },
+    "3339": {
+        "file_id": 285,
+        "content": "This code provides a guide for testing the pre-trained VideoTag model on custom data. It covers preparing test data and running inference using Python's videotag_test.py script. The video file input formats supported are mp4, mkv, and webm. Inference is performed on 300 uniformly sampled frames per video. GPU acceleration can be enabled with the --use\\_gpu flag.",
+        "type": "summary"
+    },
+    "3340": {
+        "file_id": 285,
+        "content": "# 预训练模型自测指南\n## 内容\n参考本文档，您可以快速测试VideoTag的预训练模型在自己业务数据上的预测效果。\n主要内容包括:\n- [数据准备](#数据准备)\n- [模型推断](#模型推断)\n## 数据准备\n在数据准备阶段，您需要准备好自己的测试数据，并在video\\_tag/data/VideoTag\\_test.list文件中指定待推断的测试文件路径，内容格式如下:\n```\nmy_video_path/my_video_file1.mp4\nmy_video_path/my_video_file2.mp4\n...\n```\n## 模型推断\n模型推断的启动方式如下：\n    python videotag_test.py\n- 目前支持的视频文件输入格式为：mp4、mkv和webm格式；\n- 模型会从输入的视频文件中*均匀抽取300帧*用于预测。对于较长的视频文件，建议先截取有效部分输入模型以提高预测速度；\n- 通过--use\\_gpu参数可指定是否使用gpu进行推断，默认使用gpu。对于10s左右的短视频文件，gpu推断时间约为4s；\n- 通过--filelist可指定输入list文件路径，默认为video\\_tag/data/VideoTag\\_test.list。",
+        "type": "code",
+        "location": "/applications/VideoTag/Test.md:1-31"
+    },
+    "3341": {
+        "file_id": 285,
+        "content": "This code provides a guide for testing the pre-trained VideoTag model on custom data. It covers preparing test data and running inference using Python's videotag_test.py script. The video file input formats supported are mp4, mkv, and webm. Inference is performed on 300 uniformly sampled frames per video. GPU acceleration can be enabled with the --use\\_gpu flag.",
+        "type": "comment"
+    },
+    "3342": {
+        "file_id": 286,
+        "content": "/applications/VideoTag/eval.py",
+        "type": "filepath"
+    },
+    "3343": {
+        "file_id": 286,
+        "content": "This code prepares the PaddlePaddle app environment, imports necessary libraries, handles config, defines model functions, loads test weights, logs metrics, and checks save directory. It also creates directories, logs arguments, verifies Paddle version, and runs a test function.",
+        "type": "summary"
+    },
+    "3344": {
+        "file_id": 286,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nimport os\nimport sys\nimport time\nimport logging\nimport argparse\nimport ast\nimport paddle\nimport paddle.static as static\nfrom utils.config_utils import *\nimport models\nfrom reader import get_reader\nfrom metrics import get_metrics\nfrom utils.utility import check_cuda\nfrom utils.utility import check_version\nlogging.root.handlers = []\nFORMAT = '[%(levelname)s: %(filename)s: %(lineno)4d]: %(message)s'\nlogging.basicConfig(level=logging.INFO, format=FORMAT, stream=sys.stdout)",
+        "type": "code",
+        "location": "/applications/VideoTag/eval.py:1-33"
+    },
+    "3345": {
+        "file_id": 286,
+        "content": "This code snippet sets up the environment and logging for a PaddlePaddle application. It imports necessary libraries, handles basic configuration, and sets up logging output to the console. This script seems to be part of an AI model's evaluation process, as it also includes references to reader, metrics, and model files.",
+        "type": "comment"
+    },
+    "3346": {
+        "file_id": 286,
+        "content": "logger = logging.getLogger(__name__)\ndef parse_args():\n    parser = argparse.ArgumentParser()\n    parser.add_argument('--model_name',\n                        type=str,\n                        default='AttentionCluster',\n                        help='name of model to train.')\n    parser.add_argument('--config',\n                        type=str,\n                        default='configs/attention_cluster.txt',\n                        help='path to config file of model')\n    parser.add_argument(\n        '--batch_size',\n        type=int,\n        default=None,\n        help='test batch size. None to use config file setting.')\n    parser.add_argument('--use_gpu',\n                        type=ast.literal_eval,\n                        default=True,\n                        help='default use gpu.')\n    parser.add_argument(\n        '--weights',\n        type=str,\n        default='./data/checkpoints/AttentionLSTM_epoch9.pdparams',\n        help='weight path.')\n    parser.add_argument(\n        '--save_dir',\n        type=str,\n        default=os.path.join('data', 'evaluate_results'),",
+        "type": "code",
+        "location": "/applications/VideoTag/eval.py:34-64"
+    },
+    "3347": {
+        "file_id": 286,
+        "content": "This code defines a function `parse_args()` that creates an ArgumentParser to parse command line arguments. It sets defaults for model name, config file path, batch size, GPU usage, and weight path. The parser also adds help messages for each argument.",
+        "type": "comment"
+    },
+    "3348": {
+        "file_id": 286,
+        "content": "        help='output dir path, default to use ./data/evaluate_results')\n    parser.add_argument('--log_interval',\n                        type=int,\n                        default=1,\n                        help='mini-batch interval to log.')\n    args = parser.parse_args()\n    return args\ndef test(args):\n    # parse config\n    config = parse_config(args.config)\n    test_config = merge_configs(config, 'test', vars(args))\n    print_configs(test_config, \"Test\")\n    use_dali = test_config['TEST'].get('use_dali', False)\n    # build model\n    test_model = models.get_model(args.model_name, test_config, mode='test')\n    test_model.build_input(use_dataloader=False)\n    test_model.build_model()\n    test_feeds = test_model.feeds()\n    test_fetch_list = test_model.fetches()\n    place = paddle.CUDAPlace(0) if args.use_gpu else paddle.CPUPlace()\n    exe = static.Executor(place)\n    exe.run(static.default_startup_program())\n    if args.weights:\n        assert os.path.exists(\n            args.weights), \"Given weight dir {} not exist.\".format(args.weights)",
+        "type": "code",
+        "location": "/applications/VideoTag/eval.py:65-95"
+    },
+    "3349": {
+        "file_id": 286,
+        "content": "This code defines a function `test` that takes in arguments, parses a config file, merges it with test configuration, prints the configurations, builds a model using the provided model name and configurations, feeds the model, fetches the model outputs, creates an executor based on whether to use GPU or CPU, and checks if the weight directory exists.",
+        "type": "comment"
+    },
+    "3350": {
+        "file_id": 286,
+        "content": "    weights = args.weights or test_model.get_weights()\n    logger.info('load test weights from {}'.format(weights))\n    test_model.load_test_weights(exe, weights, static.default_main_program())\n    # get reader and metrics\n    test_reader = get_reader(args.model_name.upper(), 'test', test_config)\n    test_metrics = get_metrics(args.model_name.upper(), 'test', test_config)\n    test_feeder = paddle.fluid.DataFeeder(place=place, feed_list=test_feeds)\n    epoch_period = []\n    for test_iter, data in enumerate(test_reader()):\n        cur_time = time.time()\n        test_outs = exe.run(fetch_list=test_fetch_list,\n                            feed=test_feeder.feed(data))\n        period = time.time() - cur_time\n        epoch_period.append(period)\n        test_metrics.accumulate(test_outs)\n        # metric here\n        if args.log_interval > 0 and test_iter % args.log_interval == 0:\n            info_str = '[EVAL] Batch {}'.format(test_iter)\n            test_metrics.calculate_and_log_out(test_outs, info_str)\n    if not os.path.isdir(args.save_dir):",
+        "type": "code",
+        "location": "/applications/VideoTag/eval.py:96-122"
+    },
+    "3351": {
+        "file_id": 286,
+        "content": "This code loads test weights, creates a reader and metrics for testing, runs the model with the data, calculates and logs the evaluation metrics for each batch, and checks if the save directory exists.",
+        "type": "comment"
+    },
+    "3352": {
+        "file_id": 286,
+        "content": "        os.makedirs(args.save_dir)\n    test_metrics.finalize_and_log_out(\"[EVAL] eval finished. \", args.save_dir)\nif __name__ == \"__main__\":\n    args = parse_args()\n    # check whether the installed paddle is compiled with GPU\n    check_cuda(args.use_gpu)\n    check_version()\n    logger.info(args)\n    test(args)",
+        "type": "code",
+        "location": "/applications/VideoTag/eval.py:123-134"
+    },
+    "3353": {
+        "file_id": 286,
+        "content": "This code creates directories, finalizes and logs test metrics, checks if installed Paddle is compiled with GPU, verifies Paddle version, logs arguments, and runs a test function.",
+        "type": "comment"
+    },
+    "3354": {
+        "file_id": 287,
+        "content": "/applications/VideoTag/metrics/__init__.py",
+        "type": "filepath"
+    },
+    "3355": {
+        "file_id": 287,
+        "content": "This code imports the function 'get_metrics' from the 'metrics_util' module in the same application directory. This function is likely used to calculate and retrieve various metrics related to video processing or analysis.",
+        "type": "summary"
+    },
+    "3356": {
+        "file_id": 287,
+        "content": "from .metrics_util import get_metrics",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/__init__.py:1-1"
+    },
+    "3357": {
+        "file_id": 287,
+        "content": "This code imports the function 'get_metrics' from the 'metrics_util' module in the same application directory. This function is likely used to calculate and retrieve various metrics related to video processing or analysis.",
+        "type": "comment"
+    },
+    "3358": {
+        "file_id": 288,
+        "content": "/applications/VideoTag/metrics/kinetics/accuracy_metrics.py",
+        "type": "filepath"
+    },
+    "3359": {
+        "file_id": 288,
+        "content": "The MetricsCalculator class in PaddleVideo's VideoTag application handles metric calculation, providing methods for finalizing, computing, and accumulating metrics. It calculates average loss and accuracy over multiple batches using a top-k accuracy function, accumulating per batch size before returning the final result.",
+        "type": "summary"
+    },
+    "3360": {
+        "file_id": 288,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nfrom __future__ import absolute_import\nfrom __future__ import unicode_literals\nfrom __future__ import print_function\nfrom __future__ import division\nimport numpy as np\nimport datetime\nimport logging\nlogger = logging.getLogger(__name__)\nclass MetricsCalculator():\n    def __init__(self, name, mode):\n        self.name = name\n        self.mode = mode  # 'train', 'val', 'test'\n        self.reset()\n    def reset(self):\n        logger.info('Resetting {} metrics...'.format(self.mode))",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/kinetics/accuracy_metrics.py:1-34"
+    },
+    "3361": {
+        "file_id": 288,
+        "content": "This code is part of the PaddleVideo project's VideoTag application, and it defines a class called MetricsCalculator. It handles calculating various metrics for different modes such as train, val, or test. The code imports necessary libraries, initializes logger, and sets up the MetricsCalculator class with an initialization method (__init__) and a reset method to reset the metrics values.",
+        "type": "comment"
+    },
+    "3362": {
+        "file_id": 288,
+        "content": "        self.aggr_acc1 = 0.0\n        self.aggr_acc5 = 0.0\n        self.aggr_loss = 0.0\n        self.aggr_batch_size = 0\n    def finalize_metrics(self):\n        self.avg_acc1 = self.aggr_acc1 / self.aggr_batch_size\n        self.avg_acc5 = self.aggr_acc5 / self.aggr_batch_size\n        self.avg_loss = self.aggr_loss / self.aggr_batch_size\n    def get_computed_metrics(self):\n        json_stats = {}\n        json_stats['avg_loss'] = self.avg_loss\n        json_stats['avg_acc1'] = self.avg_acc1\n        json_stats['avg_acc5'] = self.avg_acc5\n        return json_stats\n    def calculate_metrics(self, loss, softmax, labels):\n        accuracy1 = compute_topk_accuracy(softmax, labels, top_k=1) * 100.\n        accuracy5 = compute_topk_accuracy(softmax, labels, top_k=5) * 100.\n        return accuracy1, accuracy5\n    def accumulate(self, loss, softmax, labels):\n        cur_batch_size = softmax.shape[0]\n        # if returned loss is None for e.g. test, just set loss to be 0.\n        if loss is None:\n            cur_loss = 0.\n        else:",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/kinetics/accuracy_metrics.py:35-62"
+    },
+    "3363": {
+        "file_id": 288,
+        "content": "The class initializes variables for accumulating aggregated accuracy, loss, and batch size. The `finalize_metrics` method calculates average metrics by dividing the accumulated values by the total batch size. The `get_computed_metrics` returns a JSON object containing the average loss and accuracy for top 1 and top 5 predictions. The `calculate_metrics` computes the accuracy for top 1 and top 5 predictions, and the `accumulate` method accumulates the loss and updates the batch size if the returned loss is not None.",
+        "type": "comment"
+    },
+    "3364": {
+        "file_id": 288,
+        "content": "            cur_loss = np.mean(np.array(loss))  #\n        self.aggr_batch_size += cur_batch_size\n        self.aggr_loss += cur_loss * cur_batch_size\n        accuracy1 = compute_topk_accuracy(softmax, labels, top_k=1) * 100.\n        accuracy5 = compute_topk_accuracy(softmax, labels, top_k=5) * 100.\n        self.aggr_acc1 += accuracy1 * cur_batch_size\n        self.aggr_acc5 += accuracy5 * cur_batch_size\n        return\n# ----------------------------------------------\n# other utils\n# ----------------------------------------------\ndef compute_topk_correct_hits(top_k, preds, labels):\n    '''Compute the number of corret hits'''\n    batch_size = preds.shape[0]\n    top_k_preds = np.zeros((batch_size, top_k), dtype=np.float32)\n    for i in range(batch_size):\n        top_k_preds[i, :] = np.argsort(-preds[i, :])[:top_k]\n    correctness = np.zeros(batch_size, dtype=np.int32)\n    for i in range(batch_size):\n        if labels[i] in top_k_preds[i, :].astype(np.int32).tolist():\n            correctness[i] = 1\n    correct_hits = sum(correctness)",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/kinetics/accuracy_metrics.py:63-90"
+    },
+    "3365": {
+        "file_id": 288,
+        "content": "This code calculates the average loss and accuracy over multiple batches. It uses a function called \"compute_topk_accuracy\" to calculate the accuracy for top 1 and top 5 predictions. The computed values are then accumulated per batch size, with the final result being returned.",
+        "type": "comment"
+    },
+    "3366": {
+        "file_id": 288,
+        "content": "    return correct_hits\ndef compute_topk_accuracy(softmax, labels, top_k):\n    computed_metrics = {}\n    assert labels.shape[0] == softmax.shape[0], \"Batch size mismatch.\"\n    aggr_batch_size = labels.shape[0]\n    aggr_top_k_correct_hits = compute_topk_correct_hits(top_k, softmax, labels)\n    # normalize results\n    computed_metrics = \\\n        float(aggr_top_k_correct_hits) / aggr_batch_size\n    return computed_metrics",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/kinetics/accuracy_metrics.py:92-107"
+    },
+    "3367": {
+        "file_id": 288,
+        "content": "The function `compute_topk_accuracy` computes the top-k accuracy by first asserting that the batch size of labels and softmax are equal, then it computes the correct hits for each batch element using the `compute_topk_correct_hits` function. Finally, it normalizes the results and returns the computed metric as a float value representing accuracy.",
+        "type": "comment"
+    },
+    "3368": {
+        "file_id": 289,
+        "content": "/applications/VideoTag/metrics/metrics_util.py",
+        "type": "filepath"
+    },
+    "3369": {
+        "file_id": 289,
+        "content": "This code defines a class for evaluating metrics in video analysis tasks, handling inference mode and performing tagging/classification using a model with functions for metrics update, calculator reset, logging results, and saving/retrieving metrics.",
+        "type": "summary"
+    },
+    "3370": {
+        "file_id": 289,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nfrom __future__ import absolute_import\nfrom __future__ import unicode_literals\nfrom __future__ import print_function\nfrom __future__ import division\nimport logging\nimport os\nimport io\nimport numpy as np\nimport json\nfrom metrics.youtube8m import eval_util as youtube8m_metrics\nfrom metrics.kinetics import accuracy_metrics as kinetics_metrics\nlogger = logging.getLogger(__name__)\nclass Metrics(object):\n    def __init__(self, name, mode, metrics_args):",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/metrics_util.py:1-33"
+    },
+    "3371": {
+        "file_id": 289,
+        "content": "This code is importing necessary libraries and initializing a class called Metrics. It appears to be part of a larger module for evaluating metrics, possibly in the context of video analysis or recognition tasks. The code defines an object-oriented structure with methods that will likely handle different types of evaluation tasks based on the input name, mode, and metrics_args parameters.",
+        "type": "comment"
+    },
+    "3372": {
+        "file_id": 289,
+        "content": "        \"\"\"Not implemented\"\"\"\n        pass\n    def calculate_and_log_out(self, fetch_list, info=''):\n        \"\"\"Not implemented\"\"\"\n        pass\n    def accumulate(self, fetch_list, info=''):\n        \"\"\"Not implemented\"\"\"\n        pass\n    def finalize_and_log_out(self, info='', savedir='./'):\n        \"\"\"Not implemented\"\"\"\n        pass\n    def reset(self):\n        \"\"\"Not implemented\"\"\"\n        pass\nclass Youtube8mMetrics(Metrics):\n    def __init__(self, name, mode, metrics_args):\n        self.name = name\n        self.mode = mode\n        self.num_classes = metrics_args['MODEL']['num_classes']\n        self.topk = metrics_args['MODEL']['topk']\n        self.calculator = youtube8m_metrics.EvaluationMetrics(\n            self.num_classes, self.topk)\n        if self.mode == 'infer':\n            self.infer_results = []\n    def calculate_and_log_out(self, fetch_list, info=''):\n        loss = np.mean(np.array(fetch_list[0]))\n        pred = np.array(fetch_list[1])\n        label = np.array(fetch_list[2])\n        hit_at_one = youtube8m_metrics.calculate_hit_at_one(pred, label)",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/metrics_util.py:34-69"
+    },
+    "3373": {
+        "file_id": 289,
+        "content": "The code defines a class named Youtube8mMetrics that inherits from the Metrics base class. It has methods for calculating and logging metrics, accumulating results, finalizing and logging output, and resetting variables. The Youtube8mMetrics class is initialized with a name, mode, and metrics_args. The calculate_and_log_out method calculates loss, prediction, and ground truth labels, then calls the youtube8m_metrics.calculate_hit_at_one function to compute the hit at one metric.",
+        "type": "comment"
+    },
+    "3374": {
+        "file_id": 289,
+        "content": "        perr = youtube8m_metrics.calculate_precision_at_equal_recall_rate(\n            pred, label)\n        gap = youtube8m_metrics.calculate_gap(pred, label)\n        logger.info(info + ' , loss = {0}, Hit@1 = {1}, PERR = {2}, GAP = {3}'.format(\\\n                     '%.6f' % loss, '%.2f' % hit_at_one, '%.2f' % perr, '%.2f' % gap))\n    def accumulate(self, fetch_list, info=''):\n        if self.mode == 'infer':\n            predictions = np.array(fetch_list[0])\n            video_id = fetch_list[1]\n            for i in range(len(predictions)):\n                topk_inds = predictions[i].argsort()[0 - self.topk:]\n                topk_inds = topk_inds[::-1]\n                preds = predictions[i][topk_inds]\n                self.infer_results.append(\n                    (video_id[i], topk_inds.tolist(), preds.tolist()))\n        else:\n            loss = np.array(fetch_list[0])\n            pred = np.array(fetch_list[1])\n            label = np.array(fetch_list[2])\n            self.calculator.accumulate(loss, pred, label)",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/metrics_util.py:70-90"
+    },
+    "3375": {
+        "file_id": 289,
+        "content": "This function accumulates metrics for a video tagging application. It handles two modes: 'infer' and others. For the 'infer' mode, it gathers predictions for each video, calculates top-k indices, and appends them to a list. For other modes, it takes in loss, prediction, and label arrays, and accumulates metrics using the calculator object. It logs information including loss, Hit@1, precision at equal recall rate (PERR), and gap.",
+        "type": "comment"
+    },
+    "3376": {
+        "file_id": 289,
+        "content": "    def finalize_and_log_out(self,\n                             info='',\n                             savedir='./data/results',\n                             label_file='./label_3396.txt'):\n        if self.mode == 'infer':\n            for index, item in enumerate(self.infer_results):\n                video_id = item[0]\n                print('[========video_id [ {} ] , topk({}) preds: ========]\\n'.\n                      format(video_id, self.topk))\n                f = io.open(label_file, \"r\", encoding=\"utf-8\")\n                fl = f.readlines()\n                res_list = []\n                res_list.append(video_id)\n                for i in range(len(item[1])):\n                    class_id = item[1][i]\n                    class_prob = item[2][i]\n                    class_name = fl[class_id].split('\\n')[0]\n                    print('class_id: {},'.format(class_id), 'class_name:',\n                          class_name,\n                          ',  probability:  {} \\n'.format(class_prob))\n                    save_dict = {",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/metrics_util.py:92-113"
+    },
+    "3377": {
+        "file_id": 289,
+        "content": "This code snippet is part of the VideoTag application and it logs out the final results for each video. It reads a label file, iterates through each item's predictions, matches class ID to class name and probability, and then prints them out. The function can be called with optional parameters to specify the output directory (default: `./data/results`) and the label file path (default: `./label_3396.txt`). It is designed to run in 'infer' mode only.",
+        "type": "comment"
+    },
+    "3378": {
+        "file_id": 289,
+        "content": "                        \"'class_id\": class_id,\n                        \"class_name\": class_name,\n                        \"probability\": class_prob\n                    }\n                    res_list.append(save_dict)\n                # save infer result into output dir\n                with io.open(os.path.join(savedir,\n                                          'result' + str(index) + '.json'),\n                             'w',\n                             encoding='utf-8') as f:\n                    f.write(json.dumps(res_list, ensure_ascii=False))\n        else:\n            epoch_info_dict = self.calculator.get()\n            logger.info(info + '\\tavg_hit_at_one: {0},\\tavg_perr: {1},\\tavg_loss :{2},\\taps: {3},\\tgap:{4}'\\\n                     .format(epoch_info_dict['avg_hit_at_one'], epoch_info_dict['avg_perr'], \\\n                             epoch_info_dict['avg_loss'], epoch_info_dict['aps'], epoch_info_dict['gap']))\n    def reset(self):\n        self.calculator.clear()\n        if self.mode == 'infer':\n            self.infer_results = []",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/metrics_util.py:114-135"
+    },
+    "3379": {
+        "file_id": 289,
+        "content": "This code snippet appears to be part of a larger program that performs some sort of video tagging or classification. It includes functions to save the result of an inference operation and update metrics after each epoch, as well as a reset function for the calculator. The \"calculator\" object seems to keep track of average hit rate at one, perr, loss, aps, and gap for some type of learning algorithm or model.",
+        "type": "comment"
+    },
+    "3380": {
+        "file_id": 289,
+        "content": "class Kinetics400Metrics(Metrics):\n    def __init__(self, name, mode, metrics_args):\n        self.name = name\n        self.mode = mode\n        self.topk = metrics_args['MODEL']['topk']\n        self.calculator = kinetics_metrics.MetricsCalculator(name, mode.lower())\n        if self.mode == 'infer':\n            self.infer_results = []\n    def calculate_and_log_out(self, fetch_list, info=''):\n        if len(fetch_list) == 3:\n            loss = fetch_list[0]\n            loss = np.mean(np.array(loss))\n            pred = np.array(fetch_list[1])\n            label = np.array(fetch_list[2])\n        else:\n            loss = 0.\n            pred = np.array(fetch_list[0])\n            label = np.array(fetch_list[1])\n        acc1, acc5 = self.calculator.calculate_metrics(loss, pred, label)\n        logger.info(info + '\\tLoss: {},\\ttop1_acc: {}, \\ttop5_acc: {}'.format('%.6f' % loss, \\\n                       '%.2f' % acc1, '%.2f' % acc5))\n        return loss\n    def accumulate(self, fetch_list, info=''):\n        if self.mode == 'infer':",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/metrics_util.py:138-163"
+    },
+    "3381": {
+        "file_id": 289,
+        "content": "Class Kinetics400Metrics is used for calculating and logging metrics, accepting a name, mode, and metrics_args. It stores the topk value from metrics_args, initializes a MetricsCalculator instance with the given name and mode, and maintains an infer_results list if in inference mode. The calculate_and_log_out method takes a fetch_list as input and calculates the mean loss, accuracy for top-1 and top-5 predictions, and logs the information. It can be used to accumulate results during inference.",
+        "type": "comment"
+    },
+    "3382": {
+        "file_id": 289,
+        "content": "            predictions = np.array(fetch_list[0])\n            video_id = fetch_list[1]\n            for i in range(len(predictions)):\n                topk_inds = predictions[i].argsort()[0 - self.topk:]\n                topk_inds = topk_inds[::-1]\n                preds = predictions[i][topk_inds]\n                self.infer_results.append(\n                    (video_id[i], topk_inds.tolist(), preds.tolist()))\n        else:\n            if len(fetch_list) == 3:\n                loss = fetch_list[0]\n                loss = np.mean(np.array(loss))\n                pred = np.array(fetch_list[1])\n                label = np.array(fetch_list[2])\n            else:\n                loss = 0.\n                pred = np.array(fetch_list[0])\n                label = np.array(fetch_list[1])\n            self.calculator.accumulate(loss, pred, label)\n    def finalize_and_log_out(self,\n                             info='',\n                             savedir='./data/results',\n                             label_file='./label_3396.txt'):",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/metrics_util.py:164-187"
+    },
+    "3383": {
+        "file_id": 289,
+        "content": "This code appears to be a part of a machine learning model's evaluation process. It calculates top predictions and loss values for each video, accumulates them, and then logs out the results. The method \"finalize_and_log_out\" likely concludes the evaluation process and saves or outputs the final results. The code seems to handle both cases where results are available for each video (predictions and losses) and when only predictions and labels are given.",
+        "type": "comment"
+    },
+    "3384": {
+        "file_id": 289,
+        "content": "        if self.mode == 'infer':\n            for index, item in enumerate(self.infer_results):\n                video_id = item[0]\n                print('[========video_id [ {} ] , topk({}) preds: ========]\\n'.\n                      format(video_id, self.topk))\n                f = io.open(label_file, \"r\", encoding=\"utf-8\")\n                fl = f.readlines()\n                res_list = []\n                res_list.append(video_id)\n                for i in range(len(item[1])):\n                    class_id = item[1][i]\n                    class_prob = item[2][i]\n                    class_name = fl[class_id].split('\\n')[0]\n                    print('class_id: {},'.format(class_id), 'class_name:',\n                          class_name,\n                          ',  probability:  {} \\n'.format(class_prob))\n                    save_dict = {\n                        \"'class_id\": class_id,\n                        \"class_name\": class_name,\n                        \"probability\": class_prob\n                    }\n                    res_list.append(save_dict)",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/metrics_util.py:188-210"
+    },
+    "3385": {
+        "file_id": 289,
+        "content": "This code is part of a function that iterates over the 'infer_results' list and prints out the video ID, topk predictions for each class, along with their respective probabilities. It reads labels from the 'label_file', appends each prediction to a 'res_list' as a dictionary containing class_id, class_name, and probability, and then continues to the next iteration. The label file is read once per video.",
+        "type": "comment"
+    },
+    "3386": {
+        "file_id": 289,
+        "content": "                # save infer result into output dir\n                with io.open(os.path.join(savedir,\n                                          'result' + str(index) + '.json'),\n                             'w',\n                             encoding='utf-8') as f:\n                    f.write(json.dumps(res_list, ensure_ascii=False))\n        else:\n            self.calculator.finalize_metrics()\n            metrics_dict = self.calculator.get_computed_metrics()\n            loss = metrics_dict['avg_loss']\n            acc1 = metrics_dict['avg_acc1']\n            acc5 = metrics_dict['avg_acc5']\n            logger.info(info + '\\tLoss: {},\\ttop1_acc: {}, \\ttop5_acc: {}'.format('%.6f' % loss, \\\n                       '%.2f' % acc1, '%.2f' % acc5))\n    def reset(self):\n        self.calculator.reset()\n        if self.mode == 'infer':\n            self.infer_results = []\nclass MetricsNotFoundError(Exception):\n    \"Error: metrics not found\"\n    def __init__(self, metrics_name, avail_metrics):\n        super(MetricsNotFoundError, self).__init__()",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/metrics_util.py:212-237"
+    },
+    "3387": {
+        "file_id": 289,
+        "content": "The code saves the infer results into the specified output directory, finalizes and retrieves computed metrics from a calculator, logs the loss, top1_acc, and top5_acc if in 'train' mode, resets the calculator and list of infer results when resetting, and defines a MetricsNotFoundError exception for missing metrics.",
+        "type": "comment"
+    },
+    "3388": {
+        "file_id": 289,
+        "content": "        self.metrics_name = metrics_name\n        self.avail_metrics = avail_metrics\n    def __str__(self):\n        msg = \"Metrics {} Not Found.\\nAvailiable metrics:\\n\".format(\n            self.metrics_name)\n        for metric in self.avail_metrics:\n            msg += \"  {}\\n\".format(metric)\n        return msg\nclass MetricsZoo(object):\n    def __init__(self):\n        self.metrics_zoo = {}\n    def regist(self, name, metrics):\n        assert metrics.__base__ == Metrics, \"Unknow model type {}\".format(\n            type(metrics))\n        self.metrics_zoo[name] = metrics\n    def get(self, name, mode, cfg):\n        for k, v in self.metrics_zoo.items():\n            if k == name:\n                return v(name, mode, cfg)\n        raise MetricsNotFoundError(name, self.metrics_zoo.keys())\n# singleton metrics_zoo\nmetrics_zoo = MetricsZoo()\ndef regist_metrics(name, metrics):\n    metrics_zoo.regist(name, metrics)\ndef get_metrics(name, mode, cfg):\n    return metrics_zoo.get(name, mode, cfg)\n# sort by alphabet\nregist_metrics(\"ATTENTIONLSTM\", Youtube8mMetrics)",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/metrics_util.py:238-278"
+    },
+    "3389": {
+        "file_id": 289,
+        "content": "This code defines a MetricsZoo class to manage and retrieve metrics. It provides regist() and get() methods for registering and retrieving metrics by name, respectively. The MetricsZoo instance is made singleton via global variable metrics_zoo. Youtube8mMetrics are registered under the name \"ATTENTIONLSTM\".",
+        "type": "comment"
+    },
+    "3390": {
+        "file_id": 289,
+        "content": "regist_metrics(\"TSN\", Kinetics400Metrics)",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/metrics_util.py:279-279"
+    },
+    "3391": {
+        "file_id": 289,
+        "content": "The code registers the \"TSN\" metric with the Kinetics400Metrics class.",
+        "type": "comment"
+    },
+    "3392": {
+        "file_id": 290,
+        "content": "/applications/VideoTag/metrics/youtube8m/average_precision_calculator.py",
+        "type": "filepath"
+    },
+    "3393": {
+        "file_id": 290,
+        "content": "The Python code's `AveragePrecisionCalculator` class calculates interpolated average precision, supports large datasets, and handles sparse prediction scores and ground truth labels for classification tasks.",
+        "type": "summary"
+    },
+    "3394": {
+        "file_id": 290,
+        "content": "# Copyright 2016 Google Inc. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#      http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS-IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"Calculate or keep track of the interpolated average precision.\nIt provides an interface for calculating interpolated average precision for an\nentire list or the top-n ranked items. For the definition of the\n(non-)interpolated average precision:\nhttp://trec.nist.gov/pubs/trec15/appendices/CE.MEASURES06.pdf\nExample usages:\n1) Use it as a static function call to directly calculate average precision for\na short ranked list in the memory.",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/average_precision_calculator.py:1-23"
+    },
+    "3395": {
+        "file_id": 290,
+        "content": "This code is for a Python class that calculates the interpolated average precision (IAP) of ranked items in a list. It follows the definition provided in the given link and can be used as a static function to directly calculate IAP from a short ranked list.",
+        "type": "comment"
+    },
+    "3396": {
+        "file_id": 290,
+        "content": "```\nimport random\np = np.array([random.random() for _ in xrange(10)])\na = np.array([random.choice([0, 1]) for _ in xrange(10)])\nap = average_precision_calculator.AveragePrecisionCalculator.ap(p, a)\n```\n2) Use it as an object for long ranked list that cannot be stored in memory or\nthe case where partial predictions can be observed at a time (Tensorflow\npredictions). In this case, we first call the function accumulate many times\nto process parts of the ranked list. After processing all the parts, we call\npeek_interpolated_ap_at_n.\n```\np1 = np.array([random.random() for _ in xrange(5)])\na1 = np.array([random.choice([0, 1]) for _ in xrange(5)])\np2 = np.array([random.random() for _ in xrange(5)])\na2 = np.array([random.choice([0, 1]) for _ in xrange(5)])\n# interpolated average precision at 10 using 1000 break points\ncalculator = average_precision_calculator.AveragePrecisionCalculator(10)\ncalculator.accumulate(p1, a1)\ncalculator.accumulate(p2, a2)\nap3 = calculator.peek_ap_at_n()\n```\n\"\"\"\nimport heapq\nimport random\nimport numbers",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/average_precision_calculator.py:25-55"
+    },
+    "3397": {
+        "file_id": 290,
+        "content": "The code creates an instance of the AveragePrecisionCalculator class and uses its accumulate method to process parts of a ranked list that cannot be stored in memory or observed at once. After processing all parts, it uses the peek_interpolated_ap_at_n method to get the interpolated average precision at a given number of elements. The code also imports heapq and random modules for priority queue and random number generation respectively.",
+        "type": "comment"
+    },
+    "3398": {
+        "file_id": 290,
+        "content": "import numpy\nclass AveragePrecisionCalculator(object):\n    \"\"\"Calculate the average precision and average precision at n.\"\"\"\n    def __init__(self, top_n=None):\n        \"\"\"Construct an AveragePrecisionCalculator to calculate average precision.\n    This class is used to calculate the average precision for a single label.\n    Args:\n      top_n: A positive Integer specifying the average precision at n, or\n        None to use all provided data points.\n    Raises:\n      ValueError: An error occurred when the top_n is not a positive integer.\n    \"\"\"\n        if not ((isinstance(top_n, int) and top_n >= 0) or top_n is None):\n            raise ValueError(\"top_n must be a positive integer or None.\")\n        self._top_n = top_n  # average precision at n\n        self._total_positives = 0  # total number of positives have seen\n        self._heap = []  # max heap of (prediction, actual)\n    @property\n    def heap_size(self):\n        \"\"\"Gets the heap size maintained in the class.\"\"\"\n        return len(self._heap)\n    @property",
+        "type": "code",
+        "location": "/applications/VideoTag/metrics/youtube8m/average_precision_calculator.py:57-86"
+    },
+    "3399": {
+        "file_id": 290,
+        "content": "This code defines a class `AveragePrecisionCalculator` that calculates average precision and average precision at n for a single label. It takes a `top_n` argument to specify the average precision at n or uses all provided data points if None. The class maintains a max heap of (prediction, actual) and provides a `heap_size` property to get the heap size.",
+        "type": "comment"
+    }
+}

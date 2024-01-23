@@ -1,0 +1,543 @@
+{
+    "5800": {
+        "file_id": 467,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom typing import List\nimport paddle\nfrom paddlevideo.utils import get_logger\nfrom .base import BaseMetric\nfrom .registry import METRIC\nlogger = get_logger(\"paddlevideo\")\n@METRIC.register\nclass CenterCropMetric(BaseMetric):\n    def __init__(self, data_size, batch_size, log_interval=1, **kwargs):\n        \"\"\"prepare for metrics\n        \"\"\"\n        super().__init__(data_size, batch_size, log_interval, **kwargs)\n        self.rest_data_size = data_size  # Number of samples remaining to be tested\n        self.all_outputs = []",
+        "type": "code",
+        "location": "/paddlevideo/metrics/center_crop_metric.py:1-31"
+    },
+    "5801": {
+        "file_id": 467,
+        "content": "This code registers a class called CenterCropMetric as a metric in the PaddleVideo library. It initializes the metric with data_size, batch_size, and log_interval parameters. The rest_data_size is also stored to keep track of remaining samples to be tested.",
+        "type": "comment"
+    },
+    "5802": {
+        "file_id": 467,
+        "content": "        self.all_labels = []\n        self.topk = kwargs.get(\"topk\", [1, 5])\n    def update(self, batch_id: int, data: List, outputs: paddle.Tensor) -> None:\n        \"\"\"update metrics during each iter\n        Args:\n            batch_id (int): iter id of current batch.\n            data (List): list of batched data, such as [inputs, labels]\n            outputs (paddle.Tensor): batched outputs from model\n        \"\"\"\n        labels = data[1]\n        if self.world_size > 1:\n            labels_gathered = self.gather_from_gpu(labels, concat_axis=0)\n            outpus_gathered = self.gather_from_gpu(outputs, concat_axis=0)\n        else:\n            labels_gathered = labels\n            outpus_gathered = outputs\n        # Avoid resampling effects when testing with multiple cards\n        labels_gathered = labels_gathered[0:min(len(labels_gathered), self.\n                                                rest_data_size)]\n        outpus_gathered = outpus_gathered[0:min(len(outpus_gathered), self.\n                                                rest_data_size)]",
+        "type": "code",
+        "location": "/paddlevideo/metrics/center_crop_metric.py:32-55"
+    },
+    "5803": {
+        "file_id": 467,
+        "content": "This code is initializing a metric object, allowing for batch updates, and handling data from multiple GPUs to avoid resampling effects when testing with multiple cards.",
+        "type": "comment"
+    },
+    "5804": {
+        "file_id": 467,
+        "content": "        self.all_labels.append(labels_gathered)\n        self.all_outputs.append(outpus_gathered)\n        self.rest_data_size -= outpus_gathered.shape[0]\n        # preds ensemble\n        if batch_id % self.log_interval == 0:\n            logger.info(\"[TEST] Processing batch {}/{} ...\".format(\n                batch_id,\n                self.data_size // (self.batch_size * self.world_size)))\n    def accumulate(self):\n        \"\"\"accumulate, compute, and show metrics when finished all iters.\n        \"\"\"\n        self.all_outputs = paddle.concat(self.all_outputs, axis=0)\n        self.all_labels = paddle.concat(self.all_labels, axis=0)\n        result_str = []\n        for _k in self.topk:\n            topk_val = paddle.metric.accuracy(input=self.all_outputs,\n                                              label=self.all_labels,\n                                              k=_k).item()\n            result_str.append(f\"avg_acc{_k}={topk_val}\")\n        result_str = \", \".join(result_str)\n        logger.info(f\"[TEST] finished, {result_str}\")",
+        "type": "code",
+        "location": "/paddlevideo/metrics/center_crop_metric.py:56-79"
+    },
+    "5805": {
+        "file_id": 467,
+        "content": "The code is part of a class that seems to be handling batch processing in a machine learning application. It accumulates and concatenates outputs and labels from multiple batches, performs top-k accuracy calculations, and logs the results. The log_interval variable controls when progress updates are displayed.",
+        "type": "comment"
+    },
+    "5806": {
+        "file_id": 468,
+        "content": "/paddlevideo/metrics/center_crop_metric_MRI.py",
+        "type": "filepath"
+    },
+    "5807": {
+        "file_id": 468,
+        "content": "The code creates a class to calculate top-1 and possibly top-5 accuracy metrics in image classification tasks, tracking and averaging them during iteration, with support for multi-GPU scenarios using all-reduce operations.",
+        "type": "summary"
+    },
+    "5808": {
+        "file_id": 468,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport numpy as np\nimport paddle\nfrom .registry import METRIC\nfrom .base import BaseMetric\nfrom paddlevideo.utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@METRIC.register\nclass CenterCropMetric_MRI(BaseMetric):\n    def __init__(self, data_size, batch_size, log_interval=1, if_slowfast=0):\n        \"\"\"prepare for metrics\n        \"\"\"\n        super().__init__(data_size, batch_size, log_interval)\n        self.top1 = []\n        self.if_slowfast = if_slowfast\n    def update(self, batch_id, data, outputs):\n        \"\"\"update metrics during each iter",
+        "type": "code",
+        "location": "/paddlevideo/metrics/center_crop_metric_MRI.py:1-33"
+    },
+    "5809": {
+        "file_id": 468,
+        "content": "This code defines the class CenterCropMetric_MRI, a metric for a video processing framework. It initializes variables and tracks top1 accuracy during iteration.",
+        "type": "comment"
+    },
+    "5810": {
+        "file_id": 468,
+        "content": "        \"\"\"\n        labels = data[1]\n        if self.if_slowfast:\n            labels = data[2]\n        top1 = paddle.metric.accuracy(input=outputs, label=labels, k=1)\n        #top5 = paddle.metric.accuracy(input=outputs, label=labels, k=5)\n        #NOTE(shipping): deal with multi cards validate\n        if self.world_size > 1:\n            top1 = paddle.distributed.all_reduce(\n                top1, op=paddle.distributed.ReduceOp.SUM) / self.world_size\n            # top5 = paddle.distributed.all_reduce(\n            #     top5, op=paddle.distributed.ReduceOp.SUM) / self.world_size\n        self.top1.append(top1.numpy())\n        #self.top5.append(top5.numpy())\n        # preds ensemble\n        if batch_id % self.log_interval == 0:\n            logger.info(\"[TEST] Processing batch {}/{} ...\".format(\n                batch_id,\n                self.data_size // (self.batch_size * self.world_size)))\n    def accumulate(self):\n        \"\"\"accumulate metrics when finished all iters.\n        \"\"\"\n        logger.info('[TEST] finished, avg_acc1= {}'.format(",
+        "type": "code",
+        "location": "/paddlevideo/metrics/center_crop_metric_MRI.py:34-60"
+    },
+    "5811": {
+        "file_id": 468,
+        "content": "This code snippet defines a class for calculating top-1 and possibly top-5 accuracy metrics in an image classification task. It collects the metrics for each batch during testing, then averages them at the end of all iterations. The code handles multi-GPU scenarios by performing all-reduce operations on the metric values.",
+        "type": "comment"
+    },
+    "5812": {
+        "file_id": 468,
+        "content": "            np.mean(np.array(self.top1))))",
+        "type": "code",
+        "location": "/paddlevideo/metrics/center_crop_metric_MRI.py:61-61"
+    },
+    "5813": {
+        "file_id": 468,
+        "content": "Calculates mean of top-1 accuracy across all samples in the batch.",
+        "type": "comment"
+    },
+    "5814": {
+        "file_id": 469,
+        "content": "/paddlevideo/metrics/depth_metric.py",
+        "type": "filepath"
+    },
+    "5815": {
+        "file_id": 469,
+        "content": "The `DepthMetric` class inherits from `BaseMetric`, processes batches, accumulates metrics and performs distributed all-reduce operations before averaging metric values.",
+        "type": "summary"
+    },
+    "5816": {
+        "file_id": 469,
+        "content": "import numpy as np\nimport paddle\nfrom paddlevideo.utils import get_logger\nfrom .base import BaseMetric\nfrom .registry import METRIC\nlogger = get_logger(\"paddlevideo\")\n@METRIC.register\nclass DepthMetric(BaseMetric):\n    def __init__(self, data_size, batch_size, log_interval=1):\n        \"\"\"prepare for metrics\n        \"\"\"\n        super().__init__(data_size, batch_size, log_interval)\n        self.abs_rel = []\n        self.sq_rel = []\n        self.rmse = []\n        self.rmse_log = []\n        self.a1 = []\n        self.a2 = []\n        self.a3 = []\n    def update(self, batch_id, data, outputs):\n        \"\"\"update metrics during each iter\n        \"\"\"\n        abs_rel, sq_rel, rmse, rmse_log, a1, a2, a3 = outputs['abs_rel'], outputs['sq_rel'], outputs['rmse'], \\\n                                                      outputs['rmse_log'], outputs['a1'], outputs['a2'],outputs['a3']\n        # preds ensemble\n        if self.world_size > 1:\n            abs_rel = paddle.distributed.all_reduce(\n                outputs['abs_rel'],\n                op=paddle.distributed.ReduceOp.SUM) / self.world_size",
+        "type": "code",
+        "location": "/paddlevideo/metrics/depth_metric.py:1-34"
+    },
+    "5817": {
+        "file_id": 469,
+        "content": "This code defines a class `DepthMetric` that inherits from `BaseMetric`. It initializes lists for various metric values and then updates these metrics during each iteration. The code also includes logic to handle distributed computing, using all-reduce operation to average the results across different processes in the same training job.",
+        "type": "comment"
+    },
+    "5818": {
+        "file_id": 469,
+        "content": "            sq_rel = paddle.distributed.all_reduce(\n                outputs['sq_rel'],\n                op=paddle.distributed.ReduceOp.SUM) / self.world_size\n            rmse = paddle.distributed.all_reduce(\n                outputs['rmse'],\n                op=paddle.distributed.ReduceOp.SUM) / self.world_size\n            rmse_log = paddle.distributed.all_reduce(\n                outputs['rmse_log'],\n                op=paddle.distributed.ReduceOp.SUM) / self.world_size\n            a1 = paddle.distributed.all_reduce(\n                outputs['a1'],\n                op=paddle.distributed.ReduceOp.SUM) / self.world_size\n            a2 = paddle.distributed.all_reduce(\n                outputs['a2'],\n                op=paddle.distributed.ReduceOp.SUM) / self.world_size\n            a3 = paddle.distributed.all_reduce(\n                outputs['a3'],\n                op=paddle.distributed.ReduceOp.SUM) / self.world_size\n        self.abs_rel.append(abs_rel)\n        self.sq_rel.append(sq_rel)\n        self.rmse.append(rmse)\n        self.rmse_log.append(rmse_log)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/depth_metric.py:35-57"
+    },
+    "5819": {
+        "file_id": 469,
+        "content": "This code performs distributed all-reduce operations on several metrics (sq_rel, rmse, rmse\\_log, a1, a2, a3) and calculates their average values by dividing by the world size. These averaged metric values are then appended to corresponding lists (abs_rel, sq_rel, rmse, rmse_log).",
+        "type": "comment"
+    },
+    "5820": {
+        "file_id": 469,
+        "content": "        self.a1.append(a1)\n        self.a2.append(a2)\n        self.a3.append(a3)\n        if batch_id % self.log_interval == 0:\n            logger.info(\"[TEST] Processing batch {}/{} ...\".format(\n                batch_id,\n                self.data_size // (self.batch_size * self.world_size)))\n    def accumulate(self):\n        \"\"\"accumulate metrics when finished all iters.\n        \"\"\"\n        logger.info(\n            '[TEST] finished, abs_rel= {}, sq_rel= {} , rmse= {}, rmse_log= {},'\n            'a1= {}, a2= {}, a3= {}'.format(np.mean(np.array(self.abs_rel)),\n                                            np.mean(np.array(self.sq_rel)),\n                                            np.mean(np.array(self.rmse)),\n                                            np.mean(np.array(self.rmse_log)),\n                                            np.mean(np.array(self.a1)),\n                                            np.mean(np.array(self.a2)),\n                                            np.mean(np.array(self.a3))))",
+        "type": "code",
+        "location": "/paddlevideo/metrics/depth_metric.py:58-77"
+    },
+    "5821": {
+        "file_id": 469,
+        "content": "This code defines a class with methods for processing batches and accumulating metrics. The `process_batch` method appends data to lists, logs progress if the batch ID is divisible by log_interval, and handles the next batch. The `accumulate` method calculates mean values for each metric list and logs them using a logger with the corresponding metric values.",
+        "type": "comment"
+    },
+    "5822": {
+        "file_id": 470,
+        "content": "/paddlevideo/metrics/msrvtt_metric.py",
+        "type": "filepath"
+    },
+    "5823": {
+        "file_id": 470,
+        "content": "The code initializes and defines a class for MS-RNN/VTT model metrics computation, updates metrics using input data, calculates rank metrics (r1, r5, r10, medr, mean), logs these metrics, and signals the end of iterations.",
+        "type": "summary"
+    },
+    "5824": {
+        "file_id": 470,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport numpy as np\nimport paddle\nimport paddle.nn.functional as F\nfrom .registry import METRIC\nfrom .base import BaseMetric\nfrom paddlevideo.utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@METRIC.register\nclass MSRVTTMetric(BaseMetric):\n    def __init__(self, data_size, batch_size, log_interval=1):\n        \"\"\"prepare for metrics\n        \"\"\"\n        super().__init__(data_size, batch_size, log_interval)\n        self.score_matrix = np.zeros((data_size, data_size))\n        self.target_matrix = np.zeros((data_size, data_size))",
+        "type": "code",
+        "location": "/paddlevideo/metrics/msrvtt_metric.py:1-31"
+    },
+    "5825": {
+        "file_id": 470,
+        "content": "The code is from the MSRVTTMetric class in paddlevideo's metrics module. It initializes an instance of the class, prepares for metrics computation, and creates score_matrix and target_matrix using numpy with zeroes. These matrices will be used to store results during metric calculations. The class also registers with the base BaseMetric class.",
+        "type": "comment"
+    },
+    "5826": {
+        "file_id": 470,
+        "content": "        self.rank_matrix = np.ones((data_size)) * data_size\n    def update(self, batch_id, data, outputs):\n        \"\"\"update metrics during each iter\n        \"\"\"\n        target = data[-1]\n        cm_logit = outputs[-1]\n        self.score_matrix[batch_id, :] = F.softmax(\n            cm_logit, axis=1)[:, 0].reshape([-1]).numpy()\n        self.target_matrix[batch_id, :] = target.reshape([-1]).numpy()\n        rank = np.where((np.argsort(-self.score_matrix[batch_id]) == np.where(\n            self.target_matrix[batch_id] == 1)[0][0]) == 1)[0][0]\n        self.rank_matrix[batch_id] = rank\n        rank_matrix_tmp = self.rank_matrix[:batch_id + 1]\n        r1 = 100.0 * np.sum(rank_matrix_tmp < 1) / len(rank_matrix_tmp)\n        r5 = 100.0 * np.sum(rank_matrix_tmp < 5) / len(rank_matrix_tmp)\n        r10 = 100.0 * np.sum(rank_matrix_tmp < 10) / len(rank_matrix_tmp)\n        medr = np.floor(np.median(rank_matrix_tmp) + 1)\n        meanr = np.mean(rank_matrix_tmp) + 1\n        logger.info(\n            \"[{}] Final r1:{:.3f}, r5:{:.3f}, r10:{:.3f}, mder:{:.3f}, meanr:{:.3f}\"",
+        "type": "code",
+        "location": "/paddlevideo/metrics/msrvtt_metric.py:32-56"
+    },
+    "5827": {
+        "file_id": 470,
+        "content": "This code initializes a rank matrix, updates score and target matrices based on input data, calculates r1, r5, r10 rank metrics and median rank (medr) and mean rank, then logs these metrics.",
+        "type": "comment"
+    },
+    "5828": {
+        "file_id": 470,
+        "content": "            .format(batch_id, r1, r5, r10, medr, meanr))\n    def accumulate(self):\n        \"\"\"accumulate metrics when finished all iters.\n        \"\"\"\n        logger.info(\"Eval Finished!\")",
+        "type": "code",
+        "location": "/paddlevideo/metrics/msrvtt_metric.py:57-62"
+    },
+    "5829": {
+        "file_id": 470,
+        "content": "This code defines a class for accumulating metrics related to the MS-RNN/VTT model. It seems to have methods for updating and finalizing the metric calculations. The update method takes in values r1, r5, r10, medr, and meanr, which are likely performance scores. The accumulate method signals the end of iterations by logging a message saying \"Eval Finished!\".",
+        "type": "comment"
+    },
+    "5830": {
+        "file_id": 471,
+        "content": "/paddlevideo/metrics/multi_crop_metric.py",
+        "type": "filepath"
+    },
+    "5831": {
+        "file_id": 471,
+        "content": "The MultiCropMetric class in PaddleVideo computes top-1/5 accuracy using multi-crop metrics for each video label and logs average values.",
+        "type": "summary"
+    },
+    "5832": {
+        "file_id": 471,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport numpy as np\nimport paddle\nfrom paddle.hapi.model import _all_gather\nfrom paddlevideo.utils import get_logger\nfrom .registry import METRIC\nfrom .base import BaseMetric\nlogger = get_logger(\"paddlevideo\")\n\"\"\" An example for metrics class.\n    MultiCropMetric for slowfast.\n\"\"\"\n@METRIC.register\nclass MultiCropMetric(BaseMetric):\n    def __init__(self,\n                 data_size,\n                 batch_size,\n                 num_ensemble_views,\n                 num_spatial_crops,\n                 num_classes,\n                 log_interval=1):",
+        "type": "code",
+        "location": "/paddlevideo/metrics/multi_crop_metric.py:1-35"
+    },
+    "5833": {
+        "file_id": 471,
+        "content": "This code snippet defines a class for MultiCropMetric, which is part of the PaddleVideo library. It initializes instances with various parameters such as data_size, batch_size, num_ensemble_views, num_spatial_crops, and num_classes. The log_interval parameter determines how often to update logs during training. This metric appears to be related to slowfast video processing, as specified in the comment.",
+        "type": "comment"
+    },
+    "5834": {
+        "file_id": 471,
+        "content": "        \"\"\"prepare for metrics\n        \"\"\"\n        super().__init__(data_size, batch_size, log_interval)\n        self.num_ensemble_views = num_ensemble_views\n        self.num_spatial_crops = num_spatial_crops\n        self.num_classes = num_classes\n        self.num_clips = self.num_ensemble_views * self.num_spatial_crops\n        num_videos = self.data_size // self.num_clips\n        self.video_preds = np.zeros((num_videos, self.num_classes))\n        self.video_labels = np.zeros((num_videos, 1), dtype=\"int64\")\n        self.clip_count = {}\n    def update(self, batch_id, data, outputs):\n        \"\"\"update metrics during each iter\n        \"\"\"\n        labels = data[2]\n        clip_ids = data[3]\n        # gather mulit card, results of following process in each card is the same.\n        if self.world_size > 1:\n            outputs = _all_gather(outputs, self.world_size)\n            labels = _all_gather(labels.cuda(), self.world_size)\n            clip_ids = _all_gather(clip_ids.cuda(), self.world_size)\n        # to numpy",
+        "type": "code",
+        "location": "/paddlevideo/metrics/multi_crop_metric.py:36-61"
+    },
+    "5835": {
+        "file_id": 471,
+        "content": "This code initializes a multi-crop metric class, which takes data size, batch size, log interval, number of ensemble views, and number of spatial crops as parameters. It calculates the number of videos and clips, creates arrays to store video predictions and labels, and initializes a clip_count dictionary. The update method is used to update metrics during each iteration by gathering data across multiple cards if needed, converting outputs to numpy arrays.",
+        "type": "comment"
+    },
+    "5836": {
+        "file_id": 471,
+        "content": "        preds = outputs.numpy()\n        labels = labels.numpy().astype(\"int64\")\n        clip_ids = clip_ids.numpy()\n        # preds ensemble\n        for ind in range(preds.shape[0]):\n            vid_id = int(clip_ids[ind]) // self.num_clips\n            ts_idx = int(clip_ids[ind]) % self.num_clips\n            if vid_id not in self.clip_count:\n                self.clip_count[vid_id] = []\n            if ts_idx in self.clip_count[vid_id]:\n                logger.info(\n                    \"[TEST] Passed!! read video {} clip index {} / {} repeatedly.\"\n                    .format(vid_id, ts_idx, clip_ids[ind]))\n            else:\n                self.clip_count[vid_id].append(ts_idx)\n                self.video_preds[vid_id] += preds[ind]  # ensemble method: sum\n                if self.video_labels[vid_id].sum() > 0:\n                    assert self.video_labels[vid_id] == labels[ind]\n                self.video_labels[vid_id] = labels[ind]\n        if batch_id % self.log_interval == 0:\n            logger.info(\"[TEST] Processing batch {}/{} ...\".format(",
+        "type": "code",
+        "location": "/paddlevideo/metrics/multi_crop_metric.py:62-83"
+    },
+    "5837": {
+        "file_id": 471,
+        "content": "The code loops through each prediction and label for video clips in a batch. It checks if the clip index has been encountered before for a particular video ID, and updates the count if it's a new clip or performs ensemble by summing predictions if it's not. If there are labels for a video, it asserts they match and updates the label accordingly. The code also logs processing information at log intervals.",
+        "type": "comment"
+    },
+    "5838": {
+        "file_id": 471,
+        "content": "                batch_id,\n                self.data_size // (self.batch_size * self.world_size)))\n    def accumulate(self):\n        \"\"\"accumulate metrics when finished all iters.\n        \"\"\"\n        # check clip index of each video\n        for key in self.clip_count.keys():\n            if len(self.clip_count[key]) != self.num_clips or sum(\n                    self.clip_count[key]) != self.num_clips * (self.num_clips -\n                                                               1) / 2:\n                logger.info(\n                    \"[TEST] Count Error!! video [{}] clip count [{}] not match number clips {}\"\n                    .format(key, self.clip_count[key], self.num_clips))\n        video_preds = paddle.to_tensor(self.video_preds)\n        video_labels = paddle.to_tensor(self.video_labels)\n        acc_top1 = paddle.metric.accuracy(input=video_preds,\n                                          label=video_labels,\n                                          k=1)\n        acc_top5 = paddle.metric.accuracy(input=video_preds,",
+        "type": "code",
+        "location": "/paddlevideo/metrics/multi_crop_metric.py:84-104"
+    },
+    "5839": {
+        "file_id": 471,
+        "content": "This code defines a class that accumulates metrics when all iterations are finished. It checks if the number of clips and their counts match, logging an error if not. Then, it converts video predictions and labels to Paddle tensors and calculates top-1 and top-5 accuracy using Paddle's metric library.",
+        "type": "comment"
+    },
+    "5840": {
+        "file_id": 471,
+        "content": "                                          label=video_labels,\n                                          k=5)\n        logger.info('[TEST] finished, avg_acc1= {}, avg_acc5= {} '.format(\n            acc_top1.numpy(), acc_top5.numpy()))",
+        "type": "code",
+        "location": "/paddlevideo/metrics/multi_crop_metric.py:105-108"
+    },
+    "5841": {
+        "file_id": 471,
+        "content": "Calculates top-1 and top-5 accuracy using multi-crop metric for each video label, then logs the average accuracy values.",
+        "type": "comment"
+    },
+    "5842": {
+        "file_id": 472,
+        "content": "/paddlevideo/metrics/recall.py",
+        "type": "filepath"
+    },
+    "5843": {
+        "file_id": 472,
+        "content": "This code calculates recall for object detection by iterating through images, selecting proposals based on scores, and calculating IoU between these proposals and ground truth boxes. It defines `recalls()` and `eval_recalls()`, with the latter computing recalls for each image.",
+        "type": "summary"
+    },
+    "5844": {
+        "file_id": 472,
+        "content": "import numpy as np\nimport paddle \ndef _recalls(all_ious, proposal_nums, thrs):\n    img_num = all_ious.shape[0]\n    total_gt_num = sum([ious.shape[0] for ious in all_ious])\n    ious_ = np.zeros((proposal_nums.size, total_gt_num), dtype=np.float32)\n    for k, proposal_num in enumerate(proposal_nums):\n        tmp_ious = np.zeros(0)\n        for i in range(img_num):\n            ious = all_ious[i][:, :proposal_num].copy()\n            gt_ious = np.zeros(ious.shape[0])\n            if ious.size == 0:\n                tmp_ious = np.hstack((tmp_ious, gt_ious))\n                continue\n            for j in range(ious.shape[0]):\n                gt_max_overlaps = ious.argmax(axis=1)\n                max_ious = ious[np.arange(0, ious.shape[0]), gt_max_overlaps]\n                gt_idx = max_ious.argmax()\n                gt_ious[j] = max_ious[gt_idx]\n                box_idx = gt_max_overlaps[gt_idx]\n                ious[gt_idx, :] = -1\n                ious[:, box_idx] = -1\n            tmp_ious = np.hstack((tmp_ious, gt_ious))\n        ious_[k, :] = tmp_ious",
+        "type": "code",
+        "location": "/paddlevideo/metrics/recall.py:1-27"
+    },
+    "5845": {
+        "file_id": 472,
+        "content": "This code calculates recall metric for object detection. It takes in all IoUs (intersection over union), proposal numbers, and thresholds as input. It iterates through images and gt (ground truth) boxes, and then computes the recall scores for each image and stores them in an array. The recall is computed by finding the maximum IOU between ground truth and proposals for each image and storing it in a temporary array, then concatenating these values into the final result.",
+        "type": "comment"
+    },
+    "5846": {
+        "file_id": 472,
+        "content": "    ious_ = np.fliplr(np.sort(ious_, axis=1))\n    recalls = np.zeros((proposal_nums.size, thrs.size))\n    for i, thr in enumerate(thrs):\n        recalls[:, i] = (ious_ >= thr).sum(axis=1) / float(total_gt_num)\n    return recalls\ndef set_recall_param(proposal_nums, iou_thrs):\n    if isinstance(proposal_nums, list):\n        proposal_nums_ = np.array(proposal_nums)\n    elif isinstance(proposal_nums, int):\n        proposal_nums_ = np.array([proposal_nums])\n    else:\n        proposal_nums_ = proposal_nums\n    if iou_thrs is None:\n        _iou_thrs = np.array([0.5])\n    elif isinstance(iou_thrs, list):\n        _iou_thrs = np.array(iou_thrs)\n    elif isinstance(iou_thrs, float):\n        _iou_thrs = np.array([iou_thrs])\n    else:\n        _iou_thrs = iou_thrs\n    return proposal_nums_, _iou_thrs\ndef eval_recalls(gts, proposals, proposal_nums=None, iou_thrs=None):\n    \"\"\"Calculate recalls. \"\"\"\n    img_num = len(gts)\n    assert img_num == len(proposals)\n    proposal_nums, iou_thrs = set_recall_param(proposal_nums, iou_thrs)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/recall.py:29-62"
+    },
+    "5847": {
+        "file_id": 472,
+        "content": "The code defines two functions: `recalls()` and `eval_recalls()`. \n\n`recalls()` calculates the average precision-recall curve by comparing predicted bounding boxes with ground truth ones. It does this by sorting intersection over union (IOU) values, creating a recall matrix based on IOU thresholds, and averaging recall across images.\n\n`eval_recalls()` is a wrapper function that calls `recalls()`. It calculates recalls for each image given ground truths and proposals. It also checks input types and sets default parameters if necessary.",
+        "type": "comment"
+    },
+    "5848": {
+        "file_id": 472,
+        "content": "    all_ious = []\n    for i in range(img_num):\n        if proposals[i].ndim == 2 and proposals[i].shape[1] == 5:\n            scores = proposals[i][:, 4]\n            sort_idx = np.argsort(scores)[::-1]\n            img_proposal = proposals[i][sort_idx, :]\n        else:\n            img_proposal = proposals[i]\n        prop_num = min(img_proposal.shape[0], proposal_nums[-1])\n        if gts[i] is None or gts[i].shape[0] == 0:\n            ious = np.zeros((0, img_proposal.shape[0]), dtype=np.float32)\n        else:\n            ious = bbox_overlaps(\n                torch.tensor(gts[i]),\n                torch.tensor(img_proposal[:prop_num, :4]))\n            ious = ious.data.numpy()\n        all_ious.append(ious)\n    all_ious = np.array(all_ious)\n    recalls = _recalls(all_ious, proposal_nums, iou_thrs)\n    return recalls",
+        "type": "code",
+        "location": "/paddlevideo/metrics/recall.py:64-84"
+    },
+    "5849": {
+        "file_id": 472,
+        "content": "This code calculates recall for object detection. It iterates through images, sorts and selects proposals based on scores, and then calculates IoU (intersection over union) between these proposals and ground truth boxes. If no ground truth is found or it has zero boxes, all_ious is filled with zeros. The function returns recalls for each image number.",
+        "type": "comment"
+    },
+    "5850": {
+        "file_id": 473,
+        "content": "/paddlevideo/metrics/registry.py",
+        "type": "filepath"
+    },
+    "5851": {
+        "file_id": 473,
+        "content": "The code imports a Registry class from the utils module and initializes the METRIC as an instance of this Registry, designed to store and manage different types of metrics.",
+        "type": "summary"
+    },
+    "5852": {
+        "file_id": 473,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom ..utils import Registry\nMETRIC = Registry('metric')",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/metrics/registry.py:1-17"
+    },
+    "5853": {
+        "file_id": 473,
+        "content": "The code imports a Registry class from the utils module and initializes the METRIC as an instance of this Registry, designed to store and manage different types of metrics.",
+        "type": "comment"
+    },
+    "5854": {
+        "file_id": 474,
+        "content": "/paddlevideo/metrics/segmentation_metric.py",
+        "type": "filepath"
+    },
+    "5855": {
+        "file_id": 474,
+        "content": "The code creates a function for label change detection in video segmentation, computes precision, recall, and F1 score, uses Levenstein distance, and evaluates ground truth and predicted actions.",
+        "type": "summary"
+    },
+    "5856": {
+        "file_id": 474,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport numpy as np\nimport argparse\nimport pandas as pd\nfrom .registry import METRIC\nfrom .base import BaseMetric\nfrom paddlevideo.utils import get_logger\nlogger = get_logger(\"paddlevideo\")\ndef get_labels_scores_start_end_time(input_np,\n                                     frame_wise_labels,\n                                     actions_dict,\n                                     bg_class=[\"background\", \"None\"]):\n    labels = []\n    starts = []\n    ends = []\n    scores = []\n    boundary_score_ptr = 0\n    last_label = frame_wise_labels[0]",
+        "type": "code",
+        "location": "/paddlevideo/metrics/segmentation_metric.py:1-35"
+    },
+    "5857": {
+        "file_id": 474,
+        "content": "This code is a part of PaddleVideo library and defines a function get_labels_scores_start_end_time that takes input, frame-wise labels, actions dictionary, and optional background class. It returns labels, starts, ends, and scores based on the input and labels. The function also keeps track of the boundary score pointer and the last label.",
+        "type": "comment"
+    },
+    "5858": {
+        "file_id": 474,
+        "content": "    if frame_wise_labels[0] not in bg_class:\n        labels.append(frame_wise_labels[0])\n        starts.append(0)\n    for i in range(len(frame_wise_labels)):\n        if frame_wise_labels[i] != last_label:\n            if frame_wise_labels[i] not in bg_class:\n                labels.append(frame_wise_labels[i])\n                starts.append(i)\n            if last_label not in bg_class:\n                ends.append(i)\n                score = np.mean(\n                        input_np[actions_dict[labels[boundary_score_ptr]], \\\n                            starts[boundary_score_ptr]:(ends[boundary_score_ptr] + 1)]\n                        )\n                scores.append(score)\n                boundary_score_ptr = boundary_score_ptr + 1\n            last_label = frame_wise_labels[i]\n    if last_label not in bg_class:\n        ends.append(i + 1)\n        score = np.mean(\n                    input_np[actions_dict[labels[boundary_score_ptr]], \\\n                        starts[boundary_score_ptr]:(ends[boundary_score_ptr] + 1)]",
+        "type": "code",
+        "location": "/paddlevideo/metrics/segmentation_metric.py:36-57"
+    },
+    "5859": {
+        "file_id": 474,
+        "content": "This code segment is a part of a larger video analysis algorithm. It identifies changes in frame-wise labels and calculates scores for those changes based on input_np data associated with the actions_dict[labels]. The scores are then appended to the 'scores' list, while starts and ends lists keep track of the start and end indices for each identified change. Finally, if the last label is not in bg_class, it adds an ending index to the 'ends' list and calculates a score using input_np data associated with starts and ends indices. The code then updates boundary_score_ptr and proceeds to the next iteration.",
+        "type": "comment"
+    },
+    "5860": {
+        "file_id": 474,
+        "content": "                    )\n        scores.append(score)\n        boundary_score_ptr = boundary_score_ptr + 1\n    return labels, starts, ends, scores\ndef get_labels_start_end_time(frame_wise_labels,\n                              bg_class=[\"background\", \"None\"]):\n    labels = []\n    starts = []\n    ends = []\n    last_label = frame_wise_labels[0]\n    if frame_wise_labels[0] not in bg_class:\n        labels.append(frame_wise_labels[0])\n        starts.append(0)\n    for i in range(len(frame_wise_labels)):\n        if frame_wise_labels[i] != last_label:\n            if frame_wise_labels[i] not in bg_class:\n                labels.append(frame_wise_labels[i])\n                starts.append(i)\n            if last_label not in bg_class:\n                ends.append(i)\n            last_label = frame_wise_labels[i]\n    if last_label not in bg_class:\n        ends.append(i + 1)\n    return labels, starts, ends\ndef levenstein(p, y, norm=False):\n    m_row = len(p)\n    n_col = len(y)\n    D = np.zeros([m_row + 1, n_col + 1], np.float)\n    for i in range(m_row + 1):",
+        "type": "code",
+        "location": "/paddlevideo/metrics/segmentation_metric.py:58-91"
+    },
+    "5861": {
+        "file_id": 474,
+        "content": "The first code chunk is a function that takes a list of frame-wise labels, iterates over the frames, and returns lists for the label names, starting indices, and ending indices. It appends new label names to the labels list and new starting indices to the starts list when a new label appears, and adds corresponding ending indices to the ends list if the previous label was not \"background\" or \"None\". The last label's ending index is added after the loop.\n\nThe second code chunk defines a function that calculates the Levenshtein distance between two strings (p and y) using dynamic programming, which measures the minimum number of operations required to transform one string into another (insertion, deletion, or substitution). The function creates a 2D array D of size (m_row + 1) x (n_col + 1), where m_row is the length of p and n_col is the length of y. It then fills the array using dynamic programming, considering different operations at each step to calculate the minimum distance. This function likely uses the D array for further calculations or returns it as a result.",
+        "type": "comment"
+    },
+    "5862": {
+        "file_id": 474,
+        "content": "        D[i, 0] = i\n    for i in range(n_col + 1):\n        D[0, i] = i\n    for j in range(1, n_col + 1):\n        for i in range(1, m_row + 1):\n            if y[j - 1] == p[i - 1]:\n                D[i, j] = D[i - 1, j - 1]\n            else:\n                D[i, j] = min(D[i - 1, j] + 1, D[i, j - 1] + 1,\n                              D[i - 1, j - 1] + 1)\n    if norm:\n        score = (1 - D[-1, -1] / max(m_row, n_col)) * 100\n    else:\n        score = D[-1, -1]\n    return score\ndef edit_score(recognized,\n               ground_truth,\n               norm=True,\n               bg_class=[\"background\", \"None\"]):\n    P, _, _ = get_labels_start_end_time(recognized, bg_class)\n    Y, _, _ = get_labels_start_end_time(ground_truth, bg_class)\n    return levenstein(P, Y, norm)\ndef f_score(recognized, ground_truth, overlap, bg_class=[\"background\", \"None\"]):\n    p_label, p_start, p_end = get_labels_start_end_time(recognized, bg_class)\n    y_label, y_start, y_end = get_labels_start_end_time(ground_truth, bg_class)\n    tp = 0\n    fp = 0",
+        "type": "code",
+        "location": "/paddlevideo/metrics/segmentation_metric.py:92-126"
+    },
+    "5863": {
+        "file_id": 474,
+        "content": "The code contains a function called \"levenstein\" that calculates the Levenstein distance between two sequences. The Levenstein distance is a metric used to measure the difference between two strings of characters, such as words or labels. In this case, it's used to compare the recognized and ground truth labels for video segmentation. The function takes in a pair of lists P and Y representing recognized and ground truth labels respectively, and an optional norm parameter which normalizes the score if True. The output is a single numeric value representing the distance between the two lists of labels. This score can be used to evaluate the accuracy of the recognition algorithm in comparison with the ground truth data.",
+        "type": "comment"
+    },
+    "5864": {
+        "file_id": 474,
+        "content": "    hits = np.zeros(len(y_label))\n    for j in range(len(p_label)):\n        intersection = np.minimum(p_end[j], y_end) - np.maximum(\n            p_start[j], y_start)\n        union = np.maximum(p_end[j], y_end) - np.minimum(p_start[j], y_start)\n        IoU = (1.0 * intersection / union) * (\n            [p_label[j] == y_label[x] for x in range(len(y_label))])\n        # Get the best scoring segment\n        idx = np.array(IoU).argmax()\n        if IoU[idx] >= overlap and not hits[idx]:\n            tp += 1\n            hits[idx] = 1\n        else:\n            fp += 1\n    fn = len(y_label) - sum(hits)\n    return float(tp), float(fp), float(fn)\ndef boundary_AR(pred_boundary, gt_boundary, overlap_list, max_proposal):\n    p_label, p_start, p_end, p_scores = pred_boundary\n    y_label, y_start, y_end, _ = gt_boundary\n    # sort proposal\n    pred_dict = {\n        \"label\": p_label,\n        \"start\": p_start,\n        \"end\": p_end,\n        \"scores\": p_scores\n    }\n    pdf = pd.DataFrame(pred_dict)\n    pdf = pdf.sort_values(by=\"scores\", ascending=False)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/segmentation_metric.py:128-161"
+    },
+    "5865": {
+        "file_id": 474,
+        "content": "The code calculates the precision, recall, and F1 score for image segmentation by iterating through predicted and ground truth labels. It assigns hits when there is a match between predictions and ground truth, and counts true positives (TP), false positives (FP), and false negatives (FN). The boundary_AR function takes in predicted and ground truth boundaries, sorts them based on scores, and calculates various metrics for image segmentation.",
+        "type": "comment"
+    },
+    "5866": {
+        "file_id": 474,
+        "content": "    p_label = list(pdf[\"label\"])\n    p_start = list(pdf[\"start\"])\n    p_end = list(pdf[\"end\"])\n    p_scores = list(pdf[\"scores\"])\n    # refine AN\n    if len(p_label) < max_proposal and len(p_label) > 0:\n        p_label = p_label + [p_label[-1]] * (max_proposal - len(p_label))\n        p_start = p_start + [p_start[-1]] * (max_proposal - len(p_start))\n        p_start = p_start + p_start[len(p_start) -\n                                    (max_proposal - len(p_start)):]\n        p_end = p_end + [p_end[-1]] * (max_proposal - len(p_end))\n        p_scores = p_scores + [p_scores[-1]] * (max_proposal - len(p_scores))\n    elif len(p_label) > max_proposal:\n        p_label[max_proposal:] = []\n        p_start[max_proposal:] = []\n        p_end[max_proposal:] = []\n        p_scores[max_proposal:] = []\n    t_AR = np.zeros(len(overlap_list))\n    for i in range(len(overlap_list)):\n        overlap = overlap_list[i]\n        tp = 0\n        fp = 0\n        hits = np.zeros(len(y_label))\n        for j in range(len(p_label)):\n            intersection = np.minimum(p_end[j], y_end) - np.maximum(",
+        "type": "code",
+        "location": "/paddlevideo/metrics/segmentation_metric.py:162-191"
+    },
+    "5867": {
+        "file_id": 474,
+        "content": "This code segment handles the refinement of proposals in an object detection model. If the number of proposals is less than the maximum allowed, it repeats the last proposal to meet the requirement. If there are more proposals than the maximum allowed, it discards extra proposals. The code then calculates the average recall (AR) by iterating over the overlap list and counting true positives (tp) and false positives (fp). It also initializes hits for each proposal in the ground truth labels.",
+        "type": "comment"
+    },
+    "5868": {
+        "file_id": 474,
+        "content": "                p_start[j], y_start)\n            union = np.maximum(p_end[j], y_end) - np.minimum(\n                p_start[j], y_start)\n            IoU = (1.0 * intersection / union)\n            # Get the best scoring segment\n            idx = np.array(IoU).argmax()\n            if IoU[idx] >= overlap and not hits[idx]:\n                tp += 1\n                hits[idx] = 1\n            else:\n                fp += 1\n        fn = len(y_label) - sum(hits)\n        recall = float(tp) / (float(tp) + float(fn))\n        t_AR[i] = recall\n    AR = np.mean(t_AR)\n    return AR\n@METRIC.register\nclass SegmentationMetric(BaseMetric):\n    \"\"\"\n    Test for Video Segmentation based model.\n    \"\"\"\n    def __init__(self,\n                 data_size,\n                 batch_size,\n                 overlap,\n                 actions_map_file_path,\n                 log_interval=1,\n                 tolerance=5,\n                 boundary_threshold=0.7,\n                 max_proposal=100):\n        \"\"\"prepare for metrics\n        \"\"\"\n        super().__init__(data_size, batch_size, log_interval)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/segmentation_metric.py:192-230"
+    },
+    "5869": {
+        "file_id": 474,
+        "content": "This code calculates the Average Recall (AR) for video segmentation models. It iterates through ground truth and predicted labels, calculates intersection over union (IoU), counts true positives (tp), false positives (fp), and false negatives (fn). Then it computes recall and averages them to obtain AR. The SegmentationMetric class initializes with various parameters for the metric calculation.",
+        "type": "comment"
+    },
+    "5870": {
+        "file_id": 474,
+        "content": "        # actions dict generate\n        file_ptr = open(actions_map_file_path, 'r')\n        actions = file_ptr.read().split('\\n')[:-1]\n        file_ptr.close()\n        self.actions_dict = dict()\n        for a in actions:\n            self.actions_dict[a.split()[1]] = int(a.split()[0])\n        # cls score\n        self.overlap = overlap\n        self.overlap_len = len(overlap)\n        self.cls_tp = np.zeros(self.overlap_len)\n        self.cls_fp = np.zeros(self.overlap_len)\n        self.cls_fn = np.zeros(self.overlap_len)\n        self.total_correct = 0\n        self.total_edit = 0\n        self.total_frame = 0\n        self.total_video = 0\n        # boundary score\n        self.max_proposal = max_proposal\n        self.AR_at_AN = [[] for _ in range(max_proposal)]\n    def update(self, batch_id, data, outputs):\n        \"\"\"update metrics during each iter\n        \"\"\"\n        groundTruth = data[1]\n        predicted = outputs['predict']\n        output_np = outputs['output_np']\n        outputs_np = predicted.numpy()\n        outputs_arr = output_np.numpy()[0, :]",
+        "type": "code",
+        "location": "/paddlevideo/metrics/segmentation_metric.py:231-264"
+    },
+    "5871": {
+        "file_id": 474,
+        "content": "This code initializes a SegmentationMetric object, reads an actions map file, and prepares to update metrics during each iteration. It calculates true positives (cls_tp), false positives (cls_fp), and false negatives (cls_fn) for each frame's overlap. The AR_at_AN is also initialized with empty lists for each max_proposal value.",
+        "type": "comment"
+    },
+    "5872": {
+        "file_id": 474,
+        "content": "        gt_np = groundTruth.numpy()[0, :]\n        recognition = []\n        for i in range(outputs_np.shape[0]):\n            recognition = np.concatenate((recognition, [\n                list(self.actions_dict.keys())[list(\n                    self.actions_dict.values()).index(outputs_np[i])]\n            ]))\n        recog_content = list(recognition)\n        gt_content = []\n        for i in range(gt_np.shape[0]):\n            gt_content = np.concatenate((gt_content, [\n                list(self.actions_dict.keys())[list(\n                    self.actions_dict.values()).index(gt_np[i])]\n            ]))\n        gt_content = list(gt_content)\n        pred_boundary = get_labels_scores_start_end_time(\n            outputs_arr, recog_content, self.actions_dict)\n        gt_boundary = get_labels_scores_start_end_time(\n            np.ones(outputs_arr.shape), gt_content, self.actions_dict)\n        # cls score\n        correct = 0\n        total = 0\n        edit = 0\n        for i in range(len(gt_content)):\n            total += 1\n            #accumulate",
+        "type": "code",
+        "location": "/paddlevideo/metrics/segmentation_metric.py:265-295"
+    },
+    "5873": {
+        "file_id": 474,
+        "content": "This code segment compares ground truth and predicted actions for a video. It converts the numpy arrays to lists, generates predicted and ground truth boundaries using the `get_labels_scores_start_end_time` function, and then initializes variables for accuracy calculation.",
+        "type": "comment"
+    },
+    "5874": {
+        "file_id": 474,
+        "content": "            self.total_frame += 1\n            if gt_content[i] == recog_content[i]:\n                correct += 1\n                #accumulate\n                self.total_correct += 1\n        edit_num = edit_score(recog_content, gt_content)\n        edit += edit_num\n        self.total_edit += edit_num\n        for s in range(self.overlap_len):\n            tp1, fp1, fn1 = f_score(recog_content, gt_content, self.overlap[s])\n            # accumulate\n            self.cls_tp[s] += tp1\n            self.cls_fp[s] += fp1\n            self.cls_fn[s] += fn1\n        # accumulate\n        self.total_video += 1\n        # proposal score\n        for AN in range(self.max_proposal):\n            AR = boundary_AR(pred_boundary,\n                             gt_boundary,\n                             self.overlap,\n                             max_proposal=(AN + 1))\n            self.AR_at_AN[AN].append(AR)\n    def accumulate(self):\n        \"\"\"accumulate metrics when finished all iters.\n        \"\"\"\n        # cls metric\n        Acc = 100 * float(self.total_correct) / self.total_frame",
+        "type": "code",
+        "location": "/paddlevideo/metrics/segmentation_metric.py:296-330"
+    },
+    "5875": {
+        "file_id": 474,
+        "content": "This code calculates segmentation metrics, including accuracy, false positives, and false negatives for video frames. It also keeps track of total correct predictions, edit distances, proposal scores, and accumulates these metrics per video. The `accumulate` function is used to calculate classification accuracy when all iterations are finished.",
+        "type": "comment"
+    },
+    "5876": {
+        "file_id": 474,
+        "content": "        Edit = (1.0 * self.total_edit) / self.total_video\n        Fscore = dict()\n        for s in range(self.overlap_len):\n            precision = self.cls_tp[s] / float(self.cls_tp[s] + self.cls_fp[s])\n            recall = self.cls_tp[s] / float(self.cls_tp[s] + self.cls_fn[s])\n            f1 = 2.0 * (precision * recall) / (precision + recall)\n            f1 = np.nan_to_num(f1) * 100\n            Fscore[self.overlap[s]] = f1\n        # proposal metric\n        proposal_AUC = np.array(self.AR_at_AN) * 100\n        AUC = np.mean(proposal_AUC)\n        AR_at_AN1 = np.mean(proposal_AUC[0, :])\n        AR_at_AN5 = np.mean(proposal_AUC[4, :])\n        AR_at_AN15 = np.mean(proposal_AUC[14, :])\n        # log metric\n        log_mertic_info = \"dataset model performence: \"\n        # preds ensemble\n        log_mertic_info += \"Acc: {:.4f}, \".format(Acc)\n        log_mertic_info += 'Edit: {:.4f}, '.format(Edit)\n        for s in range(len(self.overlap)):\n            log_mertic_info += 'F1@{:0.2f}: {:.4f}, '.format(\n                self.overlap[s], Fscore[self.overlap[s]])",
+        "type": "code",
+        "location": "/paddlevideo/metrics/segmentation_metric.py:331-356"
+    },
+    "5877": {
+        "file_id": 474,
+        "content": "This code calculates segmentation metrics, including Edit distance, F1 score at different overlap levels, and proposal area under the curve (AUC). It then stores these values in a dictionary and computes average AUCs for different overlap thresholds. The code also calculates an ensemble metric based on accuracy (Acc) and Edit distance. Finally, it logs this information as a string.",
+        "type": "comment"
+    },
+    "5878": {
+        "file_id": 474,
+        "content": "        # boundary metric\n        log_mertic_info += \"Auc: {:.4f}, \".format(AUC)\n        log_mertic_info += \"AR@AN1: {:.4f}, \".format(AR_at_AN1)\n        log_mertic_info += \"AR@AN5: {:.4f}, \".format(AR_at_AN5)\n        log_mertic_info += \"AR@AN15: {:.4f}, \".format(AR_at_AN15)\n        logger.info(log_mertic_info)\n        # log metric\n        metric_dict = dict()\n        metric_dict['Acc'] = Acc\n        metric_dict['Edit'] = Edit\n        for s in range(len(self.overlap)):\n            metric_dict['F1@{:0.2f}'.format(\n                self.overlap[s])] = Fscore[self.overlap[s]]\n        metric_dict['Auc'] = AUC\n        metric_dict['AR@AN1'] = AR_at_AN1\n        metric_dict['AR@AN5'] = AR_at_AN5\n        metric_dict['AR@AN15'] = AR_at_AN15\n        # clear for next epoch\n        # cls\n        self.cls_tp = np.zeros(self.overlap_len)\n        self.cls_fp = np.zeros(self.overlap_len)\n        self.cls_fn = np.zeros(self.overlap_len)\n        self.total_correct = 0\n        self.total_edit = 0\n        self.total_frame = 0\n        self.total_video = 0",
+        "type": "code",
+        "location": "/paddlevideo/metrics/segmentation_metric.py:358-385"
+    },
+    "5879": {
+        "file_id": 474,
+        "content": "This code calculates and logs various segmentation metrics, including AUC, AR@AN1, AR@AN5, and AR@AN15. It also updates the metric dictionary with F1 scores for different overlap thresholds and clears the classifier statistics for the next epoch.",
+        "type": "comment"
+    },
+    "5880": {
+        "file_id": 474,
+        "content": "        # proposal\n        self.AR_at_AN = [[] for _ in range(self.max_proposal)]\n        return metric_dict",
+        "type": "code",
+        "location": "/paddlevideo/metrics/segmentation_metric.py:386-389"
+    },
+    "5881": {
+        "file_id": 474,
+        "content": "This code initializes the attribute \"AR_at_AN\" as a list of empty lists, with the length equal to the maximum number of proposals. This is done within the context of a class method and the list will likely be used for storing evaluation metrics related to these proposals. The method then returns a dictionary (metric_dict) containing other potentially calculated metrics.",
+        "type": "comment"
+    },
+    "5882": {
+        "file_id": 475,
+        "content": "/paddlevideo/metrics/skeleton_metric.py",
+        "type": "filepath"
+    },
+    "5883": {
+        "file_id": 475,
+        "content": "The SkeletonMetric class in PaddleVideo measures skeleton-based model performance metrics, supports batch size 1 and single card testing, and calculates top1 and top5 accuracy for batches with labels. It logs processing info, updates progress, and accumulates metrics while saving results to 'submission.csv'.",
+        "type": "summary"
+    },
+    "5884": {
+        "file_id": 475,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport numpy as np\nimport paddle\nimport csv\nimport paddle.nn.functional as F\nfrom .registry import METRIC\nfrom .base import BaseMetric\nfrom paddlevideo.utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@METRIC.register\nclass SkeletonMetric(BaseMetric):\n    \"\"\"\n    Test for Skeleton based model.\n    note: only support batch size = 1, single card test.\n    Args:\n        out_file: str, file to save test results.\n    \"\"\"\n    def __init__(self,\n                 data_size,\n                 batch_size,\n                 out_file='submission.csv',",
+        "type": "code",
+        "location": "/paddlevideo/metrics/skeleton_metric.py:1-38"
+    },
+    "5885": {
+        "file_id": 475,
+        "content": "This code is for the SkeletonMetric class in PaddleVideo, a machine learning framework. The class measures performance metrics for skeleton-based models. It supports batch size 1 and single card testing. Results can be saved to a file named 'submission.csv'.",
+        "type": "comment"
+    },
+    "5886": {
+        "file_id": 475,
+        "content": "                 log_interval=1,\n                 top_k=5):\n        \"\"\"prepare for metrics\n        \"\"\"\n        super().__init__(data_size, batch_size, log_interval)\n        self.top1 = []\n        self.top5 = []\n        self.values = []\n        self.out_file = out_file\n        self.k = top_k\n    def update(self, batch_id, data, outputs):\n        \"\"\"update metrics during each iter\n        \"\"\"\n        if data[0].shape[0] != outputs.shape[0]:\n            num_segs = data[0].shape[1]\n            batch_size = outputs.shape[0]\n            outputs = outputs.reshape(\n                [batch_size // num_segs, num_segs, outputs.shape[-1]])\n            outputs = outputs.mean(axis=1)\n        if len(data) == 2:  # data with label\n            labels = data[1]\n            top1 = paddle.metric.accuracy(input=outputs, label=labels, k=1)\n            top5 = paddle.metric.accuracy(input=outputs, label=labels, k=self.k)\n            if self.world_size > 1:\n                top1 = paddle.distributed.all_reduce(\n                    top1, op=paddle.distributed.ReduceOp.SUM) / self.world_size",
+        "type": "code",
+        "location": "/paddlevideo/metrics/skeleton_metric.py:39-65"
+    },
+    "5887": {
+        "file_id": 475,
+        "content": "This code initializes a metrics class for tracking accuracy metrics during training. The `__init__` function sets up the top1, top5, and values lists to store metric results, as well as an output file path and the desired top k value. The `update` method processes data from each batch iteration, updating the metrics based on whether the input data contains labels or not. It also handles distributed training by averaging across multiple workers.",
+        "type": "comment"
+    },
+    "5888": {
+        "file_id": 475,
+        "content": "                top5 = paddle.distributed.all_reduce(\n                    top5, op=paddle.distributed.ReduceOp.SUM) / self.world_size\n            self.top1.append(top1.numpy())\n            self.top5.append(top5.numpy())\n        else:  # data without label, only support batch_size=1. Used for fsd-10.\n            prob = F.softmax(outputs)\n            clas = paddle.argmax(prob, axis=1).numpy()[0]\n            self.values.append((batch_id, clas))\n        # preds ensemble\n        if batch_id % self.log_interval == 0:\n            logger.info(\"[TEST] Processing batch {}/{} ...\".format(\n                batch_id,\n                self.data_size // (self.batch_size * self.world_size)))\n    def accumulate(self):\n        \"\"\"accumulate metrics when finished all iters.\n        \"\"\"\n        if self.top1:  # data with label\n            logger.info('[TEST] finished, avg_acc1= {}, avg_acc5= {}'.format(\n                np.mean(np.array(self.top1)), np.mean(np.array(self.top5))))\n        else:\n            headers = ['sample_index', 'predict_category']",
+        "type": "code",
+        "location": "/paddlevideo/metrics/skeleton_metric.py:66-88"
+    },
+    "5889": {
+        "file_id": 475,
+        "content": "This code segment is part of a class that handles metrics for a testing process. It calculates top1 and top5 accuracy for batches with labels and stores them. For batches without labels, it performs softmax on outputs and gets the class with highest probability. It logs processing information and updates progress. Finally, it accumulates metrics when all iterations are done.",
+        "type": "comment"
+    },
+    "5890": {
+        "file_id": 475,
+        "content": "            with open(\n                    self.out_file,\n                    'w',\n            ) as fp:\n                writer = csv.writer(fp)\n                writer.writerow(headers)\n                writer.writerows(self.values)\n            logger.info(\"Results saved in {} !\".format(self.out_file))",
+        "type": "code",
+        "location": "/paddlevideo/metrics/skeleton_metric.py:89-96"
+    },
+    "5891": {
+        "file_id": 475,
+        "content": "Writes headers and values from self.values to file, saves results in out_file and logs success.",
+        "type": "comment"
+    },
+    "5892": {
+        "file_id": 476,
+        "content": "/paddlevideo/metrics/transnetv2_metric.py",
+        "type": "filepath"
+    },
+    "5893": {
+        "file_id": 476,
+        "content": "This code calculates precision, recall, and F1-score for a TransNetV2 metric machine learning model by handling scene location transformations and errors. It iterates through different thresholds before logging the results.",
+        "type": "summary"
+    },
+    "5894": {
+        "file_id": 476,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport numpy as np\nfrom .registry import METRIC\nfrom .base import BaseMetric\nfrom paddlevideo.utils import get_logger\nlogger = get_logger(\"paddlevideo\")\ndef predictions_to_scenes(predictions):\n    scenes = []\n    t, t_prev, start = -1, 0, 0\n    for i, t in enumerate(predictions):\n        if t_prev == 1 and t == 0:\n            start = i\n        if t_prev == 0 and t == 1 and i != 0:\n            scenes.append([start, i])\n        t_prev = t\n    if t == 0:\n        scenes.append([start, i])\n    # just fix if all predictions are 1",
+        "type": "code",
+        "location": "/paddlevideo/metrics/transnetv2_metric.py:1-34"
+    },
+    "5895": {
+        "file_id": 476,
+        "content": "This function, named \"predictions_to_scenes\", takes in a list of predictions and outputs a list of scene locations. The scenes are determined by identifying changes from 0 to 1 and vice versa. If all predictions are 1, the function adds a final scene ending at the last index. The code also includes error checking for cases where all predictions are 1 or when there is a disruption in prediction data flow.",
+        "type": "comment"
+    },
+    "5896": {
+        "file_id": 476,
+        "content": "    if len(scenes) == 0:\n        return np.array([[0, len(predictions) - 1]], dtype=np.int32)\n    return np.array(scenes, dtype=np.int32)\ndef evaluate_scenes(gt_scenes, pred_scenes, n_frames_miss_tolerance=2):\n    \"\"\"\n    Adapted from: https://github.com/gyglim/shot-detection-evaluation\n    The original based on: http://imagelab.ing.unimore.it/imagelab/researchActivity.asp?idActivity=19\n    n_frames_miss_tolerance:\n        Number of frames it is possible to miss ground truth by, and still being counted as a correct detection.\n    Examples of computation with different tolerance margin:\n    n_frames_miss_tolerance = 0\n      pred_scenes: [[0, 5], [6, 9]] -> pred_trans: [[5.5, 5.5]]\n      gt_scenes:   [[0, 5], [6, 9]] -> gt_trans:   [[5.5, 5.5]] -> HIT\n      gt_scenes:   [[0, 4], [5, 9]] -> gt_trans:   [[4.5, 4.5]] -> MISS\n    n_frames_miss_tolerance = 1\n      pred_scenes: [[0, 5], [6, 9]] -> pred_trans: [[5.0, 6.0]]\n      gt_scenes:   [[0, 5], [6, 9]] -> gt_trans:   [[5.0, 6.0]] -> HIT\n      gt_scenes:   [[0, 4], [5, 9]] -> gt_trans:   [[4.0, 5.0]] -> HIT",
+        "type": "code",
+        "location": "/paddlevideo/metrics/transnetv2_metric.py:35-57"
+    },
+    "5897": {
+        "file_id": 476,
+        "content": "This function converts scene lists to transition lists. If there are no scenes, it returns a transition list with one element. The function is based on an external source and adapted for specific use cases. It can handle different tolerance margins, which affects how the pred_scenes and gt_scenes are transformed into prediction transitions (pred_trans) and ground truth transitions (gt_trans), respectively. A \"HIT\" or \"MISS\" status is determined based on these converted lists.",
+        "type": "comment"
+    },
+    "5898": {
+        "file_id": 476,
+        "content": "      gt_scenes:   [[0, 3], [4, 9]] -> gt_trans:   [[3.0, 4.0]] -> MISS\n    n_frames_miss_tolerance = 2\n      pred_scenes: [[0, 5], [6, 9]] -> pred_trans: [[4.5, 6.5]]\n      gt_scenes:   [[0, 5], [6, 9]] -> gt_trans:   [[4.5, 6.5]] -> HIT\n      gt_scenes:   [[0, 4], [5, 9]] -> gt_trans:   [[3.5, 5.5]] -> HIT\n      gt_scenes:   [[0, 3], [4, 9]] -> gt_trans:   [[2.5, 4.5]] -> HIT\n      gt_scenes:   [[0, 2], [3, 9]] -> gt_trans:   [[1.5, 3.5]] -> MISS\n      Users should be careful about adopting these functions in any commercial matters.\n    \"\"\"\n    shift = n_frames_miss_tolerance / 2\n    gt_scenes = gt_scenes.astype(np.float32) + np.array([[-0.5 + shift, 0.5 - shift]])\n    pred_scenes = pred_scenes.astype(np.float32) + np.array([[-0.5 + shift, 0.5 - shift]])\n    gt_trans = np.stack([gt_scenes[:-1, 1], gt_scenes[1:, 0]], 1)\n    pred_trans = np.stack([pred_scenes[:-1, 1], pred_scenes[1:, 0]], 1)\n    i, j = 0, 0\n    tp, fp, fn = 0, 0, 0\n    while i < len(gt_trans) or j < len(pred_trans):\n        if j == len(pred_trans) or pred_trans[j, 0] > gt_trans[i, 1]:",
+        "type": "code",
+        "location": "/paddlevideo/metrics/transnetv2_metric.py:58-80"
+    },
+    "5899": {
+        "file_id": 476,
+        "content": "This code adjusts and transforms input frame scene and transition data, and then iterates through both to calculate true positives (TP), false positives (FP), and false negatives (FN) for evaluation.",
+        "type": "comment"
+    }
+}

@@ -1,0 +1,549 @@
+{
+    "6900": {
+        "file_id": 511,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom __future__ import absolute_import\nfrom __future__ import division\nfrom __future__ import print_function\nimport paddle\nfrom paddle import ParamAttr\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nfrom paddle.regularizer import L2Decay\nfrom paddle.nn import Conv2D, BatchNorm\nfrom paddle.nn import MaxPool2D, AvgPool2D\nfrom ..registry import BACKBONES\nfrom ..weight_init import weight_init_\nfrom ...utils import load_ckpt",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsn.py:1-29"
+    },
+    "6901": {
+        "file_id": 511,
+        "content": "This code is a part of the PaddleVideo library, which provides model backbones including ResNet Tweaks TSN. It imports necessary modules and defines functions for creating convolutional layers, batch normalization, pooling layers, initializing weights, and loading checkpoints. The code follows the Apache License 2.0 and is distributed under an \"AS IS\" basis.",
+        "type": "comment"
+    },
+    "6902": {
+        "file_id": 511,
+        "content": "__all__ = [\"ResNetTweaksTSN\"]\nclass ConvBNLayer(nn.Layer):\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 kernel_size,\n                 stride=1,\n                 groups=1,\n                 is_tweaks_mode=False,\n                 act=None,\n                 lr_mult=1.0,\n                 name=None):\n        super(ConvBNLayer, self).__init__()\n        self.is_tweaks_mode = is_tweaks_mode\n        self._pool2d_avg = AvgPool2D(kernel_size=2,\n                                     stride=2,\n                                     padding=0,\n                                     ceil_mode=True)\n        self._conv = Conv2D(in_channels=in_channels,\n                            out_channels=out_channels,\n                            kernel_size=kernel_size,\n                            stride=stride,\n                            padding=(kernel_size - 1) // 2,\n                            groups=groups,\n                            weight_attr=ParamAttr(name=name + \"_weights\",\n                                                  learning_rate=lr_mult),",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsn.py:31-58"
+    },
+    "6903": {
+        "file_id": 511,
+        "content": "This code defines a ConvBNLayer class with an average pooling operation, a convolution layer, and optional tweaks mode. It also initializes a Conv2D layer and sets parameters for weight attributes and learning rates.",
+        "type": "comment"
+    },
+    "6904": {
+        "file_id": 511,
+        "content": "                            bias_attr=False)\n        if name == \"conv1\":\n            bn_name = \"bn_\" + name\n        else:\n            bn_name = \"bn\" + name[3:]\n        self._batch_norm = BatchNorm(\n            out_channels,\n            act=act,\n            param_attr=ParamAttr(name=bn_name + '_scale',\n                                 learning_rate=lr_mult,\n                                 regularizer=L2Decay(0.0)),\n            bias_attr=ParamAttr(bn_name + '_offset',\n                                learning_rate=lr_mult,\n                                regularizer=L2Decay(0.0)),\n            moving_mean_name=bn_name + '_mean',\n            moving_variance_name=bn_name + '_variance')\n    def forward(self, inputs):\n        if self.is_tweaks_mode:\n            inputs = self._pool2d_avg(inputs)\n        y = self._conv(inputs)\n        y = self._batch_norm(y)\n        return y\nclass BottleneckBlock(nn.Layer):\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 stride,\n                 shortcut=True,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsn.py:59-89"
+    },
+    "6905": {
+        "file_id": 511,
+        "content": "The code defines a ResNet backbone with Temporal Segment Network (TSN) modifications. It includes a BatchNorm layer for normalization and has a forward function that applies pooling if in tweaks mode, followed by the batch norm and convolution layers. The BottleneckBlock class is also defined as a sublayer.",
+        "type": "comment"
+    },
+    "6906": {
+        "file_id": 511,
+        "content": "                 if_first=False,\n                 lr_mult=1.0,\n                 name=None):\n        super(BottleneckBlock, self).__init__()\n        self.conv0 = ConvBNLayer(in_channels=in_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=1,\n                                 act='relu',\n                                 lr_mult=lr_mult,\n                                 name=name + \"_branch2a\")\n        self.conv1 = ConvBNLayer(in_channels=out_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=3,\n                                 stride=stride,\n                                 act='relu',\n                                 lr_mult=lr_mult,\n                                 name=name + \"_branch2b\")\n        self.conv2 = ConvBNLayer(in_channels=out_channels,\n                                 out_channels=out_channels * 4,\n                                 kernel_size=1,\n                                 act=None,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsn.py:90-111"
+    },
+    "6907": {
+        "file_id": 511,
+        "content": "This code defines the BottleneckBlock class, which is a layer in ResNet backbone. It consists of three ConvBNLayer instances: conv0, conv1, and conv2. The first one performs a 1x1 convolution, while the second one does a 3x3 convolution with stride. Lastly, the third one executes a 1x1 convolution without activation function. This block is designed to reduce parameters for deeper networks.",
+        "type": "comment"
+    },
+    "6908": {
+        "file_id": 511,
+        "content": "                                 lr_mult=lr_mult,\n                                 name=name + \"_branch2c\")\n        if not shortcut:\n            self.short = ConvBNLayer(in_channels=in_channels,\n                                     out_channels=out_channels * 4,\n                                     kernel_size=1,\n                                     stride=1,\n                                     is_tweaks_mode=False if if_first else True,\n                                     lr_mult=lr_mult,\n                                     name=name + \"_branch1\")\n        self.shortcut = shortcut\n    def forward(self, inputs):\n        y = self.conv0(inputs)\n        conv1 = self.conv1(y)\n        conv2 = self.conv2(conv1)\n        if self.shortcut:\n            short = inputs\n        else:\n            short = self.short(inputs)\n        y = paddle.add(x=short, y=conv2)\n        y = F.relu(y)\n        return y\nclass BasicBlock(nn.Layer):\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 stride,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsn.py:112-144"
+    },
+    "6909": {
+        "file_id": 511,
+        "content": "This code defines a ResNet block with two convolution layers, one optional shortcut connection, and applies ReLU activation after the addition of the branch outputs. The BasicBlock class is used for the basic building block of the network.",
+        "type": "comment"
+    },
+    "6910": {
+        "file_id": 511,
+        "content": "                 shortcut=True,\n                 if_first=False,\n                 lr_mult=1.0,\n                 name=None):\n        super(BasicBlock, self).__init__()\n        self.stride = stride\n        self.conv0 = ConvBNLayer(in_channels=in_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=3,\n                                 stride=stride,\n                                 act='relu',\n                                 lr_mult=lr_mult,\n                                 name=name + \"_branch2a\")\n        self.conv1 = ConvBNLayer(in_channels=out_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=3,\n                                 act=None,\n                                 lr_mult=lr_mult,\n                                 name=name + \"_branch2b\")\n        if not shortcut:\n            self.short = ConvBNLayer(in_channels=in_channels,\n                                     out_channels=out_channels,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsn.py:145-167"
+    },
+    "6911": {
+        "file_id": 511,
+        "content": "This code defines a BasicBlock class with convolutional layers and Batch Normalization. It initializes the block's parameters like stride, convolution layers, and batch normalization. The shortcut connection is optional and depends on the 'shortcut' parameter. The 'if_first', 'lr_mult', and 'name' parameters are also provided for customization.",
+        "type": "comment"
+    },
+    "6912": {
+        "file_id": 511,
+        "content": "                                     kernel_size=1,\n                                     stride=1,\n                                     is_tweaks_mode=False if if_first else True,\n                                     lr_mult=lr_mult,\n                                     name=name + \"_branch1\")\n        self.shortcut = shortcut\n    def forward(self, inputs):\n        y = self.conv0(inputs)\n        conv1 = self.conv1(y)\n        if self.shortcut:\n            short = inputs\n        else:\n            short = self.short(inputs)\n        y = paddle.add(x=short, y=conv1)\n        y = F.relu(y)\n        return y\n@BACKBONES.register()\nclass ResNetTweaksTSN(nn.Layer):\n    \"\"\"ResNetTweaksTSN backbone.\n    Args:\n        depth (int): Depth of resnet model.\n        pretrained (str): pretrained model. Default: None.\n    \"\"\"\n    def __init__(self,\n                 layers=50,\n                 pretrained=None,\n                 lr_mult_list=[1.0, 1.0, 1.0, 1.0, 1.0]):\n        super(ResNetTweaksTSN, self).__init__()\n        self.pretrained = pretrained",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsn.py:168-203"
+    },
+    "6913": {
+        "file_id": 511,
+        "content": "This code defines a ResNetTweaksTSN backbone for deep learning models. It includes layers such as convolution, shortcut connections, and ReLU activation function. The constructor takes parameters like depth (layers), pretrained model, and learning rate multipliers for different layers.",
+        "type": "comment"
+    },
+    "6914": {
+        "file_id": 511,
+        "content": "        self.layers = layers\n        supported_layers = [18, 34, 50, 101, 152, 200]\n        assert layers in supported_layers, \\\n            \"supported layers are {} but input layer is {}\".format(\n                supported_layers, layers)\n        self.lr_mult_list = lr_mult_list\n        assert isinstance(\n            self.lr_mult_list,\n            (list, tuple\n             )), \"lr_mult_list should be in (list, tuple) but got {}\".format(\n                 type(self.lr_mult_list))\n        assert len(\n            self.lr_mult_list\n        ) == 5, \"lr_mult_list length should should be 5 but got {}\".format(\n            len(self.lr_mult_list))\n        if layers == 18:\n            depth = [2, 2, 2, 2]\n        elif layers == 34 or layers == 50:\n            depth = [3, 4, 6, 3]\n        elif layers == 101:\n            depth = [3, 4, 23, 3]\n        elif layers == 152:\n            depth = [3, 8, 36, 3]\n        elif layers == 200:\n            depth = [3, 12, 48, 3]\n        num_channels = [64, 256, 512, 1024\n                        ] if layers >= 50 else [64, 64, 128, 256]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsn.py:204-232"
+    },
+    "6915": {
+        "file_id": 511,
+        "content": "This code initializes a ResNet backbone with different configurations based on the input layer. It checks if the provided layer is supported, asserts the type and length of the learning rate multiplier list, and assigns depth and number of channels for each layer configuration.",
+        "type": "comment"
+    },
+    "6916": {
+        "file_id": 511,
+        "content": "        num_filters = [64, 128, 256, 512]\n        self.conv1_1 = ConvBNLayer(in_channels=3,\n                                   out_channels=32,\n                                   kernel_size=3,\n                                   stride=2,\n                                   act='relu',\n                                   lr_mult=self.lr_mult_list[0],\n                                   name=\"conv1_1\")\n        self.conv1_2 = ConvBNLayer(in_channels=32,\n                                   out_channels=32,\n                                   kernel_size=3,\n                                   stride=1,\n                                   act='relu',\n                                   lr_mult=self.lr_mult_list[0],\n                                   name=\"conv1_2\")\n        self.conv1_3 = ConvBNLayer(in_channels=32,\n                                   out_channels=64,\n                                   kernel_size=3,\n                                   stride=1,\n                                   act='relu',\n                                   lr_mult=self.lr_mult_list[0],",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsn.py:233-254"
+    },
+    "6917": {
+        "file_id": 511,
+        "content": "This code defines the first layer of the ResNet backbone, including three ConvBNLayer instances for different operations. The first layer consists of a 2x downsampling convolution, followed by two 1x1 convolutions to reduce dimensionality and apply relu activation. Lr_mult ensures that these layers are trained with different learning rates based on their importance.",
+        "type": "comment"
+    },
+    "6918": {
+        "file_id": 511,
+        "content": "                                   name=\"conv1_3\")\n        self.pool2d_max = MaxPool2D(kernel_size=3, stride=2, padding=1)\n        self.block_list = []\n        if layers >= 50:\n            for block in range(len(depth)):\n                shortcut = False\n                for i in range(depth[block]):\n                    if layers in [101, 152, 200] and block == 2:\n                        if i == 0:\n                            conv_name = \"res\" + str(block + 2) + \"a\"\n                        else:\n                            conv_name = \"res\" + str(block + 2) + \"b\" + str(i)\n                    else:\n                        conv_name = \"res\" + str(block + 2) + chr(97 + i)\n                    bottleneck_block = self.add_sublayer(\n                        'bb_%d_%d' % (block, i),\n                        BottleneckBlock(\n                            in_channels=num_channels[block]\n                            if i == 0 else num_filters[block] * 4,\n                            out_channels=num_filters[block],\n                            stride=2 if i == 0 and block != 0 else 1,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsn.py:255-276"
+    },
+    "6919": {
+        "file_id": 511,
+        "content": "This code defines a ResNet backbone with optional Temporal Segment Network (TSN) modifications. It adds BottleneckBlock layers, specifies pooling operations, and handles shortcut connections for blocks 0-56. The number of layers and filters are determined by the provided depth and num_filters lists.",
+        "type": "comment"
+    },
+    "6920": {
+        "file_id": 511,
+        "content": "                            shortcut=shortcut,\n                            if_first=block == i == 0,\n                            lr_mult=self.lr_mult_list[block + 1],\n                            name=conv_name))\n                    self.block_list.append(bottleneck_block)\n                    shortcut = True\n        else:\n            for block in range(len(depth)):\n                shortcut = False\n                for i in range(depth[block]):\n                    conv_name = \"res\" + str(block + 2) + chr(97 + i)\n                    basic_block = self.add_sublayer(\n                        'bb_%d_%d' % (block, i),\n                        BasicBlock(in_channels=num_channels[block]\n                                   if i == 0 else num_filters[block],\n                                   out_channels=num_filters[block],\n                                   stride=2 if i == 0 and block != 0 else 1,\n                                   shortcut=shortcut,\n                                   if_first=block == i == 0,\n                                   name=conv_name,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsn.py:277-296"
+    },
+    "6921": {
+        "file_id": 511,
+        "content": "This code adds layers to the ResNet backbone model. It uses conditional statements and loops to determine the number of layers added at each block based on a given depth configuration, and applies different configurations for the first block. Layers are added with specific parameters such as in_channels, out_channels, stride, shortcut, if_first flag, and name.",
+        "type": "comment"
+    },
+    "6922": {
+        "file_id": 511,
+        "content": "                                   lr_mult=self.lr_mult_list[block + 1]))\n                    self.block_list.append(basic_block)\n                    shortcut = True\n    def init_weights(self):\n        \"\"\"Initiate the parameters.\n        Note:\n            1. when indicate pretrained loading path, will load it to initiate backbone.\n            2. when not indicating pretrained loading path, will follow specific initialization initiate backbone. Always, Conv2D layer will be\n            initiated by KaimingNormal function, and BatchNorm2d will be initiated by Constant function.\n            Please refer to https://www.paddlepaddle.org.cn/documentation/docs/en/develop/api/paddle/nn/initializer/kaiming/KaimingNormal_en.html\n        \"\"\"\n        # XXX: check bias!!! check pretrained!!!\n        if isinstance(self.pretrained, str) and self.pretrained.strip() != \"\":\n            load_ckpt(self, self.pretrained)\n        elif self.pretrained is None or self.pretrained.strip() == \"\":\n            for layer in self.sublayers():",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsn.py:297-314"
+    },
+    "6923": {
+        "file_id": 511,
+        "content": "This code initializes a backbone model and handles the loading of pre-trained weights. If pre-trained path is specified, it loads the weights; otherwise, it follows specific initialization for Conv2D layers and BatchNorm2d using KaimingNormal and Constant functions respectively.",
+        "type": "comment"
+    },
+    "6924": {
+        "file_id": 511,
+        "content": "                if isinstance(layer, nn.Conv2D):\n                    # XXX: no bias\n                    weight_init_(layer, 'KaimingNormal')\n                elif isinstance(layer, nn.BatchNorm2D):\n                    weight_init_(layer, 'Constant', value=1)\n    def forward(self, inputs):\n        y = self.conv1_1(inputs)\n        y = self.conv1_2(y)\n        y = self.conv1_3(y)\n        y = self.pool2d_max(y)\n        for block in self.block_list:\n            y = block(y)\n        return y",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_tweaks_tsn.py:315-328"
+    },
+    "6925": {
+        "file_id": 511,
+        "content": "This code initializes the weights of convolutional layers without bias and batch normalization layers with constant value 1. It then performs forward pass through the network, applying convolutions and pooling operations. The output is returned after passing through each block in the block list.",
+        "type": "comment"
+    },
+    "6926": {
+        "file_id": 512,
+        "content": "/paddlevideo/modeling/backbones/resnext101.py",
+        "type": "filepath"
+    },
+    "6927": {
+        "file_id": 512,
+        "content": "The code defines a ResNeXt-101 model in PaddlePaddle, including downsample and residual blocks, BottleneckBlock, performs convolutions, activation, max pooling on input image.",
+        "type": "summary"
+    },
+    "6928": {
+        "file_id": 512,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom functools import partial\nimport paddle\nclass ConvBNLayer(paddle.nn.Layer):\n    def __init__(self,\n                 num_channels,\n                 num_filters,\n                 filter_size,\n                 stride=1,\n                 padding=0,\n                 dilation=1,\n                 groups=1,\n                 padding_mode='zeros',\n                 weight_attr=None,\n                 bias_attr=None,\n                 name=None,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnext101.py:1-31"
+    },
+    "6929": {
+        "file_id": 512,
+        "content": "This code defines a ConvBNLayer class in PaddlePaddle, which is a convolution-batch normalization layer. It takes inputs like num_channels, num_filters, filter_size, stride, padding, dilation, groups, padding_mode, weight_attr, bias_attr, and name.",
+        "type": "comment"
+    },
+    "6930": {
+        "file_id": 512,
+        "content": "                 data_format=\"NCDHW\"):\n        super(ConvBNLayer, self).__init__()\n        self._conv = paddle.nn.Conv3D(\n            in_channels=num_channels,\n            out_channels=num_filters,\n            kernel_size=filter_size,\n            stride=stride,\n            padding=padding,\n            dilation=dilation,\n            groups=groups,\n            padding_mode=padding_mode,\n            weight_attr=paddle.ParamAttr(initializer=paddle.nn.initializer.KaimingNormal(\n                fan_in=num_filters * filter_size * filter_size), name=name+'_weights'),\n            bias_attr=bias_attr,\n            data_format=data_format)\n        bn_name = \"bn_\" + name\n        self._batch_norm = paddle.nn.BatchNorm3D(\n            num_filters,\n            momentum=0.9,\n            epsilon=1e-05,\n            weight_attr=paddle.ParamAttr(initializer=paddle.nn.initializer.Constant(\n                1.), name=bn_name + '_scale'),\n            bias_attr=paddle.ParamAttr(initializer=paddle.nn.initializer.Constant(\n                0.), name=bn_name + '_offset'),",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnext101.py:32-55"
+    },
+    "6931": {
+        "file_id": 512,
+        "content": "This code defines a ConvBNLayer class with specified parameters for convolutional and batch normalization layers. The convolutional layer uses Kaiming Normal initialization, while the batch normalization layer has fixed scales and offsets initialized to 1 and 0 respectively.",
+        "type": "comment"
+    },
+    "6932": {
+        "file_id": 512,
+        "content": "            data_format=data_format)\n    def forward(self, inputs):\n        y = self._conv(inputs)\n        y = self._batch_norm(y)\n        return y\ndef _downsample_basic_block(self, x, planes, stride):\n    out = paddle.nn.functional.avg_pool3d(x, kernel_size=1, stride=stride)\n    shape = out.shape\n    zero_pads = paddle.zeros(shape=[shape[0], planes - shape[1], shape[2], shape[3], shape[4]],\n                                   dtype='float32')\n    out = paddle.concat(x=[out, zero_pads], axis=1)\nclass BottleneckBlock(paddle.nn.Layer):\n    expansion = 2\n    def __init__(self, inplanes, planes, cardinality, stride=1, downsample=None, name=None):\n        super(BottleneckBlock, self).__init__()\n        mid_planes = cardinality * int(planes / 32)\n        self.conv0 = ConvBNLayer(\n            inplanes, mid_planes, filter_size=1, bias_attr=False, name=name+'_branch2a')\n        self.conv1 = ConvBNLayer(mid_planes, mid_planes, filter_size=3, stride=stride,\n                                 padding=1, groups=cardinality, bias_attr=False, name=name+'_branch2b')",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnext101.py:56-82"
+    },
+    "6933": {
+        "file_id": 512,
+        "content": "This code defines a BottleneckBlock class and a downsample function for the ResNeXt101 model in PaddlePaddle. The BottleneckBlock has an expansion factor of 2 and uses ConvBNLayer for convolution and batch normalization. The downsample function performs average pooling and concatenation to perform downsampling.",
+        "type": "comment"
+    },
+    "6934": {
+        "file_id": 512,
+        "content": "        self.conv2 = ConvBNLayer(mid_planes, planes * self.expansion,\n                                 filter_size=1, bias_attr=False, name=name+'_branch2c')\n        self.downsample = downsample\n        self.stride = stride\n        self.relu = paddle.nn.ReLU()\n    def forward(self, x):\n        residual = x\n        out = self.conv0(x)\n        out = self.relu(out)\n        out = self.conv1(out)\n        out = self.relu(out)\n        out = self.conv2(out)\n        if self.downsample is not None:\n            residual = self.downsample(x)\n        out += residual\n        out = self.relu(out)\n        return out\nclass ResNeXt(paddle.nn.Layer):\n    def __init__(self,\n                 block,\n                 layers,\n                 shortcut_type='B',\n                 cardinality=32):\n        self.inplanes = 64\n        super(ResNeXt, self).__init__()\n        self.conv = ConvBNLayer(\n            3,\n            64,\n            filter_size=7,\n            stride=(1, 2, 2),\n            padding=(3, 3, 3),\n            bias_attr=False,\n            name=\"res_conv1\"",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnext101.py:83-122"
+    },
+    "6935": {
+        "file_id": 512,
+        "content": "This code defines a ResNeXt model. The class ResNeXt has an initialization that sets inplanes to 64 and inherits from paddle.nn.Layer. It contains a convolution layer (conv) with 3 input channels, 64 output channels, filter size of 7, and stride of (1,2,2). The class also includes a ResNet-style residual block as a member variable named 'block'. It has layers, shortcut_type (defaults to B), and cardinality parameters.",
+        "type": "comment"
+    },
+    "6936": {
+        "file_id": 512,
+        "content": "        )\n        self.relu = paddle.nn.ReLU()\n        self.maxpool = paddle.nn.MaxPool3D(kernel_size=(3, 3, 3), stride=2, padding=1)\n        self.layer1 = self._make_layer(block, 128, layers[0], shortcut_type,\n                                       cardinality, stride=1, name='layer1')\n        self.layer2 = self._make_layer(\n            block, 256, layers[1], shortcut_type, cardinality, stride=2, name='layer2')\n        self.layer3 = self._make_layer(\n            block, 512, layers[2], shortcut_type, cardinality, stride=2, name='layer3')\n        self.layer4 = self._make_layer(\n            block, 1024, layers[3], shortcut_type, cardinality, stride=2, name='layer4')\n        self.avgpool = paddle.nn.AvgPool3D((2, 1, 1), stride=1, exclusive=False)\n    def _make_layer(self,\n                    block,\n                    planes,\n                    blocks,\n                    shortcut_type,\n                    cardinality,\n                    stride=1,\n                    name=None):\n        downsample = None\n        if stride != 1 or self.inplanes != planes * block.expansion:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnext101.py:123-148"
+    },
+    "6937": {
+        "file_id": 512,
+        "content": "The code defines a ResNext101 backbone for a deep learning model. It includes a ReLU activation function and max pooling operation, followed by four residual layers (layer1 to layer4) with varying numbers of planes (256, 512, 1024 respectively). The _make_layer method is used to create the layers, with options for downsampling and varying expansion rates.",
+        "type": "comment"
+    },
+    "6938": {
+        "file_id": 512,
+        "content": "            if shortcut_type == 'A':\n                downsample = partial(self._downsample_basic_block,\n                                     planes=planes * block.expansion,\n                                     stride=stride)\n            else:\n                downsample = ConvBNLayer(\n                    self.inplanes,\n                    planes * block.expansion,\n                    1,\n                    stride=stride,\n                    bias_attr=False,\n                    name=name+'downsample'\n                )\n        layers = []\n        layers.append(\n            block(self.inplanes, planes, cardinality, stride, downsample, name=name+'_downsample'))\n        self.inplanes = planes * block.expansion\n        for i in range(1, blocks):\n            layers.append(block(self.inplanes, planes,\n                          cardinality, name=name+'_res_block'+str(i)))\n        return paddle.nn.Sequential(*layers)\n    def forward(self, x):\n        x = self.conv(x)\n        x = self.relu(x)\n        x = self.maxpool(x)\n        x = self.layer1(x)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnext101.py:149-176"
+    },
+    "6939": {
+        "file_id": 512,
+        "content": "This code defines a ResNeXt-101 model, implementing its downsample and residual blocks. It takes an input image, performs convolutions, applies ReLU activation, and max pooling before passing through the specified number of residual blocks.",
+        "type": "comment"
+    },
+    "6940": {
+        "file_id": 512,
+        "content": "        x = self.layer2(x)\n        x = self.layer3(x)\n        x = self.layer4(x)\n        return x\ndef ResNext101():\n    \"\"\"Constructs a ResNext-101 model.\n    \"\"\"\n    model = ResNeXt(BottleneckBlock, [3, 4, 23, 3])\n    return model",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnext101.py:177-187"
+    },
+    "6941": {
+        "file_id": 512,
+        "content": "The ResNext101 function constructs a ResNeXt-101 model using BottleneckBlock and the specified block configurations. It applies the layer2, layer3, and layer4 operations to x before returning the result.",
+        "type": "comment"
+    },
+    "6942": {
+        "file_id": 513,
+        "content": "/paddlevideo/modeling/backbones/stgcn.py",
+        "type": "filepath"
+    },
+    "6943": {
+        "file_id": 513,
+        "content": "The code incorporates image processing and Graph class, supports layouts like 'stgcn' and 'coco_keypoint'. It defines a STGCN model for spatio-temporal data processing using ConvTemporalGraphical layer. The code creates a STGCN class for skeleton-based action recognition with edge importance, applies networks, pools results, and averages before returning output.",
+        "type": "summary"
+    },
+    "6944": {
+        "file_id": 513,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nimport numpy as np\nfrom ..registry import BACKBONES\nfrom ..weight_init import weight_init_\ndef zero(x):\n    return 0\ndef iden(x):\n    return x\ndef einsum(x, A):\n    \"\"\"paddle.einsum will be implemented in release/2.2.\n    \"\"\"\n    x = x.transpose((0, 2, 3, 1, 4))\n    n, c, t, k, v = x.shape\n    k2, v2, w = A.shape\n    assert (k == k2 and v == v2), \"Args of einsum not match!\"",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/stgcn.py:1-37"
+    },
+    "6945": {
+        "file_id": 513,
+        "content": "This code snippet imports necessary libraries, defines several functions (zero, iden, einsum), and registers the BACKBONES. The purpose of this module seems to be defining backbone architectures or functions used in image processing tasks. However, more context is needed to understand the specific functionality of these functions or their use within the BACKBONES registry.",
+        "type": "comment"
+    },
+    "6946": {
+        "file_id": 513,
+        "content": "    x = x.reshape((n, c, t, k * v))\n    A = A.reshape((k * v, w))\n    y = paddle.matmul(x, A)\n    return y\ndef get_hop_distance(num_node, edge, max_hop=1):\n    A = np.zeros((num_node, num_node))\n    for i, j in edge:\n        A[j, i] = 1\n        A[i, j] = 1\n    # compute hop steps\n    hop_dis = np.zeros((num_node, num_node)) + np.inf\n    transfer_mat = [np.linalg.matrix_power(A, d) for d in range(max_hop + 1)]\n    arrive_mat = (np.stack(transfer_mat) > 0)\n    for d in range(max_hop, -1, -1):\n        hop_dis[arrive_mat[d]] = d\n    return hop_dis\ndef normalize_digraph(A):\n    Dl = np.sum(A, 0)\n    num_node = A.shape[0]\n    Dn = np.zeros((num_node, num_node))\n    for i in range(num_node):\n        if Dl[i] > 0:\n            Dn[i, i] = Dl[i]**(-1)\n    AD = np.dot(A, Dn)\n    return AD\nclass Graph():\n    def __init__(self,\n                 layout='openpose',\n                 strategy='uniform',\n                 max_hop=1,\n                 dilation=1):\n        self.max_hop = max_hop\n        self.dilation = dilation\n        self.get_edge(layout)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/stgcn.py:38-80"
+    },
+    "6947": {
+        "file_id": 513,
+        "content": "This code defines a Graph class and three functions: get_hop_distance, normalize_digraph, and a constructor for the Graph class. The Graph class initializes with layout, strategy, max_hop, and dilation parameters. The get_hop_distance function computes hop distances between nodes in a graph up to max_hop level. The normalize_digraph function calculates and applies row-wise node degrees to normalize the adjacency matrix. The constructor initializes an instance of the Graph class with given parameters.",
+        "type": "comment"
+    },
+    "6948": {
+        "file_id": 513,
+        "content": "        self.hop_dis = get_hop_distance(self.num_node,\n                                        self.edge,\n                                        max_hop=max_hop)\n        self.get_adjacency(strategy)\n    def __str__(self):\n        return self.A\n    def get_edge(self, layout):\n        # edge is a list of [child, parent] paris\n        if layout == 'fsd10':\n            self.num_node = 25\n            self_link = [(i, i) for i in range(self.num_node)]\n            neighbor_link = [(1, 8), (0, 1), (15, 0), (17, 15), (16, 0),\n                             (18, 16), (5, 1), (6, 5), (7, 6), (2, 1), (3, 2),\n                             (4, 3), (9, 8), (10, 9), (11, 10), (24, 11),\n                             (22, 11), (23, 22), (12, 8), (13, 12), (14, 13),\n                             (21, 14), (19, 14), (20, 19)]\n            self.edge = self_link + neighbor_link\n            self.center = 8\n        elif layout == 'ntu-rgb+d':\n            self.num_node = 25\n            self_link = [(i, i) for i in range(self.num_node)]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/stgcn.py:81-104"
+    },
+    "6949": {
+        "file_id": 513,
+        "content": "The code initializes the hop distance and edge based on the number of nodes, maximum hops, and layout type. It defines self_link as intra-node connections and neighbor_link as inter-node connections. The center node is determined based on the layout.",
+        "type": "comment"
+    },
+    "6950": {
+        "file_id": 513,
+        "content": "            neighbor_1base = [(1, 2), (2, 21), (3, 21), (4, 3), (5, 21), (6, 5),\n                              (7, 6), (8, 7), (9, 21), (10, 9), (11, 10),\n                              (12, 11), (13, 1), (14, 13), (15, 14), (16, 15),\n                              (17, 1), (18, 17), (19, 18), (20, 19), (22, 23),\n                              (23, 8), (24, 25), (25, 12)]\n            neighbor_link = [(i - 1, j - 1) for (i, j) in neighbor_1base]\n            self.edge = self_link + neighbor_link\n            self.center = 21 - 1\n        elif layout == 'coco_keypoint':\n            self.num_node = 17\n            self_link = [(i, i) for i in range(self.num_node)]\n            neighbor_1base = [(0, 1), (0, 2), (1, 3), (2, 4), (3, 5), (4, 6),\n                              (5, 7), (6, 8), (7, 9), (8, 10), (5, 11), (6, 12),\n                              (11, 13), (12, 14), (13, 15), (14, 16), (11, 12)]\n            neighbor_link = [(i, j) for (i, j) in neighbor_1base]\n            self.edge = self_link + neighbor_link",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/stgcn.py:105-120"
+    },
+    "6951": {
+        "file_id": 513,
+        "content": "The code initializes 'self.edge' and 'self.center', defining nodes, self-links, and neighboring node links based on the specified layout ('stgcn' or 'coco_keypoint'). For 'stgcn', there are 25 nodes with various connections, while for 'coco_keypoint', there are 17 nodes with specific connections.",
+        "type": "comment"
+    },
+    "6952": {
+        "file_id": 513,
+        "content": "            self.center = 11\n        else:\n            raise ValueError(\"Do Not Exist This Layout.\")\n    def get_adjacency(self, strategy):\n        valid_hop = range(0, self.max_hop + 1, self.dilation)\n        adjacency = np.zeros((self.num_node, self.num_node))\n        for hop in valid_hop:\n            adjacency[self.hop_dis == hop] = 1\n        normalize_adjacency = normalize_digraph(adjacency)\n        if strategy == 'spatial':\n            A = []\n            for hop in valid_hop:\n                a_root = np.zeros((self.num_node, self.num_node))\n                a_close = np.zeros((self.num_node, self.num_node))\n                a_further = np.zeros((self.num_node, self.num_node))\n                for i in range(self.num_node):\n                    for j in range(self.num_node):\n                        if self.hop_dis[j, i] == hop:\n                            if self.hop_dis[j, self.center] == self.hop_dis[\n                                    i, self.center]:\n                                a_root[j, i] = normalize_adjacency[j, i]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/stgcn.py:121-143"
+    },
+    "6953": {
+        "file_id": 513,
+        "content": "This function sets the adjacency matrix for STGCN based on the strategy. It initializes the adjacency matrix as a zero matrix, then fills it with 1s for valid hops. The adjacency matrix is normalized using `normalize_digraph`. If the strategy is 'spatial', it iterates over each pair of nodes and populates the adjacency matrix accordingly based on their hop distance from the center node and their hop distance to each other.",
+        "type": "comment"
+    },
+    "6954": {
+        "file_id": 513,
+        "content": "                            elif self.hop_dis[j, self.center] > self.hop_dis[\n                                    i, self.center]:\n                                a_close[j, i] = normalize_adjacency[j, i]\n                            else:\n                                a_further[j, i] = normalize_adjacency[j, i]\n                if hop == 0:\n                    A.append(a_root)\n                else:\n                    A.append(a_root + a_close)\n                    A.append(a_further)\n            A = np.stack(A)\n            self.A = A\n        else:\n            raise ValueError(\"Do Not Exist This Strategy\")\nclass ConvTemporalGraphical(nn.Layer):\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 kernel_size,\n                 t_kernel_size=1,\n                 t_stride=1,\n                 t_padding=0,\n                 t_dilation=1):\n        super().__init__()\n        self.kernel_size = kernel_size\n        self.conv = nn.Conv2D(in_channels,\n                              out_channels * kernel_size,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/stgcn.py:144-174"
+    },
+    "6955": {
+        "file_id": 513,
+        "content": "This code implements a ConvTemporalGraphical layer, which is a backbone architecture for STGCN. It initializes the ConvTemporalGraphical layer with input and output channels, kernel size, and temporal parameters. The code handles different strategies to build the adjacency matrix (A) for the graph convolution by considering close and further nodes based on hop distance from the central node. If hop == 0, it appends A to a list, otherwise appends both close and further A matrices. Finally, it stacks the A matrices into a numpy array and assigns it to self.A.",
+        "type": "comment"
+    },
+    "6956": {
+        "file_id": 513,
+        "content": "                              kernel_size=(t_kernel_size, 1),\n                              padding=(t_padding, 0),\n                              stride=(t_stride, 1),\n                              dilation=(t_dilation, 1))\n    def forward(self, x, A):\n        assert A.shape[0] == self.kernel_size\n        x = self.conv(x)\n        n, kc, t, v = x.shape\n        x = x.reshape((n, self.kernel_size, kc // self.kernel_size, t, v))\n        x = einsum(x, A)\n        return x, A\nclass st_gcn_block(nn.Layer):\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 kernel_size,\n                 stride=1,\n                 dropout=0,\n                 residual=True):\n        super(st_gcn_block, self).__init__()\n        assert len(kernel_size) == 2\n        assert kernel_size[0] % 2 == 1\n        padding = ((kernel_size[0] - 1) // 2, 0)\n        self.gcn = ConvTemporalGraphical(in_channels, out_channels,\n                                         kernel_size[1])\n        self.tcn = nn.Sequential(",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/stgcn.py:175-209"
+    },
+    "6957": {
+        "file_id": 513,
+        "content": "The code defines a ConvTemporalGraphical layer and an STGCNBlock. The ConvTemporalGraphical layer is a 2D convolutional layer with temporal kernel size, padding, stride, and dilation. The STGCNBlock is a residual block that takes input and output channels, temporal kernel size, stride, and dropout as inputs. It initializes the GCN layer and TCN layers sequentially, with the GCN layer performing temporal graph convolution and the TCN layers performing temporal convolutions.",
+        "type": "comment"
+    },
+    "6958": {
+        "file_id": 513,
+        "content": "            nn.BatchNorm2D(out_channels),\n            nn.ReLU(),\n            nn.Conv2D(\n                out_channels,\n                out_channels,\n                (kernel_size[0], 1),\n                (stride, 1),\n                padding,\n            ),\n            nn.BatchNorm2D(out_channels),\n            nn.Dropout(dropout),\n        )\n        if not residual:\n            self.residual = zero\n        elif (in_channels == out_channels) and (stride == 1):\n            self.residual = iden\n        else:\n            self.residual = nn.Sequential(\n                nn.Conv2D(in_channels,\n                          out_channels,\n                          kernel_size=1,\n                          stride=(stride, 1)),\n                nn.BatchNorm2D(out_channels),\n            )\n        self.relu = nn.ReLU()\n    def forward(self, x, A):\n        res = self.residual(x)\n        x, A = self.gcn(x, A)\n        x = self.tcn(x) + res\n        return self.relu(x), A\n@BACKBONES.register()\nclass STGCN(nn.Layer):\n    \"\"\"\n    ST-GCN model from:\n ",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/stgcn.py:210-251"
+    },
+    "6959": {
+        "file_id": 513,
+        "content": "This code defines a STGCN (Spatio-Temporal Graph Convolutional Network) model. It includes layers such as BatchNormalization, ReLU activation, and convolution operations for processing spatial and temporal data. The forward method applies these operations to input features x and adjacency matrix A.",
+        "type": "comment"
+    },
+    "6960": {
+        "file_id": 513,
+        "content": "   `\"Spatial Temporal Graph Convolutional Networks for Skeleton-Based Action Recognition\" <https://arxiv.org/abs/1801.07455>`_\n    Args:\n        in_channels: int, channels of vertex coordinate. 2 for (x,y), 3 for (x,y,z). Default 2.\n        edge_importance_weighting: bool, whether to use edge attention. Default True.\n        data_bn: bool, whether to use data BatchNorm. Default True.\n    \"\"\"\n    def __init__(self,\n                 in_channels=2,\n                 edge_importance_weighting=True,\n                 data_bn=True,\n                 layout='fsd10',\n                 strategy='spatial',\n                 **kwargs):\n        super(STGCN, self).__init__()\n        self.data_bn = data_bn\n        # load graph\n        self.graph = Graph(\n            layout=layout,\n            strategy=strategy,\n        )\n        A = paddle.to_tensor(self.graph.A, dtype='float32')\n        self.register_buffer('A', A)\n        # build networks\n        spatial_kernel_size = A.shape[0]\n        temporal_kernel_size = 9\n        kernel_size = (temporal_kernel_size, spatial_kernel_size)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/stgcn.py:251-278"
+    },
+    "6961": {
+        "file_id": 513,
+        "content": "This code defines the STGCN (Spatial Temporal Graph Convolutional Networks) class, which is a model for skeleton-based action recognition. It takes arguments like in_channels, edge_importance_weighting, and data_bn to determine the network configuration. It loads graph data and builds networks with specific kernel sizes for spatial and temporal dimensions.",
+        "type": "comment"
+    },
+    "6962": {
+        "file_id": 513,
+        "content": "        self.data_bn = nn.BatchNorm1D(in_channels *\n                                      A.shape[1]) if self.data_bn else iden\n        kwargs0 = {k: v for k, v in kwargs.items() if k != 'dropout'}\n        self.st_gcn_networks = nn.LayerList((\n            st_gcn_block(in_channels,\n                         64,\n                         kernel_size,\n                         1,\n                         residual=False,\n                         **kwargs0),\n            st_gcn_block(64, 64, kernel_size, 1, **kwargs),\n            st_gcn_block(64, 64, kernel_size, 1, **kwargs),\n            st_gcn_block(64, 64, kernel_size, 1, **kwargs),\n            st_gcn_block(64, 128, kernel_size, 2, **kwargs),\n            st_gcn_block(128, 128, kernel_size, 1, **kwargs),\n            st_gcn_block(128, 128, kernel_size, 1, **kwargs),\n            st_gcn_block(128, 256, kernel_size, 2, **kwargs),\n            st_gcn_block(256, 256, kernel_size, 1, **kwargs),\n            st_gcn_block(256, 256, kernel_size, 1, **kwargs),\n        ))\n        # initialize parameters for edge importance weighting",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/stgcn.py:279-300"
+    },
+    "6963": {
+        "file_id": 513,
+        "content": "This code initializes a series of ST-GCN blocks with different configurations for the ST-GCN backbone, including batch normalization and specific layer dimensions. These blocks are stored in a LayerList for flexibility and efficient computation.",
+        "type": "comment"
+    },
+    "6964": {
+        "file_id": 513,
+        "content": "        if edge_importance_weighting:\n            self.edge_importance = nn.ParameterList([\n                self.create_parameter(\n                    shape=self.A.shape,\n                    default_initializer=nn.initializer.Constant(1))\n                for i in self.st_gcn_networks\n            ])\n        else:\n            self.edge_importance = [1] * len(self.st_gcn_networks)\n        self.pool = nn.AdaptiveAvgPool2D(output_size=(1, 1))\n    def init_weights(self):\n        \"\"\"Initiate the parameters.\n        \"\"\"\n        for layer in self.sublayers():\n            if isinstance(layer, nn.Conv2D):\n                weight_init_(layer, 'Normal', mean=0.0, std=0.02)\n            elif isinstance(layer, nn.BatchNorm2D):\n                weight_init_(layer, 'Normal', mean=1.0, std=0.02)\n            elif isinstance(layer, nn.BatchNorm1D):\n                weight_init_(layer, 'Normal', mean=1.0, std=0.02)\n    def forward(self, x):\n        # data normalization\n        N, C, T, V, M = x.shape\n        x = x.transpose((0, 4, 3, 1, 2))  # N, M, V, C, T",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/stgcn.py:301-327"
+    },
+    "6965": {
+        "file_id": 513,
+        "content": "Code creates edge importance parameters if edge_importance_weighting is True, otherwise sets all edge importances to 1. Initializes weights for convolutional layers and batch normalization layers with specified means and standard deviations. The forward function transposes the input tensor shape before processing.",
+        "type": "comment"
+    },
+    "6966": {
+        "file_id": 513,
+        "content": "        x = x.reshape((N * M, V * C, T))\n        if self.data_bn:\n            x.stop_gradient = False\n        x = self.data_bn(x)\n        x = x.reshape((N, M, V, C, T))\n        x = x.transpose((0, 1, 3, 4, 2))  # N, M, C, T, V\n        x = x.reshape((N * M, C, T, V))\n        # forward\n        for gcn, importance in zip(self.st_gcn_networks, self.edge_importance):\n            x, _ = gcn(x, paddle.multiply(self.A, importance))\n        x = self.pool(x)  # NM,C,T,V --> NM,C,1,1\n        C = x.shape[1]\n        x = paddle.reshape(x, (N, M, C, 1, 1)).mean(axis=1)  # N,C,1,1\n        return x",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/stgcn.py:328-343"
+    },
+    "6967": {
+        "file_id": 513,
+        "content": "This code reshapes the input tensor and applies batch normalization before reshaping again. It then transposes the dimensions and reshapes once more. The main operation involves iterating through each ST-GCN network and applying it to the input with multiplied edge importance, followed by pooling. Finally, it reshapes the output, performs averaging over the third dimension, and returns the result.",
+        "type": "comment"
+    },
+    "6968": {
+        "file_id": 514,
+        "content": "/paddlevideo/modeling/backbones/swin_transformer.py",
+        "type": "filepath"
+    },
+    "6969": {
+        "file_id": 514,
+        "content": "The code introduces a DropPath layer, Swin Transformer backbone with window-based multi-head attention for image processing, and implements the Swin Transformer Block 3D in PaddleVideo, which also features a 3D PatchEmbed3D and 3D backbone.",
+        "type": "summary"
+    },
+    "6970": {
+        "file_id": 514,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom functools import lru_cache, reduce\nfrom operator import mul\nimport numpy as np\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nfrom paddle.nn.initializer import Constant\nfrom ...utils import load_ckpt\nfrom ..registry import BACKBONES\nfrom ..weight_init import trunc_normal_\nzeros_ = Constant(value=0.)\nones_ = Constant(value=1.)\ndef drop_path(x, drop_prob=0., training=False):\n    \"\"\"Drop paths (Stochastic Depth) per sample (when applied in main path of residual blocks).",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/swin_transformer.py:1-33"
+    },
+    "6971": {
+        "file_id": 514,
+        "content": "Copyright notice, import statements, and drop_path function definition for stochastic depth in residual blocks.",
+        "type": "comment"
+    },
+    "6972": {
+        "file_id": 514,
+        "content": "    the original name is misleading as 'Drop Connect' is a different form of dropout in a separate paper...\n    # issuecomment-532968956 ...\n    See discussion: https://github.com/tensorflow/tpu/issues/494\n    \"\"\"\n    if drop_prob == 0. or not training:\n        return x\n    keep_prob = paddle.to_tensor(1 - drop_prob)\n    shape = (paddle.shape(x)[0], ) + (1, ) * (x.ndim - 1)\n    random_tensor = keep_prob + paddle.rand(shape, dtype=x.dtype)\n    random_tensor = paddle.floor(random_tensor)  # binarize\n    output = x.divide(keep_prob) * random_tensor\n    return output\nclass DropPath(nn.Layer):\n    \"\"\"Drop paths (Stochastic Depth) per sample  (when applied in main path of residual blocks).\n    \"\"\"\n    def __init__(self, drop_prob=None):\n        super(DropPath, self).__init__()\n        self.drop_prob = drop_prob\n    def forward(self, x):\n        return drop_path(x, self.drop_prob, self.training)\nclass Mlp(nn.Layer):\n    \"\"\" Multilayer perceptron.\"\"\"\n    def __init__(self,\n                 in_features,\n                 hidden_features=None,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/swin_transformer.py:34-64"
+    },
+    "6973": {
+        "file_id": 514,
+        "content": "This code snippet defines a \"DropPath\" layer that applies drop paths (Stochastic Depth) to the input, based on the provided drop probability. The drop paths are applied in the main path of residual blocks for each sample. This class also includes a forward method that drops out elements from the input with the specified probability during training but returns the original input unchanged when not training or if the drop probability is 0.",
+        "type": "comment"
+    },
+    "6974": {
+        "file_id": 514,
+        "content": "                 out_features=None,\n                 act_layer=nn.GELU,\n                 drop=0.):\n        super().__init__()\n        out_features = out_features or in_features\n        hidden_features = hidden_features or in_features\n        self.fc1 = nn.Linear(in_features, hidden_features)\n        self.act = act_layer()\n        self.fc2 = nn.Linear(hidden_features, out_features)\n        self.drop = nn.Dropout(drop)\n    def forward(self, x):\n        x = self.fc1(x)\n        x = self.act(x)\n        x = self.drop(x)\n        x = self.fc2(x)\n        x = self.drop(x)\n        return x\ndef window_partition(x, window_size):\n    \"\"\"window_partition\n    Args:\n        x (Tensor): x.shape = [B, D, H, W, C]\n        window_size (tuple[int]): window_size\n    Returns:\n        Tensor: (B*num_windows, window_size*window_size, C)\n    \"\"\"\n    B, D, H, W, C = x.shape\n    x = x.reshape([\n        B, D // window_size[0], window_size[0], H // window_size[1],\n        window_size[1], W // window_size[2], window_size[2], C\n    ])\n    windows = x.transpose([0, 1, 3, 5, 2, 4, 6,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/swin_transformer.py:65-99"
+    },
+    "6975": {
+        "file_id": 514,
+        "content": "The code above defines a layer for the Swin Transformer backbone. It contains two linear layers, an activation function (GELU), and a dropout layer. The `window_partition` function partitions input tensor based on specified window size.",
+        "type": "comment"
+    },
+    "6976": {
+        "file_id": 514,
+        "content": "                           7]).reshape([-1, reduce(mul, window_size), C])\n    return windows\nclass Identity(nn.Layer):\n    def __init__(self):\n        super(Identity, self).__init__()\n    def forward(self, input):\n        return input\ndef window_reverse(windows, window_size, B, D, H, W):\n    \"\"\"\n    Args:\n        windows: (B*num_windows, window_size, window_size, C)\n        window_size (tuple[int]): Window size\n        H (int): Height of image\n        W (int): Width of image\n    Returns:\n        x: (B, D, H, W, C)\n    \"\"\"\n    x = windows.reshape([\n        B, D // window_size[0], H // window_size[1], W // window_size[2],\n        window_size[0], window_size[1], window_size[2], -1\n    ])\n    x = x.transpose([0, 1, 4, 2, 5, 3, 6, 7]).reshape([B, D, H, W, -1])\n    return x\ndef get_window_size(x_size, window_size, shift_size=None):\n    use_window_size = list(window_size)\n    if shift_size is not None:\n        use_shift_size = list(shift_size)\n    for i in range(len(x_size)):\n        if x_size[i] <= window_size[i]:\n            use_window_size[i] = x_size[i]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/swin_transformer.py:100-137"
+    },
+    "6977": {
+        "file_id": 514,
+        "content": "The code defines a function `window_reverse` that takes a set of windows and rearranges them back into the original image shape. The `get_window_size` function determines the appropriate window size based on input dimensions. Both functions are used in the Swin Transformer backbone model.",
+        "type": "comment"
+    },
+    "6978": {
+        "file_id": 514,
+        "content": "            if shift_size is not None:\n                use_shift_size[i] = 0\n    if shift_size is None:\n        return tuple(use_window_size)\n    else:\n        return tuple(use_window_size), tuple(use_shift_size)\nclass WindowAttention3D(nn.Layer):\n    \"\"\" Window based multi-head self attention (W-MSA) module with relative position bias.\n    It supports both of shifted and non-shifted window.\n    Args:\n        dim (int): Number of input channels.\n        window_size (tuple[int]): The temporal length, height and width of the window.\n        num_heads (int): Number of attention heads.\n        qkv_bias (bool, optional):  If True, add a learnable bias to query, key, value. Default: True\n        qk_scale (float | None, optional): Override default qk scale of head_dim ** -0.5 if set\n        attn_drop (float, optional): Dropout ratio of attention weight. Default: 0.0\n        proj_drop (float, optional): Dropout ratio of output. Default: 0.0\n    \"\"\"\n    def __init__(self,\n                 dim,\n                 window_size,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/swin_transformer.py:138-161"
+    },
+    "6979": {
+        "file_id": 514,
+        "content": "This code defines a class called \"WindowAttention3D\" which implements a window-based multi-head self attention module with relative position bias. It supports both shifted and non-shifted windows, and takes in parameters such as the number of input channels (dim), temporal length, height and width of the window (window_size), number of attention heads (num_heads), whether to add a learnable bias to query, key, value (qkv_bias), override default qk scale of head_dim ** -0.5 if set (qk_scale), dropout ratio of attention weight (attn_drop), and dropout ratio of output (proj_drop). The function at the top part of the code determines whether to use window or shift size based on a given value.",
+        "type": "comment"
+    },
+    "6980": {
+        "file_id": 514,
+        "content": "                 num_heads,\n                 qkv_bias=False,\n                 qk_scale=None,\n                 attn_drop=0.,\n                 proj_drop=0.):\n        super().__init__()\n        self.dim = dim\n        self.window_size = window_size  # Wd, Wh, Ww\n        self.num_heads = num_heads\n        head_dim = dim // num_heads\n        self.scale = qk_scale or head_dim**-0.5\n        # define a parameter table of relative position bias\n        self.relative_position_bias_table = self.create_parameter(\n            shape=((2 * window_size[0] - 1) * (2 * window_size[1] - 1) *\n                   (2 * window_size[2] - 1), num_heads),\n            default_initializer=zeros_,\n        )  # 2*Wd-1 * 2*Wh-1 * 2*Ww-1, nH\n        self.add_parameter(\"relative_position_bias_table\",\n                           self.relative_position_bias_table)\n        # get pair-wise relative position index for each token inside the window\n        coords_d = paddle.arange(self.window_size[0])\n        coords_h = paddle.arange(self.window_size[1])",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/swin_transformer.py:162-185"
+    },
+    "6981": {
+        "file_id": 514,
+        "content": "This code initializes the Swin Transformer's self-attention module. It defines a window size and number of attention heads, calculates head dimensions, sets up position bias table, and adds parameters for position bias table and head dimensions. The code also creates coordinate arrays for dimension and height inside the window.",
+        "type": "comment"
+    },
+    "6982": {
+        "file_id": 514,
+        "content": "        coords_w = paddle.arange(self.window_size[2])\n        coords = paddle.stack(paddle.meshgrid(coords_d, coords_h,\n                                              coords_w))  # 3, Wd, Wh, Ww\n        coords_flatten = paddle.flatten(coords, 1)  # 3, Wd*Wh*Ww\n        relative_coords = coords_flatten.unsqueeze(\n            axis=2) - coords_flatten.unsqueeze(axis=1)  # 3, Wd*Wh*Ww, Wd*Wh*Ww\n        # relative_coords = coords_flatten.unsqueeze(2) - coords_flatten.unsqueeze(1)  # 3, Wd*Wh*Ww, Wd*Wh*Ww\n        relative_coords = relative_coords.transpose([1, 2, 0\n                                                     ])  # Wd*Wh*Ww, Wd*Wh*Ww, 3\n        relative_coords[:, :,\n                        0] += self.window_size[0] - 1  # shift to start from 0\n        relative_coords[:, :, 1] += self.window_size[1] - 1\n        relative_coords[:, :, 2] += self.window_size[2] - 1\n        relative_coords[:, :, 0] *= (2 * self.window_size[1] -\n                                     1) * (2 * self.window_size[2] - 1)\n        relative_coords[:, :, 1] *= (2 * self.window_size[2] - 1)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/swin_transformer.py:186-204"
+    },
+    "6983": {
+        "file_id": 514,
+        "content": "This code performs relative position encoding for the Swin Transformer by calculating relative coordinates of patches within a sliding window. It first creates 2D and 3D coordinate grids, then subtracts them to obtain relative positions. Finally, it shifts and scales the relative coordinates to fit the range of the window size.",
+        "type": "comment"
+    },
+    "6984": {
+        "file_id": 514,
+        "content": "        relative_position_index = relative_coords.sum(\n            axis=-1)  # Wd*Wh*Ww, Wd*Wh*Ww\n        self.register_buffer(\"relative_position_index\", relative_position_index)\n        self.qkv = nn.Linear(dim, dim * 3, bias_attr=qkv_bias)\n        self.attn_drop = nn.Dropout(attn_drop)\n        self.proj = nn.Linear(dim, dim)\n        self.proj_drop = nn.Dropout(proj_drop)\n        trunc_normal_(self.relative_position_bias_table, std=0.02)\n        self.softmax = nn.Softmax(axis=-1)\n    def forward(self, x, mask=None):\n        \"\"\" Forward function.\n        Args:\n            x: input features with shape of (num_windows*B, N, C)\n            mask: (0/-inf) mask with shape of (num_windows, N, N) or None\n        \"\"\"\n        B_, N, C = x.shape\n        qkv = self.qkv(x).reshape(\n            [B_, N, 3, self.num_heads,\n             C // self.num_heads]).transpose([2, 0, 3, 1, 4])\n        q, k, v = qkv[0], qkv[1], qkv[2]  # B_, nH, N, C\n        q = q * self.scale\n        attn = q @ k.transpose([0, 1, 3, 2])\n        relative_position_bias = self.relative_position_bias_table[",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/swin_transformer.py:205-232"
+    },
+    "6985": {
+        "file_id": 514,
+        "content": "This code initializes a Swin Transformer backbone by registering a buffer for relative position indices and defining the linear projections, dropouts, softmax function, and forward pass. The forward function takes input features of shape (num_windows*B, N, C) and performs multi-head self-attention with learned query, key, and value matrices, scaled by the square root of the dimension. Attention is calculated using dot product between queries and keys, and then passed through a softmax function for normalization before being multiplied by values and projected back to the original feature space.",
+        "type": "comment"
+    },
+    "6986": {
+        "file_id": 514,
+        "content": "            self.relative_position_index[:N, :N].reshape([-1])].reshape(\n                [N, N, -1])  # Wd*Wh*Ww,Wd*Wh*Ww,nH\n        relative_position_bias = relative_position_bias.transpose(\n            [2, 0, 1])  # nH, Wd*Wh*Ww, Wd*Wh*Ww\n        attn = attn + relative_position_bias.unsqueeze(0)  # B_, nH, N, N\n        if mask is not None:\n            nW = mask.shape[0]\n            attn = attn.reshape([B_ // nW, nW, self.num_heads, N, N\n                                 ]) + mask.unsqueeze(1).unsqueeze(0).astype(attn.dtype)\n            attn = attn.reshape([-1, self.num_heads, N, N])\n            attn = self.softmax(attn)\n        else:\n            attn = self.softmax(attn)\n        attn = self.attn_drop(attn)\n        x = (attn @ v).transpose([0, 2, 1, 3]).reshape([B_, N, C])\n        x = self.proj(x)\n        x = self.proj_drop(x)\n        return x\nclass SwinTransformerBlock3D(nn.Layer):\n    \"\"\" Swin Transformer Block.\n    Args:\n        dim (int): Number of input channels.\n        num_heads (int): Number of attention heads.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/swin_transformer.py:233-261"
+    },
+    "6987": {
+        "file_id": 514,
+        "content": "This code defines the Swin Transformer Block 3D, which implements a self-attention mechanism for multi-dimensional data. It adds relative position biases to the attention scores, applies a mask if provided, and applies softmax normalization. Finally, it passes the result through two dropout layers before outputting the transformed feature map.",
+        "type": "comment"
+    },
+    "6988": {
+        "file_id": 514,
+        "content": "        window_size (tuple[int]): Window size.\n        shift_size (tuple[int]): Shift size for SW-MSA.\n        mlp_ratio (float): Ratio of mlp hidden dim to embedding dim.\n        qkv_bias (bool, optional): If True, add a learnable bias to query, key, value. Default: True\n        qk_scale (float | None, optional): Override default qk scale of head_dim ** -0.5 if set.\n        drop (float, optional): Dropout rate. Default: 0.0\n        attn_drop (float, optional): Attention dropout rate. Default: 0.0\n        drop_path (float, optional): Stochastic depth rate. Default: 0.0\n        act_layer (nn.Layer, optional): Activation layer. Default: nn.GELU\n        norm_layer (nn.Layer, optional): Normalization layer.  Default: nn.LayerNorm\n    \"\"\"\n    def __init__(self,\n                 dim,\n                 num_heads,\n                 window_size=(2, 7, 7),\n                 shift_size=(0, 0, 0),\n                 mlp_ratio=4.,\n                 qkv_bias=True,\n                 qk_scale=None,\n                 drop=0.,\n                 attn_drop=0.,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/swin_transformer.py:262-282"
+    },
+    "6989": {
+        "file_id": 514,
+        "content": "This code initializes a class for the Swin Transformer backbone, specifying the dimensions, number of heads, window size, shift size, mlp ratio, and various optional parameters like dropout rates and activation layers.",
+        "type": "comment"
+    },
+    "6990": {
+        "file_id": 514,
+        "content": "                 drop_path=0.,\n                 act_layer=nn.GELU,\n                 norm_layer=nn.LayerNorm,\n                 use_checkpoint=False):\n        super().__init__()\n        self.dim = dim\n        self.num_heads = num_heads\n        self.window_size = window_size\n        self.shift_size = shift_size\n        self.mlp_ratio = mlp_ratio\n        # self.use_checkpoint=use_checkpoint\n        assert 0 <= self.shift_size[0] < self.window_size[\n            0], \"shift_size must in 0-window_size\"\n        assert 0 <= self.shift_size[1] < self.window_size[\n            1], \"shift_size must in 0-window_size\"\n        assert 0 <= self.shift_size[2] < self.window_size[\n            2], \"shift_size must in 0-window_size\"\n        self.norm1 = norm_layer(dim)\n        self.attn = WindowAttention3D(dim,\n                                      window_size=self.window_size,\n                                      num_heads=num_heads,\n                                      qkv_bias=qkv_bias,\n                                      qk_scale=qk_scale,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/swin_transformer.py:283-307"
+    },
+    "6991": {
+        "file_id": 514,
+        "content": "The code defines a class for the Swin Transformer backbone in PaddleVideo. It takes input parameters such as dimension, number of attention heads, window size, and shift size, and initializes layers including norm_layer and attn layer. It performs assertions on shift sizes to ensure they are within the window size limits and then initializes the normalization layer.",
+        "type": "comment"
+    },
+    "6992": {
+        "file_id": 514,
+        "content": "                                      attn_drop=attn_drop,\n                                      proj_drop=drop)\n        self.drop_path = DropPath(drop_path) if drop_path > 0. else Identity()\n        self.norm2 = norm_layer(dim)\n        mlp_hidden_dim = int(dim * mlp_ratio)\n        self.mlp = Mlp(in_features=dim,\n                       hidden_features=mlp_hidden_dim,\n                       act_layer=act_layer,\n                       drop=drop)\n    def forward_part1(self, x, mask_matrix):\n        B = paddle.shape(x)[0]\n        _, D, H, W, C = x.shape\n        window_size, shift_size = get_window_size((D, H, W), self.window_size,\n                                                  self.shift_size)\n        x = self.norm1(x)\n        # pad feature maps to multiples of window size\n        pad_l = pad_t = pad_d0 = 0\n        pad_d1 = (window_size[0] - D % window_size[0]) % window_size[0]\n        pad_b = (window_size[1] - H % window_size[1]) % window_size[1]\n        pad_r = (window_size[2] - W % window_size[2]) % window_size[2]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/swin_transformer.py:308-330"
+    },
+    "6993": {
+        "file_id": 514,
+        "content": "This code defines a Swin Transformer backbone class with parameters like window size, shift size, and drop path. It initializes the layers including attention and mlp blocks. The forward_part1 function pads input features to multiples of window size for processing.",
+        "type": "comment"
+    },
+    "6994": {
+        "file_id": 514,
+        "content": "        x = F.pad(x, (pad_l, pad_r, pad_t, pad_b, pad_d0, pad_d1),\n                  data_format='NDHWC')\n        _, Dp, Hp, Wp, _ = x.shape\n        # cyclic shift\n        if any(i > 0 for i in shift_size):\n            shifted_x = paddle.roll(x,\n                                    shifts=(-shift_size[0], -shift_size[1],\n                                            -shift_size[2]),\n                                    axis=(1, 2, 3))\n            attn_mask = mask_matrix\n        else:\n            shifted_x = x\n            attn_mask = None\n        # partition windows\n        x_windows = window_partition(shifted_x,\n                                     window_size)  # B*nW, Wd*Wh*Ww, C\n        # W-MSA/SW-MSA\n        attn_windows = self.attn(x_windows, mask=attn_mask)  # B*nW, Wd*Wh*Ww, C\n        # merge windows\n        attn_windows = attn_windows.reshape([-1, *(window_size + (C, ))])\n        shifted_x = window_reverse(attn_windows, window_size, B, Dp, Hp,\n                                   Wp)  # B D' H' W' C\n        # reverse cyclic shift",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/swin_transformer.py:331-353"
+    },
+    "6995": {
+        "file_id": 514,
+        "content": "This code performs a cyclic shift on the input feature map, depending on the shift size. If any of the shift sizes are greater than 0, it applies the roll operation to the feature map along specific axes (1, 2, and 3). The shifted feature map is then partitioned into windows based on the window size specified. These windows go through a self-attention layer (self.attn) and are reshaped accordingly. Finally, a reverse cyclic shift is applied to the result before returning the output feature map. This process helps in performing window-based self-attention or spatial-wise self-attention in the Swin Transformer architecture.",
+        "type": "comment"
+    },
+    "6996": {
+        "file_id": 514,
+        "content": "        if any(i > 0 for i in shift_size):\n            x = paddle.roll(shifted_x,\n                            shifts=(shift_size[0], shift_size[1],\n                                    shift_size[2]),\n                            axis=(1, 2, 3))\n        else:\n            x = shifted_x\n        if pad_d1 > 0 or pad_r > 0 or pad_b > 0:\n            x = x[:, :D, :H, :W, :]\n        return x\n    def forward_part2(self, x):\n        return self.drop_path(self.mlp(self.norm2(x)))\n    def forward(self, x, mask_matrix):\n        \"\"\" Forward function.\n        Args:\n            x: Input feature, tensor size (B, D, H, W, C).\n            mask_matrix: Attention mask for cyclic shift.\n        \"\"\"\n        shortcut = x\n        x = self.forward_part1(x, mask_matrix)\n        x = shortcut + self.drop_path(x).astype(shortcut.dtype)\n        x = x + self.forward_part2(x).astype(x.dtype)\n        return x\nclass PatchMerging(nn.Layer):\n    \"\"\" Patch Merging Layer\n    Args:\n        dim (int): Number of input channels.\n        norm_layer (nn.Layer, optional): Normalization layer.  Default: nn.LayerNorm",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/swin_transformer.py:354-390"
+    },
+    "6997": {
+        "file_id": 514,
+        "content": "The code defines a function for the forward pass of a neural network. It consists of two parts: `forward_part1` and `forward_part2`. The function takes an input tensor, performs some operations, and returns the result. The `forward_part1` function applies a shift operation to the input based on a specified shift size, followed by a padding operation if necessary. The `forward_part2` function passes the input through a multi-layer perceptron (MLP) and applies dropout. Finally, the `forward` function combines the outputs of these two parts and returns the result after adding it to an initial shortcut connection.",
+        "type": "comment"
+    },
+    "6998": {
+        "file_id": 514,
+        "content": "    \"\"\"\n    def __init__(self, dim, norm_layer=nn.LayerNorm):\n        super().__init__()\n        self.dim = dim\n        self.reduction = nn.Linear(4 * dim, 2 * dim, bias_attr=False)\n        self.norm = norm_layer(4 * dim)\n    def forward(self, x):\n        \"\"\" Forward function.\n        Args:\n            x: Input feature, tensor size (B, D, H, W, C).\n        \"\"\"\n        B, D, H, W, C = x.shape\n        # padding\n        pad_input = (H % 2 == 1) or (W % 2 == 1)\n        if pad_input:\n            x = F.pad(x, (0, W % 2, 0, H % 2, 0, 0), data_format='NDHWC')\n        x0 = x[:, :, 0::2, 0::2, :]  # B D H/2 W/2 C\n        x1 = x[:, :, 1::2, 0::2, :]  # B D H/2 W/2 C\n        x2 = x[:, :, 0::2, 1::2, :]  # B D H/2 W/2 C\n        x3 = x[:, :, 1::2, 1::2, :]  # B D H/2 W/2 C\n        x = paddle.concat([x0, x1, x2, x3], -1)  # B D H/2 W/2 4*C\n        x = self.norm(x)\n        x = self.reduction(x)\n        return x\n# cache each stage results\n@lru_cache()\ndef compute_mask(D, H, W, window_size, shift_size):\n    img_mask = paddle.zeros((1, D, H, W, 1))  # 1 Dp Hp Wp 1",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/swin_transformer.py:391-426"
+    },
+    "6999": {
+        "file_id": 514,
+        "content": "The code defines a Swin Transformer backbone for an image model. The `__init__` method initializes the Swin Transformer with specified dimension and normalization layer. The forward function processes input feature by splitting, concatenating, normalizing, and reducing dimensions. The `compute_mask` function generates an image mask using LRU caching.",
+        "type": "comment"
+    }
+}

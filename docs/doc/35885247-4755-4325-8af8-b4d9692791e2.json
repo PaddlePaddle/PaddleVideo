@@ -1,0 +1,20 @@
+{
+    "summary": "The code imports libraries, defines a function for parsing command line arguments, and sets up paths and licenses before building the model using PaddleVideo. It initializes segments (num_seg) and summarizes the model's parameters while calculating FLOPs if enabled.",
+    "details": [
+        {
+            "comment": "This code snippet is importing necessary libraries and defining a function for parsing command line arguments in the PaddleVideo project. The code also sets up some paths and licenses, ensuring compliance with the Apache License, Version 2.0.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/tools/summary.py\":0-33",
+            "content": "# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport argparse\nimport os\nimport sys\nimport os.path as osp\nimport paddle\nimport paddle.nn.functional as F\nfrom paddle.jit import to_static\nimport paddleslim\n__dir__ = os.path.dirname(os.path.abspath(__file__))\nsys.path.append(os.path.abspath(os.path.join(__dir__, '../')))\nfrom paddlevideo.modeling.builder import build_model\nfrom paddlevideo.utils import get_config\ndef parse_args():\n    parser = argparse.ArgumentParser(\"PaddleVideo Summary\")"
+        },
+        {
+            "comment": "This code parses arguments for the config file path, image size, and number of segments. It then trims unnecessary attributes from the training configuration before building the model using the parsed arguments.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/tools/summary.py\":34-68",
+            "content": "    parser.add_argument('-c',\n                        '--config',\n                        type=str,\n                        default='configs/example.yaml',\n                        help='config file path')\n    parser.add_argument(\"--img_size\", type=int, default=224)\n    parser.add_argument(\"--num_seg\", type=int, default=8)\n    parser.add_argument(\"--FLOPs\",\n                        action=\"store_true\",\n                        help=\"whether to print FLOPs\")\n    return parser.parse_args()\ndef _trim(cfg, args):\n    \"\"\"\n    Reuse the trainging config will bring useless attribute, such as: backbone.pretrained model. Trim it here.\n    \"\"\"\n    model_name = cfg.model_name\n    cfg = cfg.MODEL\n    cfg.backbone.pretrained = \"\"\n    if 'num_seg' in cfg.backbone:\n        cfg.backbone.num_seg = args.num_seg\n    return cfg, model_name\ndef main():\n    args = parse_args()\n    cfg, model_name = _trim(get_config(args.config, show=False), args)\n    print(f\"Building model({model_name})...\")\n    model = build_model(cfg)\n    img_size = args.img_size"
+        },
+        {
+            "comment": "This code snippet initializes the number of segments (num_seg) and currently only supports tsm. It generates a summary of the model's parameters using Paddle's summary function, and if FLOPs is enabled, it also calculates and prints the model's floating-point operations using paddleslim's analysis.flops function.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/tools/summary.py\":69-81",
+            "content": "    num_seg = args.num_seg\n    #NOTE: only support tsm now, will refine soon\n    params_info = paddle.summary(model, (1, 1, num_seg, 3, img_size, img_size))\n    print(params_info)\n    if args.FLOPs:\n        flops_info = paddleslim.analysis.flops(\n            model, [1, 1, num_seg, 3, img_size, img_size])\n        print(flops_info)\nif __name__ == \"__main__\":\n    main()"
+        }
+    ]
+}

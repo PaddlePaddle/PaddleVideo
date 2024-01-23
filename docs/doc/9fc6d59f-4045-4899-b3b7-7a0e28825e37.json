@@ -1,0 +1,10 @@
+{
+    "summary": "This code is specifying the files and directories to include in the package distribution for PaddleVideo. It includes important documents like LICENSE and README, utilities scripts like utils.py and ava_predict.py, and key data file Kinetics-400_label_list.txt. Additionally, it uses a recursive-include to incorporate all .py and .txt files within the paddlevideo directory.",
+    "details": [
+        {
+            "comment": "This code is specifying the files and directories to include in the package distribution for PaddleVideo. It includes important documents like LICENSE and README, utilities scripts like utils.py and ava_predict.py, and key data file Kinetics-400_label_list.txt. Additionally, it uses a recursive-include to incorporate all .py and .txt files within the paddlevideo directory.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/MANIFEST.in\":0-8",
+            "content": "include LICENSE\ninclude README.md\ninclude tools/__init__.py\ninclude tools/utils.py\ninclude tools/ava_predict.py\ninclude tools/wheel.py\ninclude data/k400/Kinetics-400_label_list.txt\nrecursive-include paddlevideo/ *.py *.txt"
+        }
+    ]
+}

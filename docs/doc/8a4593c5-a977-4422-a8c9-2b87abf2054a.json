@@ -1,0 +1,15 @@
+{
+    "summary": "This code defines the SmoothL1Loss class as a custom loss function in PaddlePaddle's VideoQualityAssessment library, and implements _forward method to calculate smooth L1 loss between predicted scores and ground truth labels. It extends BaseWeightedLoss for handling outliers in computer vision tasks.",
+    "details": [
+        {
+            "comment": "This code defines the SmoothL1Loss class, a custom loss function in PaddlePaddle's VideoQualityAssessment library. It extends BaseWeightedLoss and implements a _forward method for calculating the smooth L1 loss between predicted scores and ground truth labels. The smooth L1 loss is used in computer vision tasks to handle outliers and improve robustness.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/modeling/losses/smooth_l1_loss.py\":0-32",
+            "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport paddle\nimport paddle.nn.functional as F\nfrom ..registry import LOSSES\nfrom .base import BaseWeightedLoss\n@LOSSES.register()\nclass SmoothL1Loss(BaseWeightedLoss):\n    \"\"\"smooth L1 Loss.\"\"\"\n    def _forward(self, score, labels):\n        \"\"\"Forward function.\n        Args:\n            score (paddle.Tensor): The class score.\n            labels (paddle.Tensor): The ground truth labels.\n        Returns:\n            loss (paddle.Tensor): The returned smooth L1 Loss."
+        },
+        {
+            "comment": "This code snippet defines a function that calculates the smooth L1 loss between two arrays, \"score\" and \"labels\". It converts labels to the data type of score, then applies F.smooth_l1_loss() to compute the loss. Finally, it returns the computed loss value.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/modeling/losses/smooth_l1_loss.py\":33-38",
+            "content": "        \"\"\"\n        labels = labels.astype(score.dtype)\n        loss = F.smooth_l1_loss(score, labels)\n        return loss"
+        }
+    ]
+}

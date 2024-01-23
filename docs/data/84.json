@@ -1,0 +1,543 @@
+{
+    "8400": {
+        "file_id": 621,
+        "content": "/paddlevideo/utils/precise_bn.py",
+        "type": "filepath"
+    },
+    "8401": {
+        "file_id": 621,
+        "content": "This code defines a function for precise batch normalization that recomputes and updates BN statistics, improving accuracy while speeding up training and saving memory.",
+        "type": "summary"
+    },
+    "8402": {
+        "file_id": 621,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport itertools\nfrom paddlevideo.utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n\"\"\"\nImplement precise bn, which is useful for improving accuracy.\n\"\"\"\n@paddle.no_grad()  # speed up and save CUDA memory\ndef do_preciseBN(model,\n                 data_loader,\n                 parallel,\n                 num_iters=200,\n                 use_amp=False,\n                 amp_level=None):\n    \"\"\"\n    Recompute and update the batch norm stats to make them more precise. During",
+        "type": "code",
+        "location": "/paddlevideo/utils/precise_bn.py:1-34"
+    },
+    "8403": {
+        "file_id": 621,
+        "content": "The code is importing necessary libraries and defining a function for the precise batch normalization (BN) technique. This BN improves accuracy by recomputing and updating batch norm statistics to make them more precise, which can speed up training and save memory. The function takes in a model, data loader, parallel flag, number of iterations, whether to use automatic mixed precision, and the AMP level.",
+        "type": "comment"
+    },
+    "8404": {
+        "file_id": 621,
+        "content": "    training both BN stats and the weight are changing after every iteration, so\n    the running average can not precisely reflect the actual stats of the\n    current model.\n    In this function, the BN stats are recomputed with fixed weights, to make\n    the running average more precise. Specifically, it computes the true average\n    of per-batch mean/variance instead of the running average.\n    This is useful to improve validation accuracy.\n    Args:\n        model: the model whose bn stats will be recomputed\n        data_loader: an iterator. Produce data as input to the model\n        num_iters: number of iterations to compute the stats.\n    Return:\n        the model with precise mean and variance in bn layers.\n    \"\"\"\n    bn_layers_list = [\n        m for m in model.sublayers()\n        if any((isinstance(m, bn_type)\n                for bn_type in (paddle.nn.BatchNorm1D, paddle.nn.BatchNorm2D,\n                                paddle.nn.BatchNorm3D))) and m.training\n    ]\n    if len(bn_layers_list) == 0:\n        return",
+        "type": "code",
+        "location": "/paddlevideo/utils/precise_bn.py:35-56"
+    },
+    "8405": {
+        "file_id": 621,
+        "content": "This function recomputes the BN stats for a given model using fixed weights to improve validation accuracy. It targets specific BN layers and runs iterations to compute precise mean and variance values. This is useful when training both BN stats and weights are changing with every iteration, affecting running averages.",
+        "type": "comment"
+    },
+    "8406": {
+        "file_id": 621,
+        "content": "    # moving_mean=moving_mean*momentum+batch_mean*(1.−momentum)\n    # we set momentum=0. to get the true mean and variance during forward\n    momentum_actual = [bn._momentum for bn in bn_layers_list]\n    for bn in bn_layers_list:\n        bn._momentum = 0.\n    running_mean = [paddle.zeros_like(bn._mean)\n                    for bn in bn_layers_list]  # pre-ignore\n    running_var = [paddle.zeros_like(bn._variance) for bn in bn_layers_list]\n    ind = -1\n    for ind, data in enumerate(itertools.islice(data_loader, num_iters)):\n        logger.info(\"Computing precise BN {} / {}...\".format(\n            ind + 1, num_iters))\n        if use_amp:\n            with paddle.amp.auto_cast(\n                    custom_black_list={\"reduce_mean\",\n                                       \"conv3d\"}, level=amp_level):\n                model(data, mode='train')\n        else:\n            model(data, mode='train')\n        for i, bn in enumerate(bn_layers_list):\n            # Accumulates the bn stats.\n            running_mean[i] += (bn._mean - running_mean[i]) / (ind + 1)",
+        "type": "code",
+        "location": "/paddlevideo/utils/precise_bn.py:58-83"
+    },
+    "8407": {
+        "file_id": 621,
+        "content": "This code resets the momentum in Batch Normalization layers to 0, calculates precise Batch Normalization by accumulating batch means and variances across iterations, and then updates the running mean and variance.",
+        "type": "comment"
+    },
+    "8408": {
+        "file_id": 621,
+        "content": "            running_var[i] += (bn._variance - running_var[i]) / (ind + 1)\n    assert ind == num_iters - 1, (\n        \"update_bn_stats is meant to run for {} iterations, but the dataloader stops at {} iterations.\"\n        .format(num_iters, ind))\n    # Sets the precise bn stats.\n    for i, bn in enumerate(bn_layers_list):\n        bn._mean.set_value(running_mean[i])\n        bn._variance.set_value(running_var[i])\n        bn._momentum = momentum_actual[i]",
+        "type": "code",
+        "location": "/paddlevideo/utils/precise_bn.py:84-94"
+    },
+    "8409": {
+        "file_id": 621,
+        "content": "This code updates batch normalization (BN) statistics based on the running mean, variance, and momentum. It asserts that the dataloader has run for the expected number of iterations before setting these values to the BN layers.",
+        "type": "comment"
+    },
+    "8410": {
+        "file_id": 622,
+        "content": "/paddlevideo/utils/profiler.py",
+        "type": "filepath"
+    },
+    "8411": {
+        "file_id": 622,
+        "content": "This code is part of PaddleVideo's profiler module, which allows performance analysis and optimization. It initializes a profiler object and starts/stops profiling based on step ID and specified batch range, generating summary reports in ms units.",
+        "type": "summary"
+    },
+    "8412": {
+        "file_id": 622,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport sys\nimport paddle.profiler as profiler\n# A global variable to record the number of calling times for profiler\n# functions. It is used to specify the tracing range of training steps.\n_profiler_step_id = 0\n# A global variable to avoid parsing from string every time.\n_profiler_options = None\n_prof = None\nclass ProfilerOptions(object):\n    '''\n    Use a string to initialize a ProfilerOptions.\n    The string should be in the format: \"key1=value1;key2=value;key3=value3\".",
+        "type": "code",
+        "location": "/paddlevideo/utils/profiler.py:1-29"
+    },
+    "8413": {
+        "file_id": 622,
+        "content": "This code is a part of PaddleVideo's profiler module, which allows for performance analysis and optimization. It imports the necessary libraries, initializes global variables, and defines the ProfilerOptions class to configure profiling options using a string in key-value format.",
+        "type": "comment"
+    },
+    "8414": {
+        "file_id": 622,
+        "content": "    For example:\n      \"profile_path=model.profile\"\n      \"batch_range=[50, 60]; profile_path=model.profile\"\n      \"batch_range=[50, 60]; tracer_option=OpDetail; profile_path=model.profile\"\n    ProfilerOptions supports following key-value pair:\n      batch_range      - a integer list, e.g. [100, 110].\n      state            - a string, the optional values are 'CPU', 'GPU' or 'All'. \n      sorted_key       - a string, the optional values are 'calls', 'total',\n                         'max', 'min' or 'ave.\n      tracer_option    - a string, the optional values are 'Default', 'OpDetail',\n                         'AllOpDetail'.\n      profile_path     - a string, the path to save the serialized profile data,\n                         which can be used to generate a timeline.\n      exit_on_finished - a boolean.\n    '''\n    def __init__(self, options_str):\n        assert isinstance(options_str, str)\n        self._options = {\n            'batch_range': [10, 20],\n            'state': 'All',\n            'sorted_key': 'total',",
+        "type": "code",
+        "location": "/paddlevideo/utils/profiler.py:30-53"
+    },
+    "8415": {
+        "file_id": 622,
+        "content": "The code defines a class \"ProfilerOptions\" with options for profiling. It takes an options string as input and has attributes for batch range (default [10, 20]), state (default 'All'), sorted key (default 'total'), tracer option (default 'Default'), profile path (empty string), and exit on finished flag (False).",
+        "type": "comment"
+    },
+    "8416": {
+        "file_id": 622,
+        "content": "            'tracer_option': 'Default',\n            'profile_path': '/tmp/profile',\n            'exit_on_finished': True,\n            'timer_only': True\n        }\n        self._parse_from_string(options_str)\n    def _parse_from_string(self, options_str):\n        for kv in options_str.replace(' ', '').split(';'):\n            key, value = kv.split('=')\n            if key == 'batch_range':\n                value_list = value.replace('[', '').replace(']', '').split(',')\n                value_list = list(map(int, value_list))\n                if len(value_list) >= 2 and value_list[0] >= 0 and value_list[\n                        1] > value_list[0]:\n                    self._options[key] = value_list\n            elif key == 'exit_on_finished':\n                self._options[key] = value.lower() in (\"yes\", \"true\", \"t\", \"1\")\n            elif key in [\n                    'state', 'sorted_key', 'tracer_option', 'profile_path'\n            ]:\n                self._options[key] = value\n            elif key == 'timer_only':\n                self._options[key] = value",
+        "type": "code",
+        "location": "/paddlevideo/utils/profiler.py:54-77"
+    },
+    "8417": {
+        "file_id": 622,
+        "content": "The code defines a class with an option parser. It parses options from a string, sets batch range if present, handles exit_on_finished flag, and updates other specified options (state, sorted_key, tracer_option, profile_path, timer_only).",
+        "type": "comment"
+    },
+    "8418": {
+        "file_id": 622,
+        "content": "    def __getitem__(self, name):\n        if self._options.get(name, None) is None:\n            raise ValueError(\n                \"ProfilerOptions does not have an option named %s.\" % name)\n        return self._options[name]\ndef add_profiler_step(options_str=None):\n    '''\n    Enable the operator-level timing using PaddlePaddle's profiler.\n    The profiler uses a independent variable to count the profiler steps.\n    One call of this function is treated as a profiler step.\n    Args:\n      profiler_options - a string to initialize the ProfilerOptions.\n                         Default is None, and the profiler is disabled.\n    '''\n    if options_str is None:\n        return\n    global _prof \n    global _profiler_step_id\n    global _profiler_options\n    if _profiler_options is None:\n        _profiler_options = ProfilerOptions(options_str)\n    # profile : https://www.paddlepaddle.org.cn/documentation/docs/zh/guides/performance_improving/profiling_model.html#chakanxingnengshujudetongjibiaodan\n    # timer_only = True  only the model's throughput and time overhead are displayed",
+        "type": "code",
+        "location": "/paddlevideo/utils/profiler.py:79-105"
+    },
+    "8419": {
+        "file_id": 622,
+        "content": "This code provides a function to enable the operator-level timing using PaddlePaddle's profiler. The profiler step is initialized with options provided as a string. If no options are given, the profiler remains disabled. This can be used for performance analysis of models by measuring their throughput and time overhead.",
+        "type": "comment"
+    },
+    "8420": {
+        "file_id": 622,
+        "content": "    # timer_only = False calling summary can print a statistical form that presents performance data from different perspectives.\n    # timer_only = False the output Timeline information can be found in the profiler_log directory\n    if _prof is None:\n        _timer_only = str(_profiler_options['timer_only']) == str(True)\n        _prof = profiler.Profiler(\n                   scheduler = (_profiler_options['batch_range'][0], _profiler_options['batch_range'][1]),\n                   on_trace_ready = profiler.export_chrome_tracing('./profiler_log'),\n                   timer_only = _timer_only)\n        _prof.start()\n    else:\n        _prof.step()\n    if _profiler_step_id == _profiler_options['batch_range'][1]:\n        _prof.stop()\n        _prof.summary(\n             op_detail=True,\n             thread_sep=False,\n             time_unit='ms')\n        _prof = None\n        if _profiler_options['exit_on_finished']:\n            sys.exit(0)\n    _profiler_step_id += 1",
+        "type": "code",
+        "location": "/paddlevideo/utils/profiler.py:106-128"
+    },
+    "8421": {
+        "file_id": 622,
+        "content": "This code initializes a profiler object with specified scheduler range and timer_only option, then starts the profiling process. If the step ID matches the specified batch range, it stops the profiling, generates a summary report in ms units, clears the profiler, and exits the program if instructed to do so.",
+        "type": "comment"
+    },
+    "8422": {
+        "file_id": 623,
+        "content": "/paddlevideo/utils/record.py",
+        "type": "filepath"
+    },
+    "8423": {
+        "file_id": 623,
+        "content": "This code records metrics, calculates means, logs batch info and epoch progress in training processes with colored formatting for visibility. It uses PaddleVideo framework, AverageMeter and OrderedDict for efficient logging.",
+        "type": "summary"
+    },
+    "8424": {
+        "file_id": 623,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport datetime\nfrom collections import OrderedDict\nimport paddle\nfrom .logger import coloring, get_logger\nlogger = get_logger(\"paddlevideo\")\n__all__ = ['AverageMeter', 'build_record', 'log_batch', 'log_epoch']\ndef build_record(cfg):\n    record_list = [\n        (\"loss\", AverageMeter('loss', '7.5f')),\n        (\"lr\", AverageMeter('lr', 'f', need_avg=False)),\n    ]\n    if 'Recognizer1D' in cfg.framework:  #TODO: required specify str in framework",
+        "type": "code",
+        "location": "/paddlevideo/utils/record.py:1-32"
+    },
+    "8425": {
+        "file_id": 623,
+        "content": "Code snippet imports necessary libraries and defines functions for building a record, logging batches and epochs. It also sets up logger for the PaddleVideo framework.",
+        "type": "comment"
+    },
+    "8426": {
+        "file_id": 623,
+        "content": "        record_list.append((\"hit_at_one\", AverageMeter(\"hit_at_one\", '.5f')))\n        record_list.append((\"perr\", AverageMeter(\"perr\", '.5f')))\n        record_list.append((\"gap\", AverageMeter(\"gap\", '.5f')))\n    elif 'Recognizer' in cfg.framework:\n        record_list.append((\"top1\", AverageMeter(\"top1\", '.5f')))\n        record_list.append((\"top5\", AverageMeter(\"top5\", '.5f')))\n    elif 'FastRCNN' in cfg.framework:\n        record_list.append(\n            (\"recall@thr=0.5\", AverageMeter(\"recall@thr=0.5\", '.5f')))\n        record_list.append((\"prec@thr=0.5\", AverageMeter(\"prec@thr=0.5\",\n                                                         '.5f')))\n        record_list.append((\"recall@top3\", AverageMeter(\"recall@top3\", '.5f')))\n        record_list.append((\"prec@top3\", AverageMeter(\"prec@top3\", '.5f')))\n        record_list.append((\"recall@top5\", AverageMeter(\"recall@top5\", '.5f')))\n        record_list.append((\"prec@top5\", AverageMeter(\"prec@top5\", '.5f')))\n        record_list.append((\"mAP@0.5IOU\", AverageMeter(\"mAP@0.5IOU\", '.5f')))",
+        "type": "code",
+        "location": "/paddlevideo/utils/record.py:33-48"
+    },
+    "8427": {
+        "file_id": 623,
+        "content": "Code appends specific metrics to the record list based on the framework specified in cfg. Frameworks include 'PaddleVideo', 'Recognizer', and 'FastRCNN'. Metrics are averaged using AverageMeter and include 'hit_at_one', 'perr', 'gap', 'top1', 'top5', recall@thr=0.5, prec@thr=0.5, recall@top3, prec@top3, recall@top5, prec@top5, and mAP@0.5IOU.",
+        "type": "comment"
+    },
+    "8428": {
+        "file_id": 623,
+        "content": "    elif 'DepthEstimator' in cfg.framework:\n        record_list.append((\"abs_rel\", AverageMeter(\"abs_rel\", '.5f')))\n        record_list.append((\"sq_rel\", AverageMeter(\"sq_rel\", '.5f')))\n        record_list.append((\"rmse\", AverageMeter(\"rmse\", '.5f')))\n        record_list.append((\"rmse_log\", AverageMeter(\"rmse_log\", '.5f')))\n        record_list.append((\"a1\", AverageMeter(\"a1\", '.5f')))\n        record_list.append((\"a2\", AverageMeter(\"a2\", '.5f')))\n        record_list.append((\"a3\", AverageMeter(\"a3\", '.5f')))\n        record_list.append((\"losses_day\", AverageMeter(\"losses_day\", '.5f')))\n        record_list.append((\"losses_night\", AverageMeter(\"losses_night\",\n                                                         '.5f')))\n    elif 'MSTCN' in cfg.framework or 'ASRF' in cfg.framework:\n        record_list.append((\"F1@0.50\", AverageMeter(\"F1@0.50\", '.5f')))\n    elif 'YOWOLocalizer' in cfg.framework:\n        record_list.append((\"nCorrect\", AverageMeter('nCorrect', '.1f')))\n        record_list.append((\"fscore\", AverageMeter(\"fscore\", '.5f')))",
+        "type": "code",
+        "location": "/paddlevideo/utils/record.py:49-65"
+    },
+    "8429": {
+        "file_id": 623,
+        "content": "The code is conditionally adding metrics to the record list based on the value of 'cfg.framework'. It handles three different cases: 'DepthEstimator', 'MSTCN' or 'ASRF', and 'YOWOLocalizer'. For 'DepthEstimator', it adds 9 metrics, for 'MSTCN' or 'ASRF', it adds one metric, and for 'YOWOLocalizer', it adds two metrics. Each metric is associated with an AverageMeter object that keeps track of its mean value over time.",
+        "type": "comment"
+    },
+    "8430": {
+        "file_id": 623,
+        "content": "    record_list.append((\"batch_time\", AverageMeter('batch_cost', '.5f')))\n    record_list.append((\"reader_time\", AverageMeter('reader_cost', '.5f')))\n    record_list = OrderedDict(record_list)\n    return record_list\nclass AverageMeter(object):\n    \"\"\"\n    Computes and stores the average and current value\n    \"\"\"\n    def __init__(self, name='', fmt='f', need_avg=True):\n        self.name = name\n        self.fmt = fmt\n        self.need_avg = need_avg\n        self.reset()\n    def reset(self):\n        \"\"\" reset \"\"\"\n        self.val = 0\n        self.avg = 0\n        self.sum = 0\n        self.count = 0\n    def update(self, val, n=1):\n        \"\"\" update \"\"\"\n        if isinstance(val, paddle.Tensor):\n            val = float(val)\n        self.val = val\n        self.sum += val * n\n        self.count += n\n        self.avg = self.sum / self.count\n    @property\n    def total(self):\n        return '{self.name}_sum: {self.sum:{self.fmt}}'.format(self=self)\n    @property\n    def total_minute(self):\n        return '{self.name}_sum: {s:{self.fmt}} min'.format(s=self.sum / 60,",
+        "type": "code",
+        "location": "/paddlevideo/utils/record.py:67-105"
+    },
+    "8431": {
+        "file_id": 623,
+        "content": "This function creates a record dictionary containing two AverageMeter objects, one for batch time and another for reader time. It then converts the list to an OrderedDict and returns it. The AverageMeter class calculates and stores the average and current values of a given metric, allowing easy tracking of performance metrics during program execution.",
+        "type": "comment"
+    },
+    "8432": {
+        "file_id": 623,
+        "content": "                                                            self=self)\n    @property\n    def mean(self):\n        return '{self.name}_avg: {self.avg:{self.fmt}}'.format(\n            self=self) if self.need_avg else ''\n    @property\n    def value(self):\n        return '{self.name}: {self.val:{self.fmt}}'.format(self=self)\ndef log_batch(metric_list,\n              batch_id,\n              epoch_id,\n              total_epoch,\n              mode,\n              ips,\n              eta_sec: int = None):\n    batch_cost = str(metric_list['batch_time'].value) + ' sec,'\n    reader_cost = str(metric_list['reader_time'].value) + ' sec,'\n    metric_values = []\n    for m in metric_list:\n        if not (m == 'batch_time' or m == 'reader_time'):\n            metric_values.append(metric_list[m].value)\n    metric_str = ' '.join([str(v) for v in metric_values])\n    epoch_str = \"epoch:[{:>3d}/{:<3d}]\".format(epoch_id, total_epoch)\n    step_str = \"{:s} step:{:<4d}\".format(mode, batch_id)\n    if eta_sec is not None:\n        eta_str = \"eta: {:s}\".format(",
+        "type": "code",
+        "location": "/paddlevideo/utils/record.py:106-136"
+    },
+    "8433": {
+        "file_id": 623,
+        "content": "This code defines a class and functions for recording metrics, calculating means, and logging batch information. The `log_batch` function records the time taken for each batch, adds other metric values, and logs the total epoch, current epoch, mode, and step. It also calculates the remaining time for the current operation if provided.",
+        "type": "comment"
+    },
+    "8434": {
+        "file_id": 623,
+        "content": "            str(datetime.timedelta(seconds=int(eta_sec))))\n    else:\n        eta_str = ''\n    max_mem_reserved_str = \"\"\n    max_mem_allocated_str = \"\"\n    if paddle.device.is_compiled_with_cuda():\n        max_mem_reserved_str = f\"max_mem_reserved: {format(paddle.device.cuda.max_memory_reserved() / (1024 ** 2), '.2f')} MB\"\n        max_mem_allocated_str = f\"max_mem_allocated: {format(paddle.device.cuda.max_memory_allocated() / (1024 ** 2), '.2f')} MB\"\n    logger.info(\"{:s} {:s} {:s} {:s} {:s} {} {:s}, {} {}\".format(\n        coloring(epoch_str, \"HEADER\") if batch_id == 0 else epoch_str,\n        coloring(step_str, \"PURPLE\"), coloring(metric_str, 'OKGREEN'),\n        coloring(batch_cost, \"OKGREEN\"), coloring(reader_cost, 'OKGREEN'), ips,\n        eta_str, max_mem_reserved_str, max_mem_allocated_str))\ndef log_epoch(metric_list, epoch, mode, ips):\n    batch_cost = 'avg_' + str(metric_list['batch_time'].value) + ' sec,'\n    reader_cost = 'avg_' + str(metric_list['reader_time'].value) + ' sec,'\n    batch_sum = str(metric_list['batch_time'].total) + ' sec,'",
+        "type": "code",
+        "location": "/paddlevideo/utils/record.py:137-155"
+    },
+    "8435": {
+        "file_id": 623,
+        "content": "This code logs the progress of an epoch in a training process. It formats the logged information with colors for better visibility. The logger displays the current step, metrics, time taken, batch cost and reader cost, estimated time remaining (ETA), and maximum memory reserved and allocated on CUDA devices if available.",
+        "type": "comment"
+    },
+    "8436": {
+        "file_id": 623,
+        "content": "    metric_values = []\n    for m in metric_list:\n        if not (m == 'batch_time' or m == 'reader_time'):\n            metric_values.append(metric_list[m].mean)\n    metric_str = ' '.join([str(v) for v in metric_values])\n    end_epoch_str = \"END epoch:{:<3d}\".format(epoch)\n    logger.info(\"{:s} {:s} {:s} {:s} {:s} {:s} {}\".format(\n        coloring(end_epoch_str, \"RED\"), coloring(mode, \"PURPLE\"),\n        coloring(metric_str, \"OKGREEN\"), coloring(batch_cost, \"OKGREEN\"),\n        coloring(reader_cost, \"OKGREEN\"), coloring(batch_sum, \"OKGREEN\"), ips))",
+        "type": "code",
+        "location": "/paddlevideo/utils/record.py:157-168"
+    },
+    "8437": {
+        "file_id": 623,
+        "content": "This code calculates the mean of metrics except 'batch_time' and 'reader_time', then joins them into a string. It formats an info message with RED for \"END epoch\", PURPLE for mode, GREEN for metric values, batch cost, reader cost, and batch sum, as well as ips (inferences per second). The logger outputs this formatted message.",
+        "type": "comment"
+    },
+    "8438": {
+        "file_id": 624,
+        "content": "/paddlevideo/utils/registry.py",
+        "type": "filepath"
+    },
+    "8439": {
+        "file_id": 624,
+        "content": "The code defines a Registry class for mapping names to objects and provides methods for registering, getting, and unregistering objects. It utilizes the @BACKBONES.register() decorator or BACKBONES.register(ResNet) function for registration, and also verifies if an object with a given name exists in the registry using the `get` method.",
+        "type": "summary"
+    },
+    "8440": {
+        "file_id": 624,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nclass Registry(object):\n    \"\"\"\n    The registry that provides name -> object mapping, to support third-party users' custom modules.\n    To register an object:\n    .. code-block:: python\n        BACKBONES = Registry('backbone')\n        @BACKBONES.register()\n        class ResNet:\n            pass\n    Or:\n    .. code-block:: python\n        BACKBONES = Registry('backbone')\n        class ResNet:\n            pass\n        BACKBONES.register(ResNet)",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/registry.py:1-34"
+    },
+    "8441": {
+        "file_id": 624,
+        "content": "This code defines a Registry class that provides name to object mapping, allowing third-party users to register their custom modules. Users can register their objects by using the @BACKBONES.register() decorator or by calling BACKBONES.register(ResNet).",
+        "type": "comment"
+    },
+    "8442": {
+        "file_id": 624,
+        "content": "    Usage: To build a module.\n    .. code-block:: python\n        backbone_name = \"ResNet\"\n        b = BACKBONES.get(backbone_name)()\n    \"\"\"\n    def __init__(self, name):\n        \"\"\"\n        Args:\n            name (str): the name of this registry\n        \"\"\"\n        self._name = name\n        self._obj_map = {}\n    def __contains__(self, key):\n        return self._obj_map.get(key) is not None\n    def _do_register(self, name, obj):\n        assert (\n            name not in self._obj_map\n        ), \"An object named '{}' was already registered in '{}' registry!\".format(\n            name, self._name)\n        self._obj_map[name] = obj\n    def register(self, obj=None, name=None):\n        \"\"\"\n        Register the given object under the the name `obj.__name__`.\n        Can be used as either a decorator or not. See docstring of this class for usage.\n        \"\"\"\n        if obj is None:\n            # used as a decorator\n            def deco(func_or_class, name=name):\n                if name is None:\n                    name = func_or_class.__name__",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/registry.py:36-70"
+    },
+    "8443": {
+        "file_id": 624,
+        "content": "This code is a registry class for storing and managing objects. It allows registering objects under their names or using decorators, and provides functions to check if an object with a given name exists in the registry.",
+        "type": "comment"
+    },
+    "8444": {
+        "file_id": 624,
+        "content": "                self._do_register(name, func_or_class)\n                return func_or_class\n            return deco\n        # used as a function call\n        if name is None:\n            name = obj.__name__\n        self._do_register(name, obj)\n    def get(self, name):\n        \"\"\"Get the registry record.\n        Args:\n            name (str): The class name.\n        Returns:\n            ret: The class.\n        \"\"\"\n        ret = self._obj_map.get(name)\n        if ret is None:\n            raise KeyError(\n                \"No object named '{}' found in '{}' registry!\".format(\n                    name, self._name))\n        return ret",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/utils/registry.py:71-96"
+    },
+    "8445": {
+        "file_id": 624,
+        "content": "The code defines a class with methods for registering, getting and unregistering objects in a registry. The `_do_register` method is used to store the object's name and function or class into a dictionary. If no name is provided when calling the function, it defaults to the object's name. The `get` method retrieves an object from the registry using its name. If the object is not found, it raises a KeyError with an error message.",
+        "type": "comment"
+    },
+    "8446": {
+        "file_id": 625,
+        "content": "/paddlevideo/utils/save_load.py",
+        "type": "filepath"
+    },
+    "8447": {
+        "file_id": 625,
+        "content": "The code imports modules, transfers model parameters, adjusts positional embeddings, and provides save/load functions for Resnet18, VisionTransformer (TimeSformer), SwinTransformer3D models using PaddlePaddle library.",
+        "type": "summary"
+    },
+    "8448": {
+        "file_id": 625,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os\nimport os.path as osp\nimport time\nimport paddle\nimport paddle.nn.functional as F\nfrom paddlevideo.utils import get_logger, main_only\nfrom tqdm import tqdm\nimport numpy as np\nfrom scipy import ndimage\ndef pretrain_swin_param_trans(model, state_dicts):\n    # delete classifier's params\n    if 'head.fc' + '.weight' in state_dicts:\n        del state_dicts['head.fc' + '.weight']\n    if 'head.fc' + '.bias' in state_dicts:",
+        "type": "code",
+        "location": "/paddlevideo/utils/save_load.py:1-30"
+    },
+    "8449": {
+        "file_id": 625,
+        "content": "This code is from the PaddleVideo library and it imports necessary modules, defines a function for transferring pre-trained Swin model parameters, and deletes the classifier's weights from state_dicts.",
+        "type": "comment"
+    },
+    "8450": {
+        "file_id": 625,
+        "content": "        del state_dicts['head.fc' + '.bias']\n    state_dicts = {\n        k.replace('backbone.', ''): v\n        for k, v in state_dicts.items()\n    }\n    if len(state_dicts) == len(model.state_dict()):\n        print(\"Load 3D weights\")\n        return state_dicts\n    print(\"Load 2D weights\")\n    relative_position_index_keys = [\n        k for k in state_dicts.keys() if \"relative_position_index\" in k\n    ]\n    for k in relative_position_index_keys:\n        del state_dicts[k]\n    # delete attn_mask since we always re-init it\n    attn_mask_keys = [k for k in state_dicts.keys() if \"attn_mask\" in k]\n    for k in attn_mask_keys:\n        del state_dicts[k]\n    state_dicts['patch_embed.proj.weight'] = state_dicts[\n        'patch_embed.proj.weight'].unsqueeze(2).tile(\n            [1, 1, model.patch_size[0], 1, 1]) / model.patch_size[0]\n    # bicubic interpolate relative_position_bias_table if not match\n    relative_position_bias_table_keys = [\n        k for k in state_dicts.keys() if \"relative_position_bias_table\" in k\n    ]",
+        "type": "code",
+        "location": "/paddlevideo/utils/save_load.py:31-61"
+    },
+    "8451": {
+        "file_id": 625,
+        "content": "This code checks if the loaded state dictionaries match the model's state dictionaries and handles any inconsistencies. It removes unnecessary keys, adjusts certain weights, and bicubically interpolates relative position bias tables if they don't match to ensure proper loading of 2D or 3D weights.",
+        "type": "comment"
+    },
+    "8452": {
+        "file_id": 625,
+        "content": "    total_len = len(relative_position_bias_table_keys)\n    with tqdm(total=total_len,\n              position=1,\n              bar_format='{desc}',\n              desc=\"Loading weights\") as desc:\n        for key in tqdm(relative_position_bias_table_keys,\n                        total=total_len,\n                        position=0):\n            relative_position_bias_table_pretrained = state_dicts[key]\n            relative_position_bias_table_current = model.state_dict()[key]\n            L1, nH1 = relative_position_bias_table_pretrained.shape\n            L2, nH2 = relative_position_bias_table_current.shape\n            L2 = (2 * model.window_size[1] - 1) * (2 * model.window_size[2] - 1)\n            wd = model.window_size[0]\n            if nH1 != nH2:\n                desc.set_description(f\"Error in loading {key}, skip\")\n            else:\n                if L1 != L2:\n                    S1 = int(L1**0.5)\n                    relative_position_bias_table_pretrained_resized = paddle.nn.functional.interpolate(\n                        relative_position_bias_table_pretrained.transpose(",
+        "type": "code",
+        "location": "/paddlevideo/utils/save_load.py:62-82"
+    },
+    "8453": {
+        "file_id": 625,
+        "content": "Loading weights for relative position bias tables from pretrained and current model state dictionaries.",
+        "type": "comment"
+    },
+    "8454": {
+        "file_id": 625,
+        "content": "                            [1, 0]).reshape([1, nH1, S1, S1]),\n                        size=(2 * model.window_size[1] - 1,\n                              2 * model.window_size[2] - 1),\n                        mode='bicubic')\n                    relative_position_bias_table_pretrained = relative_position_bias_table_pretrained_resized.reshape(\n                        [nH2, L2]).transpose([1, 0])\n                desc.set_description(f\"Loading {key}\")\n            state_dicts[key] = relative_position_bias_table_pretrained.tile(\n                [2 * wd - 1, 1])\n            time.sleep(0.01)\n    ret_str = \"loading {:<20d} weights completed.\".format(\n        len(model.state_dict()))\n    desc.set_description(ret_str)\n    return state_dicts\ndef pretrain_vit_param_trans(model, state_dicts, num_patches, num_seg,\n                             attention_type):\n    \"\"\"\n    Convert ViT's pre-trained model parameters to a parameter dictionary that matches the existing model\n    \"\"\"\n    if 'head' + '.weight' in state_dicts:\n        del state_dicts['head' + '.weight']",
+        "type": "code",
+        "location": "/paddlevideo/utils/save_load.py:83-105"
+    },
+    "8455": {
+        "file_id": 625,
+        "content": "Function is loading pre-trained model parameters, resizing a table, and setting the description.\nThe code is performing model parameter transformation for ViT models, deleting unnecessary weights.",
+        "type": "comment"
+    },
+    "8456": {
+        "file_id": 625,
+        "content": "    if 'head' + '.bias' in state_dicts:\n        del state_dicts['head' + '.bias']\n    total_len = len(model.state_dict())\n    if num_patches + 1 != state_dicts['pos_embed'].shape[1]:  # when\n        pos_embed = state_dicts['pos_embed']\n        cls_pos_embed = paddle.to_tensor(\n            pos_embed[0, 0, :]).unsqueeze(0).unsqueeze(1)\n        other_pos_embed = paddle.to_tensor(pos_embed[0, 1:, :])\n        gs_new = int(np.sqrt(num_patches))\n        gs_old = int(np.sqrt(other_pos_embed.shape[0]))\n        zoom = (gs_new / gs_old, gs_new / gs_old, 1)\n        other_pos_embed = paddle.reshape(other_pos_embed, [gs_old, gs_old, -1])\n        other_pos_embed = ndimage.zoom(other_pos_embed, zoom, order=1)\n        other_pos_embed = paddle.to_tensor(other_pos_embed)\n        new_pos_embed = paddle.reshape(other_pos_embed, [1, num_patches, -1])\n        new_pos_embed = paddle.concat((cls_pos_embed, new_pos_embed), axis=1)\n        state_dicts['pos_embed'] = new_pos_embed\n        time.sleep(0.01)\n    if 'time_embed' in state_dicts and num_seg != state_dicts[",
+        "type": "code",
+        "location": "/paddlevideo/utils/save_load.py:106-126"
+    },
+    "8457": {
+        "file_id": 625,
+        "content": "This code block checks the shape of the 'pos_embed' tensor and adjusts it based on the number of patches provided. It resizes the tensor using Paddle's ndimage.zoom function and then reconstructs the updated positional embedding for the model. This is necessary when the number of patches changes, ensuring the positional embeddings are consistent with the new patch count.",
+        "type": "comment"
+    },
+    "8458": {
+        "file_id": 625,
+        "content": "            'time_embed'].shape[1]:\n        time_embed = state_dicts['time_embed'].transpose((0, 2, 1)).unsqueeze(0)\n        new_time_embed = F.interpolate(time_embed,\n                                       size=(time_embed.shape[-2], num_seg),\n                                       mode='nearest')\n        state_dicts['time_embed'] = new_time_embed.squeeze(0).transpose(\n            (0, 2, 1))\n        time.sleep(0.01)\n    with tqdm(total=total_len,\n              position=1,\n              bar_format='{desc}',\n              desc=\"Loading weights\") as desc:\n        if attention_type == 'divided_space_time':\n            new_state_dicts = state_dicts.copy()\n            for key in tqdm(state_dicts):\n                if 'blocks' in key and 'attn' in key:\n                    desc.set_description(\"Loading %s\" % key)\n                    new_key = key.replace('attn', 'temporal_attn')\n                    if not new_key in state_dicts:\n                        new_state_dicts[new_key] = state_dicts[key]\n                    else:",
+        "type": "code",
+        "location": "/paddlevideo/utils/save_load.py:127-147"
+    },
+    "8459": {
+        "file_id": 625,
+        "content": "This code block is part of a larger program that loads pre-trained model weights. It first checks if the shape of 'time_embed' matches a specific condition, and if not, it performs some transformations on it. Afterwards, it starts a progress bar with the description \"Loading weights\" to show the progress of loading these weights. If the attention type is 'divided_space_time', it makes a copy of state_dicts and iterates over its keys, replacing 'attn' keys with 'temporal_attn' if not already present.",
+        "type": "comment"
+    },
+    "8460": {
+        "file_id": 625,
+        "content": "                        new_state_dicts[new_key] = state_dicts[new_key]\n                if 'blocks' in key and 'norm1' in key:\n                    desc.set_description(\"Loading %s\" % key)\n                    new_key = key.replace('norm1', 'temporal_norm1')\n                    if not new_key in state_dicts:\n                        new_state_dicts[new_key] = state_dicts[key]\n                    else:\n                        new_state_dicts[new_key] = state_dicts[new_key]\n                time.sleep(0.01)\n        elif attention_type == 'space_only':  # tokenshift raw vit\n            new_state_dicts = state_dicts.copy()\n    ret_str = \"loading {:<20d} weights completed.\".format(\n        len(model.state_dict()))\n    desc.set_description(ret_str)\n    return new_state_dicts\ndef pretrain_resnet18_param_trans(model, loaded_dict):\n    encoder_dict = model.encoder.state_dict()\n    pose_encoder_dict = model.pose_encoder.state_dict()\n    names = ['encoder.', 'encoder_day.', 'encoder_night.']\n    for name in names:\n        total_len = len(loaded_dict.items())",
+        "type": "code",
+        "location": "/paddlevideo/utils/save_load.py:148-172"
+    },
+    "8461": {
+        "file_id": 625,
+        "content": "This code appears to be related to model weight loading and adaptation for a pre-trained ResNet18 in a specific context. It modifies the state_dicts of certain keys, like replacing 'norm1' with 'temporal_norm1', possibly to adapt the weights to fit the new model structure. The code also checks if a certain key exists and copies it if not, ensuring the new model has all necessary parameters. Finally, it updates the description for the loading process.",
+        "type": "comment"
+    },
+    "8462": {
+        "file_id": 625,
+        "content": "        with tqdm(total=total_len,\n                  position=1,\n                  bar_format='{desc}',\n                  desc=\"Loading weights\") as desc:\n            for key, value in tqdm(loaded_dict.items(),\n                                   total=total_len,\n                                   position=0):\n                key = str(name + key)\n                if key in encoder_dict:\n                    encoder_dict[key] = value\n                    desc.set_description('Loading %s' % key)\n                time.sleep(0.01)\n    num_input_images = 2\n    loaded_dict['conv1.weight'] = paddle.concat(\n        [loaded_dict['conv1.weight']] * num_input_images, 1) / num_input_images\n    total_len = len(loaded_dict.items())\n    with tqdm(total=total_len,\n              position=1,\n              bar_format='{desc}',\n              desc=\"Loading weights\") as desc:\n        for name, value in tqdm(loaded_dict.items(),\n                                total=total_len,\n                                position=0):\n            name = str('encoder.' + name)",
+        "type": "code",
+        "location": "/paddlevideo/utils/save_load.py:173-197"
+    },
+    "8463": {
+        "file_id": 625,
+        "content": "This code is loading weights from a dictionary, updating the encoder_dict if the key already exists. It also updates loaded_dict for a specific convolution layer based on the number of input images and uses tqdm to provide progress updates.",
+        "type": "comment"
+    },
+    "8464": {
+        "file_id": 625,
+        "content": "            if name in pose_encoder_dict:\n                pose_encoder_dict[name] = value\n                desc.set_description('Loading %s' % key)\n            time.sleep(0.01)\n        ret_str = \"loading {:<20d} weights completed.\".format(\n            len(model.state_dict()))\n        desc.set_description(ret_str)\n    return encoder_dict, pose_encoder_dict\n#XXX(shipping): maybe need load N times because of different cards have different params.\n@main_only\ndef load_ckpt(model, weight_path, **kargs):\n    \"\"\"\n    1. Load pre-trained model parameters\n    2. Extract and convert from the pre-trained model to the parameters\n    required by the existing model\n    3. Load the converted parameters of the existing model\n    \"\"\"\n    #model.set_state_dict(state_dict)\n    if not osp.isfile(weight_path):\n        raise IOError(f'{weight_path} is not a checkpoint file')\n    #state_dicts = load(weight_path)\n    logger = get_logger(\"paddlevideo\")\n    state_dicts = paddle.load(weight_path)\n    if 'ResnetEncoder' in str(model):\n        encoder_dict, pose_encoder_dict = pretrain_resnet18_param_trans(",
+        "type": "code",
+        "location": "/paddlevideo/utils/save_load.py:198-226"
+    },
+    "8465": {
+        "file_id": 625,
+        "content": "This code loads pre-trained model parameters from a specified file path and converts them for use in the existing model. If the weight_path is not a valid checkpoint file, it raises an IOError. The code also utilizes Paddle's `paddle.load()` function to load state_dicts from the specified file path. It handles loading of Resnet18 parameters specifically with the `pretrain_resnet18_param_trans()` function.",
+        "type": "comment"
+    },
+    "8466": {
+        "file_id": 625,
+        "content": "            model, state_dicts)\n        model.encoder.load_dict(encoder_dict)\n        model.pose_encoder.load_dict(pose_encoder_dict)\n        tmp = model.state_dict()\n    elif \"VisionTransformer\" in str(model):  # For TimeSformer case\n        tmp = pretrain_vit_param_trans(model, state_dicts, kargs['num_patches'],\n                                       kargs['num_seg'],\n                                       kargs['attention_type'])\n    elif 'SwinTransformer3D' in str(model):\n        tmp = pretrain_swin_param_trans(model, state_dicts)\n    else:\n        tmp = {}\n        total_len = len(model.state_dict())\n        with tqdm(total=total_len,\n                  position=1,\n                  bar_format='{desc}',\n                  desc=\"Loading weights\") as desc:\n            for item in tqdm(model.state_dict(), total=total_len, position=0):\n                name = item\n                desc.set_description('Loading %s' % name)\n                if name not in state_dicts:  # Convert from non-parallel model\n                    if str('backbone.' + name) in state_dicts:",
+        "type": "code",
+        "location": "/paddlevideo/utils/save_load.py:227-248"
+    },
+    "8467": {
+        "file_id": 625,
+        "content": "This code is loading the model's weights and dictionary entries. It checks the type of the model and then either loads or transposes the parameters accordingly, handling cases such as VisionTransformer (TimeSformer) and SwinTransformer3D. For other models, it simply initializes an empty dictionary and starts loading each item from the state_dict in a tqdm progress bar.",
+        "type": "comment"
+    },
+    "8468": {
+        "file_id": 625,
+        "content": "                        tmp[name] = state_dicts['backbone.' + name]\n                else:  # Convert from parallel model\n                    tmp[name] = state_dicts[name]\n                time.sleep(0.01)\n        ret_str = \"loading {:<20d} weights completed.\".format(\n            len(model.state_dict()))\n        desc.set_description(ret_str)\n    model.set_state_dict(tmp)\ndef mkdir(dir):\n    if not os.path.exists(dir):\n        # avoid error when train with multiple gpus\n        try:\n            os.makedirs(dir)\n        except:\n            pass\ndef _extract_student_weights(all_params, student_prefix=\"Student.\"):\n    s_params = {\n        key[len(student_prefix):]: all_params[key]\n        for key in all_params if student_prefix in key\n    }\n    return s_params\n@main_only\ndef save(obj, path, save_student_model=False):\n    if save_student_model:\n        s_params = _extract_student_weights(obj)\n        student_path = path.replace(\".pdparams\", \"_student.pdparams\")\n        if len(s_params) > 0:\n            paddle.save(s_params, student_path)",
+        "type": "code",
+        "location": "/paddlevideo/utils/save_load.py:249-282"
+    },
+    "8469": {
+        "file_id": 625,
+        "content": "This code saves a PaddlePaddle model's state dictionary and optionally the student model's state dictionary to separate files. It also has functionality for handling parallel models, converting them into separate state dictionaries. The `mkdir` function is used to create directories if they don't exist already. If the `save_student_model` flag is set to True, it will save both the main and student model weights in separate files.",
+        "type": "comment"
+    },
+    "8470": {
+        "file_id": 625,
+        "content": "    paddle.save(obj, path)\ndef load(file_name):\n    if not osp.isfile(file_name):\n        raise IOError(f'{file_name} not exist')\n    return paddle.load(file_name)",
+        "type": "code",
+        "location": "/paddlevideo/utils/save_load.py:283-289"
+    },
+    "8471": {
+        "file_id": 625,
+        "content": "This code defines two functions: \"save\" and \"load\". The \"save\" function uses the Paddle library to save an object (obj) at a specified path. The \"load\" function checks if a file exists, raises an IOError if it does not, and then loads the object from the file using the Paddle library's load function.",
+        "type": "comment"
+    },
+    "8472": {
+        "file_id": 626,
+        "content": "/paddlevideo/version.py",
+        "type": "filepath"
+    },
+    "8473": {
+        "file_id": 626,
+        "content": "This code contains the version information for PaddleVideo, licensed under the Apache License 2.0, and defines the current version as \"0.0.1\".",
+        "type": "summary"
+    },
+    "8474": {
+        "file_id": 626,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n__all__ = [\"paddlevideo_version\"]\npaddlevideo_version = \"0.0.1\"",
+        "type": "code",
+        "location": "/applications/EIVideo/EIVideo/paddlevideo/version.py:1-16"
+    },
+    "8475": {
+        "file_id": 626,
+        "content": "This code contains the version information for PaddleVideo, licensed under the Apache License 2.0, and defines the current version as \"0.0.1\".",
+        "type": "comment"
+    },
+    "8476": {
+        "file_id": 627,
+        "content": "/run.sh",
+        "type": "filepath"
+    },
+    "8477": {
+        "file_id": 627,
+        "content": "This script trains multiple deep learning models for various computer vision tasks with PaddlePaddle framework and demonstrates running BMN test, exporting models, inference using PaddleVideo toolkit, and provides training time calculation.",
+        "type": "summary"
+    },
+    "8478": {
+        "file_id": 627,
+        "content": "export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7\n#export FLAGS_conv_workspace_size_limit=800 #MB\n#export FLAGS_cudnn_exhaustive_search=1\n#export FLAGS_cudnn_batchnorm_spatial_persistent=1\nstart_time=$(date +%s)\n# run pp-tsm training\n#python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\"  --log_dir=log_pptsm  main.py --validate -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml\n# run pp-tsm_v2 distillation training\npython3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\"  --log_dir=log_pptsm_v2  main.py --validate -c configs/recognition/pptsm/v2/pptsm_lcnet_k400_16frames_uniform_dml_distillation.yaml\n# run ava training\n# python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3\" --log_dir=logdir.ava_part main.py --validate -w paddle.init_param.pdparams -c configs/detection/ava/ava_part.yaml\n# python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=logdir.ava_all.1203 main.py --validate -w paddle.init_param.pdparams -c configs/detection/ava/ava_all.yaml",
+        "type": "code",
+        "location": "/run.sh:1-18"
+    },
+    "8479": {
+        "file_id": 627,
+        "content": "This script sets the CUDA visible devices, launches distributed training for multiple models (pp-tsm, pp-tsm_v2, ava), and specifies log directories and configurations. It runs all at once using 8 GPUs and Python3.7.",
+        "type": "comment"
+    },
+    "8480": {
+        "file_id": 627,
+        "content": "# run adds training\n# python3.7 main.py --validate -c configs/estimation/adds/adds.yaml --seed 20\n# run tsm training\n# python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_tsm main.py  --validate -c configs/recognition/tsm/tsm_k400_frames.yaml\n# run tsm amp training\n# python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_k400_frames.yaml\n# run tsm amp training, nhwc\n# python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_tsm main.py  --amp --validate -c configs/recognition/tsm/tsm_k400_frames_nhwc.yaml\n# run tsn training\n# python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_tsn main.py  --validate -c configs/recognition/tsn/tsn_k400_frames.yaml\n# run video-swin-transformer training\n# python3.7 -u -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\"  --log_dir=log_videoswin main.py --amp --validate -c configs/recognition/videoswin/videoswin_k400_videos.yaml",
+        "type": "code",
+        "location": "/run.sh:20-36"
+    },
+    "8481": {
+        "file_id": 627,
+        "content": "This code contains various command lines to run different video recognition training processes using PaddlePaddle framework on multiple GPUs. Each line specifies the model architecture, the configuration file, and the options like validation, amp (automatic mixed precision), and GPU allocation for each specific task.",
+        "type": "comment"
+    },
+    "8482": {
+        "file_id": 627,
+        "content": "# run slowfast training\n# python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_slowfast  main.py --validate -c configs/recognition/slowfast/slowfast.yaml\n# run slowfast multi-grid training\n# python3.7 -B -m paddle.distributed.launch --selected_gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log-slowfast main.py --validate --multigrid -c configs/recognition/slowfast/slowfast_multigrid.yaml\n# run bmn training\n# python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3\"  --log_dir=log_bmn main.py  --validate -c configs/localization/bmn.yaml\n# run attention_lstm training\n# python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_attetion_lstm  main.py  --validate -c configs/recognition/attention_lstm/attention_lstm_youtube-8m.yaml\n# run pp-tsn training\n# python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\"  --log_dir=log_pptsn  main.py  --validate -c configs/recognition/pptsn/pptsn_k400_frames.yaml\n# run timesformer training\n# python3.7 -B -m paddle.",
+        "type": "code",
+        "location": "/run.sh:38-54"
+    },
+    "8483": {
+        "file_id": 627,
+        "content": "This code executes multiple deep learning model training scripts for various computer vision tasks such as recognition, localization, and more using PaddlePaddle framework. The training runs in distributed mode with GPU utilization to speed up the process.",
+        "type": "comment"
+    },
+    "8484": {
+        "file_id": 627,
+        "content": "distributed.launch --gpus=\"0,1,2,3,4,5,6,7\"  --log_dir=log_timesformer  main.py  --validate -c configs/recognition/timesformer/timesformer_k400_videos.yaml\n# run pp-timesformer training\n# python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\"  --log_dir=log_pptimesformer  main.py  --validate -c configs/recognition/pptimesformer/pptimesformer_k400_videos.yaml\n# run st-gcn training\n# python3.7 main.py -c configs/recognition/stgcn/stgcn_fsd.yaml\n# run agcn training\n# python3.7 main.py -c configs/recognition/agcn/agcn_fsd.yaml\n# run actbert training\n# python3.7 main.py  --validate -c configs/multimodal/actbert/actbert.yaml\n# run tsn dali training\n# python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3\" --log_dir=log_tsn main.py --train_dali -c configs/recognition/tsn/tsn_dali.yaml\n# test.sh\n# just use `example` as example, please replace to real name.\n# python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_test main.py --test -c configs/example.yaml -w \"output/example/example_best.pdparams\"",
+        "type": "code",
+        "location": "/run.sh:54-74"
+    },
+    "8485": {
+        "file_id": 627,
+        "content": "This code executes multiple deep learning model training and testing scripts for various tasks. It launches distributed training with specific GPU configurations, sets log directories, and uses different configuration files depending on the task. The tasks include pp-timesformer, st-gcn, agcn, actbert, tsn dali training, and example test.",
+        "type": "comment"
+    },
+    "8486": {
+        "file_id": 627,
+        "content": "# NOTE: run bmn test, only support single card, bs=1\n# python3.7 main.py --test -c configs/localization/bmn.yaml -w output/BMN/BMN_epoch_00010.pdparams -o DATASET.batch_size=1\n# export_models script\n# just use `example` as example, please replace to real name.\n# python3.7 tools/export_model.py -c configs/example.yaml -p output/example/example_best.pdparams -o ./inference\n# predict script\n# just use `example` as example, please replace to real name.\n# python3.7 tools/predict.py -v example.avi --model_file \"./inference/example.pdmodel\" --params_file \"./inference/example.pdiparams\" --enable_benchmark=False --model=\"example\" --num_seg=8\nend_time=$(date +%s)\ncost_time=$[ $end_time-$start_time ]\necho \"Time to train is $(($cost_time/60))min $(($cost_time%60))s\"",
+        "type": "code",
+        "location": "/run.sh:76-89"
+    },
+    "8487": {
+        "file_id": 627,
+        "content": "This script demonstrates the process of running BMN test, exporting models, and performing inference using the PaddleVideo toolkit. It highlights the commands required for each step, including the necessary configuration files and output directories. The script also calculates and outputs the training time in minutes and seconds.",
+        "type": "comment"
+    },
+    "8488": {
+        "file_id": 628,
+        "content": "/setup.py",
+        "type": "filepath"
+    },
+    "8489": {
+        "file_id": 628,
+        "content": "The setup file installs necessary packages for PaddleVideo, supports Python 3.2-3.6, and includes a console script \"ppvideo\" with keywords: \"A treasure chest for video understanding powered by PaddlePaddle.\" The code specifies Python version 3.7 and categorizes the project as a utility for metadata description in setup.py file.",
+        "type": "summary"
+    },
+    "8490": {
+        "file_id": 628,
+        "content": "# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom setuptools import setup\nfrom io import open\nwith open('requirements.txt', encoding=\"utf-8-sig\") as f:\n    requirements = f.readlines()\ndef readme():\n    with open('docs/en/quick_start.md', encoding=\"utf-8-sig\") as f:\n        README = f.read()\n    return README\nsetup(\n    name='ppvideo',  #name of .whl file\n    packages=['ppvideo'],  #install package name\n    package_dir={'ppvideo': ''},\n    include_package_data=",
+        "type": "code",
+        "location": "/setup.py:1-31"
+    },
+    "8491": {
+        "file_id": 628,
+        "content": "This code is a setup file for the PaddleVideo package using setuptools. It specifies the package name, installs required packages from requirements.txt, reads README content, and sets up directory structure.",
+        "type": "comment"
+    },
+    "8492": {
+        "file_id": 628,
+        "content": "    True,  #Accept all data files and directories matched by MANIFEST.in\n    install_requires=requirements,\n    entry_points={\"console_scripts\": [\"ppvideo= ppvideo.tools.wheel:main\"]},\n    version='2.3.0',\n    license='Apache License 2.0',\n    description='Awesome Video toolkits based on PaddlePaddle ',\n    long_description=readme(),\n    long_description_content_type='text/markdown',\n    url='https://github.com/PaddlePaddle/PaddleVideo',\n    download_url='https://github.com/PaddlePaddle/PaddleVideo.git',\n    keywords=[\n        'A treasure chest for video understanding powered by PaddlePaddle.'\n    ],\n    classifiers=[\n        'Intended Audience :: Developers', 'Operating System :: OS Independent',\n        'Natural Language :: Chinese (Simplified)',\n        'Programming Language :: Python :: 3',\n        'Programming Language :: Python :: 3.2',\n        'Programming Language :: Python :: 3.3',\n        'Programming Language :: Python :: 3.4',\n        'Programming Language :: Python :: 3.5',\n        'Programming Language :: Python :: 3.6',",
+        "type": "code",
+        "location": "/setup.py:32-53"
+    },
+    "8493": {
+        "file_id": 628,
+        "content": "This code is for setting up a Python package named \"PaddleVideo\" using setup.py. It specifies package details such as its name, version, requirements, description, license, and URL. The package is built with console script \"ppvideo\", and it supports Python 3.2-3.6. Keywords: \"A treasure chest for video understanding powered by PaddlePaddle.\"",
+        "type": "comment"
+    },
+    "8494": {
+        "file_id": 628,
+        "content": "        'Programming Language :: Python :: 3.7', 'Topic :: Utilities'\n    ],\n)",
+        "type": "code",
+        "location": "/setup.py:54-56"
+    },
+    "8495": {
+        "file_id": 628,
+        "content": "The code is specifying Python version 3.7 and categorizing the project as a utility for metadata description in setup.py file.",
+        "type": "comment"
+    },
+    "8496": {
+        "file_id": 629,
+        "content": "/test_tipc/README.md",
+        "type": "filepath"
+    },
+    "8497": {
+        "file_id": 629,
+        "content": "The code provides TIPC support for PaddleVideo, offering tutorials on acceleration features, defining naming conventions for testing, ONNX conversion, deployment with Paddle Serving, offline quantized training/inference, and multi-machine multi-GPU training/inference.",
+        "type": "summary"
+    },
+    "8498": {
+        "file_id": 629,
+        "content": "# 飞桨训推一体认证（TIPC）\n## 1. 简介\n飞桨除了基本的模型训练和预测，还提供了支持多端多平台的高性能推理部署工具。本文档提供了PaddleVideo中所有模型的飞桨训推一体认证 (Training and Inference Pipeline Certification(TIPC)) 信息和测试工具，方便用户查阅每种模型的训练推理部署打通情况，并可以进行一键测试。\n<div align=\"center\">\n    <img src=\"docs/guide.png\" width=\"1000\">\n</div>\n## 2. 汇总信息\n打通情况汇总如下，已填写的部分表示可以使用本工具进行一键测试，未填写的表示正在支持中。\n**字段说明：**\n- 基础训练预测：包括模型训练、Paddle Inference Python预测。\n- 更多训练方式：包括多机多卡(TODO)、混合精度。\n- 模型压缩：包括裁剪、离线/在线量化(TODO)、蒸馏(TODO)。\n- 其他预测部署：包括Paddle Inference C++预测、Paddle Serving部署、Paddle-Lite部署(TODO)等。\n更详细的mkldnn、Tensorrt等预测加速相关功能的支持情况可以查看各测试工具的[更多教程](#more)。\n| 算法名称 | 模型名称 | 模型类型 | 基础<br>训练预测 | 更多<br>训练方式 | 模型压缩 |  其他预测部署  |\n| :--- | :--- |  :----:  | :--------: |  :----  |   :----  |   :----  |\n| PP-TSM     |pptsm_k400_frames_uniform | 动作识别 | 支持 | 混合精度 | 离线量化 | Paddle Inference: C++ |\n| PP-TSN |pptsn_k400_videos | 动作识别 | 支持 | 混合精度 | - | Paddle Inference: C++ |\n| AGCN |agcn_fsd\t | 动作识别 | 支持 | 混合精度 | - | - |\n| STGCN |stgcn_fsd | 动作识别 | 支持 | 混合精度 | - | - |\n| TimeSformer |timesformer_k400_videos | 动作识别 | 支持 | 混合精度 | - | - |",
+        "type": "code",
+        "location": "/test_tipc/README.md:2-30"
+    },
+    "8499": {
+        "file_id": 629,
+        "content": "This code provides an introduction to the PaddleVideo training and inference pipeline certification (TIPC), including a summary of support status for various models and deployment methods. It also mentions that more details on specific acceleration features can be found in tutorials associated with each test tool.",
+        "type": "comment"
+    }
+}

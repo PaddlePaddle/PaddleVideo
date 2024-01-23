@@ -1,0 +1,546 @@
+{
+    "5000": {
+        "file_id": 430,
+        "content": "        \"\"\"get the size of the dataset.\"\"\"\n        if self.num_samples_precise_bn is None:\n            return len(self.info)\n        else:\n            random.shuffle(self.info)\n            return min(self.num_samples_precise_bn, len(self.info))",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/slowfast_video.py:138-143"
+    },
+    "5001": {
+        "file_id": 430,
+        "content": "This code calculates the size of the dataset. If num_samples_precise_bn is None, it returns the length of self.info. Otherwise, shuffles self.info and returns the minimum value between num_samples_precise_bn and the length of self.info.",
+        "type": "comment"
+    },
+    "5002": {
+        "file_id": 431,
+        "content": "/paddlevideo/loader/dataset/ucf101_skeleton.py",
+        "type": "filepath"
+    },
+    "5003": {
+        "file_id": 431,
+        "content": "This code defines a Python class for the UCF101 Skeleton Dataset in PaddleVideo, loading skeleton features and normalizing data for action recognition tasks. The dataset includes train and test methods for preparing frames with `prepare_train` and `prepare_test` functions.",
+        "type": "summary"
+    },
+    "5004": {
+        "file_id": 431,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os.path as osp\nimport copy\nimport random\nimport numpy as np\nimport pickle\nimport paddle\nfrom paddle.io import Dataset\nfrom ..registry import DATASETS\nfrom .base import BaseDataset\nfrom ...utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@DATASETS.register()\nclass UCF101SkeletonDataset(BaseDataset):\n    \"\"\"\n    Skeleton dataset for action recognition.\n    The dataset loads skeleton feature, and apply norm operatations.",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/ucf101_skeleton.py:1-35"
+    },
+    "5005": {
+        "file_id": 431,
+        "content": "This code snippet is a Python class for UCF101 Skeleton Dataset in PaddleVideo. It loads skeleton features and applies normalization operations, registering the dataset for action recognition tasks.",
+        "type": "comment"
+    },
+    "5006": {
+        "file_id": 431,
+        "content": "    Args:\n        file_path (str): Path to the index file.\n        pipeline(obj): Define the pipeline of data preprocessing.\n        test_mode (bool): Whether to bulid the test dataset. Default: False.\n    \"\"\"\n    def __init__(self,\n                 file_path,\n                 pipeline,\n                 split,\n                 repeat_times,\n                 test_mode=False):\n        self.split = split\n        self.repeat_times = repeat_times\n        super().__init__(file_path, pipeline, test_mode=test_mode)\n        self._ori_len = len(self.info)\n        self.start_index = 0\n        self.modality = \"Pose\"\n    def load_file(self):\n        \"\"\"Load annotation file to get video information.\"\"\"\n        assert self.file_path.endswith('.pkl')\n        return self.load_pkl_annotations()\n    def load_pkl_annotations(self):\n        with open(self.file_path, \"rb\") as f:\n            data = pickle.load(f)\n        if self.split:\n            split, data = data['split'], data['annotations']\n            identifier = 'filename' if 'filename' in data[0] else 'frame_dir'",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/ucf101_skeleton.py:36-66"
+    },
+    "5007": {
+        "file_id": 431,
+        "content": "This code defines a class that loads annotation data from a file, specifically for the UCF101 dataset's skeleton information. It takes arguments such as the file path, pipeline object, and whether it's building a test dataset. The load_file method checks if the file is a .pkl file and calls load_pkl_annotations to get video information. If the split argument is provided, it only uses the specified part of the data.",
+        "type": "comment"
+    },
+    "5008": {
+        "file_id": 431,
+        "content": "            data = [x for x in data if x[identifier] in split[self.split]]\n        return data\n    def prepare_train(self, idx):\n        \"\"\"Prepare the frames for training given the index.\"\"\"\n        results = copy.deepcopy(self.info[idx % self._ori_len])\n        results['modality'] = self.modality\n        results['start_index'] = self.start_index\n        return self.pipeline(results)\n    def prepare_test(self, idx):\n        \"\"\"Prepare the frames for testing given the index.\"\"\"\n        results = copy.deepcopy(self.info[idx % self._ori_len])\n        results['modality'] = self.modality\n        results['start_index'] = self.start_index\n        return self.pipeline(results)\n    def __len__(self):\n        \"\"\"get the size of the dataset.\"\"\"\n        return len(self.info) * self.repeat_times",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/ucf101_skeleton.py:67-89"
+    },
+    "5009": {
+        "file_id": 431,
+        "content": "This code defines a dataset for PaddleVideo, containing train and test methods for preparing frames. The `prepare_train` and `prepare_test` functions create new results by copying the original information, setting modality and start index based on the given index. The `__len__` function returns the size of the dataset by multiplying the number of info items with repeat times.",
+        "type": "comment"
+    },
+    "5010": {
+        "file_id": 432,
+        "content": "/paddlevideo/loader/dataset/ucf24_dataset.py",
+        "type": "filepath"
+    },
+    "5011": {
+        "file_id": 432,
+        "content": "The Python code defines a \"Ucf24Dataset\" class for loading and transforming UCF24 dataset in PaddleVideo, with methods to prepare data for training/validation and testing. It extracts relevant information like image paths, labels, and frame indices, and converts image path names from 'jpg' to 'txt'.",
+        "type": "summary"
+    },
+    "5012": {
+        "file_id": 432,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport copy\nimport numpy as np\nfrom ..registry import DATASETS\nfrom .base import BaseDataset\nfrom ...utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@DATASETS.register()\nclass UCF24Dataset(BaseDataset):\n    \"\"\"Dataset for YOWO\n       The dataset loads raw videos and apply specified transforms on them.\n       The index file is a file with multiple lines, and each line indicates\n       a sample video with the filepath and label, which are split with a whitesapce.",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/ucf24_dataset.py:1-30"
+    },
+    "5013": {
+        "file_id": 432,
+        "content": "This code is a Python class for the UCF24 dataset used in PaddleVideo, which loads raw videos and applies specified transformations on them. It is registered within the registry module and utilizes other modules such as BaseDataset and gets logger from utils. The license information and import statements are also included.",
+        "type": "comment"
+    },
+    "5014": {
+        "file_id": 432,
+        "content": "       Example of a inde file:\n       .. code-block:: txt\n       Args:\n           file_path(str): Path to the index file.\n           pipeline(XXX): A sequence of data transforms.\n           **kwargs: Keyword arguments for ```BaseDataset```.\n    \"\"\"\n    def __init__(self, file_path, pipeline, num_retries=5, **kwargs):\n        self.num_retries = num_retries\n        super().__init__(file_path, pipeline, **kwargs)\n    def load_file(self):\n        \"\"\"Load index file to get video information.\"\"\"\n        info = []\n        with open(self.file_path, 'r') as fin:\n            lines = fin.readlines()\n        for line in lines:\n            line = line.strip()  # 'data/ucf24/labels/class_name/video_name/key_frame.txt'\n            filename = line.replace('txt', 'jpg').replace(\n                'labels', 'rgb-images')  # key frame path\n            info.append(dict(filename=filename))\n        return info\n    def prepare_train(self, idx):\n        \"\"\"TRAIN & VALID. Prepare the data for training/valid given the index.\"\"\"\n        results = copy.deepcopy(self.info[idx])",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/ucf24_dataset.py:31-59"
+    },
+    "5015": {
+        "file_id": 432,
+        "content": "This code defines a dataset class, \"Ucf24Dataset\", which loads video information from an index file and prepares data for training or validation. It takes a file path, pipeline, and additional keyword arguments. The load_file method reads the index file to extract video information, such as filenames, while the prepare_train method prepares data for training/validation given an index.",
+        "type": "comment"
+    },
+    "5016": {
+        "file_id": 432,
+        "content": "        results = self.pipeline(results)\n        im_path = results['filename']\n        im_path = im_path.replace('jpg', 'txt')\n        im_split = im_path.split('/')\n        frame_index = im_split[3] + '_' + im_split[4] + '_' + im_split[5]\n        return results['imgs'], np.array([results['labels']]), frame_index\n    def prepare_test(self, idx):\n        \"\"\"TEST. Prepare the data for test given the index.\"\"\"\n        # Try to catch Exception caused by reading corrupted video file\n        results = copy.deepcopy(self.info[idx])\n        results = self.pipeline(results)\n        im_path = results['filename']\n        im_path = im_path.replace('jpg', 'txt')\n        im_split = im_path.split('/')\n        frame_index = im_split[3] + '_' + im_split[4] + '_' + im_split[5]\n        return results['imgs'], np.array([results['labels']]), frame_index",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/ucf24_dataset.py:60-76"
+    },
+    "5017": {
+        "file_id": 432,
+        "content": "Code from \"PaddleVideo/paddlevideo/loader/dataset/ucf24_dataset.py\" prepares data for testing by copying the info at index idx, applying a pipeline function to it and extracting relevant information like image paths and labels. The code also converts image path names from 'jpg' to 'txt'. Finally, it returns images, labels, and frame indices.",
+        "type": "comment"
+    },
+    "5018": {
+        "file_id": 433,
+        "content": "/paddlevideo/loader/dataset/video.py",
+        "type": "filepath"
+    },
+    "5019": {
+        "file_id": 433,
+        "content": "VideoDataset is a subclass of BaseDataset that loads and processes raw videos, using an index file containing video information. It handles corrupted files with retries and error logging. The `prepare_train` and `prepare_test` methods return image data and labels for training and testing respectively.",
+        "type": "summary"
+    },
+    "5020": {
+        "file_id": 433,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os.path as osp\nimport copy\nimport random\nimport numpy as np\nfrom ..registry import DATASETS\nfrom .base import BaseDataset\nfrom ...utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@DATASETS.register()\nclass VideoDataset(BaseDataset):\n    \"\"\"Video dataset for action recognition\n       The dataset loads raw videos and apply specified transforms on them.\n       The index file is a file with multiple lines, and each line indicates",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/video.py:1-31"
+    },
+    "5021": {
+        "file_id": 433,
+        "content": "This code is for VideoDataset class, a subclass of BaseDataset, that loads raw videos and applies specified transforms. It uses index file with multiple lines where each line indicates information about videos in the dataset. The class is registered within the DATASETS registry and logger is initialized.",
+        "type": "comment"
+    },
+    "5022": {
+        "file_id": 433,
+        "content": "       a sample video with the filepath and label, which are split with a whitesapce.\n       Example of a inde file:\n       .. code-block:: txt\n           path/000.mp4 1\n           path/001.mp4 1\n           path/002.mp4 2\n           path/003.mp4 2\n       Args:\n           file_path(str): Path to the index file.\n           pipeline(XXX): A sequence of data transforms.\n           **kwargs: Keyword arguments for ```BaseDataset```.\n    \"\"\"\n    def __init__(self, file_path, pipeline, num_retries=5, suffix='', **kwargs):\n        self.num_retries = num_retries\n        self.suffix = suffix\n        super().__init__(file_path, pipeline, **kwargs)\n    def load_file(self):\n        \"\"\"Load index file to get video information.\"\"\"\n        info = []\n        with open(self.file_path, 'r') as fin:\n            for line in fin:\n                line_split = line.strip().split()\n                filename, labels = line_split\n                #TODO(hj): Required suffix format: may mp4/avi/wmv\n                filename = filename + self.suffix",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/video.py:32-57"
+    },
+    "5023": {
+        "file_id": 433,
+        "content": "This code initializes a new class for loading index file data, which contains video information. The index file has path and label entries separated by whitespace. The load_file method reads the index file to retrieve filename and labels for each video.",
+        "type": "comment"
+    },
+    "5024": {
+        "file_id": 433,
+        "content": "                if self.data_prefix is not None:\n                    filename = osp.join(self.data_prefix, filename)\n                info.append(dict(filename=filename, labels=int(labels)))\n        return info\n    def prepare_train(self, idx):\n        \"\"\"TRAIN & VALID. Prepare the data for training/valid given the index.\"\"\"\n        #Try to catch Exception caused by reading corrupted video file\n        for ir in range(self.num_retries):\n            try:\n                results = copy.deepcopy(self.info[idx])\n                results = self.pipeline(results)\n            except Exception as e:\n                #logger.info(e)\n                if ir < self.num_retries - 1:\n                    logger.info(\n                        \"Error when loading {}, have {} trys, will try again\".\n                        format(results['filename'], ir))\n                idx = random.randint(0, len(self.info) - 1)\n                continue\n            return results['imgs'], np.array([results['labels']])\n    def prepare_test(self, idx):",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/video.py:58-80"
+    },
+    "5025": {
+        "file_id": 433,
+        "content": "This code defines a class with methods to prepare data for training and testing. It handles potential corrupted video files by retrying if an exception occurs, and logs the error message along with the number of retries. The `prepare_train` method returns image data (`imgs`) and corresponding labels from the given index in the dataset. Similarly, the `prepare_test` method returns image data and labels for testing.",
+        "type": "comment"
+    },
+    "5026": {
+        "file_id": 433,
+        "content": "        \"\"\"TEST. Prepare the data for test given the index.\"\"\"\n        #Try to catch Exception caused by reading corrupted video file\n        for ir in range(self.num_retries):\n            try:\n                results = copy.deepcopy(self.info[idx])\n                results = self.pipeline(results)\n            except Exception as e:\n                #logger.info(e)\n                if ir < self.num_retries - 1:\n                    logger.info(\n                        \"Error when loading {}, have {} trys, will try again\".\n                        format(results['filename'], ir))\n                idx = random.randint(0, len(self.info) - 1)\n                continue\n            return results['imgs'], np.array([results['labels']])",
+        "type": "code",
+        "location": "/paddlevideo/loader/dataset/video.py:81-95"
+    },
+    "5027": {
+        "file_id": 433,
+        "content": "This code attempts to load a video file and prepare the data for testing. It handles potential exceptions caused by corrupted files by retrying multiple times. If an exception occurs, it logs an error message and retries with another randomly selected file index. The function returns the images and labels from the successfully loaded video file.",
+        "type": "comment"
+    },
+    "5028": {
+        "file_id": 434,
+        "content": "/paddlevideo/loader/pipelines/__init__.py",
+        "type": "filepath"
+    },
+    "5029": {
+        "file_id": 434,
+        "content": "This file imports necessary modules for PaddleVideo data preprocessing and model training/testing, including annotations, video labels, augmentation, decoding, mixing, segmentation, and sampling. It also defines a list of pipeline components for custom video processing pipelines.",
+        "type": "summary"
+    },
+    "5030": {
+        "file_id": 434,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .anet_pipeline import GetMatchMap, GetVideoLabel, LoadFeat\nfrom .augmentations import (CenterCrop, ColorJitter, GroupRandomFlip,\n                            GroupResize, Image2Array, JitterScale, MultiCrop,\n                            Normalization, PackOutput, RandomCrop, RandomFlip,\n                            RandomResizedCrop, Scale, TenCrop, ToArray,\n                            UniformCrop, RandomGamma, MultiCenterCrop,",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/__init__.py:1-20"
+    },
+    "5031": {
+        "file_id": 434,
+        "content": "This file contains the initialization and imports from different pipeline classes in PaddleVideo. It includes functions for loading annotations, getting video labels, and various augmentation techniques. The license and copyright information are also present.",
+        "type": "comment"
+    },
+    "5032": {
+        "file_id": 434,
+        "content": "                            RandomBrightness, RandomHue, RandomSaturation, YowoAug)\nfrom .augmentations_ava import *\nfrom .compose import Compose\nfrom .decode import FeatureDecoder, FrameDecoder, VideoDecoder, ActionFeatureDecoder\nfrom .decode_image import ImageDecoder\nfrom .decode_sampler import DecodeSampler\nfrom .mix import Cutmix, Mixup, VideoMix\nfrom .multimodal import FeaturePadding, RandomCap, RandomMask, Tokenize\nfrom .sample import Sampler, SamplerPkl\nfrom .sample_ava import *\nfrom .segmentation import MultiNorm, MultiRestrictSize\nfrom .skeleton_pipeline import AutoPadding, Iden, SkeletonNorm\nfrom .skeleton_pipeline import SketeonCropSample, SketeonModalityTransform, RandomRotation\nfrom .skeleton_pipeline import (UniformSampleFrames, PoseDecode, PoseCompact,\n                                RandomResizedCrop_V2, Flip_V2, CenterCrop_V2,\n                                GeneratePoseTarget, FormatShape, Collect)\nfrom .decode_sampler_MRI import SFMRI_DecodeSampler\nfrom .segmentation_pipline import SegmentationSampler",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/__init__.py:21-38"
+    },
+    "5033": {
+        "file_id": 434,
+        "content": "The code imports various classes and functions for different image, video, and skeleton-related pipelines. It includes modules for augmentations, decoding, mixing, segmentation, sampling, and more, used in the PaddleVideo library. These pipelines are used to preprocess, decode, and sample data for training and testing models.",
+        "type": "comment"
+    },
+    "5034": {
+        "file_id": 434,
+        "content": "from .sample_ucf24 import SamplerUCF24\n__all__ = [\n    'ImageDecoder', 'RandomMask', 'UniformCrop', 'SkeletonNorm', 'Tokenize',\n    'Sampler', 'FeatureDecoder', 'DecodeSampler', 'TenCrop', 'Compose',\n    'AutoPadding', 'Normalization', 'Mixup', 'Image2Array', 'Scale',\n    'GroupResize', 'VideoDecoder', 'FrameDecoder', 'PackOutput',\n    'ActionFeatureDecoder', 'GetVideoLabel', 'Cutmix', 'CenterCrop',\n    'RandomCrop', 'LoadFeat', 'RandomCap', 'JitterScale', 'Iden', 'VideoMix',\n    'ColorJitter', 'RandomFlip', 'ToArray', 'FeaturePadding', 'GetMatchMap',\n    'GroupRandomFlip', 'MultiCrop', 'SFMRI_DecodeSampler', 'MultiRestrictSize',\n    'MultiNorm', 'RandomResizedCrop', 'SamplerPkl', 'SegmentationSampler',\n    'SketeonCropSample', 'SketeonModalityTransform', 'RandomRotation',\n    'RandomGamma', 'MultiCenterCrop', 'RandomBrightness', 'RandomHue',\n    'RandomSaturation', 'UniformSampleFrames', 'PoseDecode', 'PoseCompact',\n    'Resize', 'RandomResizedCrop_V2', 'Flip_V2', 'GeneratePoseTarget',\n    'FormatShape', 'Collect', 'RandomSaturation', 'SamplerUCF24', 'YowoAug'",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/__init__.py:39-55"
+    },
+    "5035": {
+        "file_id": 434,
+        "content": "This code is importing the \"SamplerUCF24\" class from the \"sample_ucf24\" module and defining a list of available pipeline components for PaddleVideo, including image and feature decoders, transforms, samplers, and more. These components can be used to build custom video processing pipelines for various tasks.",
+        "type": "comment"
+    },
+    "5036": {
+        "file_id": 434,
+        "content": "]",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/__init__.py:56-56"
+    },
+    "5037": {
+        "file_id": 434,
+        "content": "The code appears to be incomplete or empty, as there are no visible operations or assignments. It could potentially be a placeholder or an intentionally empty function/class definition.",
+        "type": "comment"
+    },
+    "5038": {
+        "file_id": 435,
+        "content": "/paddlevideo/loader/pipelines/anet_pipeline.py",
+        "type": "filepath"
+    },
+    "5039": {
+        "file_id": 435,
+        "content": "PaddleVideo library enables feature extraction and map creation, while GetVideoLabel class calculates IoU for object detection tasks. The code stores max IoU values and prepares data for evaluation or processing.",
+        "type": "summary"
+    },
+    "5040": {
+        "file_id": 435,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os\nimport numpy as np\nfrom ..registry import PIPELINES\n\"\"\"pipeline ops for Activity Net.\n\"\"\"\n@PIPELINES.register()\nclass LoadFeat(object):\n    def __init__(self, feat_path):\n        self.feat_path = feat_path\n    def __call__(self, results):\n        video_name = results['video_name']\n        file_name = video_name + \".npy\"\n        file_path = os.path.join(self.feat_path, file_name)\n        #TODO: check path\n        video_feat = np.load(file_path)",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/anet_pipeline.py:1-32"
+    },
+    "5041": {
+        "file_id": 435,
+        "content": "This code is part of PaddleVideo library, specifically for loading feature data from a given path. It defines a class \"LoadFeat\" and uses the numpy library to load .npy files based on the video name provided in the results dictionary. The file path is constructed using the specified feat_path and video name.",
+        "type": "comment"
+    },
+    "5042": {
+        "file_id": 435,
+        "content": "        video_feat = video_feat.T\n        video_feat = video_feat.astype(\"float32\")\n        results['video_feat'] = video_feat\n        return results\n@PIPELINES.register()\nclass GetMatchMap(object):\n    def __init__(self, tscale):\n        self.tscale = tscale\n        self.tgap = 1. / self.tscale\n    def __call__(self, results):\n        match_map = []\n        for idx in range(self.tscale):\n            tmp_match_window = []\n            xmin = self.tgap * idx\n            for jdx in range(1, self.tscale + 1):\n                xmax = xmin + self.tgap * jdx\n                tmp_match_window.append([xmin, xmax])\n            match_map.append(tmp_match_window)\n        match_map = np.array(match_map)\n        match_map = np.transpose(match_map, [1, 0, 2])\n        match_map = np.reshape(match_map, [-1, 2])\n        anchor_xmin = [self.tgap * i for i in range(self.tscale)]\n        anchor_xmax = [self.tgap * i for i in range(1, self.tscale + 1)]\n        results['match_map'] = match_map\n        results['anchor_xmin'] = anchor_xmin",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/anet_pipeline.py:33-62"
+    },
+    "5043": {
+        "file_id": 435,
+        "content": "This code defines a pipeline function that generates matching maps for an input video. It creates temporal matching windows of varying sizes and reshapes the result into a specific format. The anchor positions are also extracted for later use.",
+        "type": "comment"
+    },
+    "5044": {
+        "file_id": 435,
+        "content": "        results['anchor_xmax'] = anchor_xmax\n        return results\n@PIPELINES.register()\nclass GetVideoLabel(object):\n    def __init__(self, tscale, dscale, datatype=\"float32\"):\n        self.tscale = tscale\n        self.dscale = dscale\n        self.tgap = 1. / self.tscale\n        self.datatype = datatype\n    def iou_with_anchors(self, anchors_min, anchors_max, box_min, box_max):\n        \"\"\"Compute jaccard score between a box and the anchors.\n        \"\"\"\n        len_anchors = anchors_max - anchors_min\n        int_xmin = np.maximum(anchors_min, box_min)\n        int_xmax = np.minimum(anchors_max, box_max)\n        inter_len = np.maximum(int_xmax - int_xmin, 0.)\n        union_len = len_anchors - inter_len + box_max - box_min\n        jaccard = np.divide(inter_len, union_len)\n        return jaccard\n    def ioa_with_anchors(self, anchors_min, anchors_max, box_min, box_max):\n        \"\"\"Compute intersection between score a box and the anchors.\n        \"\"\"\n        len_anchors = anchors_max - anchors_min\n        int_xmin = np.maximum(anchors_min, box_min)",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/anet_pipeline.py:63-90"
+    },
+    "5045": {
+        "file_id": 435,
+        "content": "This code defines a class called \"GetVideoLabel\" which calculates the Intersection over Union (IOU) and intersection scores between a box and the anchors. It also initializes variables for time and distance scaling, and box type data types. The \"iou_with_anchors\" method calculates the Jaccard score and the \"ioa_with_anchors\" method computes the intersection. These methods can be used to determine the best match between an anchor box and a target box in object detection tasks.",
+        "type": "comment"
+    },
+    "5046": {
+        "file_id": 435,
+        "content": "        int_xmax = np.minimum(anchors_max, box_max)\n        inter_len = np.maximum(int_xmax - int_xmin, 0.)\n        scores = np.divide(inter_len, len_anchors)\n        return scores\n    def __call__(self, results):\n        video_info = results['video_info']\n        match_map = results['match_map']\n        anchor_xmin = results['anchor_xmin']\n        anchor_xmax = results['anchor_xmax']\n        video_second = video_info['duration_second']\n        video_labels = video_info['annotations']\n        gt_bbox = []\n        gt_iou_map = []\n        for gt in video_labels:\n            tmp_start = max(min(1, gt[\"segment\"][0] / video_second), 0)\n            tmp_end = max(min(1, gt[\"segment\"][1] / video_second), 0)\n            gt_bbox.append([tmp_start, tmp_end])\n            tmp_gt_iou_map = self.iou_with_anchors(match_map[:, 0],\n                                                   match_map[:, 1], tmp_start,\n                                                   tmp_end)\n            tmp_gt_iou_map = np.reshape(tmp_gt_iou_map,\n                                        [self.dscale, self.tscale])",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/anet_pipeline.py:91-115"
+    },
+    "5047": {
+        "file_id": 435,
+        "content": "The function initializes gt_bbox and gt_iou_map variables to store ground truth bounding box coordinates and their IoU with anchor boxes. It then iterates through video labels, calculating the start and end timestamps in video seconds for each ground truth box. The IoU between match map and the current ground truth is computed using the iou_with_anchors function and stored in gt_iou_map, reshaped to match the dimensions of dscale and tscale.",
+        "type": "comment"
+    },
+    "5048": {
+        "file_id": 435,
+        "content": "            gt_iou_map.append(tmp_gt_iou_map)\n        gt_iou_map = np.array(gt_iou_map)\n        gt_iou_map = np.max(gt_iou_map, axis=0)\n        gt_bbox = np.array(gt_bbox)\n        gt_xmins = gt_bbox[:, 0]\n        gt_xmaxs = gt_bbox[:, 1]\n        gt_len_small = 3 * self.tgap\n        gt_start_bboxs = np.stack(\n            (gt_xmins - gt_len_small / 2, gt_xmins + gt_len_small / 2), axis=1)\n        gt_end_bboxs = np.stack(\n            (gt_xmaxs - gt_len_small / 2, gt_xmaxs + gt_len_small / 2), axis=1)\n        match_score_start = []\n        for jdx in range(len(anchor_xmin)):\n            match_score_start.append(\n                np.max(\n                    self.ioa_with_anchors(anchor_xmin[jdx], anchor_xmax[jdx],\n                                          gt_start_bboxs[:, 0],\n                                          gt_start_bboxs[:, 1])))\n        match_score_end = []\n        for jdx in range(len(anchor_xmin)):\n            match_score_end.append(\n                np.max(\n                    self.ioa_with_anchors(anchor_xmin[jdx], anchor_xmax[jdx],",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/anet_pipeline.py:116-140"
+    },
+    "5049": {
+        "file_id": 435,
+        "content": "This code calculates the intersection over union (IoU) between ground truth bounding boxes and anchor boxes. It stores the maximum IoU values for each ground truth box and anchor pair, then calculates the maximum IoU values for start and end positions of anchor boxes. This information will be used to determine if a prediction matches with a ground truth box and assign appropriate scores.",
+        "type": "comment"
+    },
+    "5050": {
+        "file_id": 435,
+        "content": "                                          gt_end_bboxs[:, 0], gt_end_bboxs[:,\n                                                                           1])))\n        gt_start = np.array(match_score_start)\n        gt_end = np.array(match_score_end)\n        results['gt_iou_map'] = gt_iou_map.astype(self.datatype)\n        results['gt_start'] = gt_start.astype(self.datatype)\n        results['gt_end'] = gt_end.astype(self.datatype)\n        return results",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/anet_pipeline.py:141-150"
+    },
+    "5051": {
+        "file_id": 435,
+        "content": "This code is storing ground truth (gt) IOU map, start and end indices for the annotations into the 'results' dictionary. The IOU map is converted to specified datatype before storage. These values will be used later for evaluation or further processing.",
+        "type": "comment"
+    },
+    "5052": {
+        "file_id": 436,
+        "content": "/paddlevideo/loader/pipelines/augmentations.py",
+        "type": "filepath"
+    },
+    "5053": {
+        "file_id": 436,
+        "content": "This code enhances PaddleVideo's loader with resize operation and augmentation pipeline, enabling diverse data preprocessing. It calculates crop offsets and performs object detection image augmentation using uniform sampling, resizing, and flipping techniques, resizes images, scales by 255.0, concatenates frames, transposes array dimensions, stores results in 'results', and returns arrays.",
+        "type": "summary"
+    },
+    "5054": {
+        "file_id": 436,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport math\nimport random\nfrom collections.abc import Sequence\nimport cv2\nimport numpy as np\nimport paddle\nimport paddle.nn.functional as F\nfrom PIL import Image\nfrom ..registry import PIPELINES\n@PIPELINES.register()\nclass Scale(object):\n    \"\"\"\n    Scale images.\n    Args:\n        short_size(float | int): Short size of an image will be scaled to the short_size.\n        fixed_ratio(bool): Set whether to zoom according to a fixed ratio. default: True",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:1-34"
+    },
+    "5055": {
+        "file_id": 436,
+        "content": "This code is from the PaddleVideo library, specifically the loader module's augmentations pipeline. It defines a Scale class that scales images based on their short side to the given short_size parameter. The fixed_ratio parameter determines whether or not the image should be resized while maintaining its aspect ratio. This class is then registered in PIPELINES for later use.",
+        "type": "comment"
+    },
+    "5056": {
+        "file_id": 436,
+        "content": "        do_round(bool): Whether to round up when calculating the zoom ratio. default: False\n        backend(str): Choose pillow or cv2 as the graphics processing backend. default: 'pillow'\n    \"\"\"\n    def __init__(self,\n                 short_size,\n                 fixed_ratio=True,\n                 keep_ratio=None,\n                 do_round=False,\n                 backend='pillow'):\n        self.short_size = short_size\n        assert (fixed_ratio and not keep_ratio) or (not fixed_ratio), \\\n            f\"fixed_ratio and keep_ratio cannot be true at the same time\"\n        self.fixed_ratio = fixed_ratio\n        self.keep_ratio = keep_ratio\n        self.do_round = do_round\n        assert backend in [\n            'pillow', 'cv2'\n        ], f\"Scale's backend must be pillow or cv2, but get {backend}\"\n        self.backend = backend\n    def __call__(self, results):\n        \"\"\"\n        Performs resize operations.\n        Args:\n            imgs (Sequence[PIL.Image]): List where each item is a PIL.Image.\n            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:35-61"
+    },
+    "5057": {
+        "file_id": 436,
+        "content": "The code defines a class for resize operations. It takes parameters for short size, fixed ratio (defaults to True), keep ratio, do_round (default False), and backend (default 'pillow'). The class checks if fixed_ratio and keep_ratio can't be true at the same time. It also ensures the backend is either 'pillow' or 'cv2'. The __call__ method performs resize operations on images, taking a Sequence of PIL.Image as input.",
+        "type": "comment"
+    },
+    "5058": {
+        "file_id": 436,
+        "content": "        return:\n            resized_imgs: List where each item is a PIL.Image after scaling.\n        \"\"\"\n        imgs = results['imgs']\n        resized_imgs = []\n        for i in range(len(imgs)):\n            img = imgs[i]\n            if isinstance(img, np.ndarray):\n                h, w, _ = img.shape\n            elif isinstance(img, Image.Image):\n                w, h = img.size\n            else:\n                raise NotImplementedError\n            if (w <= h and w == self.short_size) or (h <= w\n                                                     and h == self.short_size):\n                if self.backend == 'pillow' and not isinstance(\n                        img, Image.Image):\n                    img = Image.fromarray(img)\n                resized_imgs.append(img)\n                continue\n            if w <= h:\n                ow = self.short_size\n                if self.fixed_ratio:\n                    oh = int(self.short_size * 4.0 / 3.0)\n                elif self.keep_ratio is False:\n                    oh = self.short_size",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:62-88"
+    },
+    "5059": {
+        "file_id": 436,
+        "content": "This code is responsible for resizing images to a specified size in a PaddleVideo pipeline. It iterates through each image, checks the aspect ratio, and resizes them accordingly before appending to the resized_imgs list. If the image is already the correct size, it is directly added to the list without further processing.",
+        "type": "comment"
+    },
+    "5060": {
+        "file_id": 436,
+        "content": "                else:\n                    scale_factor = self.short_size / w\n                    oh = int(h * float(scale_factor) +\n                             0.5) if self.do_round else int(h *\n                                                            self.short_size / w)\n                    ow = int(w * float(scale_factor) +\n                             0.5) if self.do_round else self.short_size\n            else:\n                oh = self.short_size\n                if self.fixed_ratio:\n                    ow = int(self.short_size * 4.0 / 3.0)\n                elif self.keep_ratio is False:\n                    ow = self.short_size\n                else:\n                    scale_factor = self.short_size / h\n                    oh = int(h * float(scale_factor) +\n                             0.5) if self.do_round else self.short_size\n                    ow = int(w * float(scale_factor) +\n                             0.5) if self.do_round else int(w *\n                                                            self.short_size / h)",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:89-108"
+    },
+    "5061": {
+        "file_id": 436,
+        "content": "This code calculates the output image size for resizing and maintains aspect ratio if specified. It uses scale_factor to calculate the output height (oh) and width (ow), considering do_round, fixed_ratio, keep_ratio flags and short_size.",
+        "type": "comment"
+    },
+    "5062": {
+        "file_id": 436,
+        "content": "            if self.backend == 'pillow':\n                resized_imgs.append(img.resize((ow, oh), Image.BILINEAR))\n            elif self.backend == 'cv2' and (self.keep_ratio is not None):\n                resized_imgs.append(\n                    cv2.resize(img, (ow, oh), interpolation=cv2.INTER_LINEAR))\n            else:\n                resized_imgs.append(\n                    Image.fromarray(\n                        cv2.resize(np.asarray(img), (ow, oh),\n                                   interpolation=cv2.INTER_LINEAR)))\n        results['imgs'] = resized_imgs\n        return results\n@PIPELINES.register()\nclass RandomCrop(object):\n    \"\"\"\n    Random crop images.\n    Args:\n        target_size(int): Random crop a square with the target_size from an image.\n    \"\"\"\n    def __init__(self, target_size):\n        self.target_size = target_size\n    def __call__(self, results):\n        \"\"\"\n        Performs random crop operations.\n        Args:\n            imgs: List where each item is a PIL.Image.\n            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:109-138"
+    },
+    "5063": {
+        "file_id": 436,
+        "content": "This code defines an augmentation pipeline for image processing. It resizes images using different backends based on the backend specified and whether the ratio should be preserved or not. The results are then returned as a dictionary with 'imgs' key containing the resized images. Additionally, there is a RandomCrop class which performs random crop operations on images of the specified target size.",
+        "type": "comment"
+    },
+    "5064": {
+        "file_id": 436,
+        "content": "        return:\n            crop_imgs: List where each item is a PIL.Image after random crop.\n        \"\"\"\n        imgs = results['imgs']\n        if 'backend' in results and results['backend'] == 'pyav':  # [c,t,h,w]\n            h, w = imgs.shape[2:]\n        else:\n            w, h = imgs[0].size\n        th, tw = self.target_size, self.target_size\n        assert (w >= self.target_size) and (h >= self.target_size), \\\n            \"image width({}) and height({}) should be larger than crop size\".format(\n                w, h, self.target_size)\n        crop_images = []\n        if 'backend' in results and results['backend'] == 'pyav':\n            x1 = np.random.randint(0, w - tw)\n            y1 = np.random.randint(0, h - th)\n            crop_images = imgs[:, :, y1:y1 + th, x1:x1 + tw]  # [C, T, th, tw]\n        else:\n            x1 = random.randint(0, w - tw)\n            y1 = random.randint(0, h - th)\n            for img in imgs:\n                if w == tw and h == th:\n                    crop_images.append(img)\n                else:",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:139-164"
+    },
+    "5065": {
+        "file_id": 436,
+        "content": "This code is a part of PaddleVideo's augmentations.py, which applies random cropping to images. It checks if the backend used is 'pyav', and if so, extracts the image dimensions. If not, it gets the image size from the first image in the list. Then, it asserts that the image dimensions are larger than the target size. Finally, it generates a random crop position and crops each image in the list using these positions. The cropped images are stored in the 'crop_images' list which is returned at the end.",
+        "type": "comment"
+    },
+    "5066": {
+        "file_id": 436,
+        "content": "                    crop_images.append(img.crop((x1, y1, x1 + tw, y1 + th)))\n        results['imgs'] = crop_images\n        return results\n@PIPELINES.register()\nclass RandomResizedCrop(RandomCrop):\n    def __init__(self,\n                 area_range=(0.08, 1.0),\n                 aspect_ratio_range=(3 / 4, 4 / 3),\n                 target_size=224,\n                 backend='cv2'):\n        self.area_range = area_range\n        self.aspect_ratio_range = aspect_ratio_range\n        self.target_size = target_size\n        self.backend = backend\n    @staticmethod\n    def get_crop_bbox(img_shape,\n                      area_range,\n                      aspect_ratio_range,\n                      max_attempts=10):\n        assert 0 < area_range[0] <= area_range[1] <= 1\n        assert 0 < aspect_ratio_range[0] <= aspect_ratio_range[1]\n        img_h, img_w = img_shape\n        area = img_h * img_w\n        min_ar, max_ar = aspect_ratio_range\n        aspect_ratios = np.exp(\n            np.random.uniform(np.log(min_ar), np.log(max_ar),",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:165-197"
+    },
+    "5067": {
+        "file_id": 436,
+        "content": "RandomResizedCrop is a pipeline that resizes and crops images randomly with specified area, aspect ratio range, target size, and backend. The method get_crop_bbox takes image shape, area and aspect ratio ranges as input and returns the crop bounding box within the specified range of area and aspect ratio.",
+        "type": "comment"
+    },
+    "5068": {
+        "file_id": 436,
+        "content": "                              size=max_attempts))\n        target_areas = np.random.uniform(*area_range, size=max_attempts) * area\n        candidate_crop_w = np.round(np.sqrt(target_areas *\n                                            aspect_ratios)).astype(np.int32)\n        candidate_crop_h = np.round(np.sqrt(target_areas /\n                                            aspect_ratios)).astype(np.int32)\n        for i in range(max_attempts):\n            crop_w = candidate_crop_w[i]\n            crop_h = candidate_crop_h[i]\n            if crop_h <= img_h and crop_w <= img_w:\n                x_offset = random.randint(0, img_w - crop_w)\n                y_offset = random.randint(0, img_h - crop_h)\n                return x_offset, y_offset, x_offset + crop_w, y_offset + crop_h\n        # Fallback\n        crop_size = min(img_h, img_w)\n        x_offset = (img_w - crop_size) // 2\n        y_offset = (img_h - crop_size) // 2\n        return x_offset, y_offset, x_offset + crop_size, y_offset + crop_size\n    def __call__(self, results):",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:198-219"
+    },
+    "5069": {
+        "file_id": 436,
+        "content": "This function generates a random crop size based on the aspect ratios and target areas. It then iterates through candidate crop sizes, selecting one that fits within the image bounds. If no suitable crop is found, it falls back to centering a smaller crop. The function returns the offset coordinates and crop dimensions for the selected crop.",
+        "type": "comment"
+    },
+    "5070": {
+        "file_id": 436,
+        "content": "        imgs = results['imgs']\n        if self.backend == 'pillow':\n            img_w, img_h = imgs[0].size\n        elif self.backend == 'cv2':\n            img_h, img_w, _ = imgs[0].shape\n        elif self.backend == 'pyav':\n            img_h, img_w = imgs.shape[2:]  # [cthw]\n        else:\n            raise NotImplementedError\n        left, top, right, bottom = self.get_crop_bbox(\n            (img_h, img_w), self.area_range, self.aspect_ratio_range)\n        if self.backend == 'pillow':\n            img_w, img_h = imgs[0].size\n            imgs = [img.crop(left, top, right, bottom) for img in imgs]\n        elif self.backend == 'cv2':\n            img_h, img_w, _ = imgs[0].shape\n            imgs = [img[top:bottom, left:right] for img in imgs]\n        elif self.backend == 'pyav':\n            img_h, img_w = imgs.shape[2:]  # [cthw]\n            imgs = imgs[:, :, top:bottom, left:right]\n        else:\n            raise NotImplementedError\n        results['imgs'] = imgs\n        return results\n@PIPELINES.register()\nclass CenterCrop(object):",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:220-249"
+    },
+    "5071": {
+        "file_id": 436,
+        "content": "This code is a part of PaddleVideo library and performs image cropping based on the specified backend. It first retrieves the image dimensions, then applies a crop box to each image according to the defined area range and aspect ratio range. The code handles different backends such as Pillow, OpenCV (cv2), and PyAV. If an unsupported backend is encountered, it raises a NotImplementedError.",
+        "type": "comment"
+    },
+    "5072": {
+        "file_id": 436,
+        "content": "    \"\"\"\n    Center crop images.\n    Args:\n        target_size(int): Center crop a square with the target_size from an image.\n        do_round(bool): Whether to round up the coordinates of the upper left corner of the cropping area. default: True\n    \"\"\"\n    def __init__(self, target_size, do_round=True, backend='pillow'):\n        self.target_size = target_size\n        self.do_round = do_round\n        self.backend = backend\n    def __call__(self, results):\n        \"\"\"\n        Performs Center crop operations.\n        Args:\n            imgs: List where each item is a PIL.Image.\n            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]\n        return:\n            ccrop_imgs: List where each item is a PIL.Image after Center crop.\n        \"\"\"\n        imgs = results['imgs']\n        ccrop_imgs = []\n        th, tw = self.target_size, self.target_size\n        if isinstance(imgs, paddle.Tensor):\n            h, w = imgs.shape[-2:]\n            x1 = int(round((w - tw) / 2.0)) if self.do_round else (w - tw) // 2\n            y1 = int(round((h - th) / 2.0)) if self.do_round else (h - th) // 2",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:250-276"
+    },
+    "5073": {
+        "file_id": 436,
+        "content": "This code defines a class for center cropping images. The constructor takes the target size, whether to round the coordinates (True by default), and the backend (default is Pillow). The `__call__` method applies the center crop operation on a list of PIL Image objects, returning a new list with the cropped images.",
+        "type": "comment"
+    },
+    "5074": {
+        "file_id": 436,
+        "content": "            ccrop_imgs = imgs[:, :, y1:y1 + th, x1:x1 + tw]\n        else:\n            for img in imgs:\n                if self.backend == 'pillow':\n                    w, h = img.size\n                elif self.backend == 'cv2':\n                    h, w, _ = img.shape\n                else:\n                    raise NotImplementedError\n                assert (w >= self.target_size) and (h >= self.target_size), \\\n                    \"image width({}) and height({}) should be larger than crop size\".format(\n                        w, h, self.target_size)\n                x1 = int(round(\n                    (w - tw) / 2.0)) if self.do_round else (w - tw) // 2\n                y1 = int(round(\n                    (h - th) / 2.0)) if self.do_round else (h - th) // 2\n                if self.backend == 'cv2':\n                    ccrop_imgs.append(img[y1:y1 + th, x1:x1 + tw])\n                elif self.backend == 'pillow':\n                    ccrop_imgs.append(img.crop((x1, y1, x1 + tw, y1 + th)))\n        results['imgs'] = ccrop_imgs",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:277-297"
+    },
+    "5075": {
+        "file_id": 436,
+        "content": "This function performs center crop on images based on the given target size. It first checks if the image dimensions are larger than the crop size, and then calculates the starting coordinates for cropping. If the backend is Pillow, it uses the crop() method to perform the cropping operation; if the backend is OpenCV (cv2), it slices the image array accordingly. The resulting cropped images are stored in 'ccrop_imgs' list and returned in the 'results' dictionary under the key 'imgs'.",
+        "type": "comment"
+    },
+    "5076": {
+        "file_id": 436,
+        "content": "        return results\n@PIPELINES.register()\nclass MultiScaleCrop(object):\n    \"\"\"\n    Random crop images in with multiscale sizes\n    Args:\n        target_size(int): Random crop a square with the target_size from an image.\n        scales(int): List of candidate cropping scales.\n        max_distort(int): Maximum allowable deformation combination distance.\n        fix_crop(int): Whether to fix the cutting start point.\n        allow_duplication(int): Whether to allow duplicate candidate crop starting points.\n        more_fix_crop(int): Whether to allow more cutting starting points.\n    \"\"\"\n    def __init__(\n            self,\n            target_size,  # NOTE: named target size now, but still pass short size in it!\n            scales=None,\n            max_distort=1,\n            fix_crop=True,\n            allow_duplication=False,\n            more_fix_crop=True,\n            backend='pillow'):\n        self.target_size = target_size\n        self.scales = scales if scales else [1, .875, .75, .66]\n        self.max_distort = max_distort",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:298-325"
+    },
+    "5077": {
+        "file_id": 436,
+        "content": "The MultiScaleCrop class is a pipeline module that randomly crops images with multiple scales, targeting a specific size. It allows adjustable parameters like maximum distortion, fix crop start point, and duplicate candidate crop points for flexibility. This module is useful in image processing tasks where random cropping can provide more data augmentation and improve model performance.",
+        "type": "comment"
+    },
+    "5078": {
+        "file_id": 436,
+        "content": "        self.fix_crop = fix_crop\n        self.allow_duplication = allow_duplication\n        self.more_fix_crop = more_fix_crop\n        assert backend in [\n            'pillow', 'cv2'\n        ], f\"MultiScaleCrop's backend must be pillow or cv2, but get {backend}\"\n        self.backend = backend\n    def __call__(self, results):\n        \"\"\"\n        Performs MultiScaleCrop operations.\n        Args:\n            imgs: List where wach item is a PIL.Image.\n            XXX:\n        results:\n        \"\"\"\n        imgs = results['imgs']\n        input_size = [self.target_size, self.target_size]\n        im_size = imgs[0].size\n        # get random crop offset\n        def _sample_crop_size(im_size):\n            image_w, image_h = im_size[0], im_size[1]\n            base_size = min(image_w, image_h)\n            crop_sizes = [int(base_size * x) for x in self.scales]\n            crop_h = [\n                input_size[1] if abs(x - input_size[1]) < 3 else x\n                for x in crop_sizes\n            ]\n            crop_w = [\n                input_size[0] if abs(x - input_size[0]) < 3 else x",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:326-360"
+    },
+    "5079": {
+        "file_id": 436,
+        "content": "This code defines a class for multi-scale cropping of images with Pillow or OpenCV backend. The `__init__` method initializes the instance variables and checks if the provided backend is either 'pillow' or 'cv2'. The `__call__` method performs the actual multi-scale cropping operation on a given list of images, applying random crop offsets to each image with the specified target size.",
+        "type": "comment"
+    },
+    "5080": {
+        "file_id": 436,
+        "content": "                for x in crop_sizes\n            ]\n            pairs = []\n            for i, h in enumerate(crop_h):\n                for j, w in enumerate(crop_w):\n                    if abs(i - j) <= self.max_distort:\n                        pairs.append((w, h))\n            crop_pair = random.choice(pairs)\n            if not self.fix_crop:\n                w_offset = random.randint(0, image_w - crop_pair[0])\n                h_offset = random.randint(0, image_h - crop_pair[1])\n            else:\n                w_step = (image_w - crop_pair[0]) / 4\n                h_step = (image_h - crop_pair[1]) / 4\n                ret = list()\n                ret.append((0, 0))  # upper left\n                if self.allow_duplication or w_step != 0:\n                    ret.append((4 * w_step, 0))  # upper right\n                if self.allow_duplication or h_step != 0:\n                    ret.append((0, 4 * h_step))  # lower left\n                if self.allow_duplication or (h_step != 0 and w_step != 0):\n                    ret.append((4 * w_step, 4 * h_step))  # lower right",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:361-384"
+    },
+    "5081": {
+        "file_id": 436,
+        "content": "This code generates a random crop pair from provided sizes, and then applies different cropping locations to the image. If fix_crop is False, it randomly selects an offset for the crop pair within the image boundaries. If fix_crop is True, it calculates four different offsets in a grid pattern using step values based on the image size. The resulting crops are stored in 'ret'.",
+        "type": "comment"
+    },
+    "5082": {
+        "file_id": 436,
+        "content": "                if self.allow_duplication or (h_step != 0 or w_step != 0):\n                    ret.append((2 * w_step, 2 * h_step))  # center\n                if self.more_fix_crop:\n                    ret.append((0, 2 * h_step))  # center left\n                    ret.append((4 * w_step, 2 * h_step))  # center right\n                    ret.append((2 * w_step, 4 * h_step))  # lower center\n                    ret.append((2 * w_step, 0 * h_step))  # upper center\n                    ret.append((1 * w_step, 1 * h_step))  # upper left quarter\n                    ret.append((3 * w_step, 1 * h_step))  # upper right quarter\n                    ret.append((1 * w_step, 3 * h_step))  # lower left quarter\n                    ret.append((3 * w_step, 3 * h_step))  # lower righ quarter\n                w_offset, h_offset = random.choice(ret)\n            return crop_pair[0], crop_pair[1], w_offset, h_offset\n        crop_w, crop_h, offset_w, offset_h = _sample_crop_size(im_size)\n        crop_img_group = [\n            img.crop((offset_w, offset_h, offset_w + crop_w, offset_h + crop_h))",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:385-405"
+    },
+    "5083": {
+        "file_id": 436,
+        "content": "This code samples random crop sizes and offsets for image augmentation. It appends different cropping positions based on user allowance or specific flag settings, then randomly selects one of these positions. Finally, it crops the image using the selected position and size.",
+        "type": "comment"
+    },
+    "5084": {
+        "file_id": 436,
+        "content": "            for img in imgs\n        ]\n        if self.backend == 'pillow':\n            ret_img_group = [\n                img.resize((input_size[0], input_size[1]), Image.BILINEAR)\n                for img in crop_img_group\n            ]\n        else:\n            ret_img_group = [\n                Image.fromarray(\n                    cv2.resize(np.asarray(img),\n                               dsize=(input_size[0], input_size[1]),\n                               interpolation=cv2.INTER_LINEAR))\n                for img in crop_img_group\n            ]\n        results['imgs'] = ret_img_group\n        return results\n@PIPELINES.register()\nclass RandomFlip(object):\n    \"\"\"\n    Random Flip images.\n    Args:\n        p(float): Random flip images with the probability p.\n    \"\"\"\n    def __init__(self, p=0.5):\n        self.p = p\n    def __call__(self, results):\n        \"\"\"\n        Performs random flip operations.\n        Args:\n            imgs: List where each item is a PIL.Image.\n            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:406-440"
+    },
+    "5085": {
+        "file_id": 436,
+        "content": "This code is a PaddleVideo pipeline for image augmentation, specifically performing random flips with a given probability. It resizes and crops images according to the provided input size. If the backend is set to 'pillow', it uses PIL library's resize function; otherwise, it uses OpenCV's resize function. The results are stored in the 'imgs' key of the 'results' dictionary, which is then returned.",
+        "type": "comment"
+    },
+    "5086": {
+        "file_id": 436,
+        "content": "        return:\n            flip_imgs: List where each item is a PIL.Image after random flip.\n        \"\"\"\n        imgs = results['imgs']\n        v = random.random()\n        if v < self.p:\n            if isinstance(imgs, paddle.Tensor):\n                results['imgs'] = paddle.flip(imgs, axis=[3])\n            elif isinstance(imgs[0], np.ndarray):\n                results['imgs'] = [cv2.flip(img, 1, img) for img in imgs\n                                   ]  # [[h,w,c], [h,w,c], ..., [h,w,c]]\n            else:\n                results['imgs'] = [\n                    img.transpose(Image.FLIP_LEFT_RIGHT) for img in imgs\n                ]\n        else:\n            results['imgs'] = imgs\n        return results\n@PIPELINES.register()\nclass RandomBrightness(object):\n    \"\"\"\n    Random Brightness images.\n    Args:\n        p(float): Random brightness images with the probability p.\n    \"\"\"\n    def __init__(self, p=0.1, brightness=1):\n        self.p = p\n        self.brightness = brightness\n    def __call__(self, results):\n        \"\"\"",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:441-473"
+    },
+    "5087": {
+        "file_id": 436,
+        "content": "This code implements a random image flipping and brightness adjustment in PaddleVideo's pipeline. It takes an image as input, randomly decides whether to flip or keep it intact with probability 'p', and adjusts the brightness if applied. The result is then returned.",
+        "type": "comment"
+    },
+    "5088": {
+        "file_id": 436,
+        "content": "        Performs random brightness operations.\n        Args:\n            imgs: List where each item is a PIL.Image.\n            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]\n        return:\n            brightness_imgs: List where each item is a PIL.Image after random brightness.\n        \"\"\"\n        imgs = results['imgs']\n        v = random.random()\n        if v < self.p:\n            transform = ColorJitter(brightness=self.brightness)\n            results['imgs'] = [transform(img) for img in imgs]\n        else:\n            results['imgs'] = imgs\n        return results\n@PIPELINES.register()\nclass RandomSaturation(object):\n    \"\"\"\n    Random Saturation images.\n    Args:\n        p(float): Random saturation images with the probability p.\n    \"\"\"\n    def __init__(self, p=0.1, saturation=2):\n        self.p = p\n        self.saturation = saturation\n    def __call__(self, results):\n        \"\"\"\n        Performs random saturation operations.\n        Args:\n            imgs: List where each item is a PIL.Image.\n            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:474-508"
+    },
+    "5089": {
+        "file_id": 436,
+        "content": "The code defines two classes, RandomBrightness and RandomSaturation, which perform random operations on image brightness and saturation respectively. The RandomBrightness class applies ColorJitter with a specified brightness level to each image in the list with a certain probability, while the RandomSaturation class adjusts the saturation of images with another probability. Both classes are registered as Pipelines for data augmentation in PaddleVideo.",
+        "type": "comment"
+    },
+    "5090": {
+        "file_id": 436,
+        "content": "        return:\n            saturation_imgs: List where each item is a PIL.Image after random saturation.\n        \"\"\"\n        imgs = results['imgs']\n        v = random.random()\n        if v < self.p:\n            transform = ColorJitter(saturation=self.saturation)\n            results['imgs'] = [transform(img) for img in imgs]\n        else:\n            results['imgs'] = imgs\n        return results\n@PIPELINES.register()\nclass RandomHue(object):\n    \"\"\"\n    Random Hue images.\n    Args:\n        p(float): Random hue images with the probability p.\n    \"\"\"\n    def __init__(self, p=0.1, hue=0.5):\n        self.p = p\n        self.hue = hue\n    def __call__(self, results):\n        \"\"\"\n        Performs random hue operations.\n        Args:\n            imgs: List where each item is a PIL.Image.\n            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]\n        return:\n            hue_imgs: List where each item is a PIL.Image after random hue.\n        \"\"\"\n        imgs = results['imgs']\n        v = random.random()\n        if v < self.p:",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:509-546"
+    },
+    "5091": {
+        "file_id": 436,
+        "content": "This code snippet contains two classes: RandomSaturation and RandomHue. Both classes are pipeline transforms for image processing in the PaddleVideo framework. The RandomSaturation class applies random saturation adjustments to images with a certain probability, while the RandomHue class randomly alters hue values of images with another probability. These transforms can be used to augment and enhance the dataset for better model training.",
+        "type": "comment"
+    },
+    "5092": {
+        "file_id": 436,
+        "content": "            transform = ColorJitter(hue=self.hue)\n            results['imgs'] = [transform(img) for img in imgs]\n        else:\n            results['imgs'] = imgs\n        return results\n@PIPELINES.register()\nclass RandomGamma(object):\n    \"\"\"\n    Random Gamma images.\n    Args:\n        p(float): Random gamma images with the probability p.\n        gamma (float): Non negative real number, same as `\\\\gamma` in the equation.\n                       gamma larger than 1 make the shadows darker,\n                      while gamma smaller than 1 make dark regions lighter.\n    \"\"\"\n    def __init__(self, p=0.1, gamma=0.2):\n        self.p = p\n        self.value = [1 - gamma, 1 + gamma]\n        self.value[0] = max(self.value[0], 0)\n    def _adust_gamma(self, img, gamma, gain=1.0):\n        flag = False\n        if isinstance(img, np.ndarray):\n            flag = True\n            img = Image.fromarray(img)\n        input_mode = img.mode\n        img = img.convert(\"RGB\")\n        gamma_map = [\n            int((255 + 1 - 1e-3) * gain * pow(ele / 255.0, gamma))",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:547-577"
+    },
+    "5093": {
+        "file_id": 436,
+        "content": "The code defines a pipeline module for data augmentation in PaddleVideo. It includes a RandomGamma class that randomly applies gamma correction to images with a specified probability and gamma value range. The ColorJitter transform is used to apply random changes to the hue of images. The results are stored in a dictionary under the 'imgs' key, either after applying transformations or as is if no transformation is needed. The code also handles adjusting gamma for both numpy arrays and PIL Image objects.",
+        "type": "comment"
+    },
+    "5094": {
+        "file_id": 436,
+        "content": "            for ele in range(256)\n        ] * 3\n        img = img.point(\n            gamma_map)  # use PIL's point-function to accelerate this part\n        img = img.convert(input_mode)\n        if flag:\n            img = np.array(img)\n        return img\n    def __call__(self, results):\n        \"\"\"\n        Performs random gamma operations.\n        Args:\n            imgs: List where each item is a PIL.Image.\n            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]\n        return:\n            gamma_imgs: List where each item is a PIL.Image after random gamma.\n        \"\"\"\n        imgs = results['imgs']\n        v = random.random()\n        if v < self.p:\n            gamma = random.uniform(self.value[0], self.value[1])\n            results['imgs'] = [self._adust_gamma(img, gamma) for img in imgs]\n        else:\n            results['imgs'] = imgs\n        return results\n@PIPELINES.register()\nclass Image2Array(object):\n    \"\"\"\n    transfer PIL.Image to Numpy array and transpose dimensions from 'dhwc' to 'dchw'.\n    Args:",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:578-611"
+    },
+    "5095": {
+        "file_id": 436,
+        "content": "This code is defining a pipeline for image augmentation, specifically adjusting gamma values randomly. It checks if a random number falls below the threshold and applies a random gamma adjustment to each image in the input list. If not, it leaves the images unchanged. Finally, it registers an Image2Array class that converts PIL.Image to Numpy array with transposed dimensions from 'dhwc' to 'dchw'.",
+        "type": "comment"
+    },
+    "5096": {
+        "file_id": 436,
+        "content": "        transpose: whether to transpose or not, default True, False for slowfast.\n    \"\"\"\n    def __init__(self, transpose=True, data_format='tchw'):\n        assert data_format in [\n            'tchw', 'cthw'\n        ], f\"Target format must in ['tchw', 'cthw'], but got {data_format}\"\n        self.transpose = transpose\n        self.data_format = data_format\n    def __call__(self, results):\n        \"\"\"\n        Performs Image to NumpyArray operations.\n        Args:\n            imgs: List where each item is a PIL.Image.\n            For example, [PIL.Image0, PIL.Image1, PIL.Image2, ...]\n        return:\n            np_imgs: Numpy array.\n        \"\"\"\n        imgs = results['imgs']\n        if 'backend' in results and results[\n                'backend'] == 'pyav':  # [T,H,W,C] in [0, 1]\n            if self.transpose:\n                if self.data_format == 'tchw':\n                    t_imgs = imgs.transpose((0, 3, 1, 2))  # tchw\n                else:\n                    t_imgs = imgs.transpose((3, 0, 1, 2))  # cthw\n            results['imgs'] = t_imgs",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:612-638"
+    },
+    "5097": {
+        "file_id": 436,
+        "content": "This code is part of a class that performs Image to NumpyArray operations. It initializes with the option to transpose or not, and specifies the data format as either 'tchw' or 'cthw'. The class checks if the backend is 'pyav', then transposes the images accordingly. If 'transpose' is True and 'data_format' is 'tchw', it transposes the images from (0, 3, 1, 2) to (0, 3, 1, 2), resulting in 'tchw'. Otherwise, if 'transpose' is True and 'data_format' is 'cthw', it transposes the images from (3, 0, 1, 2) to (3, 0, 1, 2), resulting in 'cthw'. The transposed images are then stored back into 'imgs'.",
+        "type": "comment"
+    },
+    "5098": {
+        "file_id": 436,
+        "content": "        else:\n            t_imgs = np.stack(imgs).astype('float32')\n            if self.transpose:\n                if self.data_format == 'tchw':\n                    t_imgs = t_imgs.transpose(0, 3, 1, 2)  # tchw\n                else:\n                    t_imgs = t_imgs.transpose(3, 0, 1, 2)  # cthw\n            results['imgs'] = t_imgs\n        return results\n@PIPELINES.register()\nclass Normalization(object):\n    \"\"\"\n    Normalization.\n    Args:\n        mean(Sequence[float]): mean values of different channels.\n        std(Sequence[float]): std values of different channels.\n        tensor_shape(list): size of mean, default [3,1,1]. For slowfast, [1,1,1,3]\n    \"\"\"\n    def __init__(self, mean, std, tensor_shape=[3, 1, 1], inplace=False):\n        if not isinstance(mean, Sequence):\n            raise TypeError(\n                f'Mean must be list, tuple or np.ndarray, but got {type(mean)}')\n        if not isinstance(std, Sequence):\n            raise TypeError(\n                f'Std must be list, tuple or np.ndarray, but got {type(std)}')",
+        "type": "code",
+        "location": "/paddlevideo/loader/pipelines/augmentations.py:639-665"
+    },
+    "5099": {
+        "file_id": 436,
+        "content": "This code is defining a class for normalization in PaddleVideo's loader pipelines. It takes mean and std values as arguments to normalize the image data, and allows for transpose operation depending on data_format. The tensor_shape parameter is optional with default value [3,1,1] for standard usage or [1,1,1,3] for slowfast support. Inplace flag can be set to True to perform in-place operations if desired.",
+        "type": "comment"
+    }
+}

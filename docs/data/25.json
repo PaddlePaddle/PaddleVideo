@@ -1,0 +1,543 @@
+{
+    "2500": {
+        "file_id": 192,
+        "content": "def run_exp(config):\n    warnings.filterwarnings('ignore')\n    logger = config.get_logger('train')\n    expert_dims, raw_input_dims = compute_dims(config, logger)\n    trn_config = compute_trn_config(config)\n    if config._args.group_seed:\n        seeds = [int(config._args.group_seed)]\n    else:\n        seeds = [int(x) for x in config._args.seeds.split(\",\")]\n    for ii, seed in enumerate(seeds):\n        tic = time.time()\n        logger.info(f\"{ii + 1}/{len(seeds)} Setting experiment random seed to {seed}\")\n        set_seeds(seed)\n        config[\"seed\"] = seed\n        model = config.init(\n            name='arch',\n            module=module_arch,\n            expert_dims=expert_dims,\n            text_dim=config[\"experts\"][\"text_dim\"],\n            ce_shared_dim=config[\"experts\"].get(\"ce_shared_dim\", None),\n            feat_aggregation=config[\"data_loader\"][\"args\"][\"feat_aggregation\"],\n        )\n        logger.info(model)\n        data_loaders = config.init(\n            name='data_loader',\n            module=module_data,",
+        "type": "code",
+        "location": "/applications/T2VLAD/train.py:37-67"
+    },
+    "2501": {
+        "file_id": 192,
+        "content": "This code snippet defines a function `run_exp()` that initializes an experiment. It sets the random seed, initializes the model (arch) and data loaders based on the given configuration. The seeds are obtained from command line arguments, and for each seed, it logs information about the setting and proceeds with the experiment initialization.",
+        "type": "comment"
+    },
+    "2502": {
+        "file_id": 192,
+        "content": "            logger=logger,\n            raw_input_dims=raw_input_dims,\n            text_feat=config[\"experts\"][\"text_feat\"],\n            text_dim=config[\"experts\"][\"text_dim\"],\n            text_agg=config[\"experts\"][\"text_agg\"],\n            use_zeros_for_missing=config[\"experts\"].get(\"use_zeros_for_missing\", False),\n            eval_only=False,\n        )\n        loss = config.init(name=\"loss\", module=module_loss)\n        metrics = [getattr(module_metric, met) for met in config['metrics']]\n        lr_scheduler = paddle.optimizer.lr.StepDecay(learning_rate=0.0001, step_size=5, gamma=0.9)\n        optimizer = paddle.optimizer.AdamW(learning_rate=lr_scheduler, weight_decay=1e-4, parameters=model.parameters(), grad_clip=paddle.nn.ClipGradByGlobalNorm(2))\n        trainer = Trainer(\n            model,\n            loss,\n            metrics,\n            optimizer,\n            config=config,\n            data_loaders=data_loaders,\n            lr_scheduler=lr_scheduler,\n            mini_train=config._args.mini_train,\n            visualizer=None,",
+        "type": "code",
+        "location": "/applications/T2VLAD/train.py:68-92"
+    },
+    "2503": {
+        "file_id": 192,
+        "content": "Initializing a model with specific configurations and defining the loss function, metrics to track progress, learning rate scheduler for dynamic adjustments, and an optimizer (AdamW) to update model parameters. Also creating a Trainer instance which combines all these components for training the model on given data loaders.",
+        "type": "comment"
+    },
+    "2504": {
+        "file_id": 192,
+        "content": "            val_freq=config[\"trainer\"].get(\"val_freq\", 1),\n            force_cpu_val=config.get(\"force_cpu_val\", False),\n            skip_first_n_saves=config[\"trainer\"].get(\"skip_first_n_saves\", 0),\n            include_optim_in_save_model=config[\"trainer\"].get(\"include_optim_in_save_model\", 1),\n            cache_targets=set(config.get(\"cache_targets\", [])),\n        )\n        trainer.train()\n        best_model_path = config.save_dir / \"trained_model.pdparams\"\n        duration = time.strftime('%Hh%Mm%Ss', time.gmtime(time.time() - tic))\n        logger.info(f\"Training took {duration}\")\n    # If multiple runs were conducted, report relevant statistics\n    if len(seeds) > 1:\n        log_summary(\n            logger=logger,\n            log_path=config.log_path,\n            eval_mode=config[\"eval_mode\"],\n            fixed_num_epochs=config[\"trainer\"][\"epochs\"],\n        )\n    print(f\"Log file stored at {config.log_path}\")\n    # Report the location of the \"best\" model of the final seeded run (here\n    # \"best\" corresponds to the model with the highest geometric mean over the",
+        "type": "code",
+        "location": "/applications/T2VLAD/train.py:93-115"
+    },
+    "2505": {
+        "file_id": 192,
+        "content": "This code sets up a trainer with specified configuration, trains the model, saves the best model at 'best_model_path', logs training duration, reports relevant statistics if multiple runs were conducted, and prints the log file location.",
+        "type": "comment"
+    },
+    "2506": {
+        "file_id": 192,
+        "content": "    # R@1, R@5 and R@10 metrics when a validation set is used, or simply the final\n    # epoch of training for fixed-length schedules).\n    print(f\"The best performing model can be found at {str(best_model_path)}\")\ndef main():\n    args = argparse.ArgumentParser(description='Main entry point for training')\n    args.add_argument('--config', help='config file path')\n    args.add_argument('--resume', help='path to latest model (default: None)')\n    args.add_argument('--mini_train', action=\"store_true\")\n    args.add_argument('--group_id', help=\"if supplied, group these experiments\")\n    args.add_argument('--disable_workers', action=\"store_true\")\n    args.add_argument('--refresh_lru_cache', action=\"store_true\")\n    args.add_argument('--train_single_epoch', action=\"store_true\")\n    args.add_argument('--purge_exp_dir', action=\"store_true\",\n                      help=\"remove all previous experiments with the given config\")\n    args.add_argument(\"--dbg\", default=\"ipdb.set_trace\")\n    args.add_argument(\"--custom_args\", help=\"qualified key,val pairs\")",
+        "type": "code",
+        "location": "/applications/T2VLAD/train.py:116-133"
+    },
+    "2507": {
+        "file_id": 192,
+        "content": "This code defines the command-line arguments for the training script of a video analysis application. The arguments include config file path, resuming from a previous model, mini-batch training option, grouping experiments by ID, disabling workers, refreshing LRU cache, training a single epoch, purging existing experiments, and debugging options.",
+        "type": "comment"
+    },
+    "2508": {
+        "file_id": 192,
+        "content": "    # Seeds can either be passed directly as a comma separated list at the command line,\n    # or individually for separate experiments as a group (used for slurm experiments)\n    seed_args = args.add_mutually_exclusive_group()\n    seed_args.add_argument('--seeds', default=\"0\", help=\"comma separated list of seeds\")\n    seed_args.add_argument('--group_seed', help=\"seed for group member\")\n    args = ConfigParser(args)\n    os.environ[\"PYTHONBREAKPOINT\"] = args._args.dbg\n    args[\"data_loader\"][\"args\"][\"refresh_lru_cache\"] = args._args.refresh_lru_cache\n    msg = (f\"Expected the number of training epochs ({args['trainer']['epochs']})\"\n           f\"to exceed the save period ({args['trainer']['save_period']}), otherwise\"\n           \" no checkpoints will be saved.\")\n    assert args[\"trainer\"][\"epochs\"] >= args[\"trainer\"][\"save_period\"], msg\n    run_exp(config=args)\nif __name__ == '__main__':\n    main()",
+        "type": "code",
+        "location": "/applications/T2VLAD/train.py:135-151"
+    },
+    "2509": {
+        "file_id": 192,
+        "content": "This code is parsing command-line arguments for seeds, setting environment variables, and asserting that the number of training epochs is greater than the save period to ensure checkpoints are saved. The function run_exp is then called with these configuration settings, and the main function is executed if the script is run directly.",
+        "type": "comment"
+    },
+    "2510": {
+        "file_id": 193,
+        "content": "/applications/T2VLAD/trainer/__init__.py",
+        "type": "filepath"
+    },
+    "2511": {
+        "file_id": 193,
+        "content": "This line imports all functions and classes from the \"trainer\" module in the same package.",
+        "type": "summary"
+    },
+    "2512": {
+        "file_id": 193,
+        "content": "from .trainer import *",
+        "type": "code",
+        "location": "/applications/T2VLAD/trainer/__init__.py:1-1"
+    },
+    "2513": {
+        "file_id": 193,
+        "content": "This line imports all functions and classes from the \"trainer\" module in the same package.",
+        "type": "comment"
+    },
+    "2514": {
+        "file_id": 194,
+        "content": "/applications/T2VLAD/trainer/trainer.py",
+        "type": "filepath"
+    },
+    "2515": {
+        "file_id": 194,
+        "content": "The code utilizes PaddlePaddle library for video retrieval, trains a model, handles memory-efficient sample copies, calculates metrics, logs progress, and visualizes ranking if available. Mean Average Precision is computed, results stored, and single test caption checked during each epoch.",
+        "type": "summary"
+    },
+    "2516": {
+        "file_id": 194,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport paddle\nimport numpy as np\nfrom base import BaseTrainer\nfrom utils import memory_summary\nfrom contextlib import contextmanager\ndef verbose(epoch, metrics, mode, name=\"TEST\"):\n    r1, r5, r10, r50 = metrics[\"R1\"], metrics[\"R5\"], metrics[\"R10\"], metrics[\"R50\"]\n    msg = f\"[{mode}]{name:s} epoch {epoch}, R@1: {r1:.1f}\"\n    msg += f\", R@5: {r5:.1f}, R@10 {r10:.1f}, R@50 {r50:.1f}\"\n    msg += f\"MedR: {metrics['MedR']:g}, MeanR: {metrics['MeanR']:.1f}\"\n    print(msg)\n@contextmanager\ndef ctxt_mgr(samples):\n    \"\"\"Provide a context for managing temporary, cloned copies of retrieval",
+        "type": "code",
+        "location": "/applications/T2VLAD/trainer/trainer.py:1-31"
+    },
+    "2517": {
+        "file_id": 194,
+        "content": "This code is part of a larger program using the PaddlePaddle library for video retrieval. It defines a verbose function to display training metrics and a context manager to handle temporary copies of retrieval samples.",
+        "type": "comment"
+    },
+    "2518": {
+        "file_id": 194,
+        "content": "    sample tensors.\n    The rationale here is that to use nan-checking in the model (to validate the\n    positions of missing experts), we need to modify the underlying tensors. This\n    function lets the evaluation code run (and modify) temporary copies, without\n    modifying the originals.\n    \"\"\"\n    exp_dict = samples[\"experts\"].items()\n    experts = {key: val.clone() for key, val in exp_dict}\n    samples_ = {\n        \"experts\": experts,\n        \"ind\": samples[\"ind\"],\n        \"text\": samples[\"text\"],\n        \"cap_id\": samples[\"cap_id\"],\n        \"att_mask\": samples[\"att_mask\"],\n    }\n    if \"text_token_mask\" in samples:\n        samples_[\"text_token_mask\"] = samples[\"text_token_mask\"]\n    try:\n        yield samples_\n    finally:\n        del samples_\nclass Trainer(BaseTrainer):\n    \"\"\"\n    Trainer class\n    Note:\n        Inherited from BaseTrainer.\n    \"\"\"\n    def __init__(self, model, loss, metrics, optimizer, config, data_loaders,\n                 lr_scheduler, visualizer, skip_first_n_saves,\n                 include_optim_in_save_model, force_cpu_val, cache_targets=set(),",
+        "type": "code",
+        "location": "/applications/T2VLAD/trainer/trainer.py:32-66"
+    },
+    "2519": {
+        "file_id": 194,
+        "content": "This function creates a copy of the \"experts\" tensor from the input samples and replaces it in the samples dictionary. It also includes other relevant tensors and allows for evaluation without modifying the original samples. The copied samples are yielded, and then deleted after use to avoid memory leaks.",
+        "type": "comment"
+    },
+    "2520": {
+        "file_id": 194,
+        "content": "                 num_keep_ckpts=3, mini_train=False, val_freq=1, skip_tboard=False):\n        super().__init__(model, loss, metrics, optimizer, config, mini_train=mini_train,\n                         skip_tboard=skip_tboard, num_keep_ckpts=num_keep_ckpts)\n        self.config = config\n        self.cache_targets = cache_targets\n        self.data_loaders = data_loaders\n        self.lr_scheduler = lr_scheduler\n        self.mini_train = mini_train\n        self.len_epoch = len(self.data_loaders[\"train\"])\n        self.log_step = int(np.sqrt(data_loaders[\"train\"].batch_size))\n        self.visualizer = visualizer\n        self.force_cpu_val = force_cpu_val\n        self.val_freq = val_freq\n        self.skip_first_n_saves = skip_first_n_saves\n        self.include_optim_in_save_model = include_optim_in_save_model\n        self.seen = {\"train\": 0, \"val\": 0}\n    def _train_epoch(self, epoch):\n        \"\"\"\n        Training logic for an epoch\n        :param epoch: Current training epoch.\n        :return: A log that contains all information you want to save.",
+        "type": "code",
+        "location": "/applications/T2VLAD/trainer/trainer.py:67-89"
+    },
+    "2521": {
+        "file_id": 194,
+        "content": "This code defines a class for training a model with specific configurations, data loaders, learning rate scheduler, and more. It initializes the necessary attributes and provides a method for performing training during an epoch. The `_train_epoch` method performs training logic for an epoch and returns a log containing all relevant information.",
+        "type": "comment"
+    },
+    "2522": {
+        "file_id": 194,
+        "content": "        Note:\n            If you have additional information to record, for example:\n                > additional_log = {\"x\": x, \"y\": y}\n            merge it with log before return. i.e.\n                > log = {**log, **additional_log}\n                > return log\n            The metrics in log must have the key 'metrics'.\n        \"\"\"\n        total_loss = 0\n        self.model.train()\n        memory_summary()\n        for batch_idx, minibatch in enumerate(self.data_loaders[\"train\"]):\n            output = self.model(**minibatch)\n            if \"retrieval\" in self.data_loaders.dataloaders:\n                loss = self.loss(output[\"cross_view_conf_matrix\"])\n            else:\n                loss = self.loss(x=output[\"class_preds\"], target=labels)\n            loss.backward()\n            self.optimizer.step()\n            self.optimizer.clear_grad()\n            sample_key = list(minibatch[\"experts\"].keys())[0]\n            batch_size = minibatch[\"experts\"][sample_key].shape[0]\n            self.seen[\"train\"] += batch_size",
+        "type": "code",
+        "location": "/applications/T2VLAD/trainer/trainer.py:91-117"
+    },
+    "2523": {
+        "file_id": 194,
+        "content": "This code trains a model and computes the loss for each batch of data in the train loader. The loss is then backpropagated, the optimizer steps, and gradients are cleared before moving on to the next batch. The batch size is also tracked as part of the seen data count.",
+        "type": "comment"
+    },
+    "2524": {
+        "file_id": 194,
+        "content": "            total_loss += loss.item()\n            if batch_idx % self.log_step == 0:\n                prog = self._progress(batch_idx)\n                self.logger.info(f\"Train Epoch: {epoch} {prog} Loss: {loss.item():.6f}\")\n            if batch_idx == self.len_epoch or (self.mini_train and batch_idx > 3):\n                break\n        log = {'loss': total_loss / self.len_epoch}\n        if epoch % self.val_freq == 0:\n            nested_log, cached_preds = self._valid_epoch(epoch)\n            log.update(nested_log)\n        else:\n            nested_log, cached_preds = {}, None\n            self.logger.info(f\"skipping val for epoch: {epoch}\")\n        self.lr_scheduler.step()\n        self.logger.info(f\"LR {self.lr_scheduler.get_lr()}\")\n        return log, cached_preds\n    def _valid_epoch(self, epoch):\n        \"\"\"Validate model after an epoch of training and store results to disk.\n        Args:\n            epoch (int): the current epoch\n        Returns:\n            A log that contains information about validation\n        NOTE: The validation metrics in log must have the key 'val_metrics'.",
+        "type": "code",
+        "location": "/applications/T2VLAD/trainer/trainer.py:119-150"
+    },
+    "2525": {
+        "file_id": 194,
+        "content": "Training loop for a machine learning model, logging progress and validating after certain epochs. Performs validation metrics calculation and updates learning rate with a scheduler.",
+        "type": "comment"
+    },
+    "2526": {
+        "file_id": 194,
+        "content": "        \"\"\"\n        self.model.eval()\n        cached_preds = {key: {\"vid_name\": [], \"preds\": [], \"labels\": []}\n                        for key in self.cache_targets}\n        with paddle.no_grad():\n            if \"retrieval\" in self.data_loaders.dataloaders:\n                samples, meta = self.data_loaders[\"retrieval\"]\n                sample_key = list(samples[\"experts\"].keys())[0]\n                batch_size = samples[\"experts\"][sample_key].shape[0]\n                self.seen[\"val\"] += batch_size\n                num_queries = samples[\"text\"].shape[0] * samples[\"text\"].shape[1]\n                safe_queries = 1\n                text_keys = ['text', 'cap_id', 'att_mask', 'text_token_mask']\n                if num_queries > safe_queries:\n                    chk = 50\n                    tck = 50\n                    if samples['text'].shape[0] % chk == 0:\n                        vid_batch = samples['text'].shape[0] // chk\n                    else:\n                        vid_batch = samples['text'].shape[0] // chk + 1",
+        "type": "code",
+        "location": "/applications/T2VLAD/trainer/trainer.py:151-171"
+    },
+    "2527": {
+        "file_id": 194,
+        "content": "This code is initializing the model in evaluation mode, creating a dictionary to store cached predictions, and retrieving data from dataloaders. It also checks if there are too many queries and adjusts batch size accordingly. The text_keys variable stores keys for text-related data.",
+        "type": "comment"
+    },
+    "2528": {
+        "file_id": 194,
+        "content": "                    if samples['text'].shape[0] % tck == 0:\n                        text_batch  =  samples['text'].shape[0] // tck\n                    else:\n                        text_batch  =  samples['text'].shape[0] // tck + 1\n                    sub_sims = []\n                    for idx in range(text_batch):\n                        if idx % 5 == 0:\n                            print(idx,'/',text_batch)\n                        sub_samples = {}\n                        for key in text_keys:\n                            sub_samples.update({key: samples[key][idx*tck:idx*tck+tck]})\n                        subsub_sims = []\n                        for vid in range(vid_batch):\n                            sub_samples['experts'] = {}\n                            sub_samples['ind'] = {} \n                            for expert in samples['experts'].keys():\n                                sub_samples['experts'][expert] = samples['experts'][expert][vid*chk:vid*chk+chk]\n                                sub_samples['ind'][expert] = samples['ind'][expert][vid*chk:vid*chk+chk]",
+        "type": "code",
+        "location": "/applications/T2VLAD/trainer/trainer.py:172-190"
+    },
+    "2529": {
+        "file_id": 194,
+        "content": "This code segment calculates the number of batches for 'text' and iterates through each batch. It then creates sub-samples and subsub-sims for further processing. This seems to be part of a machine learning model training process, possibly using video data with experts and indicators as additional features. The progress is printed every 5 batches.",
+        "type": "comment"
+    },
+    "2530": {
+        "file_id": 194,
+        "content": "                            with ctxt_mgr(sub_samples) as xx:\n                                output = self.model(**xx)\n                            subsub_sims.append(output[\"cross_view_conf_matrix\"].cpu())\n                        subsub_sims = paddle.concat(subsub_sims, axis=1)\n                        sub_sims.append(subsub_sims)\n                    sims = paddle.concat(sub_sims, axis=0)\n                    sims = paddle.to_tensor(sims, dtype='float32').cpu().numpy()\n                else:\n                    with ctxt_mgr(samples) as xx:\n                        output = self.model(**xx)\n                    sims = paddle.to_tensor(output[\"cross_view_conf_matrix\"], dtype='float32').cpu().numpy()\n                # sample the loss (using only the first query for each video)\n                queries_per_vid = meta[\"query_masks\"].shape[1]\n                sims_ = paddle.to_tensor(sims).reshape([-1, queries_per_vid, sims.shape[-1]])\n                loss = self.loss(sims_[:, 0, :])\n                dataset = self.data_loaders.dataset_name",
+        "type": "code",
+        "location": "/applications/T2VLAD/trainer/trainer.py:191-209"
+    },
+    "2531": {
+        "file_id": 194,
+        "content": "This code appears to be part of a machine learning model training process. It uses PaddlePaddle, a deep learning framework, to calculate similarity metrics (sims) between samples or sub-samples, then concatenates them based on the given condition (if sub_samples exists). If no sub_samples exist, it directly calculates sims from the samples. The code then samples the loss using only the first query for each video and reshapes the sims tensor accordingly before passing it to a loss function (self.loss). Finally, the dataset name is captured in the variable \"dataset\".",
+        "type": "comment"
+    },
+    "2532": {
+        "file_id": 194,
+        "content": "                nested_metrics = {}\n                for metric in self.metrics:\n                    metric_name = metric.__name__\n                    res = metric(sims, query_masks=meta[\"query_masks\"])\n                    if metric_name == \"mean_average_precision\":\n                        print(f\"Epoch: {epoch}, mean AP: {res['mAP']}\")\n                    else:\n                        verbose(epoch=epoch, metrics=res, name=dataset, mode=metric_name)\n                    nested_metrics[metric_name] = res\n                # TODO(Samuel) disabled visualisation for now, simple to add in later\n                num_test_caps = self.data_loaders.num_test_captions\n                if num_test_caps == 1 and meta[\"raw_captions\"] is not None:\n                    if self.visualizer is not None:\n                        self.visualizer.visualize_ranking(\n                            sims=sims,\n                            meta=meta,\n                            epoch=epoch,\n                            nested_metrics=nested_metrics,",
+        "type": "code",
+        "location": "/applications/T2VLAD/trainer/trainer.py:210-228"
+    },
+    "2533": {
+        "file_id": 194,
+        "content": "The code is calculating metrics such as Mean Average Precision (mAP) for each epoch and storing the results in a dictionary named nested_metrics. If mAP is calculated, it prints the value. It also calls a verbose function that takes the current epoch, metrics values, dataset name, and metric name as parameters. The code checks if there is only one test caption available (num_test_captions == 1) and if raw_captions exist. If so, it visualizes the ranking by calling a visualizer function passing simulation scores (sims), meta data, current epoch, and nested_metrics as arguments.",
+        "type": "comment"
+    },
+    "2534": {
+        "file_id": 194,
+        "content": "                        )\n                return {\"nested_val_metrics\": nested_metrics}, cached_preds\n            elif \"val\" in self.data_loaders.dataloaders:\n                metrics = [x() for x in self.metrics]\n                for batch_idx, minibatch in enumerate(self.data_loaders[\"val\"]):\n                    labels = minibatch.pop(\"labels\")\n                    vid_name = minibatch.pop(\"vid_name\")\n                    output = self.model(**minibatch)\n                    if \"val\" in self.cache_targets:\n                        cached_preds[\"val\"][\"vid_name\"].append(vid_name)\n                        cached_preds[\"val\"][\"preds\"].append(output[\"class_preds\"])\n                    for metric in metrics:\n                        metric.add(output=output[\"class_preds\"], target=labels)\n                    if batch_idx % self.log_step == 0:\n                        prog = self._progress(batch_idx)\n                        self.logger.info(f\"Val Epoch: {epoch} {prog}\")\n                nested_metrics = {}\n                for metric in metrics:",
+        "type": "code",
+        "location": "/applications/T2VLAD/trainer/trainer.py:229-249"
+    },
+    "2535": {
+        "file_id": 194,
+        "content": "Iterating over validation data, calculates metrics for each batch, logs progress during iteration. If cache_targets includes \"val\", stores predictions and labels in cached_preds dictionary.",
+        "type": "comment"
+    },
+    "2536": {
+        "file_id": 194,
+        "content": "                    if hasattr(metric, \"topk\"):\n                        res = {f\"top{key}\": val for key, val in\n                               zip(metric.topk, metric.value())}\n                        nested_metrics[\"accuracy\"] = res\n                    else:\n                        raise ValueError(f\"unsupported mettric: {type(metric)}\")\n                nested = {\"nested_val_metrics\": nested_metrics}\n                for target in self.cache_targets - {\"val\"}:\n                    for batch_idx, minibatch in enumerate(self.data_loaders[\"tiny\"]):\n                        if \"labels\" in minibatch:\n                            cached_preds[target][\"labels\"].append(minibatch.pop(\"labels\"))\n                        cached_preds[target][\"vid_name\"].append(minibatch.pop(\"vid_name\"))\n                        output = self.model(**minibatch)\n                        cached_preds[target][\"preds\"].append(output[\"class_preds\"])\n                # aggregate all cached predictions\n                for target in self.cache_targets:",
+        "type": "code",
+        "location": "/applications/T2VLAD/trainer/trainer.py:250-267"
+    },
+    "2537": {
+        "file_id": 194,
+        "content": "This code checks if the metric has a \"topk\" attribute, then creates a dictionary of top-k values and assigns it to \"res\". If not supported, raises a ValueError. It adds the accuracy metric to nested_metrics. The code then creates a nested dictionary for cache targets other than \"val\", and iterates through each data loader in self.data_loaders[\"tiny\"]. For each batch, it checks if labels are present, appends them to cached_preds with corresponding vid name and model predictions. Finally, it aggregates all cached predictions for the specified target(s).",
+        "type": "comment"
+    },
+    "2538": {
+        "file_id": 194,
+        "content": "                    for key, val in cached_preds[target].items():\n                        cached_preds[key] = paddle.concat(val).cpu().numpy()\n                return nested, cached_preds\n    def _progress(self, batch_idx):\n        base = '[{}/{} ({:.0f}%)]'\n        if hasattr(self.data_loaders, 'n_samples'):\n            current = batch_idx * self.data_loaders.batch_size\n            total = self.data_loaders.n_samples\n        else:\n            current = batch_idx\n            total = self.len_epoch\n        return base.format(current, total, 100.0 * current / total)",
+        "type": "code",
+        "location": "/applications/T2VLAD/trainer/trainer.py:268-280"
+    },
+    "2539": {
+        "file_id": 194,
+        "content": "The code defines two functions: _compute_nested_preds and _progress. The first function computes nested predictions from cached predictions for a given target, while the second one returns a progress message based on the current batch index and total number of samples or epoch length.",
+        "type": "comment"
+    },
+    "2540": {
+        "file_id": 195,
+        "content": "/applications/T2VLAD/utils/__init__.py",
+        "type": "filepath"
+    },
+    "2541": {
+        "file_id": 195,
+        "content": "This line imports all functions, classes, and variables from the \"util\" module located in the same directory as this file. It allows easy access to all utility functions defined in the \"util\" module without explicitly specifying each function or variable.",
+        "type": "summary"
+    },
+    "2542": {
+        "file_id": 195,
+        "content": "from .util import *",
+        "type": "code",
+        "location": "/applications/T2VLAD/utils/__init__.py:1-1"
+    },
+    "2543": {
+        "file_id": 195,
+        "content": "This line imports all functions, classes, and variables from the \"util\" module located in the same directory as this file. It allows easy access to all utility functions defined in the \"util\" module without explicitly specifying each function or variable.",
+        "type": "comment"
+    },
+    "2544": {
+        "file_id": 196,
+        "content": "/applications/T2VLAD/utils/util.py",
+        "type": "filepath"
+    },
+    "2545": {
+        "file_id": 196,
+        "content": "This code imports libraries, defines functions for data processing and categorizing experts, adjusts input features, ensures Tensor format, and includes utility functions.",
+        "type": "summary"
+    },
+    "2546": {
+        "file_id": 196,
+        "content": "\"\"\"\nExclude from autoreload\n%aimport -util.utils\n\"\"\"\nimport os\nimport json\nimport random\nfrom pathlib import Path\nfrom datetime import datetime\nfrom typing import List\nfrom itertools import repeat\nfrom collections import OrderedDict\nimport numpy as np\nimport paddle\nimport psutil\nimport humanize\nfrom PIL import Image\nfrom typeguard import typechecked\n@typechecked\ndef filter_cmd_args(cmd_args: List[str], remove: List[str]) -> List[str]:\n    drop = []\n    for key in remove:\n        if key not in cmd_args:\n            continue\n        pos = cmd_args.index(key)\n        drop.append(pos)\n        if len(cmd_args) > (pos + 1) and not cmd_args[pos + 1].startswith(\"--\"):\n            drop.append(pos + 1)\n    for pos in reversed(drop):\n        cmd_args.pop(pos)\n    return cmd_args\n@typechecked\ndef set_seeds(seed: int):\n    \"\"\"Set seeds for randomisation libraries.\n    Args:\n        seed: the seed value\n    \"\"\"\n    random.seed(seed)\n    np.random.seed(seed)\n    paddle.seed(seed)\ndef memory_summary():\n    vmem = psutil.virtual_memory()\n    msg = (",
+        "type": "code",
+        "location": "/applications/T2VLAD/utils/util.py:1-50"
+    },
+    "2547": {
+        "file_id": 196,
+        "content": "This code imports necessary libraries and defines several functions. The 'filter_cmd_args' function removes specified keys from a list of command arguments while preserving the order. The 'set_seeds' function sets seeds for randomization libraries, ensuring consistent results. The 'memory_summary' function provides a summary of virtual memory usage using the 'psutil' library.",
+        "type": "comment"
+    },
+    "2548": {
+        "file_id": 196,
+        "content": "        f\">>> Currently using {vmem.percent}% of system memory \"\n        f\"{humanize.naturalsize(vmem.used)}/{humanize.naturalsize(vmem.available)}\"\n    )\n    print(msg)\ndef flatten_dict(x, keysep=\"-\"):\n    flat_dict = {}\n    for key, val in x.items():\n        if isinstance(val, dict):\n            flat_subdict = flatten_dict(val)\n            flat_dict.update({f\"{key}{keysep}{subkey}\": subval\n                              for subkey, subval in flat_subdict.items()})\n        else:\n            flat_dict.update({key: val})\n    return flat_dict\ndef expert_tensor_storage(experts, feat_aggregation):\n    expert_storage = {\"fixed\": set(), \"variable\": set(), \"flaky\": set()}\n    # fixed_sz_experts, variable_sz_experts, flaky_experts = set(), set(), set()\n    for expert, config in feat_aggregation.items():\n        if config[\"temporal\"] in {\"vlad\",  \"fixed_seg\"}:\n            expert_storage[\"variable\"].add(expert)\n        elif config[\"temporal\"] in {\"avg\", \"max\", \"avg-max\", \"max-avg\", \"avg-max-ent\", \n                                    \"max-avg-ent\"}:",
+        "type": "code",
+        "location": "/applications/T2VLAD/utils/util.py:51-76"
+    },
+    "2549": {
+        "file_id": 196,
+        "content": "This code defines three functions. The first function, `print_memory`, prints the current system memory usage in a readable format. The second function, `flatten_dict`, recursively flattens nested dictionaries into a single-level dictionary. The third function, `expert_tensor_storage`, categorizes experts based on their temporal configurations into fixed, variable, and flaky sets.",
+        "type": "comment"
+    },
+    "2550": {
+        "file_id": 196,
+        "content": "            expert_storage[\"fixed\"].add(expert)\n        else:\n            raise ValueError(f\"unknown temporal strategy: {config['temporal']}\")\n        # some \"flaky\" experts are only available for a fraction of videos - we need\n        # to pass this information (in the form of indices) into the network for any\n        # experts present in the current dataset\n        if config.get(\"flaky\", False):\n            expert_storage[\"flaky\"].add(expert)\n    # we only allocate storage for experts used by the current dataset\n    for key, value in expert_storage.items():\n        expert_storage[key] = value.intersection(set(experts))\n    return expert_storage\ndef read_json(fname):\n    with fname.open('rt') as handle:\n        return json.load(handle, object_hook=OrderedDict)\ndef path2str(x):\n    \"\"\"Recursively convert pathlib objects to strings to enable serialization\"\"\"\n    for key, val in x.items():\n        if isinstance(val, dict):\n            path2str(val)\n        elif isinstance(val, Path):\n            x[key] = str(val)",
+        "type": "code",
+        "location": "/applications/T2VLAD/utils/util.py:77-103"
+    },
+    "2551": {
+        "file_id": 196,
+        "content": "This code snippet contains a function that takes in an expert and its configuration, adds it to the appropriate storage based on its temporal strategy, and handles flaky experts. It also defines two utility functions - read_json for parsing JSON files and path2str for converting pathlib objects to strings for serialization.",
+        "type": "comment"
+    },
+    "2552": {
+        "file_id": 196,
+        "content": "def write_json(content, fname, paths2strs=False):\n    if paths2strs:\n        path2str(content)\n    with fname.open('wt') as handle:\n        json.dump(content, handle, indent=4, sort_keys=False)\ndef inf_loop(data_loader):\n    ''' wrapper function for endless data loader. '''\n    for loader in repeat(data_loader):\n        yield from loader\nclass HashableDict(dict):\n    def __hash__(self):\n        return hash(frozenset(self))\nclass HashableOrderedDict(dict):\n    def __hash__(self):\n        return hash(frozenset(self))\ndef compute_trn_config(config, logger=None):\n    trn_config = {}\n    feat_agg = config[\"data_loader\"][\"args\"][\"feat_aggregation\"]\n    for static_expert in feat_agg.keys():\n        if static_expert in feat_agg:\n            if \"trn_seg\" in feat_agg[static_expert].keys():\n                trn_config[static_expert] = feat_agg[static_expert][\"trn_seg\"]\n    return trn_config\ndef compute_dims(config, logger=None):\n    if logger is None:\n        logger = config.get_logger('utils')\n    experts = config[\"experts\"]",
+        "type": "code",
+        "location": "/applications/T2VLAD/utils/util.py:106-143"
+    },
+    "2553": {
+        "file_id": 196,
+        "content": "This code includes a function for writing JSON data, an infinite loop wrapper for data loaders, two classes for hashable dictionaries, a function to compute training configuration from a given config file, and a function to compute dimensions from the same config file.",
+        "type": "comment"
+    },
+    "2554": {
+        "file_id": 196,
+        "content": "    # TODO(Samuel): clean up the logic since it's a little convoluted\n    ordered = sorted(config[\"experts\"][\"modalities\"])\n    if experts[\"drop_feats\"]:\n        to_drop = experts[\"drop_feats\"].split(\",\")\n        logger.info(f\"dropping: {to_drop}\")\n        ordered = [x for x in ordered if x not in to_drop]\n    feat_agg = config[\"data_loader\"][\"args\"][\"feat_aggregation\"]\n    dims = []\n    arch_args = config[\"arch\"][\"args\"]\n    vlad_clusters = arch_args[\"vlad_clusters\"]\n    for expert in ordered:\n        temporal = feat_agg[expert][\"temporal\"]\n        if expert == \"face\":\n            in_dim, out_dim = experts[\"face_dim\"], experts[\"face_dim\"]\n        elif expert == \"features_scene\" and temporal == \"vlad\":\n            in_dim, out_dim = 2208 * vlad_clusters[\"features_scene\"], 2208\n        elif expert == \"features_s3d\" and temporal == \"vlad\":\n            in_dim, out_dim = 1024 * vlad_clusters[\"features_s3d\"], 1024\n        elif expert == \"features_flow\" and temporal == \"vlad\":\n            in_dim, out_dim = 1024 * vlad_clusters[\"features_flow\"], 1024",
+        "type": "code",
+        "location": "/applications/T2VLAD/utils/util.py:144-165"
+    },
+    "2555": {
+        "file_id": 196,
+        "content": "This code is organizing modalities, extracting expert settings and dimensions for different modalities like face, features_scene, features_s3d, and features_flow. It also checks if any feature should be dropped and sorts them accordingly. Finally, it assigns the input and output dimensions based on the modality and temporal aggregation.",
+        "type": "comment"
+    },
+    "2556": {
+        "file_id": 196,
+        "content": "        elif expert == \"features_rgb\" and temporal == \"vlad\":\n            in_dim, out_dim = 2048 * vlad_clusters[\"features_rgb\"], 2048\n        elif expert == \"features_ocr\" and temporal == \"vlad\":\n            in_dim, out_dim = 300 * vlad_clusters[\"features_ocr\"], 300\n        elif expert == \"features_face\" and temporal == \"vlad\":\n            in_dim, out_dim = 512 * vlad_clusters[\"features_face\"], 512\n        elif expert == \"features_speech\" and temporal == \"vlad\":\n            in_dim, out_dim = 300 * vlad_clusters[\"features_speech\"], 300\n        elif expert == \"features_audio\" and temporal == \"vlad\":\n            in_dim, out_dim = 128 * vlad_clusters[\"features_audio\"], 128\n        elif expert == \"audio\" and temporal == \"vlad\":\n            in_dim, out_dim = 128 * vlad_clusters[\"audio\"], 128\n        elif expert == \"audio\" and temporal == \"vlad\":\n            in_dim, out_dim = 128 * vlad_clusters[\"audio\"], 128\n        elif expert == \"speech\" and temporal == \"vlad\":\n            in_dim, out_dim = 300 * vlad_clusters[\"speech\"], 300",
+        "type": "code",
+        "location": "/applications/T2VLAD/utils/util.py:166-181"
+    },
+    "2557": {
+        "file_id": 196,
+        "content": "This code snippet is determining the input and output dimensions based on the expert type and temporal method used. It sets the input dimension by multiplying vlad_clusters value with respective constants, and the output dimension remains constant for each expert type and temporal method combination.",
+        "type": "comment"
+    },
+    "2558": {
+        "file_id": 196,
+        "content": "        elif expert == \"ocr\" and temporal == \"vlad\":\n            in_dim, out_dim = 300 * vlad_clusters[\"ocr\"], 300\n        elif expert == \"detection\":\n            # allow for avg pooling\n            det_clusters = arch_args[\"vlad_clusters\"].get(\"detection\", 1)\n            in_dim, out_dim = 1541 * det_clusters, 1541\n        elif expert == \"detection-sem\":\n            if config[\"data_loader\"][\"args\"].get(\"spatial_feats\", False):\n                base = 300 + 16\n            else:\n                base = 300 + 5\n            det_clusters = arch_args[\"vlad_clusters\"].get(\"detection-sem\", 1)\n            in_dim, out_dim = base * det_clusters, base\n        elif expert == \"openpose\":\n            base = 54\n            det_clusters = arch_args[\"vlad_clusters\"].get(\"openpose\", 1)\n            in_dim, out_dim = base * det_clusters, base\n        else:\n            common_dim = feat_agg[expert][\"feat_dims\"][feat_agg[expert][\"type\"]]\n            # account for aggregation of multilpe forms (e.g. avg + max pooling)\n            common_dim = common_dim * len(feat_agg[expert][\"temporal\"].split(\"-\"))",
+        "type": "code",
+        "location": "/applications/T2VLAD/utils/util.py:182-202"
+    },
+    "2559": {
+        "file_id": 196,
+        "content": "This code block assigns the input and output dimensions for different experts (e.g., OCR, detection, detection-sem, openpose) based on their respective configurations and cluster settings. It also considers aggregation types like avg or max pooling.",
+        "type": "comment"
+    },
+    "2560": {
+        "file_id": 196,
+        "content": "            in_dim, out_dim = common_dim, common_dim\n        # For the CE architecture, we need to project all features to a common\n        # dimensionality\n        if arch_args.get(\"mimic_ce_dims\", False):\n            out_dim = experts[\"ce_shared_dim\"]\n        dims.append((expert, (in_dim, out_dim)))\n    expert_dims = OrderedDict(dims)\n    if vlad_clusters[\"text\"] == 0:\n        msg = \"vlad can only be disabled for text with single tokens\"\n        assert config[\"data_loader\"][\"args\"][\"max_tokens\"][\"text\"] == 1, msg\n    if config[\"experts\"][\"text_agg\"] == \"avg\":\n        msg = \"averaging can only be performed with text using single tokens\"\n        assert config[\"arch\"][\"args\"][\"vlad_clusters\"][\"text\"] == 0\n        assert config[\"data_loader\"][\"args\"][\"max_tokens\"][\"text\"] == 1\n    # To remove the dependency of dataloader on the model architecture, we create a\n    # second copy of the expert dimensions which accounts for the number of vlad\n    # clusters\n    raw_input_dims = OrderedDict()\n    for expert, dim_pair in expert_dims.items():",
+        "type": "code",
+        "location": "/applications/T2VLAD/utils/util.py:203-226"
+    },
+    "2561": {
+        "file_id": 196,
+        "content": "This code configures the expert dimensions for a machine learning model. It checks if certain conditions are met, such as disabling VLAD for text with single tokens and using averaging only with text using single tokens. To avoid dependencies between dataloader and model architecture, it creates a second copy of expert dimensions accounting for the number of VLAD clusters.",
+        "type": "comment"
+    },
+    "2562": {
+        "file_id": 196,
+        "content": "        raw_dim = dim_pair[0]\n        if expert in {\"audio\", \"speech\", \"ocr\", \"detection\", \"detection-sem\", \"openpose\", \"features_audio\", \"features_speech\", \"features_face\", \"features_ocr\",  \"features_rgb\", \"features_flow\", \"features_s3d\", \"features_scene\",\n                      \"speech.mozilla.0\"}:\n            if feat_agg[expert][\"temporal\"] == \"vlad\":\n                raw_dim = raw_dim // vlad_clusters.get(expert, 1)\n        raw_input_dims[expert] = raw_dim\n    return expert_dims, raw_input_dims\ndef ensure_tensor(x):\n    if not isinstance(x, paddle.Tensor): #if not isinstance(x, torch.Tensor):\n        x = paddle.to_tensor(x) #    x = torch.from_numpy(x)\n    return x\nclass Timer:\n    def __init__(self):\n        self.cache = datetime.now()\n    def check(self):\n        now = datetime.now()\n        duration = now - self.cache\n        self.cache = now\n        return duration.total_seconds()\n    def reset(self):\n        self.cache = datetime.now()\ndef tensor2im(input_image, imtype=np.uint8):\n    \"\"\"\"Converts a Tensor array into a numpy image array.",
+        "type": "code",
+        "location": "/applications/T2VLAD/utils/util.py:227-258"
+    },
+    "2563": {
+        "file_id": 196,
+        "content": "This code is adjusting the dimensionality of input features for different expert models and ensuring they are in Tensor format. It also provides utility functions like Timer for measuring time durations and tensor2im to convert Tensors into numpy images.",
+        "type": "comment"
+    },
+    "2564": {
+        "file_id": 196,
+        "content": "    Parameters:\n        input_image (tensor) --  the input image tensor array\n        imtype (type)        --  the desired type of the converted numpy array\n    \"\"\"\n    if not isinstance(input_image, np.ndarray):\n        if isinstance(input_image, paddle.Tensor): #if isinstance(input_image, torch.Tensor):  # get the data from a variable\n            image_tensor = input_image #image_tensor = input_image.data\n        else:\n            return input_image\n        # convert it into a numpy array\n        image_numpy = image_tensor[0].cpu().float().numpy()\n        if image_numpy.shape[0] == 1:  # grayscale to RGB\n            image_numpy = np.tile(image_numpy, (3, 1, 1))\n        # post-processing: tranpose and scaling\n        image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0\n    else:  # if it is a numpy array, do nothing\n        image_numpy = input_image\n    return image_numpy.astype(imtype)\ndef save_image(image_numpy, image_path):\n    \"\"\"Save a numpy image to the disk\n    Parameters:\n        image_numpy (numpy array) -- input numpy array",
+        "type": "code",
+        "location": "/applications/T2VLAD/utils/util.py:260-284"
+    },
+    "2565": {
+        "file_id": 196,
+        "content": "The function normalizes and converts the input image tensor array to a numpy array. It also handles different data types and saves the numpy image to disk.",
+        "type": "comment"
+    },
+    "2566": {
+        "file_id": 196,
+        "content": "        image_path (str)          -- the path of the image\n    \"\"\"\n    image_pil = Image.fromarray(image_numpy)\n    image_pil.save(image_path)\ndef print_numpy(x, val=True, shp=False):\n    \"\"\"Print the mean, min, max, median, std, and size of a numpy array\n    Parameters:\n        val (bool) -- if print the values of the numpy array\n        shp (bool) -- if print the shape of the numpy array\n    \"\"\"\n    x = x.astype(np.float64)\n    if shp:\n        print('shape,', x.shape)\n    if val:\n        x = x.flatten()\n        print('mean = %3.3f, min = %3.3f, max = %3.3f, median = %3.3f, std=%3.3f' % (\n            np.mean(x), np.min(x), np.max(x), np.median(x), np.std(x)))\ndef mkdirs(paths):\n    \"\"\"create empty directories if they don't exist\n    Parameters:\n        paths (str list) -- a list of directory paths\n    \"\"\"\n    if isinstance(paths, list) and not isinstance(paths, str):\n        for path in paths:\n            mkdir(path)\n    else:\n        mkdir(paths)\ndef mkdir(path):\n    \"\"\"create a single empty directory if it didn't exist",
+        "type": "code",
+        "location": "/applications/T2VLAD/utils/util.py:285-321"
+    },
+    "2567": {
+        "file_id": 196,
+        "content": "util.py contains several utility functions:\n1. \"image_to_path\" converts an image numpy array to a PIL Image and saves it at the given path.\n2. \"print_numpy\" prints statistics (mean, min, max, median, std) of a numpy array if specified.\n3. \"mkdirs\" creates empty directories if they don't exist, accepting either a list of paths or a single path.\n4. \"mkdir\" is a helper function for \"mkdirs,\" creating a single directory if it doesn't exist.",
+        "type": "comment"
+    },
+    "2568": {
+        "file_id": 196,
+        "content": "    Parameters:\n        path (str) -- a single directory path\n    \"\"\"\n    if not os.path.exists(path):\n        os.makedirs(path)",
+        "type": "code",
+        "location": "/applications/T2VLAD/utils/util.py:323-327"
+    },
+    "2569": {
+        "file_id": 196,
+        "content": "This function creates a directory if it does not exist at the given path.",
+        "type": "comment"
+    },
+    "2570": {
+        "file_id": 197,
+        "content": "/applications/TableTennis/ActionRecognition/README.md",
+        "type": "filepath"
+    },
+    "2571": {
+        "file_id": 197,
+        "content": "The code repository features a PaddlePaddle implementation of Table Tennis action recognition with the VideoSwinTransformer model, supporting feature extraction, classification, single/multi-GPU training, and pre-trained models. Running prediction generates gif files overlaid with predictions, while optimization can be done by adjusting sampling parameters or hyperparameters.",
+        "type": "summary"
+    },
+    "2572": {
+        "file_id": 197,
+        "content": "# 乒乓球动作识别模型\n## 内容\n- [模型简介](#模型简介)\n- [数据准备](#数据准备)\n- [模型训练](#模型训练)\n- [模型推理](#模型推理)\n- [模型优化](#模型优化)\n- [模型部署](#模型部署)\n- [参考论文](#参考论文)\n在开始使用之前，您需要按照以下命令安装额外的依赖包：\n```bash\npython -m pip install imageio\n```\n## 模型简介\n该代码库用于乒乓球动作识别, 基于paddle2.2版本开发，结合PaddleVideo中的VideoSwinTransformer模型，对给定的乒乓球视频进行动作分类。\n主要分为如下几步\n - 图像特征抽取，SwinTransformer3D\n - 动作分类，I3DHead\n## 数据准备\nTODO\n## 模型训练\n主要代码来自VideoSwin模型：[VideoSwin](../../../docs/zh-CN/model_zoo/recognition/videoswin.md)\n1. 使用VideoSwin在K400上的预训练模型基础上进行finetune，因此首先下载K400的预训练模型并放置到`data`目录下\n    ```bash\n    wget -P data/ https://videotag.bj.bcebos.com/PaddleVideo-release2.2/VideoSwin_k400.pdparams\n    ```\n2. 使用`TableTennis/ActionRecognition/configs/videoswin_tabletennis.yaml`配置文件进行训练\n    训练启动命令如下：\n    ```bash\n    # 单卡\n    python3.7 -u main.py --amp --validate -c applications/TableTennis/ActionRecognition/configs/videoswin_tabletennis.yaml\n    # 多卡\n    python3.7 -u -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_videoswin_tabletennis main.py --amp --validate -c applications/TableTennis/ActionRecognition/configs/videoswin_tabletennis.yaml",
+        "type": "code",
+        "location": "/applications/TableTennis/ActionRecognition/README.md:1-43"
+    },
+    "2573": {
+        "file_id": 197,
+        "content": "This code repository contains a PaddlePaddle implementation of Table Tennis action recognition using the VideoSwinTransformer model. The code is based on PaddlePaddle 2.2, and the training data should be placed in the \"data\" directory. It includes steps for image feature extraction and action classification using SwinTransformer3D and I3DHead respectively. Training can be done with single or multi-GPU configurations.",
+        "type": "comment"
+    },
+    "2574": {
+        "file_id": 197,
+        "content": "    ```\n## 模型评估\n```bash\npython3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\"  --log_dir=log_videoswin_tabletennis  main.py  --test -c configs/recognition/video_swin_transformer/videoswin_tabletennis.yaml -w \"output/VideoSwin_TableTennis/VideoSwin_TableTennis_best.pdparams\"\n```\n## 模型推理\n我们提供了一个在乒乓球数据集上训练好的模型以及一个乒乓球样例的视频pkl文件，以供测试\n```\nwget -P data/ https://videotag.bj.bcebos.com/PaddleVideo-release2.2/VideoSwin_tennis.pdparams # 下载乒乓球数据集上训练好的模型\nwget -P data/ https://videotag.bj.bcebos.com/Data/example_tennis.pkl # 下载乒乓球样例输入视频pkl文件\n```\n### 导出推理模型\n```\npython3.7 tools/export_model.py -c applications/TableTennis/ActionRecognition/configs/videoswin_tabletennis.yaml \\\n                                -p output/VideoSwin_TableTennis/VideoSwin_TableTennis_best.pdparams \\\n                                -o inference/VideoSwin_TableTennis\n```\n上述命令会根据传入的`.pdparams`模型，在`inference/VideoSwin_TableTennis`文件夹下生成推理模型，主要包括3个文件：`VideoSwin_TableTennis.pdiparams`、`VideoSwin_TableTennis.pdmodel`、`VideoSwin_TableTennis.info`",
+        "type": "code",
+        "location": "/applications/TableTennis/ActionRecognition/README.md:44-66"
+    },
+    "2575": {
+        "file_id": 197,
+        "content": "This code snippet is for training and testing the VideoSwin transformer model on the TableTennis dataset using PaddlePaddle. It provides instructions to download pre-trained models and example input video files, and demonstrates how to export an inference model using the provided config file and model parameters.",
+        "type": "comment"
+    },
+    "2576": {
+        "file_id": 197,
+        "content": "### 使用推理模型\n测试文件使用`.pkl`文件，其包含了已抽取的用于预测的乒乓球视频帧。\n运行预测代码\n```bash\npython3.7 tools/predict.py --input_file data/example_tennis_7.pkl \\\n                           --config applications/TableTennis/ActionRecognition/configs/videoswin_tabletennis.yaml \\\n                           --model_file inference/VideoSwin_TableTennis/VideoSwin_TableTennis.pdmodel \\\n                           --params_file inference/VideoSwin_TableTennis/VideoSwin_TableTennis.pdiparams \\\n                           --use_gpu=True \\\n                           --use_tensorrt=False\n```\n执行以上命令会产出一个原视频叠加预测结果文本(Top1类别+概率)的gif图片，保存在本目录的results文件夹下，gif文件名与输入的pkl文件名相同。\n效果如下图：\n![example_7.gif](results/example_tennis_7.gif)\n## 模型优化\n在实际使用场景中可根据视频内容尝试优化策略\n- 可根据动作持续时间的长短，调整采样的段数num_seg和段内采样的帧数seg_len\n- 可以根据数据集大小调整模型训练的超参数，包括权重衰减、DropOut概率、学习率、更换优化器等，以获得更优的结果。\n- 本代码的backbone部分可以作为视频特征提取模块，代替其它的动作识别backbone，以获得表征能力更强的视频特征，以提升整体任务的精度。\n## 模型部署\nTODO\n## 参考论文\n- [Video Swin Transformer](https://arxiv.org/pdf/2106.13230.pdf), Ze Liu, Jia Ning, Yue Cao, Yixuan Wei",
+        "type": "code",
+        "location": "/applications/TableTennis/ActionRecognition/README.md:68-98"
+    },
+    "2577": {
+        "file_id": 197,
+        "content": "Running prediction code with provided arguments will generate a gif file showing the video overlaid with predicted results (top 1 class and probability) in the results folder.\nThe model can be optimized based on video content, by adjusting sampling parameters like num_seg and seg_len or hyperparameters for training.",
+        "type": "comment"
+    },
+    "2578": {
+        "file_id": 198,
+        "content": "/applications/TableTennis/datasets/script/submission_format_transfer.py",
+        "type": "filepath"
+    },
+    "2579": {
+        "file_id": 198,
+        "content": "This code reads data from a JSON file, converts timestamps to 25 fps, and formats it according to the table tennis analysis submission format. The formatted data is written back to a new JSON file for further use or analysis.",
+        "type": "summary"
+    },
+    "2580": {
+        "file_id": 198,
+        "content": "import json\nimport math\nwith open('/workspace/bianjiang03/DATA/Output_for_bmn/prop.json') as f:\n    data = json.load(f)\nf.close()\ntransferred = dict()\n# 25 fps for all videos\nfps = 25\nfor item in data:\n    temp = []\n    for seg in item['bmn_results']:\n        temp_dict = {\n            'score': seg['score'],\n            'segment':\n            [round(seg['start'] / fps, 2),\n             round(seg['end'] / fps, 2)]\n        }\n        temp.append(temp_dict)\n    transferred[item['video_name']] = temp\ntarget_format = {\n    'version': 'A-test',\n    'results': transferred,\n    'external_data': {}\n}\njsonString = json.dumps(target_format, indent=4, ensure_ascii=False)\njsonFile = open('/workspace/bianjiang03/DATA/Output_for_bmn/submission.json',\n                'w')\njsonFile.write(jsonString)\njsonFile.close()\n# target format\n# {\n#   \"version\": NA,\n#   \"results\": {\n#     \"name_of_clip_1\": [\n#       {\n#         \"score\": 0.64,\n#         \"segment\": [2.33,3.15]\n#       },\n#       {\n#         \"score\": 0.77,\n#         \"segment\": [7.64, 7.84]\n#       }",
+        "type": "code",
+        "location": "/applications/TableTennis/datasets/script/submission_format_transfer.py:1-49"
+    },
+    "2581": {
+        "file_id": 198,
+        "content": "This code reads data from a JSON file, converts the segment timestamps to a specific frame rate (25 fps), and organizes it into the target submission format. It then writes the formatted data back to a new JSON file for further use or analysis.",
+        "type": "comment"
+    },
+    "2582": {
+        "file_id": 198,
+        "content": "#     ],\n# \t\"name_of_clip_2\": [\n#       {\n#         \"score\": 0.84,\n#         \"segment\": [9.73,10.15]\n#       },\n#       {\n#         \"score\": 0.87,\n#         \"segment\": [17.11, 17.84]\n#       }\n#     ],\n# \t...\n#   }\n#   \"external_data\": {}\n# }",
+        "type": "code",
+        "location": "/applications/TableTennis/datasets/script/submission_format_transfer.py:50-64"
+    },
+    "2583": {
+        "file_id": 198,
+        "content": "This code defines a dictionary structure representing a submission format for table tennis analysis, with \"name_of_clip\" keys holding lists of segments and scores. The \"external_data\" field is empty.",
+        "type": "comment"
+    },
+    "2584": {
+        "file_id": 199,
+        "content": "/applications/TableTennis/extractor/extract_bmn_for_tabletennis.py",
+        "type": "filepath"
+    },
+    "2585": {
+        "file_id": 199,
+        "content": "This code uses PaddleVideo library to classify videos, perform feature extraction, and predict bounding box results. It logs information, saves outputs if needed, and writes inference results into a JSON file.",
+        "type": "summary"
+    },
+    "2586": {
+        "file_id": 199,
+        "content": "#!./python27-gcc482/bin/python\n# coding: utf-8\n\"\"\"\nBAIDU CLOUD action\n\"\"\"\nimport os\nimport sys\nimport pickle\nimport json\nimport time\nimport shutil\nimport numpy as np\nsys.path.append(\n    \"/workspace/bianjiang03/App_TableTennis/PaddleVideo/FootballAction/predict/action_detect\"\n)\nimport models.bmn_infer as prop_model\nfrom utils.preprocess import get_images\nfrom utils.config_utils import parse_config, print_configs\nimport utils.config_utils as config_utils\nimport logger\nlogger = logger.Logger()\ndef load_model(cfg_file=\"configs/configs.yaml\"):\n    \"\"\"\n    load_model\n    \"\"\"\n    logger.info(\"load model ... \")\n    global infer_configs\n    infer_configs = parse_config(cfg_file)\n    print_configs(infer_configs, \"Infer\")\n    t0 = time.time()\n    global prop_model\n    prop_model = prop_model.InferModel(infer_configs)\n    t1 = time.time()\n    logger.info(\"step0: load model time: {} min\\n\".format((t1 - t0) * 1.0 / 60))\ndef video_classify(video_name, dataset_dir):\n    \"\"\"\n    extract_feature\n    \"\"\"\n    logger.info('predict ... ')\n    logger.info(video_name)",
+        "type": "code",
+        "location": "/applications/TableTennis/extractor/extract_bmn_for_tabletennis.py:1-50"
+    },
+    "2587": {
+        "file_id": 199,
+        "content": "This code is for Baidu Cloud action and loads the model using the BMN (Behaved Motion Network) model from a given configuration file. It also defines a function to classify videos by predicting their actions and prints the information about the video being processed. The code uses logger for logging the information.",
+        "type": "comment"
+    },
+    "2588": {
+        "file_id": 199,
+        "content": "    # step 1: extract feature\n    feature_path = dataset_dir + video_name\n    video_features = pickle.load(open(feature_path, 'rb'))\n    print('===video_features===', video_name)\n    # step2: get proposal\n    t0 = time.time()\n    bmn_results = prop_model.predict(infer_configs, material=video_features)\n    t1 = time.time()\n    logger.info(np.array(bmn_results).shape)\n    logger.info(\"step2: proposal time: {} min\".format((t1 - t0) * 1.0 / 60))\n    return bmn_results\nif __name__ == '__main__':\n    dataset_dir = '/workspace/bianjiang03/DATA/Features_competition_test_A/'\n    output_dir = '/workspace/bianjiang03/DATA'\n    if not os.path.exists(output_dir + '/Output_for_bmn'):\n        os.mkdir(output_dir + '/Output_for_bmn')\n    results = []\n    load_model()\n    directory = os.fsencode(dataset_dir)\n    for file in os.listdir(directory):\n        filename = os.fsdecode(file)\n        bmn_results = video_classify(filename, dataset_dir)\n        results.append({\n            'video_name': filename.split('.pkl')[0],\n            'num_proposal': len(bmn_results),",
+        "type": "code",
+        "location": "/applications/TableTennis/extractor/extract_bmn_for_tabletennis.py:52-84"
+    },
+    "2589": {
+        "file_id": 199,
+        "content": "This code performs video feature extraction and proposal generation using the PaddleVideo library. It first loads the video features from a pickle file, then predicts bounding box minimum notation (Bmn) results using a pre-trained model. Finally, it returns the Bmn results and saves them in an output directory if it doesn't already exist.",
+        "type": "comment"
+    },
+    "2590": {
+        "file_id": 199,
+        "content": "            'bmn_results': bmn_results\n        })\n    with open(output_dir + '/Output_for_bmn/prop.json', 'w',\n              encoding='utf-8') as f:\n        data = json.dumps(results, indent=4, ensure_ascii=False)\n        f.write(data)\n    print('Done with the inference!')",
+        "type": "code",
+        "location": "/applications/TableTennis/extractor/extract_bmn_for_tabletennis.py:85-93"
+    },
+    "2591": {
+        "file_id": 199,
+        "content": "This code segment writes the inference results into a JSON file. It first stores the 'bmn_results' dictionary and then writes it to a file named \"Output_for_bmn/prop.json\". The JSON data is formatted for readability with indentation and using UTF-8 encoding. Once writing is complete, it prints \"Done with the inference!\" indicating successful execution.",
+        "type": "comment"
+    },
+    "2592": {
+        "file_id": 200,
+        "content": "/applications/TableTennis/fix_bad_label.py",
+        "type": "filepath"
+    },
+    "2593": {
+        "file_id": 200,
+        "content": "The code reads files from a directory, retrieves their names without extensions, checks if the names exist in another set of labels, and deletes any mismatched labels. It then writes the fixed label file with updated sizes.",
+        "type": "summary"
+    },
+    "2594": {
+        "file_id": 200,
+        "content": "import copy\nimport json\nimport re\nimport os\nurl = '/home/aistudio/work/BMN/Input_for_bmn/feature/'\ndirectory = os.fsencode(url)\ncount = 0\ntarget_set = []\nfor file in os.listdir(directory):\n    filename = os.fsdecode(file)\n    target_name = filename.split('.npy')[0]\n    target_set.append(target_name)\n    count += 1\nprint('Feature size:', len(target_set))\nwith open('/home/aistudio/work/BMN/Input_for_bmn/label.json') as f:\n    data = json.load(f)\ndelet_set = []\nfor key in data.keys():\n    if not key in target_set:\n        delet_set.append(key)\nprint('(Label) Original size:', len(data))\nprint('(Label) Deleted size:', len(delet_set))\nfor item in delet_set:\n    data.pop(item, None)\nprint('(Label) Fixed size:', len(data))\njsonString = json.dumps(data, indent=4, ensure_ascii=False)\njsonFile = open('/home/aistudio/work/BMN/Input_for_bmn/label_fixed.json', 'w')\njsonFile.write(jsonString)\njsonFile.close()",
+        "type": "code",
+        "location": "/applications/TableTennis/fix_bad_label.py:1-37"
+    },
+    "2595": {
+        "file_id": 200,
+        "content": "The code reads files from a directory, retrieves their names without extensions, checks if the names exist in another set of labels, and deletes any mismatched labels. It then writes the fixed label file with updated sizes.",
+        "type": "comment"
+    },
+    "2596": {
+        "file_id": 201,
+        "content": "/applications/TableTennis/get_instance_for_bmn.py",
+        "type": "filepath"
+    },
+    "2597": {
+        "file_id": 201,
+        "content": "This code generates ground truth data for the BMN model in table tennis applications, using the `combile_gts` function to extract action segments from root actions. It calculates video segments, appends annotations, and returns a dataset dictionary for TableTennis.",
+        "type": "summary"
+    },
+    "2598": {
+        "file_id": 201,
+        "content": "\"\"\"\nget instance for bmn\n使用winds=8的滑窗，将所有子窗口的长度之和小于winds的进行合并\n合并后，父窗口代表bmn训练数据，子窗口代表tsn训练数据\n\"\"\"\nimport os\nimport sys\nimport json\nimport random\nimport pickle\nimport numpy as np\nimport math\n# for table tennis\nbmn_window = 8\ndataset = \"/home/aistudio/work/BMN/\"\nfeat_dir = dataset + '/Features_example'\nout_dir = dataset + '/Input_for_bmn'\nlabel_files = {\n    'train': 'label_cls14_small_train.json',\n    'validation': 'label_cls14_small_test.json'\n}\nglobal fps\ndef gen_gts_for_bmn(gts_data):\n    \"\"\"\n    @param, gts_data, original gts for action detection\n    @return, gts_bmn, output gts dict for bmn\n    \"\"\"\n    fps = gts_data['fps']\n    gts_bmn = {'fps': fps, 'gts': []}\n    for sub_item in gts_data['gts']:\n        url = sub_item['url']\n        max_length = sub_item['total_frames']\n        gts_bmn['gts'].append({\n            'url': url,\n            'total_frames': max_length,\n            'root_actions': []\n        })\n        sub_actions = sub_item['actions']\n        # 跳过没有动作的片段\n        if len(sub_actions) == 0:\n            continue\n        # duration > bmn_window， 动作持续时间大于bmn_windows，直接删除",
+        "type": "code",
+        "location": "/applications/TableTennis/get_instance_for_bmn.py:1-48"
+    },
+    "2599": {
+        "file_id": 201,
+        "content": "This code is responsible for generating ground truth data for the BMN model in a table tennis application. It takes in original gts (ground truth) data and outputs the modified gts_bmn dictionary. The code first sets the fps value from gts_data, then iterates over each sub-item in gts_data['gts']. If a sub-item has actions but its duration is less than bmn_window, it is skipped. Otherwise, the sub-item data gets stored in gts_bmn.",
+        "type": "comment"
+    }
+}

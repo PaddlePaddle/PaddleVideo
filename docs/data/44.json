@@ -1,0 +1,544 @@
+{
+    "4400": {
+        "file_id": 376,
+        "content": "## Data\nPaddleVide provides training and testing scripts on the Youtube-8M dataset. Youtube-8M data download and preparation please refer to [YouTube-8M data preparation](../../dataset/youtube8m.md)\n## Train\n### Youtube-8M data set training\n#### Start training\n- The Youtube-8M data set uses 8 cards for training. In the feature format, video and audio features will be used as input. The training start command of the data is as follows\n  ```bash\n  python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_attetion_lstm main.py --validate -c configs/recognition/attention_lstm/attention_lstm_youtube8m.yaml\n  ```\n## Test\nThe command is as follows:\n```bash\npython3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_attetion_lstm main.py --test -c configs/recognition/attention_lstm/attention_lstm_youtube8m.yaml -w \"output/AttentionLSTM/AttentionLSTM_best.pdparams\"\n```\nWhen the test configuration uses the following parameters, the test indicators on the validation data set of Youtube-8M are as follows:",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/attention_lstm.md:21-45"
+    },
+    "4401": {
+        "file_id": 376,
+        "content": "This code provides instructions on how to train and test a model using PaddleVideo's attention LSTM on the Youtube-8M dataset. It mentions the required commands for training and testing, and also states that 8 GPUs are used during the process.",
+        "type": "comment"
+    },
+    "4402": {
+        "file_id": 376,
+        "content": "| Hit@1 | PERR | GAP | checkpoints |\n| :-----: | :---------: | :---: | ----- |\n| 89.05 | 80.49 | 86.30 | [AttentionLSTM_yt8.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/AttentionLSTM_yt8.pdparams) |\n## Inference\n### Export inference model\n```bash\npython3.7 tools/export_model.py -c configs/recognition/attention_lstm/attention_lstm_youtube8m.yaml \\\n                                -p data/AttentionLSTM_yt8.pdparams \\\n                                -o inference/AttentionLSTM\n```\nThe above command will generate the model structure file `AttentionLSTM.pdmodel` and the model weight file `AttentionLSTM.pdiparams` required for prediction.\nFor the meaning of each parameter, please refer to [Model Reasoning Method](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0.0/docs/en/start.md#2-infer)\n### Use prediction engine inference\n```bash\npython3.7 tools/predict.py --input_file data/example.pkl \\\n                           --config configs/recognition/attention_lstm/attention_lstm_youtube8m.yaml \\",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/attention_lstm.md:47-68"
+    },
+    "4403": {
+        "file_id": 376,
+        "content": "This code provides instructions to export an inference model and use the prediction engine for it. The exported model will be stored as AttentionLSTM.pdmodel and AttentionLSTM.pdiparams files, which are necessary for making predictions. Users can use the tools/predict.py script with the input file data/example.pkl and the configuration file configs/recognition/attention_lstm/attention_lstm_youtube8m.yaml to perform inference using the prediction engine.",
+        "type": "comment"
+    },
+    "4404": {
+        "file_id": 376,
+        "content": "                           --model_file inference/AttentionLSTM/AttentionLSTM.pdmodel \\\n                           --params_file inference/AttentionLSTM/AttentionLSTM.pdiparams \\\n                           --use_gpu=True \\\n                           --use_tensorrt=False\n```\nAn example of the output is as follows:\n```bash\nCurrent video file: data/example.pkl\n         top-1 class: 11\n         top-1 score: 0.9841002225875854\n```\nIt can be seen that using the AttentionLSTM model trained on Youtube-8M to predict data/example.pkl, the output top1 category id is 11, and the confidence is 0.98.\n## Reference paper\n- [Attention Clusters: Purely Attention Based Local Feature Integration for Video Classification](https://arxiv.org/abs/1711.09550), Xiang Long, Chuang Gan, Gerard de Melo, Jiajun Wu, Xiao Liu, Shilei Wen\n- [YouTube-8M: A Large-Scale Video Classification Benchmark](https://arxiv.org/abs/1609.08675), Sami Abu-El-Haija, Nisarg Kothari, Joonseok Lee, Paul Natsev, George Toderici, Balakrishnan Varadarajan, Sudheendra Vijayanarasimhan",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/attention_lstm.md:69-84"
+    },
+    "4405": {
+        "file_id": 376,
+        "content": "This code executes the AttentionLSTM model for video classification on a specific file (data/example.pkl). The predicted top-1 class is 11, and the confidence is 0.9841002225875854. This result utilizes the model trained on YouTube-8M dataset, indicating its accuracy in video classification tasks.",
+        "type": "comment"
+    },
+    "4406": {
+        "file_id": 377,
+        "content": "/english_documents/model_zoo/recognition/ctrgcn.md",
+        "type": "filepath"
+    },
+    "4407": {
+        "file_id": 377,
+        "content": "CTR-GCN is a bone-based behavior recognition model using graph convolution, trained and tested with PaddlePaddle framework on the NTU-RGB+D dataset. The code snippet represents top-1 action classification with 99.9988% accuracy.",
+        "type": "summary"
+    },
+    "4408": {
+        "file_id": 377,
+        "content": "[简体中文](../../../zh-CN/model_zoo/recognition/ctrgcn.md) | English\n# CTR-GCN\n---\n## Contents\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Reference](#Reference)\n## Introduction\n[CTRGCN](https://github.com/Uason-Chen/CTR-GCN.git) is a bone based behavior recognition model proposed by iccv 2021. By applying the changes to the graph convolution of human bone data with topological structure, and using spatio-temporal graph convolution to extract spatio-temporal features for behavior recognition, the accuracy of bone based behavior recognition task is greatly improved.\n<div align=\"center\">\n<img src=\"../../../images/ctrgcn.jpg\" height=200 width=950 hspace='10'/> <br />\n</div>\n## Data\nPlease refer to NTU-RGBD data download and preparation doc [NTU-RGBD](../../dataset/ntu-rgbd.md)\n## Train\n### Train on NTU-RGBD\n- Train CTR-GCN on NTU-RGBD scripts using single gpu：\n```bash\n# joint modality\npython main.py --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs_joint.yaml --seed 1",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/ctrgcn.md:1-39"
+    },
+    "4409": {
+        "file_id": 377,
+        "content": "CTR-GCN is a bone-based behavior recognition model using graph convolution on human bone data. It improves accuracy for the task by extracting spatio-temporal features with spatio-temporal graph convolution. Train CTR-GCN on NTU-RGBD data with single GPU and joint modality.",
+        "type": "comment"
+    },
+    "4410": {
+        "file_id": 377,
+        "content": "# bone modality\npython main.py --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs_bone.yaml --seed 1\n# motion modality\npython main.py --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs_motion.yaml --seed 1\n# bone motion modality\npython main.py --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs_bone_motion.yaml --seed 1\n```\n- Train CTR-GCN on NTU-RGBD scriptsusing multi gpus:\n```bash\npython3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3\"  --log_dir=log_ctrgcn  main.py  --validate -c configs/recognition/ctrgcn/ctrgcn_ntucs_joint.yaml\n```\n- config file `ctrgcn_ntucs_joint.yaml` corresponding to the config of CTR-GCN on NTU-RGB+D dataset with cross-subject splits.\n## Test\n### Test on NTU-RGB+D\n- Test scripts：\n```bash\n# joint modality\npython3.7 main.py --test -c configs/recognition/ctrgcn/ctrgcn_ntucs_joint.yaml -w data/CTRGCN_ntucs_joint.pdparams\n# bone modality\npython3.7 main.py --test -c configs/recognition/ctrgcn/ctrgcn_ntucs_bone.yaml -w data/CTRGCN_ntucs_bone.pdparams\n# motion modality\npython",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/ctrgcn.md:41-74"
+    },
+    "4411": {
+        "file_id": 377,
+        "content": "This code snippet runs the CTR-GCN model on different modalities and datasets, performs training with multiple GPUs, and tests the trained models. It uses the PaddlePaddle framework and provides configurations for the NTU-RGB+D dataset, including joint, bone, and motion modalities. The code can be executed by providing the appropriate command line arguments to specify the model, dataset, and mode (train or test).",
+        "type": "comment"
+    },
+    "4412": {
+        "file_id": 377,
+        "content": "3.7 main.py --test -c configs/recognition/ctrgcn/ctrgcn_ntucs_motion.yaml -w data/CTRGCN_ntucs_motion.pdparams\n# bone motion modality\npython3.7 main.py --test -c configs/recognition/ctrgcn/ctrgcn_ntucs_bone_motion.yaml -w data/CTRGCN_ntucs_bone_motion.pdparams\n```\n- Specify the config file with `-c`, specify the weight path with `-w`.\nAccuracy on NTU-RGB+D dataset:\n| split | modality | Top-1 | checkpoints |\n| :----: | :----: | :----: | :----: |\n| cross-subject | joint | 89.93 | [CTRGCN_ntucs_joint.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/CTRGCN_ntucs_joint.pdparams) |\n| cross-subject | bone | 85.24 | [CTRGCN_ntucs_bone.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/CTRGCN_ntucs_bone.pdparams) |\n| cross-subject | motion | 85.33 | [CTRGCN_ntucs_motion.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/CTRGCN_ntucs_motion.pdparams) |\n| cross-subject | bone motion | 84.53 | [CTRGCN_ntucs_bone_motion.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/CTRGCN_ntucs_bone_motion.pdparams) |",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/ctrgcn.md:74-90"
+    },
+    "4413": {
+        "file_id": 377,
+        "content": "This code is executing Python scripts for the CTRGCN model, which utilizes config files (-c) and pre-trained weight paths (-w). The accuracy table showcases performance on NTU-RGB+D dataset across different modalities.",
+        "type": "comment"
+    },
+    "4414": {
+        "file_id": 377,
+        "content": "## Inference\n### export inference model\n```bash\npython3.7 tools/export_model.py -c configs/recognition/ctrgcn/ctrgcn_ntucs_joint.yaml \\\n                                -p data/CTRGCN_ntucs_joint.pdparams \\\n                                -o inference/CTRGCN\n```\n To get model architecture file `CTRGCN.pdmodel` and parameters file `CTRGCN.pdiparams`, use:\n- Args usage please refer to [Model Inference](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86).\n### infer\n```bash\npython3.7 tools/predict.py --input_file data/example_NTU-RGB-D_sketeton.npy \\\n                           --config configs/recognition/ctrgcn/ctrgcn_ntucs_joint.yaml \\\n                           --model_file inference/CTRGCN_joint/CTRGCN_joint.pdmodel \\\n                           --params_file inference/CTRGCN_joint/CTRGCN_joint.pdiparams \\\n                           --use_gpu=True \\\n                           --use_tensorrt=False\n```\nexample of logs:\n```\nCurrent video file: data/example_NTU-RGB-D_sketeton.npy",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/ctrgcn.md:93-121"
+    },
+    "4415": {
+        "file_id": 377,
+        "content": "This code exports the inference model and performs inference using PaddleVideo's CTRGCN model for action recognition. The `export_model.py` script creates the architecture file (CTRGCN.pdmodel) and parameters file (CTRGCN.pdiparams). The `predict.py` script uses these files to perform inference on a given video file, specifying the configuration file for the CTRGCN model. It runs with GPU acceleration (use_gpu=True) and without TensorRT optimization (use_tensorrt=False).",
+        "type": "comment"
+    },
+    "4416": {
+        "file_id": 377,
+        "content": "        top-1 class: 4\n        top-1 score: 0.999988317489624\n```\n## Reference\n- [Channel-wise Topology Refinement Graph Convolution for Skeleton-Based Action Recognition](https://arxiv.org/abs/2107.12213), Chen, Yuxin and Zhang, Ziqi and Yuan, Chunfeng and Li, Bing and Deng, Ying and Hu, Weiming",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/ctrgcn.md:122-128"
+    },
+    "4417": {
+        "file_id": 377,
+        "content": "The code snippet represents the top-1 class and its corresponding score in a model's prediction for skeleton-based action recognition. The top-1 class is 4, with a top-1 score of 0.999988317489624. This information can be used to identify the recognized action from multiple options.",
+        "type": "comment"
+    },
+    "4418": {
+        "file_id": 378,
+        "content": "/english_documents/model_zoo/recognition/movinet.md",
+        "type": "filepath"
+    },
+    "4419": {
+        "file_id": 378,
+        "content": "MoViNet, a lightweight Google Research video model, improves accuracy using causal convolution and temporal ensembles. PaddleVideo's code includes training/testing info, Kinetics-400 data, inference tools, configuration file, model file, parameter file, GPU usage, TensorRT settings, and example logs for processing videos.",
+        "type": "summary"
+    },
+    "4420": {
+        "file_id": 378,
+        "content": "[简体中文](../../../zh-CN/model_zoo/recognition/movinet.md) | English\n# MoViNet\n---\n## Contents\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Reference](#Reference)\n## Introduction\nMovinet is a mobile video network developed by Google research. It uses causal convolution operator with stream buffer and temporal ensembles to improve accuracy. It is a lightweight and efficient video model that can be used for online reasoning video stream.\n## Data\nPlease refer to Kinetics400 data download and preparation doc [k400-data](../../dataset/K400.md)\n## Train\n- Train MoViNet on kinetics-400 scripts:\n```bash\nexport CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7\npython3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_movinet main.py --validate -c configs/recognition/movinet/movinet_k400_frame.yaml\n```\n## Test\n- For uniform sampling, test accuracy can be found in training-logs by search key word `best`, such as:\n```txt\nAlready save the best model (top1 acc)0.6489",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/movinet.md:1-40"
+    },
+    "4421": {
+        "file_id": 378,
+        "content": "MoViNet is a lightweight, efficient video model developed by Google research for online reasoning on video streams. It utilizes causal convolution operator with stream buffer and temporal ensembles to improve accuracy. The code provides details on how to train and test MoViNet using Kinetics-400 data, along with instructions for accessing the training logs to find test accuracy results.",
+        "type": "comment"
+    },
+    "4422": {
+        "file_id": 378,
+        "content": "```\n- Test scripts:\n```bash\npython3.7 main.py --test -c configs/recognition/movinet/movinet_k400_frame.yaml -w output/MoViNet/MoViNet_best.pdparams\n```\nAccuracy on Kinetics400:\n| Config | Sampling method | num_seg | target_size | Top-1 | checkpoints |\n| :------: | :--------: | :-------: | :-------: | :-----: | :-----: |\n| A0 | Uniform | 50 | 172  | 66.62 | [MoViNetA0_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.3/MoViNetA0_k400.pdparams)  |\n## Inference\n### export inference model\n To get model architecture file `MoViNetA0.pdmodel` and parameters file `MoViNetA0.pdiparams`, use:\n```bash\npython3.7 tools/export_model.py -c configs/recognition/movinet/movinet_k400_frame.yaml \\\n                                -p data/MoViNetA0_k400.pdparams \\\n                                -o inference/MoViNetA0\n```\n- Args usage please refer to [Model Inference](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86).\n### infer\n```bash\npython3.7 tools/predict.py --input_file data/example.avi \\",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/movinet.md:41-73"
+    },
+    "4423": {
+        "file_id": 378,
+        "content": "This code provides information on testing and inference for the MoViNet model. It includes commands for running tests, accessing accuracy results on Kinetics400, exporting inference models, and using the predict tool with example input files.",
+        "type": "comment"
+    },
+    "4424": {
+        "file_id": 378,
+        "content": "                           --config configs/recognition/movinet/movinet_k400_frame.yaml \\\n                           --model_file inference/MoViNetA0/MoViNet.pdmodel \\\n                           --params_file inference/MoViNetA0/MoViNet.pdiparams \\\n                           --use_gpu=True \\\n                           --use_tensorrt=False\n```\nexample of logs:\n```\nCurrent video file: data/example.avi\n        top-1 class: 5\n        top-1 score: 0.7667049765586853\n```\n## Reference\n- [MoViNets: Mobile Video Networks for Efficient Video Recognition](https://arxiv.org/abs/2103.11511)",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/movinet.md:74-91"
+    },
+    "4425": {
+        "file_id": 378,
+        "content": "The code specifies the configuration file, model file, and parameter file for the MoViNet model in PaddleVideo. It also sets the use of GPU as True and TensorRT as False. The example logs show the video file being processed and the top-1 class and score for video recognition.",
+        "type": "comment"
+    },
+    "4426": {
+        "file_id": 379,
+        "content": "/english_documents/model_zoo/recognition/posec3d.md",
+        "type": "filepath"
+    },
+    "4427": {
+        "file_id": 379,
+        "content": "The code trains and validates PoseC3D, a skeleton-based action recognition model, on the UCF101 dataset, using pre-trained weights. It details testing and inference processes without GPU acceleration or TensorRT.",
+        "type": "summary"
+    },
+    "4428": {
+        "file_id": 379,
+        "content": "[简体中文](../../../zh-CN/model_zoo/recognition/posec3d.md) | English\n# PoseC3D\n---\n## Contents\n- [PoseC3D](#PoseC3D)\n  - [Contents](#contents)\n  - [Introduction](#introduction)\n  - [Data](#data)\n  - [Train](#train)\n    - [Train on UCF101.](#train-on-ucf101)\n  - [Test](#test)\n    - [Test onf UCF101](#test-onf-ucf101)\n  - [Inference](#inference)\n    - [export inference model](#export-inference-model)\n    - [infer](#infer)\n  - [Reference](#reference)\n## Introduction\nHuman  skeleton,  as  a  compact  representation  of  hu-man  action,  has  received  increasing  attention  in  recentyears.    Many  skeleton-based  action  recognition  methodsadopt graph convolutional networks (GCN) to extract fea-tures on top of human skeletons.   Despite the positive re-sults  shown  in  previous  works,  GCN-based  methods  aresubject  to  limitations  in  robustness,  interoperability,  andscalability.  In this work, we propose PoseC3D, a new ap-proach  to  skeleton-based  action  recognition,  which  relieson  a  3D  hea",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/posec3d.md:1-24"
+    },
+    "4429": {
+        "file_id": 379,
+        "content": "PoseC3D is a skeleton-based action recognition approach that utilizes 3D head pose features and aims to overcome the limitations of GCN-based methods in terms of robustness, interoperability, and scalability. It involves training on UCF101, testing on UCF101, exporting an inference model, and inferring using the model.",
+        "type": "comment"
+    },
+    "4430": {
+        "file_id": 379,
+        "content": "tmap  stack  instead  of  a  graph  sequence  asthe base representation of human skeletons.  Compared toGCN-based methods, PoseC3D is more effective in learningspatiotemporal features, more robust against pose estima-tion noises, and generalizes better in cross-dataset settings.Also, PoseC3D can handle multiple-person scenarios with-out additional computation cost, and its features can be eas-ily integrated with other modalities at early fusion stages,which  provides  a  great  design  space  to  further  boost  theperformance. On four challenging datasets, PoseC3D con-sistently obtains superior performance, when used alone onskeletons and in combination with the RGB modality.\n## Data\nPlease download UCF101 skeletons datasets and pretraind model weights.\n[https://aistudio.baidu.com/aistudio/datasetdetail/140593](https://aistudio.baidu.com/aistudio/datasetdetail/140593)\n## Train\n### Train on UCF101.\n- Train PoseC3D model:\n```bash\npython3.7 main.py --validate -c configs/recognition/posec3d/posec3d.yaml --weights res3d_k400.pdparams",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/posec3d.md:24-39"
+    },
+    "4431": {
+        "file_id": 379,
+        "content": "This code is for training the PoseC3D model on UCF101 dataset. It requires downloading pre-trained model weights from a specific URL. The command \"python3.7 main.py --validate -c configs/recognition/posec3d/posec3d.yaml --weights res3d_k400.pdparams\" is used to train the PoseC3D model using a provided configuration file and pre-trained weights. The trained model will be validated, likely to assess its performance.",
+        "type": "comment"
+    },
+    "4432": {
+        "file_id": 379,
+        "content": "```\n## Test\n### Test onf UCF101\n- Test scripts：\n```bash\npython3.7 main.py --test -c configs/recognition/posec3d/posec3d.yaml  -w output/PoseC3D/PoseC3D_epoch_0012.pdparams\n```\n- Specify the config file with `-c`, specify the weight path with `-w`.\nAccuracy on UCF101 dataset:\n| Test_Data | Top-1 | checkpoints |\n| :----: | :----: | :---- |\n| UCF101 test1 | 87.05 | [PoseC3D_ucf101.pdparams]() |\n## Inference\n### export inference model\n To get model architecture file `PoseC3D.pdmodel` and parameters file `PoseC3D.pdiparams`, use:\n```bash\npython3.7 tools/export_model.py -c configs/recognition/posec3d/posec3d.yaml \\\n                                -p data/PoseC3D_ucf101.pdparams \\\n                                -o inference/PoseC3D\n```\n- Args usage please refer to [Model Inference](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86).\n### infer\n```bash\npython3.7 tools/predict.py --input_file data/example_UCF101_skeleton.pkl\\\n                           --config configs/recognition/posec3d/posec3d.yaml \\",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/posec3d.md:40-82"
+    },
+    "4433": {
+        "file_id": 379,
+        "content": "This code provides instructions for testing and inference of the PoseC3D model on UCF101 dataset. The test script specifies the config file and weight path, while the inference steps explain how to export the model architecture and parameters for further usage. The link leads to additional information on model inference.",
+        "type": "comment"
+    },
+    "4434": {
+        "file_id": 379,
+        "content": "                           --model_file inference/PoseC3D/PoseC3D.pdmodel \\\n                           --params_file inference/PoseC3D/PoseC3D.pdiparams \\\n                           --use_gpu=True \\\n                           --use_tensorrt=False\n```\nexample of logs:\n```\nCurrent video file: data/example_UCF101_skeleton.pkl\n\ttop-1 class: 0\n\ttop-1 score: 0.6731489896774292\n```\n## Reference\n- [Revisiting Skeleton-based Action Recognition](https://arxiv.org/pdf/2104.13586v1.pdf), Haodong Duan, Yue Zhao, Kai Chen, Dian Shao, Dahua Lin, Bo Dai",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/posec3d.md:83-100"
+    },
+    "4435": {
+        "file_id": 379,
+        "content": "Running PoseC3D model for inference with GPU acceleration and without TensorRT.",
+        "type": "comment"
+    },
+    "4436": {
+        "file_id": 380,
+        "content": "/english_documents/model_zoo/recognition/pp-timesformer.md",
+        "type": "filepath"
+    },
+    "4437": {
+        "file_id": 380,
+        "content": "The PP-TimeSformer model is an enhanced version of TimeSformer for video recognition tasks, trained on Kinetics-400 dataset and supports multi-GPU. It uses PaddleVideo with Vision Transformer backbone for testing and exports PP-TimeSformer for prediction using a specific config file.",
+        "type": "summary"
+    },
+    "4438": {
+        "file_id": 380,
+        "content": "[简体中文](../../../zh-CN/model_zoo/recognition/pp-timesformer.md) | English\n# TimeSformer Video Classification Model\n## Content\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Reference](#Reference)\n## Introduction\nWe have improved the [TimeSformer model](./timesformer.md) and obtained a more accurate 2D practical video classification model **PP-TimeSformer**. Without increasing the amount of parameters and calculations, the accuracy on the UCF-101, Kinetics-400 and other data sets significantly exceeds the original version. The accuracy on the Kinetics-400 data set is shown in the table below.\n| Version | Top1 |\n| :------ | :----: |\n| Ours ([swa](#refer-anchor-1)+distill+16frame) | 79.44 |\n| Ours ([swa](#refer-anchor-1)+distill)  | 78.87 |\n| Ours ([swa](#refer-anchor-1)) | **78.61** |\n| [mmaction2](https://github.com/open-mmlab/mmaction2/tree/master/configs/recognition/timesformer#kinetics-400) | 77.92 |\n## Data\nK400 data download and preparation please refer to [Kinetics-400 data preparation](../../dataset/k400.md)",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-timesformer.md:1-29"
+    },
+    "4439": {
+        "file_id": 380,
+        "content": "This code describes the PP-TimeSformer video classification model, an improved version of the TimeSformer model. It outlines the training, testing, and inference processes, as well as providing data preparation instructions for Kinetics-400 dataset. The table shows the accuracy of different versions of the model on Kinetics-400 dataset.",
+        "type": "comment"
+    },
+    "4440": {
+        "file_id": 380,
+        "content": "UCF101 data download and preparation please refer to [UCF-101 data preparation](../../dataset/ucf101.md)\n## Train\n### Kinetics-400 data set training\n#### Download and add pre-trained models\n1. Download the image pre-training model [ViT_base_patch16_224_miil_21k.pdparams](https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams) as Backbone initialization parameters, or download through wget command\n   ```bash\n   wget https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams\n   ```\n2. Open `PaddleVideo/configs/recognition/pptimesformer/pptimesformer_k400_videos.yaml`, and fill in the downloaded weight storage path below `pretrained:`\n    ```yaml\n    MODEL:\n        framework: \"RecognizerTransformer\"\n        backbone:\n            name: \"VisionTransformer_tweaks\"\n            pretrained: fill in the path here\n    ```\n#### Start training\n- The Kinetics400 data set uses 8 cards for training, and the start command of the training method is as follows:",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-timesformer.md:31-58"
+    },
+    "4441": {
+        "file_id": 380,
+        "content": "This code snippet explains how to download and prepare data for training a video recognition model. It mentions the required data sets, pre-trained models, and the specific commands to download and configure them.",
+        "type": "comment"
+    },
+    "4442": {
+        "file_id": 380,
+        "content": "    ```bash\n    # videos data format\n    python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_pptimesformer main.py --validate -c configs/recognition/ pptimesformer/pptimesformer_k400_videos.yaml\n    ```\n- Turn on amp mixed-precision training to speed up the training process. The training start command is as follows:\n    ```bash\n    export FLAGS_conv_workspace_size_limit=800 # MB\n    export FLAGS_cudnn_exhaustive_search=1\n    export FLAGS_cudnn_batchnorm_spatial_persistent=1\n    # videos data format\n    python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_pptimesformer main.py --amp --validate -c configs /recognition/pptimesformer/pptimesformer_k400_videos.yaml\n    ```\n- In addition, you can customize and modify the parameter configuration to achieve the purpose of training/testing on different data sets. It is recommended that the naming method of the configuration file is `model_dataset name_file format_data format_sampling method.yaml` , Please refer to [config](../../tutorials/config.md) for parameter usage.",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-timesformer.md:60-75"
+    },
+    "4443": {
+        "file_id": 380,
+        "content": "This code runs PaddlePaddle's Timesformer model for video recognition using a specific configuration file. It uses multiple GPUs and supports AMP mixed-precision training for faster processing. The script is customizable, allowing you to train or test on different datasets by modifying the configuration file's name.",
+        "type": "comment"
+    },
+    "4444": {
+        "file_id": 380,
+        "content": "## Test\n- The PP-TimeSformer model is verified synchronously during training. You can find the keyword `best` in the training log to obtain the model test accuracy. The log example is as follows:\n  ```\n  Already save the best model (top1 acc)0.7258\n  ```\n- Because the sampling method of the PP-TimeSformer model test mode is a slightly slower but higher accuracy **UniformCrop**, which is different from the **RandomCrop** used in the verification mode during the training process, so the verification index recorded in the training log` topk Acc` does not represent the final test score, so after the training is completed, you can use the test mode to test the best model to obtain the final index. The command is as follows:\n  ```bash\n  # 8-frames testing script\n  python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\"  --log_dir=log_pptimesformer  main.py  --test -c configs/recognition/pptimesformer/pptimesformer_k400_videos.yaml -w \"output/ppTimeSformer/ppTimeSformer_best.pdparams\"\n  # 16-frames testing script",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-timesformer.md:78-92"
+    },
+    "4445": {
+        "file_id": 380,
+        "content": "The PP-TimeSformer model is tested during training, and the best test accuracy can be found in the log with keyword \"best\". However, the verification index recorded in the log may not represent the final test score, so a separate testing script should be used to obtain the accurate result. Two such scripts are provided for 8-frames and 16-frames testing.",
+        "type": "comment"
+    },
+    "4446": {
+        "file_id": 380,
+        "content": "  python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\"  --log_dir=log_pptimesformer main.py --test \\\n  -c configs/recognition/pptimesformer/pptimesformer_k400_videos.yaml \\\n  -o MODEL.backbone.num_seg=16 \\\n  -o MODEL.runtime_cfg.test.num_seg=16 \\\n  -o PIPELINE.test.decode.num_seg=16 \\\n  -o PIPELINE.test.sample.num_seg=16 \\\n  -w \"data/ppTimeSformer_k400_16f_distill.pdparams\"\n  ```\n  When the test configuration uses the following parameters, the test indicators on the validation data set of Kinetics-400 are as follows:\n   | backbone           | Sampling method | num_seg | target_size | Top-1 | checkpoints |\n   | :----------------: | :-------------: | :-----: | :---------: | :---- | :----------------------------------------------------------: |\n   | Vision Transformer |   UniformCrop   |   8    |     224     | 78.61 | [ppTimeSformer_k400_8f.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_8f.pdparams) |\n   | Vision Transformer | UniformCrop | 8 | 224 | ",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-timesformer.md:93-108"
+    },
+    "4447": {
+        "file_id": 380,
+        "content": "This code is launching the PaddleVideo model for testing using Vision Transformer backbone with UniformCrop sampling method and 8 segments. It's running on multiple GPUs and using a specific configuration file, yaml, to set parameters like backbone, sampling method, number of segments, target size, and checkpoint file. The resulting test indicators are presented in tabular format for Kinetics-400 validation dataset.",
+        "type": "comment"
+    },
+    "4448": {
+        "file_id": 380,
+        "content": "78.87 | [ppTimeSformer_k400_8f_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_8f_distill.pdparams) |\n   | Vision Transformer | UniformCrop | 16 | 224 | 79.44 | [ppTimeSformer_k400_16f_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTimeSformer_k400_16f_distill.pdparams) |\n- During the test, the PP-TimeSformer video sampling strategy is to use linspace sampling: in time sequence, from the first frame to the last frame of the video sequence to be sampled, `num_seg` sparse sampling points (including endpoints) are uniformly generated; spatially , Select 3 areas to sample at both ends of the long side and the middle position (left, middle, right or top, middle, and bottom). A total of 1 clip is sampled for 1 video.\n## Inference\n### Export inference model\n```bash\npython3.7 tools/export_model.py -c configs/recognition/pptimesformer/pptimesformer_k400_videos.yaml \\\n                                -p data/ppTimeSformer_k400_8f.pdparams \\",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-timesformer.md:108-120"
+    },
+    "4449": {
+        "file_id": 380,
+        "content": "The code snippet is exporting the PP-TimeSformer model for video recognition. The model uses linspace sampling strategy, uniformly generating sparse sampling points in time and space to create one clip from a single video. The command uses Python script `export_model.py`, with config file `configs/recognition/pptimesformer/pptimesformer_k400_videos.yaml` and model parameters file `data/ppTimeSformer_k400_8f.pdparams`.",
+        "type": "comment"
+    },
+    "4450": {
+        "file_id": 380,
+        "content": "                                -o inference/ppTimeSformer\n```\nThe above command will generate the model structure file `ppTimeSformer.pdmodel` and the model weight file `ppTimeSformer.pdiparams` required for prediction.\n- For the meaning of each parameter, please refer to [Model Reasoning Method](../../start.md#2-Model Reasoning)\n### Use predictive engine inference\n```bash\npython3.7 tools/predict.py --input_file data/example.avi \\\n                           --config configs/recognition/pptimesformer/pptimesformer_k400_videos.yaml \\\n                           --model_file inference/ppTimeSformer/ppTimeSformer.pdmodel \\\n                           --params_file inference/ppTimeSformer/ppTimeSformer.pdiparams \\\n                           --use_gpu=True \\\n                           --use_tensorrt=False\n```\nThe output example is as follows:\n```\nCurrent video file: data/example.avi\n        top-1 class: 5\n        top-1 score: 0.9997474551200867\n```\nIt can be seen that using the ppTimeSformer model trained on Ki",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-timesformer.md:121-147"
+    },
+    "4451": {
+        "file_id": 380,
+        "content": "This code is for inference using PaddlePaddle's ppTimeSformer model. The command generates the required model structure and weight files for prediction and then executes the predict.py script with the given input file, configuration, model files, and parameters. It displays the top-1 class and score for the video file provided, trained on Kinetics 400 dataset.",
+        "type": "comment"
+    },
+    "4452": {
+        "file_id": 380,
+        "content": "netics-400 to predict `data/example.avi`, the output top1 category id is `5`, and the confidence is 0.99. By referring to the category id and name correspondence table `data/k400/Kinetics-400_label_list.txt`, it can be known that the predicted category name is `archery`.\n## Reference\n- [Is Space-TimeAttention All You Need for Video Understanding?](https://arxiv.org/pdf/2102.05095.pdf), Gedas Bertasius, Heng Wang, Lorenzo Torresani\n- [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531), Geoffrey Hinton, Oriol Vinyals, Jeff Dean\n<div id=\"refer-anchor-1\"></div>\n- [Averaging Weights Leads to Wider Optima and Better Generalization](https://arxiv.org/abs/1803.05407v3), Pavel Izmailov, Dmitrii Podoprikhin, Timur Garipov\n- [ImageNet-21K Pretraining for the Masses](https://arxiv.org/pdf/2104.10972v4.pdf), Tal Ridnik, Emanuel Ben-Baruch, Asaf Noy",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-timesformer.md:147-156"
+    },
+    "4453": {
+        "file_id": 380,
+        "content": "This code snippet is discussing the prediction of a category name using the PP-Timesformer model, specifically for predicting the content of `data/example.avi`. The predicted category id is 5 and its corresponding category name is \"archery\". This information is derived from the category id and name correspondence table `data/k400/Kinetics-400_label_list.txt`. The code provides references to several related papers which have influenced or been used in this model's development.",
+        "type": "comment"
+    },
+    "4454": {
+        "file_id": 381,
+        "content": "/english_documents/model_zoo/recognition/pp-tsm.md",
+        "type": "filepath"
+    },
+    "4455": {
+        "file_id": 381,
+        "content": "This code presents PP-TSM, an optimized TSM model for action recognition on UCF101 and Kinetics-400 datasets using PaddlePaddle and ResNet101 as backbone. It offers pre-trained models for video classification inference and predicts 'archery' as top1 class for 'example.avi'.",
+        "type": "summary"
+    },
+    "4456": {
+        "file_id": 381,
+        "content": "[简体中文](../../../zh-CN/model_zoo/recognition/pp-tsm.md) | English\n# PP-TSM\n---\n## Contents\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Reference](#Reference)\n## Introduction\nWe optimized TSM model and proposed **PP-TSM** in this repo. Without increasing the number of parameters, the accuracy of TSM was significantly improved in UCF101 and Kinetics-400 datasets. Please refer to [**Tricks on PP-TSM**](https://zhuanlan.zhihu.com/p/382134297) for more details.\n| Version | Sampling method | Top1 |\n| :------ | :----------: | :----: |\n| Ours (distill) | Dense | **76.16** |\n| Ours | Dense | 75.69 |\n| [mmaction2](https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/tsm/README.md) | Dense | 74.55 |\n| [mit-han-lab](https://github.com/mit-han-lab/temporal-shift-module) | Dense | 74.1 |\n| Version | Sampling method | Top1 |\n| :------ | :----------: | :----: |\n| Ours (distill) | Uniform | **75.11** |\n| Ours | Uniform | 74.54 |\n| [mmaction",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-tsm.md:1-31"
+    },
+    "4457": {
+        "file_id": 381,
+        "content": "This code describes the PP-TSM model, an optimized version of TSM for action recognition. It significantly improves accuracy in UCF101 and Kinetics-400 datasets without increasing parameters. Two sampling methods are used, Dense and Uniform, with respective top1 accuracies shown.",
+        "type": "comment"
+    },
+    "4458": {
+        "file_id": 381,
+        "content": "2](https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/tsm/README.md) |  Uniform | 71.90 |\n| [mit-han-lab](https://github.com/mit-han-lab/temporal-shift-module)  | Uniform | 71.16 |\n## Data\nPlease refer to Kinetics400 data download and preparation doc [k400-data](../../dataset/K400.md)\nPlease refer to UCF101 data download and preparation doc [ucf101-data](../../dataset/ucf101.md)\n## Train\n### Train on kinetics-400\n#### download pretrain-model\nPlease download [ResNet50_vd_ssld_v2](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams) as pretraind model:\n```bash\nwget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams\n```\nand add path to `MODEL.framework.backbone.pretrained` in config file as：\n```yaml\nMODEL:\n    framework: \"Recognizer2D\"\n    backbone:\n        name: \"ResNetTweaksTSM\"\n        pretrained: your weight path\n```\n- If use ResNet101 as backbone, please download [ResNet101_vd_ssld_pretrained.",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-tsm.md:31-64"
+    },
+    "4459": {
+        "file_id": 381,
+        "content": "Code snippet provides a guide for training TSM model on Kinetics-400 and UCF101 datasets. It explains how to download the pre-trained ResNet50_vd_ssld_v2 model, specifies the configuration file modification required, and provides links to related data preparation documents.",
+        "type": "comment"
+    },
+    "4460": {
+        "file_id": 381,
+        "content": "pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ResNet101_vd_ssld_pretrained.pdparams) as pretraind model.\n#### Start training\n- Train PP-TSM on kinetics-400 scripts:\n```bash\npython3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml\n```\n- Train PP-TSM on kinetics-400 video data using scripts:\n```bash\npython3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_videos_uniform.yaml\n```\n- AMP is useful for speeding up training:\n```bash\nexport FLAGS_conv_workspace_size_limit=800 #MB\nexport FLAGS_cudnn_exhaustive_search=1\nexport FLAGS_cudnn_batchnorm_spatial_persistent=1\npython3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\"  --log_dir=log_pptsm  main.py  --amp --validate -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml\n```\n- Train PP-TSM on kinetics-400 with dense sampling:",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-tsm.md:64-90"
+    },
+    "4461": {
+        "file_id": 381,
+        "content": "Loading pretrained model \"pdparams\" from the provided link.\nStarting training for PP-TSM on kinetics-400 using specified scripts and configurations.\nUsing AMP to speed up training.\nTraining with dense sampling also available.",
+        "type": "comment"
+    },
+    "4462": {
+        "file_id": 381,
+        "content": "```bash\npython3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_frames_dense.yaml\n```\n- Train PP-TSM on kinetics-400 with ResNet101 as backbone using dense sampling:\n```bash\npython3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\"  --log_dir=log_pptsm  main.py  --validate -c configs/recognition/pptsm/pptsm_k400_frames_dense_r101.yaml\n```\n## Test\n- For uniform sampling, test accuracy can be found in training-logs by search key word `best`, such as:\n```txt\nAlready save the best model (top1 acc)0.7454\n```\n- For dense sampling, test accuracy can be obtained using scripts:\n```bash\npython3 main.py --test -c configs/recognition/pptsm/pptsm_k400_frames_dense.yaml -w output/ppTSM/ppTSM_best.pdparams\n```\nAccuracy on Kinetics400:\n| backbone | distill | Sampling method | num_seg | target_size | Top-1 | checkpoints |\n| :------: | :----------: | :----: | :----: | :----: | :----: | :---- |\n| ResNet50 | False | Uniform",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-tsm.md:92-122"
+    },
+    "4463": {
+        "file_id": 381,
+        "content": "This code is used to train and test the PP-TSM model on Kinetics-400 dataset. The training process utilizes PaddlePaddle distributed launch, with GPUs 0-7 for execution. It uses ResNet101 as backbone and dense sampling method for training. To obtain test accuracy, a separate script is used, specifying the configuration file and weight file path. The code also displays accuracy metrics in terms of backbone, distillation, sampling method, number of segments, target size, and top-1 accuracy for the Kinetics400 dataset.",
+        "type": "comment"
+    },
+    "4464": {
+        "file_id": 381,
+        "content": " | 8 | 224 | 74.54 | [ppTSM_k400_uniform.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform.pdparams) |\n| ResNet50 | False | Dense | 8 | 224 | 75.69 | [ppTSM_k400_dense.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_dense.pdparams) |\n| ResNet50 | True | Uniform | 8 | 224 | 75.11 | [ppTSM_k400_uniform_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_uniform_distill.pdparams) |\n| ResNet50 | True | Dense | 8 | 224 | 76.16 | [ppTSM_k400_dense_distill.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.1/PPTSM/ppTSM_k400_dense_distill.pdparams) |\n| ResNet101 | True | Uniform | 8 | 224 | 76.35 | [ppTSM_k400_uniform_distill_r101.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTSM_k400_uniform_distill_r101.pdparams) |\n| ResNet101 | False | Dense | 8 | 224 | 77.15 | [ppTSM_k400_dense_r101.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTSM_k400_dense_r101.pdparams) |",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-tsm.md:122-127"
+    },
+    "4465": {
+        "file_id": 381,
+        "content": "This code is a table of pre-trained models for PaddlePaddle Temporal Shift Module (ppTSM) with different configurations. Models are based on ResNet50 and ResNet101 architectures, using both uniform and dense distillation methods. They have different parameters, input sizes, and accuracy levels. The pdparams files are the pre-trained model weights available for download from specified URLs.",
+        "type": "comment"
+    },
+    "4466": {
+        "file_id": 381,
+        "content": "## Inference\n### export inference model\n To get model architecture file `ppTSM.pdmodel` and parameters file `ppTSM.pdiparams`, use:\n```bash\npython3.7 tools/export_model.py -c configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml \\\n                                -p data/ppTSM_k400_uniform.pdparams \\\n                                -o inference/ppTSM\n```\n- Args usage please refer to [Model Inference](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86).\n### infer\n```bash\npython3.7 tools/predict.py --input_file data/example.avi \\\n                           --config configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml \\\n                           --model_file inference/ppTSM/ppTSM.pdmodel \\\n                           --params_file inference/ppTSM/ppTSM.pdiparams \\\n                           --use_gpu=True \\\n                           --use_tensorrt=False\n```\nexample of logs:\n```\nCurrent video file: data/example.avi\n\ttop-1 class: 5\n\ttop-1 score: 0.9907386302947998",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-tsm.md:129-159"
+    },
+    "4467": {
+        "file_id": 381,
+        "content": "This code exports the PPTSM model for inference and demonstrates how to use it for video classification. It requires the user to run two commands: one to export the model architecture file (ppTSM.pdmodel) and parameters file (ppTSM.pdiparams), and another to use the model for prediction on a video file (example.avi). The predicted output includes the top-1 class and its corresponding score.",
+        "type": "comment"
+    },
+    "4468": {
+        "file_id": 381,
+        "content": "```\nwe can get the class name using class id and map file `data/k400/Kinetics-400_label_list.txt`. The top1 prediction of `data/example.avi` is `archery`.\n## Reference\n- [TSM: Temporal Shift Module for Efficient Video Understanding](https://arxiv.org/pdf/1811.08383.pdf), Ji Lin, Chuang Gan, Song Han\n- [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531), Geoffrey Hinton, Oriol Vinyals, Jeff Dean",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-tsm.md:160-167"
+    },
+    "4469": {
+        "file_id": 381,
+        "content": "The code retrieves the class name from class id and a map file, then shows that the top1 prediction of 'data/example.avi' is 'archery'.",
+        "type": "comment"
+    },
+    "4470": {
+        "file_id": 382,
+        "content": "/english_documents/model_zoo/recognition/pp-tsn.md",
+        "type": "filepath"
+    },
+    "4471": {
+        "file_id": 382,
+        "content": "This code introduces the PP-TSN model, an enhanced version of TSN. It describes implementation, data preparation and training processes, using mixed-precision training for speed. The PP-TSN model can be customized and tested on Kinetics-400, providing models for video file inference.",
+        "type": "summary"
+    },
+    "4472": {
+        "file_id": 382,
+        "content": "[简体中文](../../../zh-CN/model_zoo/recognition/pp-tsn.md) | English\n# PP-TSN\n## Content\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Reference](#Reference)\n## Introduction\nWe have improved the [TSN model](./tsn.md) and obtained a more accurate 2D practical video classification model **PP-TSN**. Without increasing the amount of parameters and calculations, the accuracy on the UCF-101, Kinetics-400 and other data sets significantly exceeds the original version. The accuracy on the Kinetics-400 data set is shown in the following table.\n| Version | Top1 |\n| :------ | :----: |\n| Ours (distill) | 75.06 |\n| Ours | **73.68** |\n| [mmaction2](https://github.com/open-mmlab/mmaction2/tree/master/configs/recognition/tsn#kinetics-400) | 71.80 |\n## Data\nK400 data download and preparation please refer to [Kinetics-400 data preparation](../../dataset/k400.md)\nUCF101 data download and preparation please refer to [UCF-101 data preparation](../../dataset/ucf101.md)",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-tsn.md:1-30"
+    },
+    "4473": {
+        "file_id": 382,
+        "content": "This code is a documentation for the PP-TSN model, which is an improved version of the TSN model. The documentation includes sections on introduction, data, train, test, inference, and reference. It also provides accuracy information and guidance on how to download and prepare K400 and UCF101 data.",
+        "type": "comment"
+    },
+    "4474": {
+        "file_id": 382,
+        "content": "## Train\n### Kinetics-400 data set training\n#### Download and add pre-trained models\n1. Download the image distillation pre-training model [ResNet50_vd_ssld_v2.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams) as the Backbone initialization parameter, or download it through wget\n   ```bash\n   wget https://videotag.bj.bcebos.com/PaddleVideo/PretrainModel/ResNet50_vd_ssld_v2_pretrained.pdparams\n   ```\n2. Open `PaddleVideo/configs/recognition/pptsn/pptsn_k400_frames.yaml`, and fill in the downloaded weight storage path below `pretrained:`\n    ```yaml\n    MODEL:\n        framework: \"Recognizer2D\"\n        backbone:\n            name: \"ResNetTweaksTSN\"\n            pretrained: fill in the path here\n    ```\n#### Start training\n- The Kinetics400 data set uses 8 cards for training, and the start command of the training method is as follows:\n    ```bash\n    # frames data format\n    python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_pptsn main.py --validate -c configs/recognition/ pptsn/pptsn_k400_frames.yaml",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-tsn.md:33-61"
+    },
+    "4475": {
+        "file_id": 382,
+        "content": "This code describes how to train the \"PPTSN\" model on the Kinetics-400 dataset using 8 GPUs. It first requires downloading a pre-trained ResNet50_vd_ssld_v2 model, then configuring its path in the yaml file, and finally running training with the provided command.",
+        "type": "comment"
+    },
+    "4476": {
+        "file_id": 382,
+        "content": "    # videos data format\n    python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_pptsn main.py --validate -c configs/recognition/ pptsn/pptsn_k400_videos.yaml\n    ```\n- Turn on amp mixed-precision training to speed up the training process. The training start command is as follows:\n    ```bash\n    export FLAGS_conv_workspace_size_limit=800 # MB\n    export FLAGS_cudnn_exhaustive_search=1\n    export FLAGS_cudnn_batchnorm_spatial_persistent=1\n    # frames data format\n    python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_pptsn main.py --amp --validate -c configs /recognition/pptsn/pptsn_k400_frames.yaml\n    # videos data format\n    python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_pptsn main.py --amp --validate -c configs /recognition/pptsn/pptsn_k400_videos.yaml\n    ```\n- In addition, you can customize and modify the parameter configuration to achieve the purpose of training/testing on different data sets. It is ",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-tsn.md:63-81"
+    },
+    "4477": {
+        "file_id": 382,
+        "content": "This code demonstrates how to run PaddleVideo's pp-tsn model with amp mixed-precision training for faster processing. It supports both videos and frames data formats, and allows customization of parameter configurations for different datasets.",
+        "type": "comment"
+    },
+    "4478": {
+        "file_id": 382,
+        "content": "recommended that the naming method of the configuration file is `model_dataset name_file format_data format_sampling method.yaml` , Please refer to [config](../../tutorials/config.md) for parameter usage.\n## Test\n- The PP-TSN model is verified during training. You can find the keyword `best` in the training log to obtain the model test accuracy. The log example is as follows:\n\t```\n  Already save the best model (top1 acc)0.7004\n\t```\n- Since the sampling method of the PP-TSN model test mode is **TenCrop**, which is slightly slower but more accurate, it is different from the **CenterCrop** used in the verification mode during the training process, so the verification index recorded in the training log is `topk Acc `Does not represent the final test score, so after the training is completed, you can use the test mode to test the best model to obtain the final index, the command is as follows:\n\t```bash\n  python3.7 -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_pptsn main.py --test -c configs/recognition/ pptsn/pptsn_k400_frames.yaml -w \"output/ppTSN/ppTSN_best.pdparams\"",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-tsn.md:81-95"
+    },
+    "4479": {
+        "file_id": 382,
+        "content": "The PP-TSN model's testing process is different from training verification due to the sampling method used. The final test score should be obtained after testing the best model in test mode, as opposed to using the top-k accuracy recorded during training.",
+        "type": "comment"
+    },
+    "4480": {
+        "file_id": 382,
+        "content": "\t```\n\tWhen the test configuration uses the following parameters, the test indicators on the validation data set of Kinetics-400 are as follows:\n\t| backbone | Sampling method | distill | num_seg | target_size | Top-1 |       checkpoints       |\n\t| :------: | :-------------: | :-----: | :-----: | :---------: | :---- | :---------------------: |\n\t| ResNet50 |     TenCrop     |  False  |    3    |     224     | 73.68 | [ppTSN_k400.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTSN_k400.pdparams) |\n\t| ResNet50 |     TenCrop     |  True   |    8    |     224     | 75.06 | [ppTSN_k400_8.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/ppTSN_k400_8.pdparams) |\n- The PP-TSN video sampling strategy is TenCrop sampling: in time sequence, the input video is evenly divided into num_seg segments, and the middle position of each segment is sampled 1 frame; spatially, from the upper left corner, upper right corner, center point, lower left corner, and lower right corner Each",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-tsn.md:96-105"
+    },
+    "4481": {
+        "file_id": 382,
+        "content": "This code outlines the test results of PP-TSN model using different configurations on the validation dataset of Kinetics-400. The table presents backbone, sampling method, distillation method, number of segments, target image size, and Top-1 accuracy for each configuration. Checkpoints are also provided for each configuration. The PP-TSN video sampling strategy is TenCrop sampling, which samples frames from different positions in the video sequence and spatial areas.",
+        "type": "comment"
+    },
+    "4482": {
+        "file_id": 382,
+        "content": " of the 5 sub-regions sampled an area of 224x224, and the horizontal flip was added to obtain a total of 10 sampling results. A total of 1 clip is sampled for 1 video.\n- Distill is `True`, which means that the pre-trained model obtained by distillation is used. For the specific distillation scheme, please refer to [ppTSM Distillation Scheme]().\n## Inference\n### Export inference model\n```bash\npython3.7 tools/export_model.py -c configs/recognition/pptsn/pptsn_k400_frames.yaml -p data/ppTSN_k400.pdparams -o inference/ppTSN\n```\nThe above command will generate the model structure file `ppTSN.pdmodel` and model weight files `ppTSN.pdiparams` and `ppTSN.pdiparams.info` files required for prediction, all of which are stored in the `inference/ppTSN/` directory\nFor the meaning of each parameter in the above bash command, please refer to [Model Reasoning Method](https://github.com/HydrogenSulfate/PaddleVideo/blob/PPTSN-v1/docs/en/start.md#2-infer)\n### Use prediction engine inference\n```bash\npython3.7 tools/predict.py --input_file data/example.avi \\",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-tsn.md:105-125"
+    },
+    "4483": {
+        "file_id": 382,
+        "content": "The code exports the pre-trained model for inference and uses the prediction engine to perform predictions on input video files. Distillation is used for obtaining the pre-trained model, and the generated model structure file and weight files are stored in the `inference/ppTSN/` directory. The provided bash commands assist in exporting and predicting with the model respectively.",
+        "type": "comment"
+    },
+    "4484": {
+        "file_id": 382,
+        "content": "                           --config configs/recognition/pptsn/pptsn_k400_frames.yaml \\\n                           --model_file inference/ppTSN/ppTSN.pdmodel \\\n                           --params_file inference/ppTSN/ppTSN.pdiparams \\\n                           --use_gpu=True \\\n                           --use_tensorrt=False\n```\nThe output example is as follows:\n```bash\nCurrent video file: data/example.avi\n        top-1 class: 5\n        top-1 score: 0.998979389667511\n```\nIt can be seen that using the PP-TSN model trained on Kinetics-400 to predict `data/example.avi`, the output top1 category id is `5`, and the confidence is 0.99. By consulting the category id and name correspondence table `data/k400/Kinetics-400_label_list.txt`, it can be known that the predicted category name is `archery`.\n## Reference\n- [Temporal Segment Networks: Towards Good Practices for Deep Action Recognition](https://arxiv.org/pdf/1608.00859.pdf), Limin Wang, Yuanjun Xiong, Zhe Wang\n- [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531), Geoffrey Hinton, Oriol Vinyals, Jeff Dean",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/pp-tsn.md:126-146"
+    },
+    "4485": {
+        "file_id": 382,
+        "content": "This code is running an inference on a video file using the PP-TSN model trained on Kinetics-400. The top-1 category and its corresponding confidence are being outputted for the given video file.",
+        "type": "comment"
+    },
+    "4486": {
+        "file_id": 383,
+        "content": "/english_documents/model_zoo/recognition/slowfast.md",
+        "type": "filepath"
+    },
+    "4487": {
+        "file_id": 383,
+        "content": "The SlowFast model, designed for video recognition, utilizes a Multigrid training strategy to speed up training and provides English documentation. It offers testing instructions using PaddleVideo with GPU usage details, retrieves class name from ID, predicts top1 result for \"example.avi\", and is explained in detail in the reference paper.",
+        "type": "summary"
+    },
+    "4488": {
+        "file_id": 383,
+        "content": "[简体中文 ](../../../zh-CN/model_zoo/recognition/slowfast.md) | English\n# SlowFast\n---\n## Contents\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n- [Reference](#Reference)\n## Introduction\nSlowFast  involves (i) a Slow pathway, operating at low frame rate, to capture spatial semantics, and (ii) a Fast path-way, operating at high frame rate, to capture motion at fine temporal resolution. The Fast pathway can be made very lightweight by reducing its channel capacity, yet can learn useful temporal information for video recognition.\n<p align=\"center\">\n<img src=\"../../../images/SlowFast.png\" height=300 width=500 hspace='10'/> <br />\nSlowFast Overview\n</p>\n## Data\nWe use Kinetics-400 to train this model，data preparation please refer to [Kinetics-400 dataset](../../dataset/k400.md).\n## Train\nYou can start training by：\n```bash\nexport CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7\npython -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_slowfast  main.py --validate -c configs/recognition/slowfast/slowfast.yaml",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/slowfast.md:1-38"
+    },
+    "4489": {
+        "file_id": 383,
+        "content": "This code is the English version of SlowFast model documentation from PaddleVideo's model_zoo. It introduces SlowFast, a video recognition model that combines low and high frame rates for spatial semantic and motion information capture. The training script and data preparation are provided.",
+        "type": "comment"
+    },
+    "4490": {
+        "file_id": 383,
+        "content": "```\n- Training would be efficent using our code. The training speed is 2x faster than the original implementation. Details can refer to [benchmark](https://github.com/PaddlePaddle/PaddleVideo/blob/main/docs/en/benchmark.md).\n### Speed up training\nIt's time consuming to train SlowFast model.  So we implement [Multigrid training stragety](https://arxiv.org/abs/1912.00998) to speed up training. Training script:\n```bash\npython -B -m paddle.distributed.launch --selected_gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log-slowfast main.py --validate --multigrid -c configs/recognition/slowfast/slowfast_multigrid.yaml\n```\nPerformance evaluation:\n| training stragety | time cost of one epoch/min | total training time/min | speed-up |\n| :------ | :-----: | :------: |:------: |\n| Multigrid | 27.25 |  9758 (6.7 days) | 2.89x |\n| Normal | 78.76 | 15438 (10.7days) | base |\nFor more details, please refer to [accelerate doc](https://github.com/PaddlePaddle/PaddleVideo/blob/develop/docs/zh-CN/tutorials/accelerate.md#%E8%AE%AD%E7%BB%83%E7%AD%96%E7%95%A5%E5%8A%A0%E9%80%9F).",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/slowfast.md:39-58"
+    },
+    "4491": {
+        "file_id": 383,
+        "content": "This code implements Multigrid training strategy to speed up SlowFast model training, which is time-consuming. The provided training script and performance evaluation show that using the multigrid method reduces the training time by 2.89x compared to normal training. For more details, refer to the accelerate documentation.",
+        "type": "comment"
+    },
+    "4492": {
+        "file_id": 383,
+        "content": "## Test\nYou can start testing by：\n```bash\npython -B -m paddle.distributed.launch --gpus=\"0,1,2,3,4,5,6,7\" --log_dir=log_slowfast_test main.py --test -c  configs/recognition/slowfast/slowfast.yaml -w output/SlowFast/SlowFast_epoch_000196.pdparams\n```\n-  Args `-w` is used to specifiy the model path，you can download our model in [SlowFast.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/SlowFast/SlowFast.pdparams).\nTest accuracy in Kinetics-400:\n| Configs | Acc1 | Acc5 | Weights |\n| :---: | :---: | :---: | :---: |\n|  [slowfast.yaml](../../../../configs/recognition/slowfast/slowfast.yaml) | 74.35 | 91.33 | [slowfast_4x16.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/SlowFast/SlowFast.pdparams) |\n|  [slowfast_multigrid.yaml](../../../../configs/recognition/slowfast/slowfast_multigrid.yaml) | 75.84  | 92.33 | [slowfast_8x8.pdparams](https://videotag.bj.bcebos.com/PaddleVideo/SlowFast/SlowFast_8*8.pdparams) |\n- Acc1 may be lower than that released in papaer, as ~5% data of kinetics-400 is missing. Experiments have verified that if training with the same data, we can get the same accuracy.",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/slowfast.md:61-79"
+    },
+    "4493": {
+        "file_id": 383,
+        "content": "This code provides instructions for testing the SlowFast model in PaddleVideo. It uses the distributed launch command to run on multiple GPUs, specifying the log directory and the model configuration file slowfast.yaml. The test accuracy for two configurations is also shown, with a note that Acc1 may be lower due to missing data.",
+        "type": "comment"
+    },
+    "4494": {
+        "file_id": 383,
+        "content": "## Inference\n### export inference model\n To get model architecture file `SlowFast.pdmodel` and parameters file `SlowFast.pdiparams`, use:\n```bash\npython3.7 tools/export_model.py -c configs/recognition/slowfast/slowfast.yaml \\\n                                -p data/SlowFast.pdparams \\\n                                -o inference/SlowFast\n```\n- Args usage please refer to [Model Inference](https://github.com/PaddlePaddle/PaddleVideo/blob/release/2.0/docs/zh-CN/start.md#2-%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86).\n### infer\n```bash\npython3.7 tools/predict.py --input_file data/example.avi \\\n                           --config configs/recognition/slowfast/slowfast.yaml \\\n                           --model_file inference/SlowFast/SlowFast.pdmodel \\\n                           --params_file inference/SlowFast/SlowFast.pdiparams \\\n                           --use_gpu=True \\\n                           --use_tensorrt=False\n```\nexample of logs:\n```\nCurrent video file: data/example.avi\n        top-1 class: 5\n        top-1 score: 1.0",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/slowfast.md:82-112"
+    },
+    "4495": {
+        "file_id": 383,
+        "content": "This code provides instructions for exporting and using the SlowFast model in PaddleVideo. The first command generates the architecture file (SlowFast.pdmodel) and parameter file (SlowFast.pdiparams). The second command demonstrates how to run inference with these files on an input video, specifying the model configuration and enabling GPU usage if available. It outputs the top-1 class and score for the predicted results.",
+        "type": "comment"
+    },
+    "4496": {
+        "file_id": 383,
+        "content": "```\nwe can get the class name using class id and map file `data/k400/Kinetics-400_label_list.txt`. The top1 prediction of `data/example.avi` is `archery`.\n## Reference\n- [SlowFast Networks for Video Recognition](https://arxiv.org/abs/1812.03982), Feichtenhofer C, Fan H, Malik J, et al.",
+        "type": "code",
+        "location": "/english_documents/model_zoo/recognition/slowfast.md:113-120"
+    },
+    "4497": {
+        "file_id": 383,
+        "content": "This code retrieves the class name from a given class ID using a map file and predicts the top1 result for a video named \"example.avi\". The reference provided is related to the SlowFast Networks for Video Recognition paper, which likely explains how this functionality works in detail.",
+        "type": "comment"
+    },
+    "4498": {
+        "file_id": 384,
+        "content": "/english_documents/model_zoo/recognition/stgcn.md",
+        "type": "filepath"
+    },
+    "4499": {
+        "file_id": 384,
+        "content": "The code provides instructions for training and testing ST-GCN, a skeleton-based action recognition model, on FSD and NTU-RGB+D datasets, with accuracy results given. It exports the model's architecture and parameters using `export_model.py` and allows inference with optional GPU usage via `predict.py`.",
+        "type": "summary"
+    }
+}

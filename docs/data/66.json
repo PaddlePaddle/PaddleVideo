@@ -1,0 +1,550 @@
+{
+    "6600": {
+        "file_id": 503,
+        "content": "            padding (int | tuple[int]): Zero-padding added to both sides of\n                the input. Same as that in ``nn._ConvNd``.\n            dilation (int | tuple[int]): Spacing between kernel elements.\n                Same as that in ``nn._ConvNd``.\n            groups (int): Number of blocked connections from input channels to\n                output channels. Same as that in ``nn._ConvNd``.\n        \"\"\"\n    def __init__(\n            self,\n            in_channels,\n            out_channels,\n            kernel_size,\n            padding=0,\n            stride=1,\n            dilation=1,\n            groups=1,\n            act=None,\n            bias=None,\n    ):\n        super(ConvBNLayer, self).__init__()\n        self._conv = nn.Conv3D(\n            in_channels=in_channels,\n            out_channels=out_channels,\n            kernel_size=kernel_size,\n            stride=stride,\n            padding=padding,\n            dilation=dilation,\n            groups=groups,\n            bias_attr=bias)\n        self._batch_norm = nn.BatchNorm3D(out_channels, momentum=0.1)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:57-89"
+    },
+    "6601": {
+        "file_id": 503,
+        "content": "This code defines a ConvBNLayer class, which is a 3D convolutional layer followed by batch normalization. It takes parameters such as in_channels, out_channels, kernel_size, padding, stride, dilation, groups, act (activation function), and bias. The constructor initializes the Conv3D layer and BatchNorm3D with the specified parameters.",
+        "type": "comment"
+    },
+    "6602": {
+        "file_id": 503,
+        "content": "        self.act = act\n        if act is not None:\n            self._act_op = nn.ReLU()\n    def forward(self, inputs):\n        y = self._conv(inputs)\n        y = self._batch_norm(y)\n        if self.act is not None:\n            y = self._act_op(y)\n        return y\nclass Bottleneck3d(nn.Layer):\n    \"\"\"Bottleneck 3d block for ResNet3D.\n    Args:\n        inplanes (int): Number of channels for the input in first conv3d layer.\n        planes (int): Number of channels produced by some norm/conv3d layers.\n        spatial_stride (int): Spatial stride in the conv3d layer. Default: 1.\n        temporal_stride (int): Temporal stride in the conv3d layer. Default: 1.\n        dilation (int): Spacing between kernel elements. Default: 1.\n        downsample (nn.Module | None): Downsample layer. Default: None.\n        inflate (bool): Whether to inflate kernel. Default: True.\n        inflate_style (str): ``3x1x1`` or ``3x3x3``. which determines the\n            kernel sizes and padding strides for conv1 and conv2 in each block.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:90-115"
+    },
+    "6603": {
+        "file_id": 503,
+        "content": "The code defines a Bottleneck3d class, which represents a bottleneck block for ResNet3D. It takes in input channels (inplanes), output channels (planes), spatial and temporal stride, dilation rate, downsample layer, inflate flag, and inflate style as arguments. The class has an act variable to store the activation function and defines a forward method that performs convolutions, batch normalization, and activation if necessary.",
+        "type": "comment"
+    },
+    "6604": {
+        "file_id": 503,
+        "content": "            Default: '3x1x1'.\n        non_local (bool): Determine whether to apply non-local module in this\n            block. Default: False.\n        non_local_cfg (dict): Config for non-local module. Default: ``dict()``.\n        conv_cfg (dict): Config dict for convolution layer.\n            Default: ``dict(type='Conv3d')``.\n        norm_cfg (dict): Config for norm layers. required keys are ``type``,\n            Default: ``dict(type='BN3d')``.\n        act_cfg (dict): Config dict for activation layer.\n            Default: ``dict(type='ReLU')``.\n        with_cp (bool): Use checkpoint or not. Using checkpoint will save some\n            memory while slowing down the training speed. Default: False.\n    \"\"\"\n    expansion = 4\n    def __init__(self,\n                 inplanes,\n                 planes,\n                 spatial_stride=1,\n                 temporal_stride=1,\n                 dilation=1,\n                 downsample=None,\n                 inflate=True,\n                 inflate_style='3x1x1',\n                 non_local=False,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:116-140"
+    },
+    "6605": {
+        "file_id": 503,
+        "content": "The code defines a ResNet3D block with various configurations including the number of input and output planes, spatial and temporal stride, dilation rate, downsampling method, inflation settings, and whether to apply non-local modules or not. The default configuration includes convolution, norm, and activation layers, as well as an option for using checkpoint to save memory at the cost of training speed.",
+        "type": "comment"
+    },
+    "6606": {
+        "file_id": 503,
+        "content": "                 non_local_cfg=dict(),\n                 conv_cfg=dict(type='Conv3d'),\n                 norm_cfg=dict(type='BN3d'),\n                 act_cfg=dict(type='ReLU'),\n                 with_cp=False):\n        super().__init__()\n        assert inflate_style in ['3x1x1', '3x3x3']\n        self.inplanes = inplanes\n        self.planes = planes\n        self.spatial_stride = spatial_stride\n        self.temporal_stride = temporal_stride\n        self.dilation = dilation\n        self.inflate = inflate\n        self.inflate_style = inflate_style\n        self.norm_cfg = norm_cfg\n        self.conv_cfg = conv_cfg\n        self.act_cfg = act_cfg\n        self.with_cp = with_cp\n        self.non_local = non_local\n        self.non_local_cfg = non_local_cfg\n        self.conv1_stride_s = 1\n        self.conv2_stride_s = spatial_stride\n        self.conv1_stride_t = 1\n        self.conv2_stride_t = temporal_stride\n        if self.inflate:\n            if inflate_style == '3x1x1':\n                conv1_kernel_size = (3, 1, 1)\n                conv1_padding = (1, 0, 0)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:141-171"
+    },
+    "6607": {
+        "file_id": 503,
+        "content": "This code initializes an instance of a 3D ResNet backbone model with specified parameters, including planes, spatial and temporal strides, dilation, inflate style, norm and conv configurations, whether to use non-local blocks, and more. It sets various attributes based on the input and instantiates a Conv3d layer for the first block.",
+        "type": "comment"
+    },
+    "6608": {
+        "file_id": 503,
+        "content": "                conv2_kernel_size = (1, 3, 3)\n                conv2_padding = (0, dilation, dilation)\n            else:\n                conv1_kernel_size = (1, 1, 1)\n                conv1_padding = (0, 0, 0)\n                conv2_kernel_size = (3, 3, 3)\n                conv2_padding = (1, dilation, dilation)\n        else:\n            conv1_kernel_size = (1, 1, 1)\n            conv1_padding = (0, 0, 0)\n            conv2_kernel_size = (1, 3, 3)\n            conv2_padding = (0, dilation, dilation)\n        self.conv1 = ConvBNLayer(\n            in_channels=inplanes,\n            out_channels=planes,\n            kernel_size=conv1_kernel_size,\n            stride=(self.conv1_stride_t, self.conv1_stride_s,\n                    self.conv1_stride_s),\n            padding=conv1_padding,\n            bias=False,\n            act='relu')\n        self.conv2 = ConvBNLayer(\n            in_channels=planes,\n            out_channels=planes,\n            kernel_size=conv2_kernel_size,\n            stride=(self.conv2_stride_t, self.conv2_stride_s,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:172-198"
+    },
+    "6609": {
+        "file_id": 503,
+        "content": "Code is setting up convolutional layers for a ResNet3D model. It creates ConvBNLayer instances with different kernel sizes and padding based on the dilation value. These layers are used for temporal, spatial, and spatial dimensions depending on the dilation value provided.",
+        "type": "comment"
+    },
+    "6610": {
+        "file_id": 503,
+        "content": "                    self.conv2_stride_s),\n            padding=conv2_padding,\n            dilation=(1, dilation, dilation),\n            bias=False,\n            act='relu')\n        self.conv3 = ConvBNLayer(\n            in_channels=planes,\n            out_channels=planes * self.expansion,\n            kernel_size=1,\n            bias=False,\n            act=None,\n        )\n        self.downsample = downsample\n        self.relu = nn.ReLU()\n    def forward(self, x):\n        \"\"\"Defines the computation performed at every call.\"\"\"\n        def _inner_forward(x):\n            \"\"\"Forward wrapper for utilizing checkpoint.\"\"\"\n            identity = x\n            out = self.conv1(x)\n            out = self.conv2(out)\n            out = self.conv3(out)\n            if self.downsample is not None:\n                identity = self.downsample(x)\n            out = out + identity\n            return out\n        out = _inner_forward(x)\n        out = self.relu(out)\n        if self.non_local:\n            out = self.non_local_block(out)\n        return out",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:199-239"
+    },
+    "6611": {
+        "file_id": 503,
+        "content": "This code defines a ResNet3D block with ConvBNLayer, downsample layer, and ReLU activation. The forward method applies the layers sequentially, optionally performs downsampling, and adds the identity connection before returning the output. Non-local blocks can be applied if specified.",
+        "type": "comment"
+    },
+    "6612": {
+        "file_id": 503,
+        "content": "class ResNet3d(nn.Layer):\n    \"\"\"ResNet 3d backbone.\n    Args:\n        depth (int): Depth of resnet, from {18, 34, 50, 101, 152}.\n        pretrained (str | None): Name of pretrained model.\n        stage_blocks (tuple | None): Set number of stages for each res layer.\n            Default: None.\n        pretrained2d (bool): Whether to load pretrained 2D model.\n            Default: True.\n        in_channels (int): Channel num of input features. Default: 3.\n        base_channels (int): Channel num of stem output features. Default: 64.\n        out_indices (Sequence[int]): Indices of output feature. Default: (3, ).\n        num_stages (int): Resnet stages. Default: 4.\n        spatial_strides (Sequence[int]):\n            Spatial strides of residual blocks of each stage.\n            Default: ``(1, 2, 2, 2)``.\n        temporal_strides (Sequence[int]):\n            Temporal strides of residual blocks of each stage.\n            Default: ``(1, 1, 1, 1)``.\n        dilations (Sequence[int]): Dilation of each stage.\n            Default: ``(1, 1, 1, 1)``.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:242-263"
+    },
+    "6613": {
+        "file_id": 503,
+        "content": "The code defines a ResNet 3D backbone, with options for depth (18, 34, 50, 101, or 152), pretrained model name, number of stages for each res layer, loading of pretrained 2D model, input channel features, output feature indices, number of stages, and spatial and temporal strides.",
+        "type": "comment"
+    },
+    "6614": {
+        "file_id": 503,
+        "content": "        conv1_kernel (Sequence[int]): Kernel size of the first conv layer.\n            Default: ``(3, 7, 7)``.\n        conv1_stride_s (int): Spatial stride of the first conv layer.\n            Default: 2.\n        conv1_stride_t (int): Temporal stride of the first conv layer.\n            Default: 1.\n        pool1_stride_s (int): Spatial stride of the first pooling layer.\n            Default: 2.\n        pool1_stride_t (int): Temporal stride of the first pooling layer.\n            Default: 1.\n        with_pool2 (bool): Whether to use pool2. Default: True.\n        inflate (Sequence[int]): Inflate Dims of each block.\n            Default: (1, 1, 1, 1).\n        inflate_style (str): ``3x1x1`` or ``3x3x3``. which determines the\n            kernel sizes and padding strides for conv1 and conv2 in each block.\n            Default: '3x1x1'.\n        conv_cfg (dict): Config for conv layers. required keys are ``type``\n            Default: ``dict(type='Conv3d')``.\n        norm_cfg (dict): Config for norm layers. required keys are ``type`` and",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:264-282"
+    },
+    "6615": {
+        "file_id": 503,
+        "content": "This code defines the parameters for ResNet3D backbone model including kernel sizes, stride values, and inflation dimensions. It also sets the default configuration for convolutional layers and normalization layers. The inflation style determines the kernel sizes for conv1 and conv2 in each block based on the given string input.",
+        "type": "comment"
+    },
+    "6616": {
+        "file_id": 503,
+        "content": "            ``requires_grad``.\n            Default: ``dict(type='BN3d', requires_grad=True)``.\n        act_cfg (dict): Config dict for activation layer.\n            Default: ``dict(type='ReLU', inplace=True)``.\n        norm_eval (bool): Whether to set BN layers to eval mode, namely, freeze\n            running stats (mean and var). Default: False.\n        with_cp (bool): Use checkpoint or not. Using checkpoint will save some\n            memory while slowing down the training speed. Default: False.\n        non_local (Sequence[int]): Determine whether to apply non-local module\n            in the corresponding block of each stages. Default: (0, 0, 0, 0).\n        non_local_cfg (dict): Config for non-local module. Default: ``dict()``.\n        zero_init_residual (bool):\n            Whether to use zero initialization for residual block,\n            Default: True.\n        kwargs (dict, optional): Key arguments for \"make_res_layer\".\n    \"\"\"\n    arch_settings = {\n        50: (Bottleneck3d, (3, 4, 6, 3)),\n        101: (Bottleneck3d, (3, 4, 23, 3)),",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:283-302"
+    },
+    "6617": {
+        "file_id": 503,
+        "content": "This code defines the parameters and architecture settings for ResNet3D model in PaddleVideo. It includes options such as backbone type, stages, activation layer, normalization mode, checkpoint usage, non-local module application, and residual block initialization.",
+        "type": "comment"
+    },
+    "6618": {
+        "file_id": 503,
+        "content": "        152: (Bottleneck3d, (3, 8, 36, 3))\n    }\n    def __init__(self,\n                 depth,\n                 stage_blocks=None,\n                 pretrained2d=True,\n                 in_channels=3,\n                 num_stages=4,\n                 base_channels=64,\n                 out_indices=(3, ),\n                 spatial_strides=(1, 2, 2, 2),\n                 temporal_strides=(1, 1, 1, 1),\n                 dilations=(1, 1, 1, 1),\n                 conv1_kernel=(3, 7, 7),\n                 conv1_stride_s=2,\n                 conv1_stride_t=1,\n                 pool1_stride_s=2,\n                 pool1_stride_t=1,\n                 with_pool1=True,\n                 with_pool2=True,\n                 inflate=(1, 1, 1, 1),\n                 inflate_style='3x1x1',\n                 conv_cfg=dict(type='Conv3d'),\n                 norm_cfg=dict(type='BN3d', requires_grad=True),\n                 act_cfg=dict(type='ReLU', inplace=True),\n                 norm_eval=False,\n                 with_cp=False,\n                 non_local=(0, 0, 0, 0),",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:303-331"
+    },
+    "6619": {
+        "file_id": 503,
+        "content": "This code defines a ResNet3D backbone model with customizable parameters such as depth, stage blocks, and more. It uses Bottleneck3d layers and allows for pre-trained 2D weights usage. The model is designed for processing 4D data (spatial and temporal dimensions).",
+        "type": "comment"
+    },
+    "6620": {
+        "file_id": 503,
+        "content": "                 non_local_cfg=dict(),\n                 zero_init_residual=True,\n                 **kwargs):\n        super().__init__()\n        if depth not in self.arch_settings:\n            raise KeyError(f'invalid depth {depth} for resnet')\n        self.depth = depth\n        self.pretrained2d = pretrained2d\n        self.in_channels = in_channels\n        self.base_channels = base_channels\n        self.num_stages = num_stages\n        assert 1 <= num_stages <= 4\n        self.stage_blocks = stage_blocks\n        self.out_indices = out_indices\n        assert max(out_indices) < num_stages\n        self.spatial_strides = spatial_strides\n        self.temporal_strides = temporal_strides\n        self.dilations = dilations\n        assert len(spatial_strides) == len(temporal_strides) == len(\n            dilations) == num_stages\n        if self.stage_blocks is not None:\n            assert len(self.stage_blocks) == num_stages\n        self.conv1_kernel = conv1_kernel\n        self.conv1_stride_s = conv1_stride_s\n        self.conv1_stride_t = conv1_stride_t",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:332-357"
+    },
+    "6621": {
+        "file_id": 503,
+        "content": "This function is initializing a ResNet3D model with specified depth, input channels, base channels, number of stages, stage blocks, output indices, spatial and temporal strides, dilations, and convolution kernel parameters. It raises an error if the provided depth does not match any of the known configurations or if the output indices exceed the number of stages. If the stage_blocks are specified, it also checks that their length matches the number of stages. The class inherits from a superclass.",
+        "type": "comment"
+    },
+    "6622": {
+        "file_id": 503,
+        "content": "        self.pool1_stride_s = pool1_stride_s\n        self.pool1_stride_t = pool1_stride_t\n        self.with_pool1 = with_pool1\n        self.with_pool2 = with_pool2\n        self.stage_inflations = _ntuple(num_stages)(inflate)\n        self.non_local_stages = _ntuple(num_stages)(non_local)\n        self.inflate_style = inflate_style\n        self.conv_cfg = conv_cfg\n        self.norm_cfg = norm_cfg\n        self.act_cfg = act_cfg\n        self.norm_eval = norm_eval\n        self.with_cp = with_cp\n        self.zero_init_residual = zero_init_residual\n        self.block, stage_blocks = self.arch_settings[depth]\n        if self.stage_blocks is None:\n            self.stage_blocks = stage_blocks[:num_stages]\n        self.inplanes = self.base_channels\n        self.non_local_cfg = non_local_cfg\n        self._make_stem_layer()\n        self.res_layers = []\n        for i, num_blocks in enumerate(self.stage_blocks):\n            spatial_stride = spatial_strides[i]\n            temporal_stride = temporal_strides[i]\n            dilation = dilations[i]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:358-387"
+    },
+    "6623": {
+        "file_id": 503,
+        "content": "This code sets various attributes for a ResNet3D model. It initializes strides, determines if pooling layers are used in certain stages, inflates stages based on input, and configures convolutional, normalization, and activation settings. It also defines the block architecture and stage blocks according to the provided depth. Finally, it creates stem and residual layers based on the configuration.",
+        "type": "comment"
+    },
+    "6624": {
+        "file_id": 503,
+        "content": "            planes = self.base_channels * 2**i\n            res_layer = self.make_res_layer(\n                self.block,\n                self.inplanes,\n                planes,\n                num_blocks,\n                spatial_stride=spatial_stride,\n                temporal_stride=temporal_stride,\n                dilation=dilation,\n                norm_cfg=self.norm_cfg,\n                conv_cfg=self.conv_cfg,\n                act_cfg=self.act_cfg,\n                non_local=self.non_local_stages[i],\n                non_local_cfg=self.non_local_cfg,\n                inflate=self.stage_inflations[i],\n                inflate_style=self.inflate_style,\n                with_cp=with_cp,\n                **kwargs)\n            self.inplanes = planes * self.block.expansion\n            layer_name = f'layer{i + 1}'\n            self.add_sublayer(layer_name, res_layer)\n            self.res_layers.append(layer_name)\n        self.feat_dim = self.block.expansion * self.base_channels * 2**(\n            len(self.stage_blocks) - 1)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:388-412"
+    },
+    "6625": {
+        "file_id": 503,
+        "content": "This code defines a function that adds ResNet3D layers with specified block, input and output planes, number of blocks, spatial and temporal strides, dilation, norm/conv cfg, non-local stages, inflations, style, and with_cp. It updates inplanes and feat_dim accordingly.",
+        "type": "comment"
+    },
+    "6626": {
+        "file_id": 503,
+        "content": "    @staticmethod\n    def make_res_layer(block,\n                       inplanes,\n                       planes,\n                       blocks,\n                       spatial_stride=1,\n                       temporal_stride=1,\n                       dilation=1,\n                       inflate=1,\n                       inflate_style='3x1x1',\n                       non_local=0,\n                       non_local_cfg=dict(),\n                       norm_cfg=None,\n                       act_cfg=None,\n                       conv_cfg=None,\n                       with_cp=False,\n                       **kwargs):\n        \"\"\"Build residual layer for ResNet3D.\n        Args:\n            block (nn.Module): Residual module to be built.\n            inplanes (int): Number of channels for the input feature\n                in each block.\n            planes (int): Number of channels for the output feature\n                in each block.\n            blocks (int): Number of residual blocks.\n            spatial_stride (int | Sequence[int]): Spatial strides in",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:414-440"
+    },
+    "6627": {
+        "file_id": 503,
+        "content": "The function \"make_res_layer\" builds a residual layer for ResNet3D. It takes parameters such as block, inplanes, planes, blocks, spatial_stride, temporal_stride, and other optional settings like non_local, norm_cfg, act_cfg, conv_cfg, with_cp to create the residual module. The function constructs the layer based on the input arguments and returns it.",
+        "type": "comment"
+    },
+    "6628": {
+        "file_id": 503,
+        "content": "                residual and conv layers. Default: 1.\n            temporal_stride (int | Sequence[int]): Temporal strides in\n                residual and conv layers. Default: 1.\n            dilation (int): Spacing between kernel elements. Default: 1.\n            inflate (int | Sequence[int]): Determine whether to inflate\n                for each block. Default: 1.\n            inflate_style (str): ``3x1x1`` or ``3x3x3``. which determines\n                the kernel sizes and padding strides for conv1 and conv2\n                in each block. Default: '3x1x1'.\n            non_local (int | Sequence[int]): Determine whether to apply\n                non-local module in the corresponding block of each stages.\n                Default: 0.\n            non_local_cfg (dict): Config for non-local module.\n                Default: ``dict()``.\n            conv_cfg (dict | None): Config for norm layers. Default: None.\n            norm_cfg (dict | None): Config for norm layers. Default: None.\n            act_cfg (dict | None): Config for activate layers. Default: None.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:441-457"
+    },
+    "6629": {
+        "file_id": 503,
+        "content": "This function defines the ResNet3D backbone model, allowing customization through parameters such as residual and conv layers, temporal stride, dilation, inflate, inflate_style, non_local modules, conv_cfg, norm_cfg, and act_cfg. Default values are provided for each parameter.",
+        "type": "comment"
+    },
+    "6630": {
+        "file_id": 503,
+        "content": "            with_cp (bool | None): Use checkpoint or not. Using checkpoint\n                will save some memory while slowing down the training speed.\n                Default: False.\n        Returns:\n            nn.Module: A residual layer for the given config.\n        \"\"\"\n        inflate = inflate if not isinstance(inflate,\n                                            int) else (inflate, ) * blocks\n        non_local = non_local if not isinstance(non_local,\n                                                int) else (non_local, ) * blocks\n        assert len(inflate) == blocks and len(non_local) == blocks\n        downsample = None\n        if spatial_stride != 1 or inplanes != planes * block.expansion:\n            downsample = ConvBNLayer(\n                in_channels=inplanes,\n                out_channels=planes * block.expansion,\n                kernel_size=1,\n                stride=(temporal_stride, spatial_stride, spatial_stride),\n                bias=False,\n                act=None)\n        layers = []\n        layers.append(",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:458-481"
+    },
+    "6631": {
+        "file_id": 503,
+        "content": "This function creates a residual layer based on the given configuration. It uses inflation and non-local blocks for the specified number of blocks, and optionally adds downsampling if there is a change in spatial or in/out planes. The output is a neural network module (nn.Module).",
+        "type": "comment"
+    },
+    "6632": {
+        "file_id": 503,
+        "content": "            block(\n                inplanes,\n                planes,\n                spatial_stride=spatial_stride,\n                temporal_stride=temporal_stride,\n                dilation=dilation,\n                downsample=downsample,\n                inflate=(inflate[0] == 1),\n                inflate_style=inflate_style,\n                non_local=(non_local[0] == 1),\n                non_local_cfg=non_local_cfg,\n                norm_cfg=norm_cfg,\n                conv_cfg=conv_cfg,\n                act_cfg=act_cfg,\n                with_cp=with_cp,\n                **kwargs))\n        inplanes = planes * block.expansion\n        for i in range(1, blocks):\n            layers.append(\n                block(\n                    inplanes,\n                    planes,\n                    spatial_stride=1,\n                    temporal_stride=1,\n                    dilation=dilation,\n                    inflate=(inflate[i] == 1),\n                    inflate_style=inflate_style,\n                    non_local=(non_local[i] == 1),",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:482-509"
+    },
+    "6633": {
+        "file_id": 503,
+        "content": "The code defines a ResNet3D architecture with multiple blocks, each with configurable parameters such as spatial and temporal stride, dilation, downsample, inflate style, non-local operation, norm/conv configuration, activation function, and whether to include channel pruning. The inplanes are updated based on the expansion factor of the block.",
+        "type": "comment"
+    },
+    "6634": {
+        "file_id": 503,
+        "content": "                    non_local_cfg=non_local_cfg,\n                    norm_cfg=norm_cfg,\n                    conv_cfg=conv_cfg,\n                    act_cfg=act_cfg,\n                    with_cp=with_cp,\n                    **kwargs))\n        return nn.Sequential(*layers)\n    @staticmethod\n    def _inflate_conv_params(conv3d, state_dict_2d, module_name_2d,\n                             inflated_param_names):\n        \"\"\"Inflate a conv module from 2d to 3d.\n        Args:\n            conv3d (nn.Module): The destination conv3d module.\n            state_dict_2d (OrderedDict): The state dict of pretrained 2d model.\n            module_name_2d (str): The name of corresponding conv module in the\n                2d model.\n            inflated_param_names (list[str]): List of parameters that have been\n                inflated.\n        \"\"\"\n        weight_2d_name = module_name_2d + '.weight'\n        conv2d_weight = state_dict_2d[weight_2d_name]\n        kernel_t = conv3d.weight.data.shape[2]\n        new_weight = conv2d_weight.data.unsqueeze(2).expand_as(",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:510-537"
+    },
+    "6635": {
+        "file_id": 503,
+        "content": "This code defines a function to inflate a 3D convolutional neural network module from a pre-trained 2D model. It takes the destination conv3d module, state dict of the 2D model, name of the corresponding conv module in the 2D model, and list of inflated parameters as inputs. The function extracts the weight from the 2D model's state dict and reshapes it to fit the 3D convolution.",
+        "type": "comment"
+    },
+    "6636": {
+        "file_id": 503,
+        "content": "            conv3d.weight) / kernel_t\n        conv3d.weight.data.copy_(new_weight)\n        inflated_param_names.append(weight_2d_name)\n        if getattr(conv3d, 'bias') is not None:\n            bias_2d_name = module_name_2d + '.bias'\n            conv3d.bias.data.copy_(state_dict_2d[bias_2d_name])\n            inflated_param_names.append(bias_2d_name)\n    @staticmethod\n    def _inflate_bn_params(bn3d, state_dict_2d, module_name_2d,\n                           inflated_param_names):\n        \"\"\"Inflate a norm module from 2d to 3d.\n        Args:\n            bn3d (nn.Module): The destination bn3d module.\n            state_dict_2d (OrderedDict): The state dict of pretrained 2d model.\n            module_name_2d (str): The name of corresponding bn module in the\n                2d model.\n            inflated_param_names (list[str]): List of parameters that have been\n                inflated.\n        \"\"\"\n        for param_name, param in bn3d.named_parameters():\n            param_2d_name = f'{module_name_2d}.{param_name}'",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:538-561"
+    },
+    "6637": {
+        "file_id": 503,
+        "content": "This code inflates 2D convolutional and Batch Normalization (BN) parameters to 3D for a ResNet3D backbone. It copies the weights and biases, if present, from the 2D state dictionary to their corresponding 3D modules and updates the list of inflated parameter names.",
+        "type": "comment"
+    },
+    "6638": {
+        "file_id": 503,
+        "content": "            param_2d = state_dict_2d[param_2d_name]\n            if param.data.shape != param_2d.shape:\n                warnings.warn(f'The parameter of {module_name_2d} is not'\n                              'loaded due to incompatible shapes. ')\n                return\n            param.data.copy_(param_2d)\n            inflated_param_names.append(param_2d_name)\n        for param_name, param in bn3d.named_buffers():\n            param_2d_name = f'{module_name_2d}.{param_name}'\n            # some buffers like num_batches_tracked may not exist in old\n            # checkpoints\n            if param_2d_name in state_dict_2d:\n                param_2d = state_dict_2d[param_2d_name]\n                param.data.copy_(param_2d)\n                inflated_param_names.append(param_2d_name)\n    def _make_stem_layer(self):\n        \"\"\"Construct the stem layers consists of a conv+norm+act module and a\n        pooling layer.\"\"\"\n        self.conv1 = ConvBNLayer(\n            in_channels=self.in_channels,\n            out_channels=self.base_channels,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:562-586"
+    },
+    "6639": {
+        "file_id": 503,
+        "content": "This code snippet is from the PaddleVideo library, specifically the ResNet3D backbone. It is loading and inflating parameters from a state dictionary, ensuring compatibility between 2D and 3D parameter shapes. The function _make_stem_layer constructs a stem layer consisting of a convolution, normalization, activation, and pooling module.",
+        "type": "comment"
+    },
+    "6640": {
+        "file_id": 503,
+        "content": "            kernel_size=self.conv1_kernel,\n            stride=(self.conv1_stride_t, self.conv1_stride_s,\n                    self.conv1_stride_s),\n            padding=tuple([(k - 1) // 2 for k in _triple(self.conv1_kernel)]),\n            bias=False,\n            act=\"relu\")\n        self.maxpool = nn.MaxPool3D(\n            kernel_size=(1, 3, 3),\n            stride=(self.pool1_stride_t, self.pool1_stride_s,\n                    self.pool1_stride_s),\n            padding=(0, 1, 1))\n        self.pool2 = nn.MaxPool3D(kernel_size=(2, 1, 1), stride=(2, 1, 1))\n    @staticmethod\n    def _init_weights(self, pretrained=None):\n        pass\n    def init_weights(self, pretrained=None):\n        self._init_weights(self, pretrained)\n    def forward(self, x):\n        \"\"\"Defines the computation performed at every call.\n        Args:\n            x (torch.Tensor): The input data.\n        Returns:\n            torch.Tensor: The feature of the input\n            samples extracted by the backbone.\n        \"\"\"\n        x = self.conv1(x)\n        if self.with_pool1:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:587-620"
+    },
+    "6641": {
+        "file_id": 503,
+        "content": "This code is initializing a ResNet3D model with convolutional and pooling layers. The convolution layer has specified kernel size, stride, padding, and uses ReLU activation function. The max pooling layer has varying sizes for temporal, spatial dimensions. This model also includes optional pool1 and can be initialized with pretrained weights.",
+        "type": "comment"
+    },
+    "6642": {
+        "file_id": 503,
+        "content": "            x = self.maxpool(x)\n        outs = []\n        for i, layer_name in enumerate(self.res_layers):\n            res_layer = getattr(self, layer_name)\n            x = res_layer(x)\n            if i == 0 and self.with_pool2:\n                x = self.pool2(x)\n            if i in self.out_indices:\n                outs.append(x)\n        if len(outs) == 1:\n            return outs[0]\n        return tuple(outs)\n    def train(self, mode=True):\n        \"\"\"Set the optimization status when training.\"\"\"\n        super().train()\n        if mode and self.norm_eval:\n            for m in self.modules():\n                if isinstance(m, paddle.nn._BatchNormBase):\n                    m.eval()",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d.py:621-641"
+    },
+    "6643": {
+        "file_id": 503,
+        "content": "This code defines a ResNet-3D backbone model with residual blocks, max pooling layers, and optionally a second pooling layer. The train function sets the model to training mode and evaluates batch normalization layers if self.norm_eval is True.",
+        "type": "comment"
+    },
+    "6644": {
+        "file_id": 504,
+        "content": "/paddlevideo/modeling/backbones/resnet3d_slowonly.py",
+        "type": "filepath"
+    },
+    "6645": {
+        "file_id": 504,
+        "content": "The ResNet3dSlowOnly class creates a Slowfast pathway in the ResNet3d architecture, reduces channel number, and is registered under BACKBONES. The make_res_layer function builds residual layers with specified spatial_strides, temporal_strides, and dilations for 3D Resnet layers.",
+        "type": "summary"
+    },
+    "6646": {
+        "file_id": 504,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport warnings\nimport paddle\nimport paddle.nn as nn\nfrom .resnet3d import ResNet3d, ConvBNLayer\nfrom ..registry import BACKBONES\n@BACKBONES.register()\nclass ResNet3dSlowOnly(ResNet3d):\n    \"\"\"A pathway of Slowfast based on ResNet3d.\n    Args:\n        *args (arguments): Arguments same as :class:``ResNet3d``.\n        channel_ratio (int): Reduce the channel number of fast pathway\n            by ``channel_ratio``, corresponding to ``beta`` in the paper.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d_slowonly.py:1-30"
+    },
+    "6647": {
+        "file_id": 504,
+        "content": "This code defines a ResNet3dSlowOnly class that extends ResNet3d for creating a Slowfast pathway. It reduces the channel number of the fast pathway by a specified 'channel_ratio'. This model is registered under BACKBONES and accepts the same arguments as ResNet3d.",
+        "type": "comment"
+    },
+    "6648": {
+        "file_id": 504,
+        "content": "            Default: 8.\n        **kwargs (keyword arguments): Keywords arguments for ResNet3d.\n    \"\"\"\n    def __init__(self, *args, **kwargs):\n        super().__init__(*args, **kwargs)\n        self.inplanes = self.base_channels\n        self.lateral_connections = []\n        for i in range(len(self.stage_blocks)):\n            planes = self.base_channels * 2**i\n            self.inplanes = planes * self.block.expansion\n    def make_res_layer(self,\n                       block,\n                       inplanes,\n                       planes,\n                       blocks,\n                       spatial_stride=1,\n                       temporal_stride=1,\n                       dilation=1,\n                       inflate=1,\n                       inflate_style='3x1x1',\n                       non_local=0,\n                       non_local_cfg=dict(),\n                       conv_cfg=None,\n                       norm_cfg=None,\n                       act_cfg=None,\n                       with_cp=False):\n        \"\"\"Build residual layer for Slowfast.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d_slowonly.py:31-60"
+    },
+    "6649": {
+        "file_id": 504,
+        "content": "Function `__init__` initializes the ResNet3d object by setting initial values for inplanes and lateral_connections based on provided args and kwargs. The function make_res_layer builds a residual layer for Slowfast, taking in various parameters including block type, input planes, output planes, number of blocks, and more.",
+        "type": "comment"
+    },
+    "6650": {
+        "file_id": 504,
+        "content": "        Args:\n            block (nn.Module): Residual module to be built.\n            inplanes (int): Number of channels for the input\n                feature in each block.\n            planes (int): Number of channels for the output\n                feature in each block.\n            blocks (int): Number of residual blocks.\n            spatial_stride (int | Sequence[int]): Spatial strides\n                in residual and conv layers. Default: 1.\n            temporal_stride (int | Sequence[int]): Temporal strides in\n                residual and conv layers. Default: 1.\n            dilation (int): Spacing between kernel elements. Default: 1.\n            inflate (int | Sequence[int]): Determine whether to inflate\n                for each block. Default: 1.\n            inflate_style (str): ``3x1x1`` or ``3x3x3``. which determines\n                the kernel sizes and padding strides for conv1 and\n                conv2 in each block. Default: ``3x1x1``.\n            non_local (int | Sequence[int]): Determine whether to apply",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d_slowonly.py:62-79"
+    },
+    "6651": {
+        "file_id": 504,
+        "content": "This function is defining a Residual module with specified parameters including block type, input and output planes, number of residual blocks, spatial and temporal strides, dilation rate, whether to inflate or apply non-local operations for each block.",
+        "type": "comment"
+    },
+    "6652": {
+        "file_id": 504,
+        "content": "                non-local module in the corresponding block of each stages.\n                Default: 0.\n            non_local_cfg (dict): Config for non-local module.\n                Default: ``dict()``.\n            conv_cfg (dict | None): Config for conv layers. Default: None.\n            norm_cfg (dict | None): Config for norm layers. Default: None.\n            act_cfg (dict | None): Config for activate layers. Default: None.\n            with_cp (bool): Use checkpoint or not. Using checkpoint will save\n                some memory while slowing down the training speed.\n                Default: False.\n        Returns:\n            nn.Module: A residual layer for the given config.\n        \"\"\"\n        inflate = inflate if not isinstance(inflate,\n                                            int) else (inflate, ) * blocks\n        non_local = non_local if not isinstance(non_local,\n                                                int) else (non_local, ) * blocks\n        assert len(inflate) == blocks and len(non_local) == blocks",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d_slowonly.py:80-98"
+    },
+    "6653": {
+        "file_id": 504,
+        "content": "This function takes in a configuration for building residual layers, including parameters like blocks (number of residual layers to create), inflate (inflation times for the conv layers), non_local (whether to use non-local modules), conv_cfg, norm_cfg, act_cfg, and with_cp (use checkpoint). It asserts that the lengths of inflate and non_local match the number of blocks specified. The function returns a residual layer for the given configuration.",
+        "type": "comment"
+    },
+    "6654": {
+        "file_id": 504,
+        "content": "        lateral_inplanes = 0\n        if (spatial_stride != 1\n                or (inplanes + lateral_inplanes) != planes * block.expansion):\n            downsample = ConvBNLayer(\n                in_channels=inplanes + lateral_inplanes,\n                out_channels=planes * block.expansion,\n                kernel_size=1,\n                stride=(temporal_stride, spatial_stride, spatial_stride),\n                bias=False,\n                act=None)\n        else:\n            downsample = None\n        layers = []\n        layers.append(\n            block(\n                inplanes + lateral_inplanes,\n                planes,\n                spatial_stride,\n                temporal_stride,\n                dilation,\n                downsample,\n                inflate=(inflate[0] == 1),\n                inflate_style=inflate_style,\n                non_local=(non_local[0] == 1),\n                non_local_cfg=non_local_cfg,\n                conv_cfg=conv_cfg,\n                norm_cfg=norm_cfg,\n                act_cfg=act_cfg,\n                with_cp=with_cp))",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d_slowonly.py:100-129"
+    },
+    "6655": {
+        "file_id": 504,
+        "content": "This code is creating a downsample layer and appending a block to the layers list. The downsample is created based on whether the current input planes match the expected value or not. If it doesn't match, a convolutional layer with stride is used for downsampling. The block is added to the layers list with specified parameters.",
+        "type": "comment"
+    },
+    "6656": {
+        "file_id": 504,
+        "content": "        inplanes = planes * block.expansion\n        for i in range(1, blocks):\n            layers.append(\n                block(\n                    inplanes,\n                    planes,\n                    1,\n                    1,\n                    dilation,\n                    inflate=(inflate[i] == 1),\n                    inflate_style=inflate_style,\n                    non_local=(non_local[i] == 1),\n                    non_local_cfg=non_local_cfg,\n                    conv_cfg=conv_cfg,\n                    norm_cfg=norm_cfg,\n                    act_cfg=act_cfg,\n                    with_cp=with_cp))\n        return nn.Sequential(*layers)\n    def _inflate_conv_params(self, conv3d, state_dict_2d, module_name_2d,\n                             inflated_param_names):\n        \"\"\"Inflate a conv module from 2d to 3d.\n        The differences of conv modules betweene 2d and 3d in Pathway\n        mainly lie in the inplanes due to lateral connections. To fit the\n        shapes of the lateral connection counterpart, it will expand",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d_slowonly.py:130-157"
+    },
+    "6657": {
+        "file_id": 504,
+        "content": "This code defines a function to create layers for a Resnet3D backbone model in PaddleVideo. It takes in parameters such as planes, blocks, dilation, inflate, inflate_style, non_local, non_local_cfg, conv_cfg, norm_cfg, act_cfg, and with_cp. The function creates layers by appending instances of a block class to a list, and returns them as a sequential model for training or inference. Additionally, there is another function that inflates a 2D conv module to a 3D one, mainly adjusting the inplanes due to lateral connections for fitting the shapes of lateral connection counterparts.",
+        "type": "comment"
+    },
+    "6658": {
+        "file_id": 504,
+        "content": "        parameters by concatting conv2d parameters and extra zero paddings.\n        Args:\n            conv3d (nn.Module): The destination conv3d module.\n            state_dict_2d (OrderedDict): The state dict of pretrained 2d model.\n            module_name_2d (str): The name of corresponding conv module in the\n                2d model.\n            inflated_param_names (list[str]): List of parameters that have been\n                inflated.\n        \"\"\"\n        weight_2d_name = module_name_2d + '.weight'\n        conv2d_weight = state_dict_2d[weight_2d_name]\n        old_shape = conv2d_weight.shape\n        new_shape = conv3d.weight.data.shape\n        kernel_t = new_shape[2]\n        if new_shape[1] != old_shape[1]:\n            if new_shape[1] < old_shape[1]:\n                warnings.warn(f'The parameter of {module_name_2d} is not'\n                              'loaded due to incompatible shapes. ')\n                return\n            # Inplanes may be different due to lateral connections\n            new_channels = new_shape[1] - old_shape[1]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d_slowonly.py:158-180"
+    },
+    "6659": {
+        "file_id": 504,
+        "content": "This function loads the 2D model's state dictionary into a 3D Conv module, concatenating conv2d parameters and adding zero paddings to match the new shape. The weight shape of the 2D model is retrieved, and if the number of input channels in the 3D model is different from the 2D model, it will raise a warning or return without loading the parameters due to incompatible shapes.",
+        "type": "comment"
+    },
+    "6660": {
+        "file_id": 504,
+        "content": "            pad_shape = old_shape\n            pad_shape = pad_shape[:1] + (new_channels, ) + pad_shape[2:]\n            # Expand parameters by concat extra channels\n            conv2d_weight = paddle.concat(\n                (conv2d_weight, paddle.zeros(pad_shape)), axis=1)\n        new_weight = conv2d_weight.data.unsqueeze(2).expand_as(\n            conv3d.weight) / kernel_t\n        conv3d.weight.data.copy_(new_weight)\n        inflated_param_names.append(weight_2d_name)\n        if getattr(conv3d, 'bias') is not None:\n            bias_2d_name = module_name_2d + '.bias'\n            conv3d.bias.data.copy_(state_dict_2d[bias_2d_name])\n            inflated_param_names.append(bias_2d_name)\nif __name__ == '__main__':\n    net = ResNet3dSlowOnly(\n        depth=50,\n        in_channels=17,\n        base_channels=32,\n        conv1_kernel=(1, 7, 7),\n        num_stages=3,\n        out_indices=[2],\n        stage_blocks=[3, 4, 6],\n        conv1_stride_s=1,\n        pool1_stride_s=1,\n        inflate=[0, 1, 1],\n        with_pool2=False,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d_slowonly.py:181-210"
+    },
+    "6661": {
+        "file_id": 504,
+        "content": "The code inflates a 2D convolutional layer into a 3D convolutional layer by padding the weights and copying the bias. It does this for all layers specified in the ResNet3dSlowOnly architecture, with specified parameters.",
+        "type": "comment"
+    },
+    "6662": {
+        "file_id": 504,
+        "content": "        spatial_strides=[2, 2, 2],\n        temporal_strides=[1, 1, 2],\n        dilations=[1, 1, 1])\n    pass",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet3d_slowonly.py:211-214"
+    },
+    "6663": {
+        "file_id": 504,
+        "content": "This code sets the spatial_strides, temporal_strides, and dilations for a 3D Resnet layer, with spatial strides of [2, 2, 2], temporal strides of [1, 1, 2], and dilations of [1, 1, 1].",
+        "type": "comment"
+    },
+    "6664": {
+        "file_id": 505,
+        "content": "/paddlevideo/modeling/backbones/resnet_slowfast.py",
+        "type": "filepath"
+    },
+    "6665": {
+        "file_id": 505,
+        "content": "The code defines ResNetSlowFast and SlowFast models for video recognition and computer vision tasks, respectively, with separate pathways for slow and fast processing using 3D convolutional layers and multi-pathway models.",
+        "type": "summary"
+    },
+    "6666": {
+        "file_id": 505,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport paddle.nn.functional as F\nfrom paddle.nn.initializer import KaimingNormal\nfrom ..registry import BACKBONES\nfrom paddlevideo.utils.multigrid import get_norm\nimport sys\nimport numpy as np\nimport paddle.distributed as dist\n# seed random seed\npaddle.framework.seed(0)\n# get init parameters for conv layer\ndef get_conv_init(fan_out):\n    return KaimingNormal(fan_in=fan_out)\ndef get_bn_param_attr(bn_weight=1.0, coeff=0.0):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:1-33"
+    },
+    "6667": {
+        "file_id": 505,
+        "content": "Copyright notice and license information for the code. Imports necessary modules, defines function to get convolutional layer initialization parameters, and a function to set batch normalization layer parameters. No actual model or functionality defined yet.",
+        "type": "comment"
+    },
+    "6668": {
+        "file_id": 505,
+        "content": "    param_attr = paddle.ParamAttr(\n        initializer=paddle.nn.initializer.Constant(bn_weight),\n        regularizer=paddle.regularizer.L2Decay(coeff))\n    return param_attr\n\"\"\"Video models.\"\"\"\nclass BottleneckTransform(paddle.nn.Layer):\n    \"\"\"\n    Bottleneck transformation: Tx1x1, 1x3x3, 1x1x1, where T is the size of\n        temporal kernel.\n    \"\"\"\n    def __init__(self,\n                 dim_in,\n                 dim_out,\n                 temp_kernel_size,\n                 stride,\n                 dim_inner,\n                 num_groups,\n                 stride_1x1=False,\n                 inplace_relu=True,\n                 eps=1e-5,\n                 dilation=1,\n                 norm_module=paddle.nn.BatchNorm3D):\n        \"\"\"\n        Args:\n            dim_in (int): the channel dimensions of the input.\n            dim_out (int): the channel dimension of the output.\n            temp_kernel_size (int): the temporal kernel sizes of the middle\n                convolution in the bottleneck.\n            stride (int): the stride of the bottleneck.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:34-66"
+    },
+    "6669": {
+        "file_id": 505,
+        "content": "This code defines a BottleneckTransform class in PaddleVideo for video models. It performs Tx1x1, 1x3x3, 1x1x1 transformations with variable temporal kernel sizes. The constructor takes in arguments like dim_in, dim_out, temp_kernel_size, stride, and more to configure the transformation layer.",
+        "type": "comment"
+    },
+    "6670": {
+        "file_id": 505,
+        "content": "            dim_inner (int): the inner dimension of the block.\n            num_groups (int): number of groups for the convolution. num_groups=1\n                is for standard ResNet like networks, and num_groups>1 is for\n                ResNeXt like networks.\n            stride_1x1 (bool): if True, apply stride to 1x1 conv, otherwise\n                apply stride to the 3x3 conv.\n            inplace_relu (bool): if True, calculate the relu on the original\n                input without allocating new memory.\n            eps (float): epsilon for batch norm.\n            dilation (int): size of dilation.\n        \"\"\"\n        super(BottleneckTransform, self).__init__()\n        self.temp_kernel_size = temp_kernel_size\n        self._inplace_relu = inplace_relu\n        self._eps = eps\n        self._stride_1x1 = stride_1x1\n        self.norm_module = norm_module\n        self._construct(dim_in, dim_out, stride, dim_inner, num_groups,\n                        dilation)\n    def _construct(self, dim_in, dim_out, stride, dim_inner, num_groups,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:67-87"
+    },
+    "6671": {
+        "file_id": 505,
+        "content": "This code defines a class called BottleneckTransform with parameters such as dim_in, dim_out, stride, dim_inner, num_groups, and dilation. It also has attributes like _inplace_relu, _eps, and norm_module for various operations and settings. The _construct method is used to initialize the class with these parameters.",
+        "type": "comment"
+    },
+    "6672": {
+        "file_id": 505,
+        "content": "                   dilation):\n        str1x1, str3x3 = (stride, 1) if self._stride_1x1 else (1, stride)\n        fan = (dim_inner) * (self.temp_kernel_size * 1 * 1)\n        initializer_tmp = get_conv_init(fan)\n        self.a = paddle.nn.Conv3D(\n            in_channels=dim_in,\n            out_channels=dim_inner,\n            kernel_size=[self.temp_kernel_size, 1, 1],\n            stride=[1, str1x1, str1x1],\n            padding=[int(self.temp_kernel_size // 2), 0, 0],\n            weight_attr=paddle.ParamAttr(initializer=initializer_tmp),\n            bias_attr=False)\n        self.a_bn = self.norm_module(num_features=dim_inner,\n                                     epsilon=self._eps,\n                                     weight_attr=get_bn_param_attr(),\n                                     bias_attr=get_bn_param_attr(bn_weight=0.0))\n        # 1x3x3, BN, ReLU.\n        fan = (dim_inner) * (1 * 3 * 3)\n        initializer_tmp = get_conv_init(fan)\n        self.b = paddle.nn.Conv3D(\n            in_channels=dim_inner,\n            out_channels=dim_inner,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:88-113"
+    },
+    "6673": {
+        "file_id": 505,
+        "content": "Defines a Conv3D layer for the ResNet_SlowFast backbone, with specified dimensions and stride. Initializes Conv3D weights using get_conv_init function and includes batch normalization (BN) and ReLU activation layers.",
+        "type": "comment"
+    },
+    "6674": {
+        "file_id": 505,
+        "content": "            kernel_size=[1, 3, 3],\n            stride=[1, str3x3, str3x3],\n            padding=[0, dilation, dilation],\n            groups=num_groups,\n            dilation=[1, dilation, dilation],\n            weight_attr=paddle.ParamAttr(initializer=initializer_tmp),\n            bias_attr=False)\n        self.b_bn = self.norm_module(num_features=dim_inner,\n                                     epsilon=self._eps,\n                                     weight_attr=get_bn_param_attr(),\n                                     bias_attr=get_bn_param_attr(bn_weight=0.0))\n        # 1x1x1, BN.\n        fan = (dim_out) * (1 * 1 * 1)\n        initializer_tmp = get_conv_init(fan)\n        self.c = paddle.nn.Conv3D(\n            in_channels=dim_inner,\n            out_channels=dim_out,\n            kernel_size=[1, 1, 1],\n            stride=[1, 1, 1],\n            padding=[0, 0, 0],\n            weight_attr=paddle.ParamAttr(initializer=initializer_tmp),\n            bias_attr=False)\n        self.c_bn = self.norm_module(\n            num_features=dim_out,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:114-139"
+    },
+    "6675": {
+        "file_id": 505,
+        "content": "This code defines a 3D convolutional layer with specific kernel sizes, strides, padding, and grouping. It also includes batch normalization layers for the intermediate and output features. The initializer functions are used to set the weights of each layer, with different initializers for different layers.",
+        "type": "comment"
+    },
+    "6676": {
+        "file_id": 505,
+        "content": "            epsilon=self._eps,\n            weight_attr=get_bn_param_attr(bn_weight=0.0),\n            bias_attr=get_bn_param_attr(bn_weight=0.0))\n    def forward(self, x):\n        # Branch2a.\n        x = self.a(x)\n        x = self.a_bn(x)\n        x = F.relu(x)\n        # Branch2b.\n        x = self.b(x)\n        x = self.b_bn(x)\n        x = F.relu(x)\n        # Branch2c\n        x = self.c(x)\n        x = self.c_bn(x)\n        return x\nclass ResBlock(paddle.nn.Layer):\n    \"\"\"\n    Residual block.\n    \"\"\"\n    def __init__(self,\n                 dim_in,\n                 dim_out,\n                 temp_kernel_size,\n                 stride,\n                 dim_inner,\n                 num_groups=1,\n                 stride_1x1=False,\n                 inplace_relu=True,\n                 eps=1e-5,\n                 dilation=1,\n                 norm_module=paddle.nn.BatchNorm3D):\n        \"\"\"\n        ResBlock class constructs redisual blocks. More details can be found in:\n            Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.\n            \"Deep residual learning for image recognition.\"",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:140-180"
+    },
+    "6677": {
+        "file_id": 505,
+        "content": "ResNetSlowFast forward function performs convolutions and Batch Normalization for each branch (2a, 2b, 2c), then applies ReLU activation. ResBlock is a layer implementing residual blocks with specified dimensions, stride, inner dimension, groups, dilation, and normalization method.",
+        "type": "comment"
+    },
+    "6678": {
+        "file_id": 505,
+        "content": "            https://arxiv.org/abs/1512.03385\n        Args:\n            dim_in (int): the channel dimensions of the input.\n            dim_out (int): the channel dimension of the output.\n            temp_kernel_size (int): the temporal kernel sizes of the middle\n                convolution in the bottleneck.\n            stride (int): the stride of the bottleneck.\n            trans_func (string): transform function to be used to construct the\n                bottleneck.\n            dim_inner (int): the inner dimension of the block.\n            num_groups (int): number of groups for the convolution. num_groups=1\n                is for standard ResNet like networks, and num_groups>1 is for\n                ResNeXt like networks.\n            stride_1x1 (bool): if True, apply stride to 1x1 conv, otherwise\n                apply stride to the 3x3 conv.\n            inplace_relu (bool): calculate the relu on the original input\n                without allocating new memory.\n            eps (float): epsilon for batch norm.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:181-198"
+    },
+    "6679": {
+        "file_id": 505,
+        "content": "This code defines the arguments for constructing a ResNet bottleneck. It includes parameters for input and output channel dimensions, temporal kernel size, stride, transform function, inner dimension, number of groups for convolution, whether to apply stride to 1x1 or 3x3 conv, inplace_relu flag, and epsilon for batch normalization.",
+        "type": "comment"
+    },
+    "6680": {
+        "file_id": 505,
+        "content": "            dilation (int): size of dilation.\n        \"\"\"\n        super(ResBlock, self).__init__()\n        self._inplace_relu = inplace_relu\n        self._eps = eps\n        self.norm_module = norm_module\n        self._construct(\n            dim_in,\n            dim_out,\n            temp_kernel_size,\n            stride,\n            dim_inner,\n            num_groups,\n            stride_1x1,\n            inplace_relu,\n            dilation,\n        )\n    def _construct(\n        self,\n        dim_in,\n        dim_out,\n        temp_kernel_size,\n        stride,\n        dim_inner,\n        num_groups,\n        stride_1x1,\n        inplace_relu,\n        dilation,\n    ):\n        # Use skip connection with projection if dim or res change.\n        if (dim_in != dim_out) or (stride != 1):\n            fan = (dim_out) * (1 * 1 * 1)\n            initializer_tmp = get_conv_init(fan)\n            self.branch1 = paddle.nn.Conv3D(\n                in_channels=dim_in,\n                out_channels=dim_out,\n                kernel_size=1,\n                stride=[1, stride, stride],",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:199-237"
+    },
+    "6681": {
+        "file_id": 505,
+        "content": "The code defines a ResBlock class, which is a residual block used in deep neural networks. It initializes the block with input and output dimensions, kernel size, stride, inner dimension, number of groups, and skip connection settings. The constructor method _construct creates a 3D convolution layer for the skip connection if there is a change in dimensions or stride.",
+        "type": "comment"
+    },
+    "6682": {
+        "file_id": 505,
+        "content": "                padding=0,\n                weight_attr=paddle.ParamAttr(initializer=initializer_tmp),\n                bias_attr=False,\n                dilation=1)\n            self.branch1_bn = self.norm_module(\n                num_features=dim_out,\n                epsilon=self._eps,\n                weight_attr=get_bn_param_attr(),\n                bias_attr=get_bn_param_attr(bn_weight=0.0))\n        self.branch2 = BottleneckTransform(dim_in,\n                                           dim_out,\n                                           temp_kernel_size,\n                                           stride,\n                                           dim_inner,\n                                           num_groups,\n                                           stride_1x1=stride_1x1,\n                                           inplace_relu=inplace_relu,\n                                           dilation=dilation,\n                                           norm_module=self.norm_module)\n    def forward(self, x):\n        if hasattr(self, \"branch1\"):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:238-260"
+    },
+    "6683": {
+        "file_id": 505,
+        "content": "This code defines a ResNet SlowFast backbone model. It includes convolution layers, batch normalization layers, and BottleneckTransform modules. The forward function checks if the \"branch1\" attribute exists to handle different stages of the network.",
+        "type": "comment"
+    },
+    "6684": {
+        "file_id": 505,
+        "content": "            x1 = self.branch1(x)\n            x1 = self.branch1_bn(x1)\n            x2 = self.branch2(x)\n            x = paddle.add(x=x1, y=x2)\n        else:\n            x2 = self.branch2(x)\n            x = paddle.add(x=x, y=x2)\n        x = F.relu(x)\n        return x\nclass ResStage(paddle.nn.Layer):\n    \"\"\"\n    Stage of 3D ResNet. It expects to have one or more tensors as input for\n        multi-pathway (SlowFast) cases.  More details can be found here:\n        Christoph Feichtenhofer, Haoqi Fan, Jitendra Malik, and Kaiming He.\n        \"Slowfast networks for video recognition.\"\n        https://arxiv.org/pdf/1812.03982.pdf\n    \"\"\"\n    def __init__(self,\n                 dim_in,\n                 dim_out,\n                 stride,\n                 temp_kernel_sizes,\n                 num_blocks,\n                 dim_inner,\n                 num_groups,\n                 num_block_temp_kernel,\n                 dilation,\n                 stride_1x1=False,\n                 inplace_relu=True,\n                 norm_module=paddle.nn.BatchNorm3D):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:261-294"
+    },
+    "6685": {
+        "file_id": 505,
+        "content": "The code defines a ResNet stage for multi-pathway (SlowFast) cases in video recognition. It takes one or more tensors as input and applies branching to separate paths with different kernel sizes. The output is added together, passed through ReLU activation, and returned. This stage supports 1x1 stride option and uses BatchNorm3D for normalization.",
+        "type": "comment"
+    },
+    "6686": {
+        "file_id": 505,
+        "content": "        \"\"\"\n        The `__init__` method of any subclass should also contain these arguments.\n        ResStage builds p streams, where p can be greater or equal to one.\n        Args:\n            dim_in (list): list of p the channel dimensions of the input.\n                Different channel dimensions control the input dimension of\n                different pathways.\n            dim_out (list): list of p the channel dimensions of the output.\n                Different channel dimensions control the input dimension of\n                different pathways.\n            temp_kernel_sizes (list): list of the p temporal kernel sizes of the\n                convolution in the bottleneck. Different temp_kernel_sizes\n                control different pathway.\n            stride (list): list of the p strides of the bottleneck. Different\n                stride control different pathway.\n            num_blocks (list): list of p numbers of blocks for each of the\n                pathway.\n            dim_inner (list): list of the p inner channel dimensions of the",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:295-312"
+    },
+    "6687": {
+        "file_id": 505,
+        "content": "The ResStage class constructor takes several lists as arguments to build p streams of pathways, controlling input and output dimensions, temporal kernel sizes, strides, and block numbers for each pathway.",
+        "type": "comment"
+    },
+    "6688": {
+        "file_id": 505,
+        "content": "                input. Different channel dimensions control the input dimension\n                of different pathways.\n            num_groups (list): list of number of p groups for the convolution.\n                num_groups=1 is for standard ResNet like networks, and\n                num_groups>1 is for ResNeXt like networks.\n            num_block_temp_kernel (list): extent the temp_kernel_sizes to\n                num_block_temp_kernel blocks, then fill temporal kernel size\n                of 1 for the rest of the layers.\n            dilation (list): size of dilation for each pathway.\n        \"\"\"\n        super(ResStage, self).__init__()\n        assert all((num_block_temp_kernel[i] <= num_blocks[i]\n                    for i in range(len(temp_kernel_sizes))))\n        self.num_blocks = num_blocks\n        self.temp_kernel_sizes = [\n            (temp_kernel_sizes[i] * num_blocks[i])[:num_block_temp_kernel[i]] +\n            [1] * (num_blocks[i] - num_block_temp_kernel[i])\n            for i in range(len(temp_kernel_sizes))",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:313-330"
+    },
+    "6689": {
+        "file_id": 505,
+        "content": "This code defines a ResStage class for a residual block. It takes input dimensions and channel dimensions as parameters, and initializes the number of blocks and temporal kernel sizes based on these inputs. The code also ensures that the provided number of block temporary kernel sizes does not exceed the specified number of blocks.",
+        "type": "comment"
+    },
+    "6690": {
+        "file_id": 505,
+        "content": "        ]\n        assert (len({\n            len(dim_in),\n            len(dim_out),\n            len(temp_kernel_sizes),\n            len(stride),\n            len(num_blocks),\n            len(dim_inner),\n            len(num_groups),\n            len(num_block_temp_kernel),\n        }) == 1)\n        self.num_pathways = len(self.num_blocks)\n        self.norm_module = norm_module\n        self._construct(\n            dim_in,\n            dim_out,\n            stride,\n            dim_inner,\n            num_groups,\n            stride_1x1,\n            inplace_relu,\n            dilation,\n        )\n    def _construct(\n        self,\n        dim_in,\n        dim_out,\n        stride,\n        dim_inner,\n        num_groups,\n        stride_1x1,\n        inplace_relu,\n        dilation,\n    ):\n        for pathway in range(self.num_pathways):\n            for i in range(self.num_blocks[pathway]):\n                res_block = ResBlock(\n                    dim_in[pathway] if i == 0 else dim_out[pathway],\n                    dim_out[pathway],\n                    self.temp_kernel_sizes[pathway][i],",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:331-372"
+    },
+    "6691": {
+        "file_id": 505,
+        "content": "The code initializes a ResNet SlowFast model by creating instances of blocks based on given parameters. It ensures that the input and output dimensions are correctly set, creates the desired number of pathways, and applies the specified norm module. The constructor then iterates over each pathway and block, creating ResBlock instances with appropriate sizes and configurations.",
+        "type": "comment"
+    },
+    "6692": {
+        "file_id": 505,
+        "content": "                    stride[pathway] if i == 0 else 1,\n                    dim_inner[pathway],\n                    num_groups[pathway],\n                    stride_1x1=stride_1x1,\n                    inplace_relu=inplace_relu,\n                    dilation=dilation[pathway],\n                    norm_module=self.norm_module)\n                self.add_sublayer(\"pathway{}_res{}\".format(pathway, i),\n                                  res_block)\n    def forward(self, inputs):\n        output = []\n        for pathway in range(self.num_pathways):\n            x = inputs[pathway]\n            for i in range(self.num_blocks[pathway]):\n                m = getattr(self, \"pathway{}_res{}\".format(pathway, i))\n                x = m(x)\n            output.append(x)\n        return output\nclass ResNetBasicStem(paddle.nn.Layer):\n    \"\"\"\n    ResNe(X)t 3D stem module.\n    Performs spatiotemporal Convolution, BN, and Relu following by a\n        spatiotemporal pooling.\n    \"\"\"\n    def __init__(self,\n                 dim_in,\n                 dim_out,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:373-404"
+    },
+    "6693": {
+        "file_id": 505,
+        "content": "This code defines a ResNet backbone with slow-fast pathways, which includes residual blocks and basic stem modules. The `forward` method processes inputs from each pathway and returns the outputs as a list. It uses getattr to access the correct residual block module for each iteration in each pathway.",
+        "type": "comment"
+    },
+    "6694": {
+        "file_id": 505,
+        "content": "                 kernel,\n                 stride,\n                 padding,\n                 eps=1e-5,\n                 norm_module=paddle.nn.BatchNorm3D):\n        super(ResNetBasicStem, self).__init__()\n        self.kernel = kernel\n        self.stride = stride\n        self.padding = padding\n        self.eps = eps\n        self.norm_module = norm_module\n        self._construct_stem(dim_in, dim_out)\n    def _construct_stem(self, dim_in, dim_out):\n        fan = (dim_out) * (self.kernel[0] * self.kernel[1] * self.kernel[2])\n        initializer_tmp = get_conv_init(fan)\n        self._conv = paddle.nn.Conv3D(\n            in_channels=dim_in,\n            out_channels=dim_out,\n            kernel_size=self.kernel,\n            stride=self.stride,\n            padding=self.padding,\n            weight_attr=paddle.ParamAttr(initializer=initializer_tmp),\n            bias_attr=False)\n        self._bn = self.norm_module(num_features=dim_out,\n                                    epsilon=self.eps,\n                                    weight_attr=get_bn_param_attr(),",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:405-432"
+    },
+    "6695": {
+        "file_id": 505,
+        "content": "This code defines a class for ResNet basic stem module with options to specify kernel, stride, padding, and batch normalization. It initializes the Conv3D layer and BatchNorm3D module based on the specified parameters. The constructor also calls the _construct_stem method to further initialize the Conv3D layer and BatchNorm3D module.",
+        "type": "comment"
+    },
+    "6696": {
+        "file_id": 505,
+        "content": "                                    bias_attr=get_bn_param_attr(bn_weight=0.0))\n    def forward(self, x):\n        x = self._conv(x)\n        x = self._bn(x)\n        x = F.relu(x)\n        x = F.max_pool3d(x=x,\n                         kernel_size=[1, 3, 3],\n                         stride=[1, 2, 2],\n                         padding=[0, 1, 1],\n                         data_format=\"NCDHW\")\n        return x\nclass VideoModelStem(paddle.nn.Layer):\n    \"\"\"\n    Video 3D stem module. Provides stem operations of Conv, BN, ReLU, MaxPool\n    on input data tensor for slow and fast pathways.\n    \"\"\"\n    def __init__(self,\n                 dim_in,\n                 dim_out,\n                 kernel,\n                 stride,\n                 padding,\n                 eps=1e-5,\n                 norm_module=paddle.nn.BatchNorm3D):\n        \"\"\"\n        Args:\n            dim_in (list): the list of channel dimensions of the inputs.\n            dim_out (list): the output dimension of the convolution in the stem\n                layer.\n            kernel (list): the kernels' size of the convolutions in the stem",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:433-466"
+    },
+    "6697": {
+        "file_id": 505,
+        "content": "This code defines a 3D stem module for video input. It consists of convolutional, batch normalization, ReLU, and max pooling operations applied to both slow and fast pathways. The dim_in, dim_out, kernel, stride, padding parameters are used to configure the specifics of these operations. Epsilon (eps) is a small value for numerical stability, and norm_module is the batch normalization module being used.",
+        "type": "comment"
+    },
+    "6698": {
+        "file_id": 505,
+        "content": "                layers. Temporal kernel size, height kernel size, width kernel\n                size in order.\n            stride (list): the stride sizes of the convolutions in the stem\n                layer. Temporal kernel stride, height kernel size, width kernel\n                size in order.\n            padding (list): the paddings' sizes of the convolutions in the stem\n                layer. Temporal padding size, height padding size, width padding\n                size in order.\n            eps (float): epsilon for batch norm.\n        \"\"\"\n        super(VideoModelStem, self).__init__()\n        assert (len({\n            len(dim_in),\n            len(dim_out),\n            len(kernel),\n            len(stride),\n            len(padding),\n        }) == 1), \"Input pathway dimensions are not consistent.\"\n        self.num_pathways = len(dim_in)\n        self.kernel = kernel\n        self.stride = stride\n        self.padding = padding\n        self.eps = eps\n        self.norm_module = norm_module\n        self._construct_stem(dim_in, dim_out)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/resnet_slowfast.py:467-492"
+    },
+    "6699": {
+        "file_id": 505,
+        "content": "The code defines a VideoModelStem class with parameters for input and output dimensions, temporal kernel size, stride, padding, epsilon for batch norm, and the normalization module. It checks for consistent dimensions and initializes instance variables before calling a constructor method.",
+        "type": "comment"
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "summary": "The BaseMetric class serves as a foundation for various video quality assessment metrics, requiring subclasses to implement the update and overridden methods. It utilizes numpy, paddle, and PaddleVideo's utils for data manipulation and distribution information.",
+    "details": [
+        {
+            "comment": "This Python class, named BaseMetric, is a base class for different video quality assessment metrics. It initializes with data size, batch size, log interval, and optional keyword arguments. The update method must be implemented by subclasses to update the metric values. The class also has abstract methods that must be overridden in subclasses for actual functionality. It utilizes numpy, paddle, and PaddleVideo's utils for data manipulation and distribution information.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/metrics/base.py\":0-35",
+            "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n\"\"\"\nfrom abc import abstractmethod\nimport numpy as np\nimport paddle\nfrom paddlevideo.utils import get_dist_info\nfrom .registry import METRIC\nclass BaseMetric(object):\n    \"\"\"Base Metric\"\"\"\n    def __init__(self, data_size, batch_size, log_interval=1, **kwargs):\n        self.data_size = data_size\n        self.batch_size = batch_size\n        _, self.world_size = get_dist_info()\n        self.log_interval = log_interval\n    @abstractmethod\n    def update(self):\n        \"\"\"update\"\"\"\n        raise NotImplementedError\n    @abstractmethod"
+        },
+        {
+            "comment": "This code defines an \"accumulate\" method in a base class, but it raises a NotImplementedError to indicate that subclasses must override this method with their own implementation.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/metrics/base.py\":36-38",
+            "content": "    def accumulate(self):\n        \"\"\"accumulate\"\"\"\n        raise NotImplementedError"
+        }
+    ]
+}

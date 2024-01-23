@@ -1,0 +1,10 @@
+{
+    "summary": "This line imports the functions and classes from the \"attention_lstm.py\" file in the same directory, allowing for easy access to those components within this module.",
+    "details": [
+        {
+            "comment": "This line imports the functions and classes from the \"attention_lstm.py\" file in the same directory, allowing for easy access to those components within this module.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoTag/models/attention_lstm/__init__.py\":0-0",
+            "content": "from .attention_lstm import *"
+        }
+    ]
+}

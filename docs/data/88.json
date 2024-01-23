@@ -1,0 +1,549 @@
+{
+    "8800": {
+        "file_id": 646,
+        "content": "                dtype='float32'),\n        ]]\n    elif model_name in ['TokenShiftVisionTransformer']:\n        input_spec = [[\n            InputSpec(shape=[\n                None, 3, cfg.num_seg * 3, cfg.target_size, cfg.target_size\n            ],\n                      dtype='float32'),\n        ]]\n    elif model_name in ['TSN', 'ppTSN']:\n        input_spec = [[\n            InputSpec(shape=[\n                None, cfg.num_seg * 10, 3, cfg.target_size, cfg.target_size\n            ],\n                      dtype='float32'),\n        ]]\n    elif model_name in ['BMN']:\n        input_spec = [[\n            InputSpec(shape=[None, cfg.feat_dim, cfg.tscale],\n                      dtype='float32',\n                      name='feat_input'),\n        ]]\n    elif model_name in ['TimeSformer', 'ppTimeSformer']:\n        input_spec = [[\n            InputSpec(shape=[\n                None, 3, cfg.num_seg * 3, cfg.target_size, cfg.target_size\n            ],\n                      dtype='float32'),\n        ]]\n    elif model_name in ['VideoSwin']:",
+        "type": "code",
+        "location": "/tools/export_model.py:88-117"
+    },
+    "8801": {
+        "file_id": 646,
+        "content": "The code snippet defines different input specifications based on the model name. It checks the model name and sets the shape and dtype of the input accordingly, handling various models such as 'PaddleVideo', 'TokenShiftVisionTransformer', 'TSN', 'ppTSN', 'BMN', 'TimeSformer', and 'ppTimeSformer'. The input specifications define the dimensions for inputs like number of frames, number of segments, channels, and target size.",
+        "type": "comment"
+    },
+    "8802": {
+        "file_id": 646,
+        "content": "        input_spec = [[\n            InputSpec(shape=[\n                None, 3, cfg.num_seg * cfg.seg_len * 1, cfg.target_size,\n                cfg.target_size\n            ],\n                      dtype='float32'),\n        ]]\n    elif model_name in ['VideoSwin_TableTennis']:\n        input_spec = [[\n            InputSpec(shape=[\n                None, 3, cfg.num_seg * cfg.seg_len * 3, cfg.target_size,\n                cfg.target_size\n            ],\n                      dtype='float32'),\n        ]]\n    elif model_name in ['AttentionLSTM']:\n        input_spec = [[\n            InputSpec(shape=[None, cfg.embedding_size, cfg.feature_dims[0]],\n                      dtype='float32'),  # for rgb_data\n            InputSpec(shape=[\n                None,\n            ], dtype='int64'),  # for rgb_len\n            InputSpec(shape=[None, cfg.embedding_size, cfg.feature_dims[0]],\n                      dtype='float32'),  # for rgb_mask\n            InputSpec(shape=[None, cfg.embedding_size, cfg.feature_dims[1]],\n                      dtype='float32'),  # for audio_data",
+        "type": "code",
+        "location": "/tools/export_model.py:118-143"
+    },
+    "8803": {
+        "file_id": 646,
+        "content": "The code is defining input specifications for different model names in the PaddleVideo tool. It uses InputSpec to specify the shape and data type of inputs for each model, with varying numbers of inputs based on the model's requirements (e.g., RGB data, audio data, etc.). This allows the export_model function to handle various models appropriately.",
+        "type": "comment"
+    },
+    "8804": {
+        "file_id": 646,
+        "content": "            InputSpec(shape=[\n                None,\n            ], dtype='int64'),  # for audio_len\n            InputSpec(shape=[None, cfg.embedding_size, cfg.feature_dims[1]],\n                      dtype='float32'),  # for audio_mask\n        ]]\n    elif model_name in ['SlowFast']:\n        input_spec = [[\n            InputSpec(shape=[\n                None, 3, cfg.num_frames // cfg.alpha, cfg.target_size,\n                cfg.target_size\n            ],\n                      dtype='float32',\n                      name='slow_input'),\n            InputSpec(shape=[\n                None, 3, cfg.num_frames, cfg.target_size, cfg.target_size\n            ],\n                      dtype='float32',\n                      name='fast_input'),\n        ]]\n    elif model_name in ['STGCN', 'AGCN', 'CTRGCN']:\n        input_spec = [[\n            InputSpec(shape=[\n                None, cfg.num_channels, cfg.window_size, cfg.vertex_nums,\n                cfg.person_nums\n            ],\n                      dtype='float32'),\n        ]]\n    # 由于在模型运行过程中涉及到第一维乘human个数(N*M), 所以这里用1作为shape",
+        "type": "code",
+        "location": "/tools/export_model.py:144-172"
+    },
+    "8805": {
+        "file_id": 646,
+        "content": "This code snippet defines input specifications for different models used in the PaddleVideo framework. It determines the shape and data type of inputs based on the model name provided, such as audio data for models like ResNet50, SlowFast, and temporal graph convolutional networks (TGCN) models like STGCN, AGCN, and CTRGCN. The shapes account for variables like number of frames, window size, and feature dimensions specific to each model.",
+        "type": "comment"
+    },
+    "8806": {
+        "file_id": 646,
+        "content": "    elif model_name in ['AGCN2s']:\n        input_spec = [[\n            InputSpec(shape=[\n                1, cfg.num_channels, cfg.window_size, cfg.vertex_nums,\n                cfg.person_nums\n            ],\n                      dtype='float32'),\n        ]]\n    elif model_name in ['TransNetV2']:\n        input_spec = [[\n            InputSpec(shape=[\n                None,\n                cfg.num_frames,\n                cfg.height,\n                cfg.width,\n                cfg.num_channels,\n            ],\n                      dtype='float32'),\n        ]]\n    elif model_name in ['MSTCN', 'ASRF']:\n        input_spec = [[\n            InputSpec(shape=[None, cfg.num_channels, None], dtype='float32'),\n        ]]\n    elif model_name in ['ADDS']:\n        input_spec = [[\n            InputSpec(shape=[None, cfg.num_channels, cfg.height, cfg.width],\n                      dtype='float32'),\n        ]]\n    elif model_name in ['AVA_SlowFast_FastRcnn']:\n        input_spec = [[\n            InputSpec(shape=[\n                None, 3, cfg.num_frames // cfg.alpha, cfg.target_size,",
+        "type": "code",
+        "location": "/tools/export_model.py:173-204"
+    },
+    "8807": {
+        "file_id": 646,
+        "content": "The code defines different input specifications for various model names. It handles models like AGCN2s, TransNetV2, MSTCN, ASRF, ADDs, and AVA_SlowFast_FastRcnn by specifying the shape of the input data and its data type ('float32'). The shapes are defined according to the specific model's input requirements.",
+        "type": "comment"
+    },
+    "8808": {
+        "file_id": 646,
+        "content": "                cfg.target_size\n            ],\n                      dtype='float32',\n                      name='slow_input'),\n            InputSpec(shape=[\n                None, 3, cfg.num_frames, cfg.target_size, cfg.target_size\n            ],\n                      dtype='float32',\n                      name='fast_input'),\n            InputSpec(shape=[None, None, 4], dtype='float32', name='proposals'),\n            InputSpec(shape=[None, 2], dtype='float32', name='img_shape')\n        ]]\n    elif model_name in ['PoseC3D']:\n        input_spec = [[\n            InputSpec(shape=[None, 1, 17, 48, 56, 56], dtype='float32'),\n        ]]\n    elif model_name in ['YOWO']:\n        input_spec = [[\n            InputSpec(shape=[\n                1, 3, cfg.num_seg, cfg.target_size, cfg.target_size\n            ],\n                      dtype='float32'),\n        ]]\n    return input_spec\ndef main():\n    args = parse_args()\n    cfg, model_name = trim_config(\n        get_config(args.config, overrides=args.override, show=False))\n    print(f\"Building model({model_name})...\")",
+        "type": "code",
+        "location": "/tools/export_model.py:205-236"
+    },
+    "8809": {
+        "file_id": 646,
+        "content": "This code defines a function that takes in a model name and returns the input specification for different models. The input specification determines the shape, dtype, and name of the input tensors for each model. Different models have different input specifications based on their architecture and requirements. The returned input specification is used to build the model correctly.",
+        "type": "comment"
+    },
+    "8810": {
+        "file_id": 646,
+        "content": "    model = build_model(cfg.MODEL)\n    assert osp.isfile(\n        args.pretrained_params\n    ), f\"pretrained params ({args.pretrained_params} is not a file path.)\"\n    if not os.path.isdir(args.output_path):\n        os.makedirs(args.output_path)\n    print(f\"Loading params from ({args.pretrained_params})...\")\n    params = paddle.load(args.pretrained_params)\n    model.set_dict(params)\n    model.eval()\n    # for rep nets\n    for layer in model.sublayers():\n        if hasattr(layer, \"rep\") and not getattr(layer, \"is_repped\"):\n            layer.rep()\n    input_spec = get_input_spec(cfg.INFERENCE, model_name)\n    model = to_static(model, input_spec=input_spec)\n    paddle.jit.save(\n        model,\n        osp.join(args.output_path,\n                 model_name if args.save_name is None else args.save_name))\n    print(\n        f\"model ({model_name}) has been already saved in ({args.output_path}).\")\nif __name__ == \"__main__\":\n    main()",
+        "type": "code",
+        "location": "/tools/export_model.py:237-267"
+    },
+    "8811": {
+        "file_id": 646,
+        "content": "Building the model, checking pretrained params are a file path, creating output directory if necessary, loading pretrained params, setting parameters to the model, evaluating the model, reppping layers if required, getting input specification, converting model to static, saving model with a specified name, and printing saved model location.",
+        "type": "comment"
+    },
+    "8812": {
+        "file_id": 647,
+        "content": "/tools/predict.py",
+        "type": "filepath"
+    },
+    "8813": {
+        "file_id": 647,
+        "content": "The code sets command-line arguments for Paddle Video tool, configures the predictor, supports GPU/NPU usage, and utilizes TensorRT engine with YOWO model. It creates a directory, preprocesses data, performs inference, post-processes output, benchmarks, and guides users to install \"auto_log\".",
+        "type": "summary"
+    },
+    "8814": {
+        "file_id": 647,
+        "content": "# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport argparse\nimport os\nfrom os import path as osp\nimport paddle\nfrom paddle import inference\nfrom paddle.inference import Config, create_predictor\nfrom utils import build_inference_helper\nfrom paddlevideo.utils import get_config\ndef parse_args():\n    def str2bool(v):\n        return v.lower() in (\"true\", \"t\", \"1\")\n    # general params\n    parser = argparse.ArgumentParser(\"PaddleVideo Inference model script\")\n    parser.add_argument(",
+        "type": "code",
+        "location": "/tools/predict.py:1-32"
+    },
+    "8815": {
+        "file_id": 647,
+        "content": "Code snippet is an import-heavy function definition. It begins with a lengthy comment mentioning the copyright and license details, followed by multiple imports from various modules. The only executable code present is the \"parse_args\" function definition. This function uses argparse to create a parser for general parameters of PaddleVideo Inference model script.",
+        "type": "comment"
+    },
+    "8816": {
+        "file_id": 647,
+        "content": "        '-c',\n        '--config',\n        type=str,\n        default='configs/example.yaml',\n        help='config file path')\n    parser.add_argument(\n        '-o',\n        '--override',\n        action='append',\n        default=[],\n        help='config options to be overridden')\n    parser.add_argument(\"-i\", \"--input_file\", type=str, help=\"input file path\")\n    parser.add_argument(\n        \"--time_test_file\",\n        type=str2bool,\n        default=False,\n        help=\"whether input time test file\")\n    parser.add_argument(\"--model_file\", type=str)\n    parser.add_argument(\"--params_file\", type=str)\n    # params for paddle predict\n    parser.add_argument(\"-b\", \"--batch_size\", type=int, default=1)\n    parser.add_argument(\"--use_gpu\", type=str2bool, default=True)\n    parser.add_argument(\"--use_xpu\", type=str2bool, default=False)\n    parser.add_argument(\"--use_npu\", type=str2bool, default=False)\n    parser.add_argument(\"--precision\", type=str, default=\"fp32\")\n    parser.add_argument(\"--ir_optim\", type=str2bool, default=True)",
+        "type": "code",
+        "location": "/tools/predict.py:33-59"
+    },
+    "8817": {
+        "file_id": 647,
+        "content": "The code defines command-line arguments for a Paddle Video tool. It allows the user to specify the config file, input file, model and parameters files, batch size, and GPU/XPU usage. The `str2bool` type converts string inputs to boolean values.",
+        "type": "comment"
+    },
+    "8818": {
+        "file_id": 647,
+        "content": "    parser.add_argument(\"--use_tensorrt\", type=str2bool, default=False)\n    parser.add_argument(\"--gpu_mem\", type=int, default=8000)\n    parser.add_argument(\"--enable_benchmark\", type=str2bool, default=False)\n    parser.add_argument(\"--enable_mkldnn\", type=str2bool, default=False)\n    parser.add_argument(\"--cpu_threads\", type=int, default=None)\n    parser.add_argument(\"--disable_glog\", type=str2bool, default=False)\n    # parser.add_argument(\"--hubserving\", type=str2bool, default=False)  #TODO\n    return parser.parse_args()\ndef create_paddle_predictor(args, cfg):\n    config = Config(args.model_file, args.params_file)\n    if args.use_gpu:\n        config.enable_use_gpu(args.gpu_mem, 0)\n    elif args.use_npu:\n        config.enable_npu()\n    elif args.use_xpu:\n        config.enable_xpu()\n    else:\n        config.disable_gpu()\n        if args.cpu_threads:\n            config.set_cpu_math_library_num_threads(args.cpu_threads)\n        if args.enable_mkldnn:\n            # cache 10 different shapes for mkldnn to avoid memory leak",
+        "type": "code",
+        "location": "/tools/predict.py:60-84"
+    },
+    "8819": {
+        "file_id": 647,
+        "content": "This code is parsing arguments to configure a Paddle video predictor. It adds various arguments for use_tensorrt, gpu_mem, enable_benchmark, enable_mkldnn, cpu_threads, and disable_glog. The create_paddle_predictor function creates a config object with the provided arguments, enabling GPU or NPU usage if specified, and disabling GPU if not. It also sets the number of CPU threads if provided, and enables MKLDNN if enabled.",
+        "type": "comment"
+    },
+    "8820": {
+        "file_id": 647,
+        "content": "            config.set_mkldnn_cache_capacity(10)\n            config.enable_mkldnn()\n            if args.precision == \"fp16\":\n                config.enable_mkldnn_bfloat16()\n    # config.disable_glog_info()\n    config.switch_ir_optim(args.ir_optim)  # default true\n    if args.use_tensorrt:\n        # choose precision\n        if args.precision == \"fp16\":\n            precision = inference.PrecisionType.Half\n        elif args.precision == \"int8\":\n            precision = inference.PrecisionType.Int8\n        else:\n            precision = inference.PrecisionType.Float32\n        # calculate real max batch size during inference when tenrotRT enabled\n        max_batch_size = args.batch_size\n        if 'num_seg' in cfg.INFERENCE:\n            # num_seg: number of segments when extracting frames.\n            # seg_len: number of frames extracted within a segment, default to 1.\n            # num_views: the number of video frame groups obtained by cropping and flipping,\n            # uniformcrop=3, tencrop=10, centercrop=1.",
+        "type": "code",
+        "location": "/tools/predict.py:85-107"
+    },
+    "8821": {
+        "file_id": 647,
+        "content": "The code configures the PaddleVideo model for inference by setting the MKLDNN cache capacity, enabling MKLDNN and optionally BFloat16, disabling GLOG info, switching IR optim, and handling precision and batch size when TensorRT is enabled.",
+        "type": "comment"
+    },
+    "8822": {
+        "file_id": 647,
+        "content": "            num_seg = cfg.INFERENCE.num_seg\n            seg_len = cfg.INFERENCE.get('seg_len', 1)\n            num_views = 1\n            if 'tsm' in cfg.model_name.lower():\n                num_views = 1  # CenterCrop\n            elif 'tsn' in cfg.model_name.lower():\n                num_views = 10  # TenCrop\n            elif 'timesformer' in cfg.model_name.lower():\n                num_views = 3  # UniformCrop\n            elif 'videoswin' in cfg.model_name.lower():\n                num_views = 3  # UniformCrop\n            elif 'tokenshift' in cfg.model_name.lower():\n                num_views = 3  # UniformCrop\n            max_batch_size = args.batch_size * num_views * num_seg * seg_len\n        config.enable_tensorrt_engine(\n            precision_mode=precision, max_batch_size=max_batch_size)\n    config.enable_memory_optim()\n    # use zero copy\n    config.switch_use_feed_fetch_ops(False)\n    # disable glog\n    if args.disable_glog:\n        config.disable_glog_info()\n    # for ST-GCN tensorRT case usage\n    # config.delete_pass(\"shuffle_channel_detect_pass\")",
+        "type": "code",
+        "location": "/tools/predict.py:108-134"
+    },
+    "8823": {
+        "file_id": 647,
+        "content": "The code sets the number of segments and views based on the model name, calculates the maximum batch size, enables TensorRT engine with specified precision mode, enables memory optimization, disables glog if instructed to do so, and potentially deletes a pass for ST-GCN TensorRT case usage.",
+        "type": "comment"
+    },
+    "8824": {
+        "file_id": 647,
+        "content": "    predictor = create_predictor(config)\n    return config, predictor\ndef parse_file_paths(input_path: str) -> list:\n    if osp.isfile(input_path):\n        files = [\n            input_path,\n        ]\n    else:\n        files = os.listdir(input_path)\n        files = [\n            file for file in files\n            if (file.endswith(\".avi\") or file.endswith(\".mp4\"))\n        ]\n        files = [osp.join(input_path, file) for file in files]\n    return files\ndef main():\n    \"\"\"predict using paddle inference model\n    \"\"\"\n    args = parse_args()\n    cfg = get_config(args.config, overrides=args.override, show=False)\n    model_name = cfg.model_name\n    print(f\"Inference model({model_name})...\")\n    InferenceHelper = build_inference_helper(cfg.INFERENCE)\n    inference_config, predictor = create_paddle_predictor(args, cfg)\n    # get input_tensor and output_tensor\n    input_names = predictor.get_input_names()\n    output_names = predictor.get_output_names()\n    input_tensor_list = []\n    output_tensor_list = []\n    for item in input_names:",
+        "type": "code",
+        "location": "/tools/predict.py:136-173"
+    },
+    "8825": {
+        "file_id": 647,
+        "content": "The code is implementing a main function for predicting using Paddle Inference model. It first parses arguments from command-line, then retrieves configuration and overrides for the inference task, prints an informative message, builds the inference helper, and creates paddle predictor with the given arguments and configuration. After this, it gets input and output names, initializes empty lists for input and output tensors, and iterates through input names to populate these lists.",
+        "type": "comment"
+    },
+    "8826": {
+        "file_id": 647,
+        "content": "        input_tensor_list.append(predictor.get_input_handle(item))\n    for item in output_names:\n        output_tensor_list.append(predictor.get_output_handle(item))\n    # get the absolute file path(s) to be processed\n    if model_name in [\"MSTCN\", \"ASRF\"]:\n        files = InferenceHelper.get_process_file(args.input_file)\n    else:\n        files = parse_file_paths(args.input_file)\n    if model_name == 'TransNetV2':\n        for file in files:\n            inputs = InferenceHelper.preprocess(file)\n            outputs = []\n            for input in inputs:\n                # Run inference\n                for i in range(len(input_tensor_list)):\n                    input_tensor_list[i].copy_from_cpu(input)\n                predictor.run()\n                output = []\n                for j in range(len(output_tensor_list)):\n                    output.append(output_tensor_list[j].copy_to_cpu())\n                outputs.append(output)\n            # Post process output\n            InferenceHelper.postprocess(outputs)\n    elif model_name == 'AVA_SlowFast_FastRcnn':",
+        "type": "code",
+        "location": "/tools/predict.py:174-201"
+    },
+    "8827": {
+        "file_id": 647,
+        "content": "The code is processing input files for a specific model and running inference. For certain models, it preprocesses the input files using InferenceHelper and then runs inference by setting input tensors and calling predictor.run(). Finally, if the model is AVA_SlowFast_FastRcnn, it post-processes the output.",
+        "type": "comment"
+    },
+    "8828": {
+        "file_id": 647,
+        "content": "        for file in files:  # for videos\n            inputs = InferenceHelper.preprocess(file)\n            outputs = []\n            for input in inputs:\n                # Run inference\n                input_len = len(input_tensor_list)\n                for i in range(input_len):\n                    if type(input[i]) == paddle.Tensor:\n                        input_tmp = input[i].numpy()\n                    else:\n                        input_tmp = input[i]\n                    input_tensor_list[i].copy_from_cpu(input_tmp)\n                predictor.run()\n                output = []\n                for j in range(len(output_tensor_list)):\n                    output.append(output_tensor_list[j].copy_to_cpu())\n                outputs.append(output)\n            # Post process output\n            InferenceHelper.postprocess(outputs)\n    elif model_name == 'YOWO':\n        for file in files:  # for videos\n            (_, filename) = os.path.split(file)\n            (filename, _) = os.path.splitext(filename)\n            save_dir = osp.join('inference', 'YOWO_infer')",
+        "type": "code",
+        "location": "/tools/predict.py:202-227"
+    },
+    "8829": {
+        "file_id": 647,
+        "content": "Iterates through each video file in the list. \nPreprocesses the input data for a model. \nRuns inference for each input, copying CPU memory. \nStores the output of each run. \nPost processes the outputs using InferenceHelper function. For YOWO model, also does filename operations and saves results to specified directory.",
+        "type": "comment"
+    },
+    "8830": {
+        "file_id": 647,
+        "content": "            if not osp.exists('inference'):\n                os.mkdir('inference')\n            if not osp.exists(save_dir):\n                os.mkdir(save_dir)\n            save_path = osp.join(save_dir, filename)\n            if not osp.exists(save_path):\n                os.mkdir(save_path)\n            inputs, frames = InferenceHelper.preprocess(file)\n            for idx, input in enumerate(inputs):\n                # Run inference\n                outputs = []\n                input_len = len(input_tensor_list)\n                for i in range(input_len):\n                    input_tensor_list[i].copy_from_cpu(input[i])\n                predictor.run()\n                for j in range(len(output_tensor_list)):\n                    outputs.append(output_tensor_list[j].copy_to_cpu())\n                # Post process output\n                InferenceHelper.postprocess(outputs, frames[idx], osp.join(save_path, str(idx).zfill(3)))\n    else:\n        if args.enable_benchmark:\n            num_warmup = 3\n            # instantiate auto log",
+        "type": "code",
+        "location": "/tools/predict.py:228-251"
+    },
+    "8831": {
+        "file_id": 647,
+        "content": "This code creates a directory and checks if the save path exists, then preprocesses input data for inference. It runs inference using a predictor, post-processes the output, and if benchmarking is enabled, it instantiates auto log.",
+        "type": "comment"
+    },
+    "8832": {
+        "file_id": 647,
+        "content": "            try:\n                import auto_log\n            except ImportError as e:\n                print(f\"{e}, [git+https://github.com/LDOUBLEV/AutoLog] \"\n                      f\"package and it's dependencies is required for \"\n                      f\"python-inference when enable_benchmark=True.\")\n            pid = os.getpid()\n            autolog = auto_log.AutoLogger(\n                model_name=cfg.model_name,\n                model_precision=args.precision,\n                batch_size=args.batch_size,\n                data_shape=\"dynamic\",\n                save_path=\"./output/auto_log.lpg\",\n                inference_config=inference_config,\n                pids=pid,\n                process_name=None,\n                gpu_ids=0 if args.use_gpu else None,\n                time_keys=[\n                    'preprocess_time', 'inference_time', 'postprocess_time'\n                ],\n                warmup=num_warmup)\n            if not args.time_test_file:\n                test_video_num = 15\n                files = [args.input_file for _ in range(test_video_num)]",
+        "type": "code",
+        "location": "/tools/predict.py:252-275"
+    },
+    "8833": {
+        "file_id": 647,
+        "content": "This code snippet attempts to import the \"auto_log\" package and if it fails, provides instructions on how to install it. Then, it creates an instance of AutoLogger, configuring various parameters like model name, batch size, data shape, etc., and specifies which timing metrics to track during inference. If no time test file is provided, the code sets the number of test videos to 15 and assigns all input files to these tests.",
+        "type": "comment"
+    },
+    "8834": {
+        "file_id": 647,
+        "content": "            else:\n                f_input = open(args.input_file, 'r')\n                files = [i.strip() for i in f_input.readlines()]\n                test_video_num = len(files)\n                f_input.close()\n        # Inferencing process\n        batch_num = args.batch_size\n        for st_idx in range(0, len(files), batch_num):\n            ed_idx = min(st_idx + batch_num, len(files))\n            # auto log start\n            if args.enable_benchmark:\n                autolog.times.start()\n            # Pre process batched input\n            batched_inputs = InferenceHelper.preprocess_batch(\n                files[st_idx:ed_idx])\n            # get pre process time cost\n            if args.enable_benchmark:\n                autolog.times.stamp()\n            # run inference\n            for i in range(len(input_tensor_list)):\n                input_tensor_list[i].copy_from_cpu(batched_inputs[i])\n            predictor.run()\n            batched_outputs = []\n            for j in range(len(output_tensor_list)):\n                batched_outputs.append(output_tensor_list[j].copy_to_cpu())",
+        "type": "code",
+        "location": "/tools/predict.py:276-306"
+    },
+    "8835": {
+        "file_id": 647,
+        "content": "This code reads input files, processes them in batches, runs inference on a model, and collects output. It also supports benchmarking and logs processing times for each step.",
+        "type": "comment"
+    },
+    "8836": {
+        "file_id": 647,
+        "content": "            # get inference process time cost\n            if args.enable_benchmark:\n                autolog.times.stamp()\n            InferenceHelper.postprocess(batched_outputs,\n                                        not args.enable_benchmark)\n            # get post process time cost\n            if args.enable_benchmark:\n                autolog.times.end(stamp=True)\n            # time.sleep(0.01)  # sleep for T4 GPU\n    # report benchmark log if enabled\n    if args.enable_benchmark:\n        autolog.report()\nif __name__ == \"__main__\":\n    main()",
+        "type": "code",
+        "location": "/tools/predict.py:308-327"
+    },
+    "8837": {
+        "file_id": 647,
+        "content": "Enables benchmarking for inference time, processes outputs and records post-processing time, then reports the benchmark log if enabled.",
+        "type": "comment"
+    },
+    "8838": {
+        "file_id": 648,
+        "content": "/tools/summary.py",
+        "type": "filepath"
+    },
+    "8839": {
+        "file_id": 648,
+        "content": "The code imports libraries, defines a function for parsing command line arguments, and sets up paths and licenses before building the model using PaddleVideo. It initializes segments (num_seg) and summarizes the model's parameters while calculating FLOPs if enabled.",
+        "type": "summary"
+    },
+    "8840": {
+        "file_id": 648,
+        "content": "# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport argparse\nimport os\nimport sys\nimport os.path as osp\nimport paddle\nimport paddle.nn.functional as F\nfrom paddle.jit import to_static\nimport paddleslim\n__dir__ = os.path.dirname(os.path.abspath(__file__))\nsys.path.append(os.path.abspath(os.path.join(__dir__, '../')))\nfrom paddlevideo.modeling.builder import build_model\nfrom paddlevideo.utils import get_config\ndef parse_args():\n    parser = argparse.ArgumentParser(\"PaddleVideo Summary\")",
+        "type": "code",
+        "location": "/tools/summary.py:1-34"
+    },
+    "8841": {
+        "file_id": 648,
+        "content": "This code snippet is importing necessary libraries and defining a function for parsing command line arguments in the PaddleVideo project. The code also sets up some paths and licenses, ensuring compliance with the Apache License, Version 2.0.",
+        "type": "comment"
+    },
+    "8842": {
+        "file_id": 648,
+        "content": "    parser.add_argument('-c',\n                        '--config',\n                        type=str,\n                        default='configs/example.yaml',\n                        help='config file path')\n    parser.add_argument(\"--img_size\", type=int, default=224)\n    parser.add_argument(\"--num_seg\", type=int, default=8)\n    parser.add_argument(\"--FLOPs\",\n                        action=\"store_true\",\n                        help=\"whether to print FLOPs\")\n    return parser.parse_args()\ndef _trim(cfg, args):\n    \"\"\"\n    Reuse the trainging config will bring useless attribute, such as: backbone.pretrained model. Trim it here.\n    \"\"\"\n    model_name = cfg.model_name\n    cfg = cfg.MODEL\n    cfg.backbone.pretrained = \"\"\n    if 'num_seg' in cfg.backbone:\n        cfg.backbone.num_seg = args.num_seg\n    return cfg, model_name\ndef main():\n    args = parse_args()\n    cfg, model_name = _trim(get_config(args.config, show=False), args)\n    print(f\"Building model({model_name})...\")\n    model = build_model(cfg)\n    img_size = args.img_size",
+        "type": "code",
+        "location": "/tools/summary.py:35-69"
+    },
+    "8843": {
+        "file_id": 648,
+        "content": "This code parses arguments for the config file path, image size, and number of segments. It then trims unnecessary attributes from the training configuration before building the model using the parsed arguments.",
+        "type": "comment"
+    },
+    "8844": {
+        "file_id": 648,
+        "content": "    num_seg = args.num_seg\n    #NOTE: only support tsm now, will refine soon\n    params_info = paddle.summary(model, (1, 1, num_seg, 3, img_size, img_size))\n    print(params_info)\n    if args.FLOPs:\n        flops_info = paddleslim.analysis.flops(\n            model, [1, 1, num_seg, 3, img_size, img_size])\n        print(flops_info)\nif __name__ == \"__main__\":\n    main()",
+        "type": "code",
+        "location": "/tools/summary.py:70-82"
+    },
+    "8845": {
+        "file_id": 648,
+        "content": "This code snippet initializes the number of segments (num_seg) and currently only supports tsm. It generates a summary of the model's parameters using Paddle's summary function, and if FLOPs is enabled, it also calculates and prints the model's floating-point operations using paddleslim's analysis.flops function.",
+        "type": "comment"
+    },
+    "8846": {
+        "file_id": 649,
+        "content": "/tools/utils.py",
+        "type": "filepath"
+    },
+    "8847": {
+        "file_id": 649,
+        "content": "The code utilizes PaddleVideo for video inference, including preprocessing steps and various action recognition techniques. It also offers classes for human detection and pose estimation which can be used for classification or object detection tasks in videos with NMS and label/probability display.",
+        "type": "summary"
+    },
+    "8848": {
+        "file_id": 649,
+        "content": "# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport json\nimport os\nimport shutil\nimport sys\nfrom typing import List\nimport pickle\nimport cv2\ntry:\n    import imageio\nexcept ImportError as e:\n    print(\n        f\"Warning! {e}, [imageio] package and it's dependencies is required for VideoSwin.\"\n    )\ntry:\n    import matplotlib as mpl\n    import matplotlib.cm as cm\nexcept ImportError as e:\n    print(\n        f\"Warning! {e}, [matplotlib] package and it's dependencies is required for ADDS.\"",
+        "type": "code",
+        "location": "/tools/utils.py:1-34"
+    },
+    "8849": {
+        "file_id": 649,
+        "content": "This code block is an import and error handling section for various Python libraries such as imageio, matplotlib, and json. It also contains license information and warning messages for required packages.",
+        "type": "comment"
+    },
+    "8850": {
+        "file_id": 649,
+        "content": "    )\nimport numpy as np\nimport paddle\nimport paddle.nn.functional as F\nimport pandas\nfrom PIL import Image\n__dir__ = os.path.dirname(os.path.abspath(__file__))\nsys.path.append(os.path.abspath(os.path.join(__dir__, '../')))\nfrom abc import abstractmethod\nfrom paddlevideo.loader.builder import build_pipeline\nfrom paddlevideo.loader.pipelines import (\n    AutoPadding, CenterCrop, DecodeSampler, FeatureDecoder, FrameDecoder,\n    GroupResize, Image2Array, ImageDecoder, JitterScale, MultiCrop,\n    Normalization, PackOutput, Sampler, SamplerPkl, Scale, SkeletonNorm,\n    TenCrop, ToArray, UniformCrop, VideoDecoder, SegmentationSampler,\n    SketeonCropSample, MultiCenterCrop, SketeonCropSample, UniformSampleFrames,\n    PoseDecode, PoseCompact, Resize, CenterCrop_V2, GeneratePoseTarget,\n    FormatShape, Collect)\nfrom paddlevideo.metrics.ava_utils import read_labelmap\nfrom paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms\nfrom paddlevideo.utils import Registry, build, get_config\nfrom paddlevideo.modeling.framework.segmenters.utils import ASRFPostProcessing",
+        "type": "code",
+        "location": "/tools/utils.py:35-58"
+    },
+    "8851": {
+        "file_id": 649,
+        "content": "This code imports necessary libraries, defines a directory path, appends the directory to the system path, and imports classes and functions from various modules within the PaddleVideo framework. It also includes abstract methods for building pipelines and metrics, as well as utility functions for model segmentation and post-processing.",
+        "type": "comment"
+    },
+    "8852": {
+        "file_id": 649,
+        "content": "from tools.ava_predict import (detection_inference, frame_extraction,\n                               get_detection_result, get_timestep_result,\n                               pack_result, visualize)\nfrom paddlevideo.modeling.framework.localizers.yowo_utils import nms, get_region_boxes\nINFERENCE = Registry('inference')\ndef build_inference_helper(cfg):\n    return build(cfg, INFERENCE)\nclass Base_Inference_helper():\n    def __init__(self,\n                 num_seg=8,\n                 seg_len=1,\n                 short_size=256,\n                 target_size=224,\n                 top_k=1):\n        \"\"\"Base_Inference_helper\n        Args:\n            num_seg (int, optional): number of segmentations of an sliced input video. Defaults to 8.\n            seg_len (int, optional): length of each segmentation. Defaults to 1.\n            short_size (int, optional): short size of input video. Defaults to 256.\n            target_size (int, optional): size of cropped video. Defaults to 224.\n            top_k (int, optional): select topk result in outputs. Defaults to 1.",
+        "type": "code",
+        "location": "/tools/utils.py:60-86"
+    },
+    "8853": {
+        "file_id": 649,
+        "content": "This code imports functions from the \"ava_predict\" and \"yowo_utils\" modules. It defines a function called \"build_inference_helper\" which uses the \"Registry\" class to build an inference helper object. The base class for this object is defined as \"Base_Inference_helper\". This class has an initializer that takes arguments for number of segmentations, length of each segmentation, short size, target size, and top k.",
+        "type": "comment"
+    },
+    "8854": {
+        "file_id": 649,
+        "content": "        \"\"\"\n        self.num_seg = num_seg\n        self.seg_len = seg_len\n        self.short_size = short_size\n        self.target_size = target_size\n        self.top_k = top_k\n    @abstractmethod\n    def preprocess(self, input_file: str):\n        \"\"\"preprocess abstractmethod\n        Args:\n            input_file (str): input file path.\n        \"\"\"\n        pass\n    def preprocess_batch(self, file_list: List[str]) -> List[np.ndarray]:\n        \"\"\"preprocess for file list\n        Args:\n            file_list (List[str]): file pathes in an list, [path1, path2, ...].\n        Returns:\n            List[np.ndarray]: batched inputs data, [data_batch[0], data_batch[1], ...].\n        \"\"\"\n        batched_inputs = []\n        for file in file_list:\n            inputs = self.preprocess(file)\n            batched_inputs.append(inputs)\n        batched_inputs = [\n            np.concatenate([item[i] for item in batched_inputs])\n            for i in range(len(batched_inputs[0]))\n        ]\n        self.input_file = file_list\n        return batched_inputs",
+        "type": "code",
+        "location": "/tools/utils.py:87-121"
+    },
+    "8855": {
+        "file_id": 649,
+        "content": "This code defines an abstract class with a preprocess method and a concrete implementation of the preprocess_batch method. The class has attributes for the number of segments, segment length, short size, target size, and top k. The preprocess_batch method processes each input file in a list of file paths and concatenates the processed data into batches. The input files are stored in the self.input\\_file attribute.",
+        "type": "comment"
+    },
+    "8856": {
+        "file_id": 649,
+        "content": "    def postprocess(self,\n                    output: np.ndarray,\n                    print_output: bool = True,\n                    return_result: bool = False):\n        \"\"\"postprocess\n        Args:\n            output (np.ndarray): batched output scores, shape of (batch_size, class_num).\n            print_output (bool, optional): whether to print result. Defaults to True.\n        \"\"\"\n        if not isinstance(self.input_file, list):\n            self.input_file = [\n                self.input_file,\n            ]\n        output = output[0]  # [B, num_cls]\n        N = len(self.input_file)\n        if output.shape[0] != N:\n            output = output.reshape([N] + [output.shape[0] // N] +\n                                    list(output.shape[1:]))  # [N, T, C]\n            output = output.mean(axis=1)  # [N, C]\n        output = F.softmax(paddle.to_tensor(output), axis=-1).numpy()\n        results_list = []\n        for i in range(N):\n            classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]\n            classes = classes[np.argsort(-output[i, classes])]",
+        "type": "code",
+        "location": "/tools/utils.py:123-147"
+    },
+    "8857": {
+        "file_id": 649,
+        "content": "This function postprocesses output scores from a model, accepting batched output scores as input. It checks if the input file is a list and reshapes the output array accordingly. The code applies softmax to each individual output tensor along the last axis, then iterates over the number of inputs (N) to generate class predictions. Classes are sorted based on their scores, and the results are stored in a list for further use.",
+        "type": "comment"
+    },
+    "8858": {
+        "file_id": 649,
+        "content": "            scores = output[i, classes]\n            topk_class = classes[:self.top_k]\n            topk_scores = scores[:self.top_k]\n            result = {\n                \"video_id\": self.input_file[i],\n                \"topk_class\": topk_class,\n                \"topk_scores\": topk_scores\n            }\n            results_list.append(result)\n            if print_output:\n                print(\"Current video file: {0}\".format(self.input_file[i]))\n                print(\"\\ttop-{0} class: {1}\".format(self.top_k, topk_class))\n                print(\"\\ttop-{0} score: {1}\".format(self.top_k, topk_scores))\n        if return_result:\n            return results_list\n@INFERENCE.register()\nclass ppTSM_Inference_helper(Base_Inference_helper):\n    def __init__(self,\n                 num_seg=8,\n                 seg_len=1,\n                 short_size=256,\n                 target_size=224,\n                 top_k=1):\n        self.num_seg = num_seg\n        self.seg_len = seg_len\n        self.short_size = short_size\n        self.target_size = target_size",
+        "type": "code",
+        "location": "/tools/utils.py:148-176"
+    },
+    "8859": {
+        "file_id": 649,
+        "content": "This code is creating a helper class for inference tasks. It takes input files, performs video classification using the PaddleVideo framework, and returns top-k class results for each video file. The class also has options to print output and return results as a list. The user can customize the number of segments, segment length, short side size, target size, and top-k values for the classification.",
+        "type": "comment"
+    },
+    "8860": {
+        "file_id": 649,
+        "content": "        self.top_k = top_k\n    def preprocess(self, input_file):\n        \"\"\"\n        input_file: str, file path\n        return: list\n        \"\"\"\n        assert os.path.isfile(input_file) is not None, \"{0} not exists\".format(\n            input_file)\n        results = {'filename': input_file}\n        img_mean = [0.485, 0.456, 0.406]\n        img_std = [0.229, 0.224, 0.225]\n        ops = [\n            VideoDecoder(backend=\"decord\"),\n            Sampler(self.num_seg, self.seg_len, valid_mode=True),\n            Scale(self.short_size),\n            CenterCrop(self.target_size),\n            Image2Array(),\n            Normalization(img_mean, img_std)\n        ]\n        for op in ops:\n            results = op(results)\n        res = np.expand_dims(results['imgs'], axis=0).copy()\n        return [res]\n@INFERENCE.register()\nclass ppTSN_Inference_helper(Base_Inference_helper):\n    def __init__(self,\n                 num_seg=25,\n                 seg_len=1,\n                 short_size=256,\n                 target_size=224,\n                 top_k=1):",
+        "type": "code",
+        "location": "/tools/utils.py:177-211"
+    },
+    "8861": {
+        "file_id": 649,
+        "content": "This code defines a class that takes in an input file path, applies several image preprocessing operations such as decoding, sampling, resizing, cropping, and normalization, then returns the processed image data in a list. The class also initializes some parameters like the number of segments, segment length, short size for resizing, target size for cropping, and top k value. The code is part of PaddleVideo library.",
+        "type": "comment"
+    },
+    "8862": {
+        "file_id": 649,
+        "content": "        self.num_seg = num_seg\n        self.seg_len = seg_len\n        self.short_size = short_size\n        self.target_size = target_size\n        self.top_k = top_k\n    def preprocess(self, input_file):\n        \"\"\"\n        input_file: str, file path\n        return: list\n        \"\"\"\n        assert os.path.isfile(input_file) is not None, \"{0} not exists\".format(\n            input_file)\n        results = {'filename': input_file}\n        img_mean = [0.485, 0.456, 0.406]\n        img_std = [0.229, 0.224, 0.225]\n        ops = [\n            VideoDecoder(backend=\"decord\"),\n            Sampler(self.num_seg,\n                    self.seg_len,\n                    valid_mode=True,\n                    select_left=True),\n            Scale(self.short_size,\n                  fixed_ratio=True,\n                  do_round=True,\n                  backend='cv2'),\n            TenCrop(self.target_size),\n            Image2Array(),\n            Normalization(img_mean, img_std)\n        ]\n        for op in ops:\n            results = op(results)\n        res = np.expand_dims(results['imgs'], axis=0).copy()",
+        "type": "code",
+        "location": "/tools/utils.py:212-245"
+    },
+    "8863": {
+        "file_id": 649,
+        "content": "This code snippet initializes a class object with several parameters (num_seg, seg_len, short_size, target_size, top_k) and defines a preprocess method. The preprocess method takes an input file path, performs various operations on the image using different ops such as VideoDecoder, Sampler, Scale, TenCrop, Image2Array, Normalization in sequence, and returns an array of processed images.",
+        "type": "comment"
+    },
+    "8864": {
+        "file_id": 649,
+        "content": "        return [res]\n@INFERENCE.register()\nclass BMN_Inference_helper(Base_Inference_helper):\n    def __init__(self, feat_dim, dscale, tscale, result_path):\n        self.feat_dim = feat_dim\n        self.dscale = dscale\n        self.tscale = tscale\n        self.result_path = result_path\n        if not os.path.isdir(self.result_path):\n            os.makedirs(self.result_path)\n    def preprocess(self, input_file):\n        \"\"\"\n        input_file: str, file path\n        return: list\n        \"\"\"\n        assert os.path.isfile(input_file) is not None, \"{0} not exists\".format(\n            input_file)\n        file_info = json.load(open(input_file))\n        self.feat_path = file_info['feat_path']\n        self.video_duration = file_info['duration_second']\n        feat = np.load(self.feat_path).astype('float32').T\n        res = np.expand_dims(feat, axis=0).copy()\n        return [res]\n    def postprocess(self, outputs, print_output=True):\n        \"\"\"\n        output: list\n        \"\"\"\n        pred_bm, pred_start, pred_end = outputs",
+        "type": "code",
+        "location": "/tools/utils.py:246-278"
+    },
+    "8865": {
+        "file_id": 649,
+        "content": "This function serves as a helper class for BMN inference and handles preprocessing of input files. It loads and preprocesses the features from the specified file path, converts them to float32 type, and returns the result in a list format. The postprocess function takes outputs as input, assuming it is a list containing predicted BMN, start time, and end time values.",
+        "type": "comment"
+    },
+    "8866": {
+        "file_id": 649,
+        "content": "        self._gen_props(pred_bm, pred_start[0], pred_end[0], print_output)\n    def _gen_props(self, pred_bm, pred_start, pred_end, print_output):\n        snippet_xmins = [1.0 / self.tscale * i for i in range(self.tscale)]\n        snippet_xmaxs = [\n            1.0 / self.tscale * i for i in range(1, self.tscale + 1)\n        ]\n        pred_bm = pred_bm[0, 0, :, :] * pred_bm[0, 1, :, :]\n        start_mask = boundary_choose(pred_start)\n        start_mask[0] = 1.\n        end_mask = boundary_choose(pred_end)\n        end_mask[-1] = 1.\n        score_vector_list = []\n        for idx in range(self.dscale):\n            for jdx in range(self.tscale):\n                start_index = jdx\n                end_index = start_index + idx\n                if end_index < self.tscale and start_mask[\n                        start_index] == 1 and end_mask[end_index] == 1:\n                    xmin = snippet_xmins[start_index]\n                    xmax = snippet_xmaxs[end_index]\n                    xmin_score = pred_start[start_index]\n                    xmax_score = pred_end[end_index]",
+        "type": "code",
+        "location": "/tools/utils.py:279-302"
+    },
+    "8867": {
+        "file_id": 649,
+        "content": "This code defines a function _gen_props that calculates snippet xmin and xmax values, generates start and end masks from pred_start and pred_end, and initializes score_vector_list. It iterates over the dscale and tscale to determine start and end indices, checks if valid indices are found, and assigns xmin, xmax, xmin_score, and xmax_score accordingly.",
+        "type": "comment"
+    },
+    "8868": {
+        "file_id": 649,
+        "content": "                    bm_score = pred_bm[idx, jdx]\n                    conf_score = xmin_score * xmax_score * bm_score\n                    score_vector_list.append([xmin, xmax, conf_score])\n        cols = [\"xmin\", \"xmax\", \"score\"]\n        score_vector_list = np.stack(score_vector_list)\n        df = pandas.DataFrame(score_vector_list, columns=cols)\n        result_dict = {}\n        proposal_list = []\n        df = soft_nms(df, alpha=0.4, t1=0.55, t2=0.9)\n        for idx in range(min(100, len(df))):\n            tmp_prop={\"score\":df.score.values[idx], \\\n                      \"segment\":[max(0,df.xmin.values[idx])*self.video_duration, \\\n                                 min(1,df.xmax.values[idx])*self.video_duration]}\n            proposal_list.append(tmp_prop)\n        result_dict[self.feat_path] = proposal_list\n        # print top-5 predictions\n        if print_output:\n            print(\"Current video file: {0} :\".format(self.feat_path))\n            for pred in proposal_list[:5]:\n                print(pred)\n        # save result",
+        "type": "code",
+        "location": "/tools/utils.py:303-328"
+    },
+    "8869": {
+        "file_id": 649,
+        "content": "This code performs non-maximum suppression (NMS) on bounding box predictions, selects top-5 predictions for each video feature path, and stores the results in a dictionary. It also prints the top-5 predictions if `print_output` is enabled.",
+        "type": "comment"
+    },
+    "8870": {
+        "file_id": 649,
+        "content": "        outfile = open(\n            os.path.join(self.result_path, \"bmn_results_inference.json\"), \"w\")\n        json.dump(result_dict, outfile)\n@INFERENCE.register()\nclass TokenShift_Inference_helper(Base_Inference_helper):\n    def __init__(self,\n                 num_seg=8,\n                 seg_len=1,\n                 short_size=256,\n                 target_size=256,\n                 top_k=1,\n                 mean=[0.5, 0.5, 0.5],\n                 std=[0.5, 0.5, 0.5]):\n        self.num_seg = num_seg\n        self.seg_len = seg_len\n        self.short_size = short_size\n        self.target_size = target_size\n        self.top_k = top_k\n        self.mean = mean\n        self.std = std\n    def preprocess(self, input_file):\n        \"\"\"\n        input_file: str, file path\n        return: list\n        \"\"\"\n        assert os.path.isfile(input_file) is not None, \"{0} not exists\".format(\n            input_file)\n        results = {'filename': input_file}\n        ops = [\n            VideoDecoder(backend='pyav', mode='test', num_seg=self.num_seg),",
+        "type": "code",
+        "location": "/tools/utils.py:329-362"
+    },
+    "8871": {
+        "file_id": 649,
+        "content": "This code defines a class called TokenShift_Inference_helper, which extends Base_Inference_helper. It has several parameters for customizing the inference process and includes a preprocess method that reads an input file and returns results as a dictionary. The results are then written to a JSON file named \"bmn_results_inference.json\".",
+        "type": "comment"
+    },
+    "8872": {
+        "file_id": 649,
+        "content": "            Sampler(self.num_seg, self.seg_len, valid_mode=True),\n            Normalization(self.mean, self.std, tensor_shape=[1, 1, 1, 3]),\n            Image2Array(data_format='cthw'),\n            JitterScale(self.short_size, self.short_size),\n            MultiCenterCrop(self.target_size)\n        ]\n        for op in ops:\n            results = op(results)\n        # [N,C,Tx3,H,W]\n        res = np.expand_dims(results['imgs'], axis=0).copy()\n        return [res]\n@INFERENCE.register()\nclass TimeSformer_Inference_helper(Base_Inference_helper):\n    def __init__(self,\n                 num_seg=8,\n                 seg_len=1,\n                 short_size=224,\n                 target_size=224,\n                 top_k=1,\n                 mean=[0.45, 0.45, 0.45],\n                 std=[0.225, 0.225, 0.225]):\n        self.num_seg = num_seg\n        self.seg_len = seg_len\n        self.short_size = short_size\n        self.target_size = target_size\n        self.top_k = top_k\n        self.mean = mean\n        self.std = std\n    def preprocess(self, input_file):",
+        "type": "code",
+        "location": "/tools/utils.py:363-395"
+    },
+    "8873": {
+        "file_id": 649,
+        "content": "The code creates a series of data processing operations to preprocess input images for the TimeSformer model. It initializes an instance of TimeSformer_Inference_helper with specified parameters, then applies these operations in order on the input image, resulting in a final tensor ready for model inference.",
+        "type": "comment"
+    },
+    "8874": {
+        "file_id": 649,
+        "content": "        \"\"\"\n        input_file: str, file path\n        return: list\n        \"\"\"\n        assert os.path.isfile(input_file) is not None, \"{0} not exists\".format(\n            input_file)\n        results = {'filename': input_file}\n        ops = [\n            VideoDecoder(backend='pyav', mode='test', num_seg=self.num_seg),\n            Sampler(self.num_seg,\n                    self.seg_len,\n                    valid_mode=True,\n                    linspace_sample=True),\n            Normalization(self.mean, self.std, tensor_shape=[1, 1, 1, 3]),\n            Image2Array(data_format='cthw'),\n            JitterScale(self.short_size, self.short_size),\n            UniformCrop(self.target_size)\n        ]\n        for op in ops:\n            results = op(results)\n        # [N,C,Tx3,H,W]\n        res = np.expand_dims(results['imgs'], axis=0).copy()\n        return [res]\n@INFERENCE.register()\nclass VideoSwin_Inference_helper(Base_Inference_helper):\n    def __init__(self,\n                 num_seg=4,\n                 seg_len=32,\n                 frame_interval=2,",
+        "type": "code",
+        "location": "/tools/utils.py:396-427"
+    },
+    "8875": {
+        "file_id": 649,
+        "content": "This code defines a function that reads an input file, applies a series of operations to it, and returns the processed data. The operations include video decoding, sampling, normalization, image conversion, jitter scaling, and uniform cropping. The result is a tensor in the shape [N,C,Tx3,H,W], where N is the number of segments, C is the number of channels, Tx3 is the number of frames, H is the height, and W is the width.",
+        "type": "comment"
+    },
+    "8876": {
+        "file_id": 649,
+        "content": "                 short_size=224,\n                 target_size=224,\n                 top_k=1,\n                 mean=[123.675, 116.28, 103.53],\n                 std=[58.395, 57.12, 57.375]):\n        self.num_seg = num_seg\n        self.seg_len = seg_len\n        self.frame_interval = frame_interval\n        self.short_size = short_size\n        self.target_size = target_size\n        self.top_k = top_k\n        self.mean = mean\n        self.std = std\n    def preprocess(self, input_file):\n        \"\"\"\n        input_file: str, file path\n        return: list\n        \"\"\"\n        self.input_file = input_file\n        assert os.path.isfile(input_file) is not None, \"{0} not exists\".format(\n            input_file)\n        results = {'filename': input_file}\n        ops = [\n            VideoDecoder(backend='decord', mode='valid'),\n            Sampler(num_seg=self.num_seg,\n                    frame_interval=self.frame_interval,\n                    seg_len=self.seg_len,\n                    valid_mode=True,\n                    use_pil=False),",
+        "type": "code",
+        "location": "/tools/utils.py:428-458"
+    },
+    "8877": {
+        "file_id": 649,
+        "content": "This code defines a class for video preprocessing, taking input file path as parameter. It checks if the file exists and stores the filename in results dictionary. The class uses Decord backend for video decoding and Sampler to sample frames based on specified parameters.",
+        "type": "comment"
+    },
+    "8878": {
+        "file_id": 649,
+        "content": "            Scale(short_size=self.short_size,\n                  fixed_ratio=False,\n                  keep_ratio=True,\n                  backend='cv2',\n                  do_round=True),\n            CenterCrop(target_size=224, backend='cv2'),\n            Normalization(mean=self.mean,\n                          std=self.std,\n                          tensor_shape=[3, 1, 1, 1],\n                          inplace=True),\n            Image2Array(data_format='cthw')\n        ]\n        for op in ops:\n            results = op(results)\n        res = np.expand_dims(results['imgs'], axis=0).copy()\n        return [res]\n    def postprocess(self, output, print_output=True):\n        \"\"\"\n        output: list\n        \"\"\"\n        if not isinstance(self.input_file, list):\n            self.input_file = [\n                self.input_file,\n            ]\n        output = output[0]  # [B, num_cls]\n        N = len(self.input_file)\n        if output.shape[0] != N:\n            output = output.reshape([N] + [output.shape[0] // N] +\n                                    list(output.shape[1:]))  # [N, T, C]",
+        "type": "code",
+        "location": "/tools/utils.py:459-489"
+    },
+    "8879": {
+        "file_id": 649,
+        "content": "The code preprocesses images by resizing, cropping, normalizing, and converting to arrays. It also provides a postprocessing function that handles outputs for multiple input files if necessary.",
+        "type": "comment"
+    },
+    "8880": {
+        "file_id": 649,
+        "content": "            output = output.mean(axis=1)  # [N, C]\n        for i in range(N):\n            classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]\n            classes = classes[np.argsort(-output[i, classes])]\n            scores = output[i, classes]\n            if print_output:\n                print(\"Current video file: {0}\".format(self.input_file[i]))\n                for j in range(self.top_k):\n                    print(\"\\ttop-{0} class: {1}\".format(j + 1, classes[j]))\n                    print(\"\\ttop-{0} score: {1}\".format(j + 1, scores[j]))\n@INFERENCE.register()\nclass VideoSwin_TableTennis_Inference_helper(Base_Inference_helper):\n    def __init__(self,\n                 num_seg=1,\n                 seg_len=32,\n                 short_size=256,\n                 target_size=224,\n                 top_k=1):\n        self.num_seg = num_seg\n        self.seg_len = seg_len\n        self.short_size = short_size\n        self.target_size = target_size\n        self.top_k = top_k\n    def preprocess(self, input_file):",
+        "type": "code",
+        "location": "/tools/utils.py:490-516"
+    },
+    "8881": {
+        "file_id": 649,
+        "content": "This code snippet is part of a function that extracts the top k classes and their corresponding scores from an output tensor. It first performs mean pooling along the axis 1 to reshape the tensor to [N, C] format, where N is the number of images and C is the number of channels. Then, it iterates over each image and finds the indexes of top k classes by performing argument partition and sorting them based on their scores. Finally, it prints out these results for each image if the print_output flag is set to True.",
+        "type": "comment"
+    },
+    "8882": {
+        "file_id": 649,
+        "content": "        \"\"\"\n        input_file: str, file path\n        return: list\n        \"\"\"\n        assert os.path.isfile(input_file) is not None, \"{0} not exists\".format(\n            input_file)\n        results = {'frame_dir': input_file, 'suffix': 'img_{:05}.jpg'}\n        img_mean = [123.675, 116.28, 103.53]\n        img_std = [58.395, 57.12, 57.375]\n        ops = [\n            FrameDecoder(),\n            SamplerPkl(num_seg=self.num_seg,\n                       seg_len=self.seg_len,\n                       backend='cv2',\n                       valid_mode=True),\n            Scale(short_size=self.short_size,\n                  fixed_ratio=False,\n                  keep_ratio=True,\n                  backend='cv2',\n                  do_round=True),\n            UniformCrop(target_size=self.target_size, backend='cv2'),\n            Normalization(mean=img_mean,\n                          std=img_std,\n                          tensor_shape=[3, 1, 1, 1],\n                          inplace=True),\n            Image2Array(data_format='cthw')",
+        "type": "code",
+        "location": "/tools/utils.py:517-542"
+    },
+    "8883": {
+        "file_id": 649,
+        "content": "This code defines a function that takes an input file, reads frames from it, applies various transformations including decoding, sampling, scaling, cropping, and normalization, and finally converts the resulting images to a numpy array. It uses the PaddleVideo library and has parameters for short_size, target_size, and num_seg.",
+        "type": "comment"
+    },
+    "8884": {
+        "file_id": 649,
+        "content": "        ]\n        for op in ops:\n            results = op(results)\n        res = np.expand_dims(results['imgs'], axis=0).copy()\n        return [res]\n    def add_text_to_video(\n            self,\n            video_path,\n            output_dir=\"applications/TableTennis/ActionRecognition/results\",\n            text=None):\n        os.makedirs(output_dir, exist_ok=True)\n        if video_path.endswith('.pkl'):\n            try:\n                import cPickle as pickle\n                from cStringIO import StringIO\n            except ImportError:\n                import pickle\n                from io import BytesIO\n            from PIL import Image\n            data_loaded = pickle.load(open(video_path, 'rb'), encoding='bytes')\n            _, _, frames = data_loaded\n            frames_len = len(frames)\n        else:\n            videoCapture = cv2.VideoCapture()\n            videoCapture.open(video_path)\n            fps = videoCapture.get(cv2.CAP_PROP_FPS)\n            frame_width = int(videoCapture.get(cv2.CAP_PROP_FRAME_WIDTH))",
+        "type": "code",
+        "location": "/tools/utils.py:543-573"
+    },
+    "8885": {
+        "file_id": 649,
+        "content": "The code snippet is adding text to a video. It creates directories, loads or captures frames from the video, and extracts important information like frame length, FPS, and frame width. The code then calls other functions to manipulate images and add text to each frame before storing or displaying the final result.",
+        "type": "comment"
+    },
+    "8886": {
+        "file_id": 649,
+        "content": "            frame_height = int(videoCapture.get(cv2.CAP_PROP_FRAME_HEIGHT))\n            frames_len = videoCapture.get(cv2.CAP_PROP_FRAME_COUNT)\n            print(\"fps=\", int(fps), \"frames=\", int(frames_len), \"scale=\",\n                  f\"{frame_height}x{frame_width}\")\n        frames_rgb_list = []\n        for i in range(int(frames_len)):\n            if video_path.endswith('.pkl'):\n                frame = np.array(\n                    Image.open(BytesIO(frames[i])).convert(\"RGB\").resize(\n                        (240, 135)))[:, :, ::-1].astype('uint8')\n            else:\n                _, frame = videoCapture.read()\n            frame = cv2.putText(frame, text, (30, 30), cv2.FONT_HERSHEY_COMPLEX,\n                                1.0, (0, 0, 255), 2)\n            frames_rgb_list.append(frame[:, :, ::-1])  # bgr to rgb\n        if not video_path.endswith('.pkl'):\n            videoCapture.release()\n        cv2.destroyAllWindows()\n        output_filename = os.path.basename(video_path)\n        output_filename = output_filename.split('.')[0] + '.gif'",
+        "type": "code",
+        "location": "/tools/utils.py:574-595"
+    },
+    "8887": {
+        "file_id": 649,
+        "content": "The code reads the video frames and resizes them, then converts to RGB format. If the file is a .pkl file, it opens the image from binary data. It also adds text to each frame using cv2.putText. The code appends each frame in RGB format to a list, and finally, releases the videoCapture object, closes all windows, and saves the resulting GIF with a specific filename.",
+        "type": "comment"
+    },
+    "8888": {
+        "file_id": 649,
+        "content": "        imageio.mimsave(f'{output_dir}/{output_filename}',\n                        frames_rgb_list,\n                        'GIF',\n                        duration=0.00085)\n    def postprocess(self, output, print_output=True, save_gif=True):\n        \"\"\"\n        output: list\n        \"\"\"\n        if not isinstance(self.input_file, list):\n            self.input_file = [\n                self.input_file,\n            ]\n        output = output[0]  # [B, num_cls]\n        N = len(self.input_file)\n        if output.shape[0] != N:\n            output = output.reshape([N] + [output.shape[0] // N] +\n                                    list(output.shape[1:]))  # [N, T, C]\n            output = output.mean(axis=1)  # [N, C]\n        for i in range(N):\n            classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]\n            classes = classes[np.argsort(-output[i, classes])]\n            scores = output[i, classes]\n            if print_output:\n                print(\"Current video file: {0}\".format(self.input_file[i]))",
+        "type": "code",
+        "location": "/tools/utils.py:596-620"
+    },
+    "8889": {
+        "file_id": 649,
+        "content": "The function `postprocess` takes an output list and processes it according to the specified parameters. It ensures that the shape of the input matches with the number of files in the input_file list, then calculates class scores for each video file. If print_output is True, it will print the current video file being processed. Finally, if save_gif is True, it creates a GIF using the frames_rgb_list and saves it to the specified output directory with the filename mentioned in the function call.",
+        "type": "comment"
+    },
+    "8890": {
+        "file_id": 649,
+        "content": "                for j in range(self.top_k):\n                    print(\"\\ttop-{0} class: {1}\".format(j + 1, classes[j]))\n                    print(\"\\ttop-{0} score: {1}\".format(j + 1, scores[j]))\n            if save_gif:\n                self.add_text_to_video(\n                    self.input_file[0],\n                    text=f\"{str(classes[0])} {float(scores[0]):.5f}\")\n@INFERENCE.register()\nclass SlowFast_Inference_helper(Base_Inference_helper):\n    def __init__(self,\n                 num_frames=32,\n                 sampling_rate=2,\n                 target_size=256,\n                 alpha=8,\n                 top_k=1):\n        self.num_frames = num_frames\n        self.sampling_rate = sampling_rate\n        self.target_size = target_size\n        self.alpha = alpha\n        self.top_k = top_k\n    def preprocess(self, input_file):\n        \"\"\"\n        input_file: str, file path\n        return: list\n        \"\"\"\n        assert os.path.isfile(input_file) is not None, \"{0} not exists\".format(\n            input_file)\n        results = {",
+        "type": "code",
+        "location": "/tools/utils.py:621-651"
+    },
+    "8891": {
+        "file_id": 649,
+        "content": "This code is a part of PaddleVideo's utils.py file, specifically the SlowFast_Inference_helper class, which handles video inference using the SlowFast model. The class has attributes for number of frames, sampling rate, target size, alpha value, and top k classes to display. It contains methods like preprocess, add_text_to_video, and infer. In this section, it displays the top-1 class and score for each frame in a video and adds text annotations to the first frame of the video if save_gif is set to True.",
+        "type": "comment"
+    },
+    "8892": {
+        "file_id": 649,
+        "content": "            'filename': input_file,\n            'temporal_sample_index': 0,\n            'spatial_sample_index': 0,\n            'temporal_num_clips': 1,\n            'spatial_num_clips': 1\n        }\n        img_mean = [0.45, 0.45, 0.45]\n        img_std = [0.225, 0.225, 0.225]\n        ops = [\n            DecodeSampler(self.num_frames, self.sampling_rate, test_mode=True),\n            JitterScale(self.target_size, self.target_size),\n            MultiCrop(self.target_size),\n            Image2Array(transpose=False),\n            Normalization(img_mean, img_std, tensor_shape=[1, 1, 1, 3]),\n            PackOutput(self.alpha),\n        ]\n        for op in ops:\n            results = op(results)\n        res = []\n        for item in results['imgs']:\n            res.append(np.expand_dims(item, axis=0).copy())\n        return res\n    def postprocess(self, output, print_output=True):\n        \"\"\"\n        output: list\n        \"\"\"\n        if not isinstance(self.input_file, list):\n            self.input_file = [\n                self.input_file,",
+        "type": "code",
+        "location": "/tools/utils.py:652-682"
+    },
+    "8893": {
+        "file_id": 649,
+        "content": "This code defines a function for preprocessing and postprocessing video frames. It initializes parameters like filename, sampling rate, target size, and normalization values. The function applies a series of operations to the input image, such as decoding, jitter scaling, cropping, converting to array format, normalizing pixel values, and packing the output. Finally, it expands the result along an axis and returns the processed frames.",
+        "type": "comment"
+    },
+    "8894": {
+        "file_id": 649,
+        "content": "            ]\n        output = output[0]  # [B, num_cls]\n        N = len(self.input_file)\n        if output.shape[0] != N:\n            output = output.reshape([N] + [output.shape[0] // N] +\n                                    list(output.shape[1:]))  # [N, T, C]\n            output = output.mean(axis=1)  # [N, C]\n        # output = F.softmax(paddle.to_tensor(output), axis=-1).numpy() # done in it's head\n        for i in range(N):\n            classes = np.argpartition(output[i], -self.top_k)[-self.top_k:]\n            classes = classes[np.argsort(-output[i, classes])]\n            scores = output[i, classes]\n            if print_output:\n                print(\"Current video file: {0}\".format(self.input_file[i]))\n                for j in range(self.top_k):\n                    print(\"\\ttop-{0} class: {1}\".format(j + 1, classes[j]))\n                    print(\"\\ttop-{0} score: {1}\".format(j + 1, scores[j]))\n@INFERENCE.register()\nclass STGCN_Inference_helper(Base_Inference_helper):\n    def __init__(self,\n                 num_channels,",
+        "type": "code",
+        "location": "/tools/utils.py:683-706"
+    },
+    "8895": {
+        "file_id": 649,
+        "content": "This function reshapes the output tensor based on the number of input files, then calculates top classes and scores for each file. If print_output is True, it prints the top classes and scores for each video file. The output is from a STGCN (Spatio-Temporal Graph Convolutional Network) inference process.",
+        "type": "comment"
+    },
+    "8896": {
+        "file_id": 649,
+        "content": "                 window_size,\n                 vertex_nums,\n                 person_nums,\n                 top_k=1):\n        self.num_channels = num_channels\n        self.window_size = window_size\n        self.vertex_nums = vertex_nums\n        self.person_nums = person_nums\n        self.top_k = top_k\n    def preprocess(self, input_file):\n        \"\"\"\n        input_file: str, file path\n        return: list\n        \"\"\"\n        assert os.path.isfile(input_file) is not None, \"{0} not exists\".format(\n            input_file)\n        data = np.load(input_file)\n        results = {'data': data}\n        ops = [AutoPadding(window_size=self.window_size), SkeletonNorm()]\n        for op in ops:\n            results = op(results)\n        res = np.expand_dims(results['data'], axis=0).copy()\n        return [res]\n@INFERENCE.register()\nclass CTRGCN_Inference_helper(Base_Inference_helper):\n    def __init__(self,\n                 num_channels=3,\n                 vertex_nums=25,\n                 person_nums=2,\n                 window_size=64,",
+        "type": "code",
+        "location": "/tools/utils.py:707-740"
+    },
+    "8897": {
+        "file_id": 649,
+        "content": "This code defines a class `CTRGCN_Inference_helper` that preprocesses data for CTRGCN inference. It takes input file path as parameter and returns processed data as list. The preprocessing includes applying auto-padding, skeleton normalization operations on the input data. The window size, vertex numbers, person numbers can be specified during initialization of the class.",
+        "type": "comment"
+    },
+    "8898": {
+        "file_id": 649,
+        "content": "                 p_interval=[0.95],\n                 top_k=1):\n        self.window_size = window_size\n        self.p_interval = p_interval\n        self.num_channels = num_channels\n        self.vertex_nums = vertex_nums\n        self.person_nums = person_nums\n        self.top_k = top_k\n    def preprocess(self, input_file):\n        \"\"\"\n        input_file: str, file path\n        return: list\n        \"\"\"\n        assert os.path.isfile(input_file) is not None, \"{0} not exists\".format(\n            input_file)\n        data = np.load(input_file)\n        results = {'data': data}\n        ops = [\n            SketeonCropSample(window_size=self.window_size,\n                              p_interval=self.p_interval)\n        ]\n        for op in ops:\n            results = op(results)\n        res = np.expand_dims(results['data'], axis=0).copy()\n        return [res]\n@INFERENCE.register()\nclass AGCN2s_Inference_helper(Base_Inference_helper):\n    def __init__(self,\n                 window_size=300,\n                 num_channels=3,\n                 vertex_nums=25,",
+        "type": "code",
+        "location": "/tools/utils.py:741-775"
+    },
+    "8899": {
+        "file_id": 649,
+        "content": "This code defines a class for preprocessing data and applying operations. It has an `__init__` method to initialize the window size, number of channels, vertex numbers, person numbers, and top k. The `preprocess` method takes a file path, asserts that it exists, loads the data, applies operations defined in ops, expands dimensions, and returns the processed data. It also registers this class for inference using the @INFERENCE decorator.",
+        "type": "comment"
+    }
+}

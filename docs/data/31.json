@@ -1,0 +1,539 @@
+{
+    "3100": {
+        "file_id": 255,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nfrom paddle.nn import AdaptiveAvgPool2D, Linear, Dropout\nfrom .base import BaseHead\nfrom ..registry import HEADS\nfrom ..weight_init import weight_init_\nimport paddle.nn.functional as F\n@HEADS.register()\nclass TSNHead(BaseHead):\n    \"\"\"TSN Head.\n    Args:\n        num_classes (int): The number of classes to be classified.\n        in_channels (int): The number of channles in input feature.\n        loss_cfg (dict): Config for building config. Default: dict(name='CrossEntropyLoss').",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/heads/tsn_head.py:1-31"
+    },
+    "3101": {
+        "file_id": 255,
+        "content": "TSNHead: PaddlePaddle Temporal Segment Network head class for video quality assessment tasks. Implements adaptive average pooling, linear transformation, dropout, and takes input number of classes and input feature channels as arguments. Registered in the HEADS registry.",
+        "type": "comment"
+    },
+    "3102": {
+        "file_id": 255,
+        "content": "        drop_ratio(float): drop ratio. Default: 0.4.\n        std(float): Std(Scale) value in normal initilizar. Default: 0.01.\n        kwargs (dict, optional): Any keyword argument to initialize.\n    \"\"\"\n    def __init__(self,\n                 num_classes,\n                 in_channels,\n                 loss_cfg=dict(name='CrossEntropyLoss'),\n                 drop_ratio=0.4,\n                 std=0.01,\n                 data_format=\"NCHW\",\n                 **kwargs):\n        super().__init__(num_classes, in_channels, loss_cfg, **kwargs)\n        self.drop_ratio = drop_ratio\n        self.std = std\n        #NOTE: global pool performance\n        self.avgpool2d = AdaptiveAvgPool2D((1, 1), data_format=data_format)\n        if self.drop_ratio != 0:\n            self.dropout = Dropout(p=self.drop_ratio)\n        else:\n            self.dropout = None\n        self.fc = Linear(self.in_channels, self.num_classes)\n    def init_weights(self):\n        \"\"\"Initiate the FC layer parameters\"\"\"\n        weight_init_(self.fc,\n                     'Normal',",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/heads/tsn_head.py:32-64"
+    },
+    "3103": {
+        "file_id": 255,
+        "content": "This code defines a class for an image classification head with dropout and global average pooling. It initializes the class with specified parameters, such as number of classes, input channels, loss configuration, drop ratio, standard deviation for initialization, and data format. The class also includes methods for initializing weights in the fully connected (FC) layer using normal distribution.",
+        "type": "comment"
+    },
+    "3104": {
+        "file_id": 255,
+        "content": "                     'fc_0.w_0',\n                     'fc_0.b_0',\n                     mean=0.,\n                     std=self.std)\n    def forward(self, x, num_seg):\n        \"\"\"Define how the head is going to run.\n        Args:\n            x (paddle.Tensor): The input data.\n            num_segs (int): Number of segments.\n        Returns:\n            score: (paddle.Tensor) The classification scores for input samples.\n        \"\"\"\n        #XXX: check dropout location!\n        # [N * num_segs, in_channels, 7, 7]\n        x = self.avgpool2d(x)\n        # [N * num_segs, in_channels, 1, 1]\n        if self.dropout is not None:\n            x = self.dropout(x)\n        # [N * num_seg, in_channels, 1, 1]\n        x = paddle.reshape(x, [-1, num_seg, x.shape[1]])\n        # [N, num_seg, in_channels]\n        x = paddle.mean(x, axis=1)\n        # [N, 1, in_channels]\n        x = paddle.reshape(x, shape=[-1, self.in_channels])\n        # [N, in_channels]\n        score = self.fc(x)\n        # [N, num_class]\n        #score = F.softmax(score)  #NOTE remove",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/heads/tsn_head.py:65-96"
+    },
+    "3105": {
+        "file_id": 255,
+        "content": "This code defines a forward pass function for a neural network head. It applies average pooling, optionally applies dropout, and performs a series of reshaping and fully connected layer operations to produce classification scores. Dropout is applied if not None, and the softmax activation (NOTE: remove) is used in the original code. The code operates on tensors of various dimensions, with N representing the number of input samples, num_seg representing the number of segments or regions for each sample, and num_class representing the number of classes being classified.",
+        "type": "comment"
+    },
+    "3106": {
+        "file_id": 255,
+        "content": "        return score",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/heads/tsn_head.py:97-97"
+    },
+    "3107": {
+        "file_id": 255,
+        "content": "This line returns the calculated score as output from the function.",
+        "type": "comment"
+    },
+    "3108": {
+        "file_id": 256,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/modeling/losses/__init__.py",
+        "type": "filepath"
+    },
+    "3109": {
+        "file_id": 256,
+        "content": "This code snippet is a part of the PaddleVideo library and it defines various loss functions, including SmoothL1Loss and L1Loss. It also provides aliases for these losses in the __all__ list.",
+        "type": "summary"
+    },
+    "3110": {
+        "file_id": 256,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom .base import BaseWeightedLoss\nfrom .smooth_l1_loss import SmoothL1Loss\nfrom .l1_loss import L1Loss\n__all__ = ['SmoothL1Loss', 'L1Loss']",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/losses/__init__.py:1-21"
+    },
+    "3111": {
+        "file_id": 256,
+        "content": "This code snippet is a part of the PaddleVideo library and it defines various loss functions, including SmoothL1Loss and L1Loss. It also provides aliases for these losses in the __all__ list.",
+        "type": "comment"
+    },
+    "3112": {
+        "file_id": 257,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/modeling/losses/base.py",
+        "type": "filepath"
+    },
+    "3113": {
+        "file_id": 257,
+        "content": "This class defines a base loss function in PaddleVideo, requires subclasses to implement _forward method and supports an optional loss_weight parameter.",
+        "type": "summary"
+    },
+    "3114": {
+        "file_id": 257,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom abc import  abstractmethod\nimport paddle\nimport paddle.nn as nn\n#XXX use _forward?? or forward??\nclass BaseWeightedLoss(nn.Layer):\n    \"\"\"Base class for loss.\n    All subclass should overwrite the ``_forward()`` method which returns the\n    normal loss without loss weights.\n    Args:\n        loss_weight (float): Factor scalar multiplied on the loss.\n            Default: 1.0.\n    \"\"\"\n    def __init__(self, loss_weight=1.0):",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/losses/base.py:1-33"
+    },
+    "3115": {
+        "file_id": 257,
+        "content": "Base class for loss functions in PaddleVideo, subclasses should override the _forward() method to return normal loss without weights. Contains an optional loss_weight parameter for scaling the final loss value.",
+        "type": "comment"
+    },
+    "3116": {
+        "file_id": 257,
+        "content": "        super().__init__()\n        self.loss_weight = loss_weight\n    @abstractmethod\n    def _forward(self, *args, **kwargs):\n        pass\n    def forward(self, *args, **kwargs):\n        \"\"\"Defines the computation performed at every call.\n        Args:\n            *args: The positional arguments for the corresponding\n                loss.\n            **kwargs: The keyword arguments for the corresponding\n                loss.\n        Returns:\n            paddle.Tensor: The calculated loss.\n        \"\"\"\n        return self._forward(*args, **kwargs) * self.loss_weight",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/losses/base.py:34-51"
+    },
+    "3117": {
+        "file_id": 257,
+        "content": "The code defines an abstract base class for a loss function. It initializes the loss weight, requires subclasses to implement the _forward method, and returns the forward pass result multiplied by the loss weight in the forward method.",
+        "type": "comment"
+    },
+    "3118": {
+        "file_id": 258,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/modeling/losses/l1_loss.py",
+        "type": "filepath"
+    },
+    "3119": {
+        "file_id": 258,
+        "content": "This code defines the L1Loss class for computing the L1 loss, commonly used in image and video quality assessment tasks. The code calculates the L1 loss between 'score' and 'labels', ensuring compatible data types, and returns the resulting loss.",
+        "type": "summary"
+    },
+    "3120": {
+        "file_id": 258,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport paddle\nimport paddle.nn.functional as F\nfrom ..registry import LOSSES\nfrom .base import BaseWeightedLoss\n@LOSSES.register()\nclass L1Loss(BaseWeightedLoss):\n    \"\"\"L1 Loss.\"\"\"\n    def _forward(self, score, labels):\n        \"\"\"Forward function.\n        Args:\n            score (paddle.Tensor): The class score.\n            labels (paddle.Tensor): The ground truth labels.\n        Returns:\n            loss (paddle.Tensor): The returned L1 loss.",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/losses/l1_loss.py:1-33"
+    },
+    "3121": {
+        "file_id": 258,
+        "content": "This code defines a class called L1Loss that extends BaseWeightedLoss and implements the forward function for computing the L1 loss. The L1 loss is commonly used in image and video quality assessment tasks.",
+        "type": "comment"
+    },
+    "3122": {
+        "file_id": 258,
+        "content": "        \"\"\"\n        labels = labels.astype(score.dtype)\n        loss = F.l1_loss(score, labels)\n        return loss",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/losses/l1_loss.py:34-38"
+    },
+    "3123": {
+        "file_id": 258,
+        "content": "This code snippet calculates the L1 loss between 'score' and 'labels', ensuring they have compatible data types, and then returns the resulting loss.",
+        "type": "comment"
+    },
+    "3124": {
+        "file_id": 259,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/modeling/losses/smooth_l1_loss.py",
+        "type": "filepath"
+    },
+    "3125": {
+        "file_id": 259,
+        "content": "This code defines the SmoothL1Loss class as a custom loss function in PaddlePaddle's VideoQualityAssessment library, and implements _forward method to calculate smooth L1 loss between predicted scores and ground truth labels. It extends BaseWeightedLoss for handling outliers in computer vision tasks.",
+        "type": "summary"
+    },
+    "3126": {
+        "file_id": 259,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport paddle\nimport paddle.nn.functional as F\nfrom ..registry import LOSSES\nfrom .base import BaseWeightedLoss\n@LOSSES.register()\nclass SmoothL1Loss(BaseWeightedLoss):\n    \"\"\"smooth L1 Loss.\"\"\"\n    def _forward(self, score, labels):\n        \"\"\"Forward function.\n        Args:\n            score (paddle.Tensor): The class score.\n            labels (paddle.Tensor): The ground truth labels.\n        Returns:\n            loss (paddle.Tensor): The returned smooth L1 Loss.",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/losses/smooth_l1_loss.py:1-33"
+    },
+    "3127": {
+        "file_id": 259,
+        "content": "This code defines the SmoothL1Loss class, a custom loss function in PaddlePaddle's VideoQualityAssessment library. It extends BaseWeightedLoss and implements a _forward method for calculating the smooth L1 loss between predicted scores and ground truth labels. The smooth L1 loss is used in computer vision tasks to handle outliers and improve robustness.",
+        "type": "comment"
+    },
+    "3128": {
+        "file_id": 259,
+        "content": "        \"\"\"\n        labels = labels.astype(score.dtype)\n        loss = F.smooth_l1_loss(score, labels)\n        return loss",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/losses/smooth_l1_loss.py:34-39"
+    },
+    "3129": {
+        "file_id": 259,
+        "content": "This code snippet defines a function that calculates the smooth L1 loss between two arrays, \"score\" and \"labels\". It converts labels to the data type of score, then applies F.smooth_l1_loss() to compute the loss. Finally, it returns the computed loss value.",
+        "type": "comment"
+    },
+    "3130": {
+        "file_id": 260,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/modeling/registry.py",
+        "type": "filepath"
+    },
+    "3131": {
+        "file_id": 260,
+        "content": "The code is a part of PaddleVideo's Video Quality Assessment application. It defines and registers several types of models including backbones, heads, recognizers, localizers, and losses using a registry system for easier management and organization.",
+        "type": "summary"
+    },
+    "3132": {
+        "file_id": 260,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom ..utils import Registry\nBACKBONES = Registry('backbone')\nHEADS = Registry('head')\nRECOGNIZERS = Registry('recognizer')\nLOCALIZERS = Registry('localizer')\nLOSSES = Registry('loss')",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/registry.py:1-23"
+    },
+    "3133": {
+        "file_id": 260,
+        "content": "The code is a part of PaddleVideo's Video Quality Assessment application. It defines and registers several types of models including backbones, heads, recognizers, localizers, and losses using a registry system for easier management and organization.",
+        "type": "comment"
+    },
+    "3134": {
+        "file_id": 261,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/modeling/weight_init.py",
+        "type": "filepath"
+    },
+    "3135": {
+        "file_id": 261,
+        "content": "The `weight_init_` function initializes layer weights in PaddlePaddle with custom functions, supporting various initialization types such as Xavier and Uniform.",
+        "type": "summary"
+    },
+    "3136": {
+        "file_id": 261,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport numpy as np\nimport paddle.nn.initializer as init\ndef weight_init_(layer,\n                 func,\n                 weight_name=None,\n                 bias_name=None,\n                 bias_value=0.0,\n                 **kwargs):\n    \"\"\"\n    In-place params init function.\n    Usage:\n    .. code-block:: python\n        import paddle\n        import numpy as np\n        data = np.ones([3, 4], dtype='float32')\n        linear = paddle.nn.Linear(4, 4)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/weight_init.py:1-36"
+    },
+    "3137": {
+        "file_id": 261,
+        "content": "This function, `weight_init_`, initializes the weights of a PaddlePaddle layer with user-defined functions. The function takes in a layer, an initialization function, optional weight and bias names, and additional keyword arguments. It performs an in-place parameter initialization and supports various types of initialization functions such as Xavier, Uniform, and others.",
+        "type": "comment"
+    },
+    "3138": {
+        "file_id": 261,
+        "content": "        input = paddle.to_tensor(data)\n        print(linear.weight)\n        linear(input)\n        weight_init_(linear, 'Normal', 'fc_w0', 'fc_b0', std=0.01, mean=0.1)\n        print(linear.weight)\n    \"\"\"\n    if hasattr(layer, 'weight') and layer.weight is not None:\n        getattr(init, func)(**kwargs)(layer.weight)\n        if weight_name is not None:\n            # override weight name\n            layer.weight.name = weight_name\n    if hasattr(layer, 'bias') and layer.bias is not None:\n        init.Constant(bias_value)(layer.bias)\n        if bias_name is not None:\n            # override bias name\n            layer.bias.name = bias_name",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/weight_init.py:37-55"
+    },
+    "3139": {
+        "file_id": 261,
+        "content": "This code initializes the weights and biases of a neural network layer using the PaddlePaddle framework. It checks if the layer has weight and bias attributes, then applies weight initialization functions and potentially overrides their names.",
+        "type": "comment"
+    },
+    "3140": {
+        "file_id": 262,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/solver/__init__.py",
+        "type": "filepath"
+    },
+    "3141": {
+        "file_id": 262,
+        "content": "This code imports functions from submodules \"optimizer\" and \"lr\" to build optimizer and learning rate for PaddleVideo's Video Quality Assessment application.",
+        "type": "summary"
+    },
+    "3142": {
+        "file_id": 262,
+        "content": "\"\"\"\n# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom .optimizer import build_optimizer\nfrom .lr import build_lr",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/solver/__init__.py:1-17"
+    },
+    "3143": {
+        "file_id": 262,
+        "content": "This code imports functions from submodules \"optimizer\" and \"lr\" to build optimizer and learning rate for PaddleVideo's Video Quality Assessment application.",
+        "type": "comment"
+    },
+    "3144": {
+        "file_id": 263,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/solver/custom_lr.py",
+        "type": "filepath"
+    },
+    "3145": {
+        "file_id": 263,
+        "content": "Two learning rate scheduler classes, CustomWarmupCosineDecay and CosineAnnealingDecay, are provided for optimizing models with warm-up and stepwise cosine decay. The `CustomWarmupPiecewiseDecay` class is a custom scheduler for PaddleVideo, implementing piecewise function and warmup phase with linear decay.",
+        "type": "summary"
+    },
+    "3146": {
+        "file_id": 263,
+        "content": "\"\"\"\n# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport math\nfrom paddle.optimizer.lr import *\n\"\"\"\nPaddleVideo Learning Rate Schedule:\nYou can use paddle.optimizer.lr\nor define your custom_lr in this file.\n\"\"\"\nclass CustomWarmupCosineDecay(LRScheduler):\n    \"\"\"\n    We combine warmup and stepwise-cosine which is used in slowfast model.\n    Args:\n        warmup_start_lr (float): start learning rate used in warmup stage.\n        warmup_epochs (int): the number epochs of warmup.",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/solver/custom_lr.py:1-33"
+    },
+    "3147": {
+        "file_id": 263,
+        "content": "This code defines a custom learning rate scheduler called CustomWarmupCosineDecay, which combines warm-up and stepwise cosine decay for optimizing models. It extends the LRScheduler class and allows users to define specific start learning rates and the number of epochs for warm-up before applying stepwise cosine decay.",
+        "type": "comment"
+    },
+    "3148": {
+        "file_id": 263,
+        "content": "        cosine_base_lr (float|int, optional): base learning rate in cosine schedule.\n        max_epoch (int): total training epochs.\n        num_iters(int): number iterations of each epoch.\n        last_epoch (int, optional):  The index of last epoch. Can be set to restart training. Default: -1, means initial learning rate.\n        verbose (bool, optional): If ``True``, prints a message to stdout for each update. Default: ``False`` .\n    Returns:\n        ``CosineAnnealingDecay`` instance to schedule learning rate.\n    \"\"\"\n    def __init__(self,\n                 warmup_start_lr,\n                 warmup_epochs,\n                 cosine_base_lr,\n                 max_epoch,\n                 num_iters,\n                 last_epoch=-1,\n                 verbose=False):\n        self.warmup_start_lr = warmup_start_lr\n        self.warmup_epochs = warmup_epochs\n        self.cosine_base_lr = cosine_base_lr\n        self.max_epoch = max_epoch\n        self.num_iters = num_iters\n        #call step() in base class, last_lr/last_epoch/base_lr will be update",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/solver/custom_lr.py:34-55"
+    },
+    "3149": {
+        "file_id": 263,
+        "content": "This code defines a class \"CosineAnnealingDecay\" for scheduling the learning rate. It takes parameters such as base learning rate, total epochs, number of iterations per epoch, and initializes instance variables accordingly. The step() method will update the last_lr/last_epoch/base_lr based on the provided parameters.",
+        "type": "comment"
+    },
+    "3150": {
+        "file_id": 263,
+        "content": "        super(CustomWarmupCosineDecay, self).__init__(last_epoch=last_epoch,\n                                                      verbose=verbose)\n    def step(self, epoch=None):\n        \"\"\"\n        ``step`` should be called after ``optimizer.step`` . It will update the learning rate in optimizer according to current ``epoch`` .\n        The new learning rate will take effect on next ``optimizer.step`` .\n        Args:\n            epoch (int, None): specify current epoch. Default: None. Auto-increment from last_epoch=-1.\n        Returns:\n            None\n        \"\"\"\n        if epoch is None:\n            if self.last_epoch == -1:\n                self.last_epoch += 1\n            else:\n                self.last_epoch += 1 / self.num_iters  # update step with iters\n        else:\n            self.last_epoch = epoch\n        self.last_lr = self.get_lr()\n        if self.verbose:\n            print('Epoch {}: {} set learning rate to {}.'.format(\n                self.last_epoch, self.__class__.__name__, self.last_lr))\n    def _lr_func_cosine(self, cur_epoch, cosine_base_lr, max_epoch):",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/solver/custom_lr.py:56-81"
+    },
+    "3151": {
+        "file_id": 263,
+        "content": "The code defines a CustomWarmupCosineDecay class that extends the Optimizer. It has an __init__ method to initialize last_epoch and verbose, and a step method to update learning rate based on current epoch. The step method also handles cases where epoch is None or provided manually. Additionally, there is a _lr_func_cosine method for calculating the learning rate using a cosine function.",
+        "type": "comment"
+    },
+    "3152": {
+        "file_id": 263,
+        "content": "        \"\"\"start to cosine\"\"\"\n        return cosine_base_lr * (math.cos(math.pi * cur_epoch / max_epoch) +\n                                 1.0) * 0.5\n    def get_lr(self):\n        \"\"\"Define lr policy\"\"\"\n        lr = self._lr_func_cosine(self.last_epoch, self.cosine_base_lr,\n                                  self.max_epoch)\n        lr_end = self._lr_func_cosine(self.warmup_epochs, self.cosine_base_lr,\n                                      self.max_epoch)\n        # Perform warm up.\n        if self.last_epoch < self.warmup_epochs:\n            lr_start = self.warmup_start_lr\n            alpha = (lr_end - lr_start) / self.warmup_epochs\n            lr = self.last_epoch * alpha + lr_start\n        return lr\nclass CustomWarmupPiecewiseDecay(LRScheduler):\n    \"\"\"\n    This op combine warmup and stepwise-cosine which is used in slowfast model.\n    Args:\n        warmup_start_lr (float): start learning rate used in warmup stage.\n        warmup_epochs (int): the number epochs of warmup.\n        step_base_lr (float|int, optional): base learning rate in step schedule.",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/solver/custom_lr.py:82-108"
+    },
+    "3153": {
+        "file_id": 263,
+        "content": "This code defines a custom learning rate (LR) scheduler that combines warmup and stepwise-cosine decay. It starts with a warmup phase, then uses a cosine annealing LR schedule. The `get_lr` function calculates the current learning rate based on the current epoch, maximum epoch, warmup epochs, and other parameters. This scheduler is used in the \"slowfast\" model.",
+        "type": "comment"
+    },
+    "3154": {
+        "file_id": 263,
+        "content": "        max_epoch (int): total training epochs.\n        num_iters(int): number iterations of each epoch.\n        last_epoch (int, optional):  The index of last epoch. Can be set to restart training. Default: -1, means initial learning rate.\n        verbose (bool, optional): If ``True``, prints a message to stdout for each update. Default: ``False`` .\n    Returns:\n        ``CustomWarmupPiecewiseDecay`` instance to schedule learning rate.\n    \"\"\"\n    def __init__(self,\n                 warmup_start_lr,\n                 warmup_epochs,\n                 step_base_lr,\n                 lrs,\n                 gamma,\n                 steps,\n                 max_epoch,\n                 num_iters,\n                 last_epoch=0,\n                 verbose=False):\n        self.warmup_start_lr = warmup_start_lr\n        self.warmup_epochs = warmup_epochs\n        self.step_base_lr = step_base_lr\n        self.lrs = lrs\n        self.gamma = gamma\n        self.steps = steps\n        self.max_epoch = max_epoch\n        self.num_iters = num_iters",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/solver/custom_lr.py:109-134"
+    },
+    "3155": {
+        "file_id": 263,
+        "content": "This code defines a class `CustomWarmupPiecewiseDecay` for scheduling learning rates. It takes several parameters like warmup start lr, warmup epochs, step base lr, lrs (list of lr values), gamma, steps, max_epoch, num_iters, last_epoch and verbose. The constructor initializes the class with these parameters.",
+        "type": "comment"
+    },
+    "3156": {
+        "file_id": 263,
+        "content": "        self.last_epoch = last_epoch\n        self.last_lr = self.warmup_start_lr  # used in first iter\n        self.verbose = verbose\n        self._var_name = None\n    def step(self, epoch=None, rebuild=False):\n        \"\"\"\n        ``step`` should be called after ``optimizer.step`` . It will update the learning rate in optimizer according to current ``epoch`` .\n        The new learning rate will take effect on next ``optimizer.step`` .\n        Args:\n            epoch (int, None): specify current epoch. Default: None. Auto-increment from last_epoch=-1.\n        Returns:\n            None\n        \"\"\"\n        if epoch is None:\n            if not rebuild:\n                self.last_epoch += 1 / self.num_iters  # update step with iters\n        else:\n            self.last_epoch = epoch\n        self.last_lr = self.get_lr()\n        if self.verbose:\n            print('Epoch {}: {} set learning rate to {}.'.format(\n                self.last_epoch, self.__class__.__name__, self.last_lr))\n    def _lr_func_steps_with_relative_lrs(self, cur_epoch, lrs, base_lr, steps,",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/solver/custom_lr.py:135-160"
+    },
+    "3157": {
+        "file_id": 263,
+        "content": "This code defines a custom learning rate scheduler for optimizers, allowing the learning rate to be updated based on epochs. The `step` function is used to update the learning rate, and the `_lr_func_steps_with_relative_lrs` function seems to set the learning rates for each parameter group.",
+        "type": "comment"
+    },
+    "3158": {
+        "file_id": 263,
+        "content": "                                         max_epoch):\n        \"\"\"lr func steps with relative lrs\"\"\"\n        # get step index\n        steps = steps + [max_epoch]\n        for ind, step in enumerate(steps):\n            if cur_epoch < step:\n                break\n        return lrs[ind - 1] * base_lr\n    def get_lr(self):\n        \"\"\"Define lr policy\"\"\"\n        lr = self._lr_func_steps_with_relative_lrs(\n            self.last_epoch,\n            self.lrs,\n            self.step_base_lr,\n            self.steps,\n            self.max_epoch,\n        )\n        lr_end = self._lr_func_steps_with_relative_lrs(\n            self.warmup_epochs,\n            self.lrs,\n            self.step_base_lr,\n            self.steps,\n            self.max_epoch,\n        )\n        # Perform warm up.\n        if self.last_epoch < self.warmup_epochs:\n            lr_start = self.warmup_start_lr\n            alpha = (lr_end - lr_start) / self.warmup_epochs\n            lr = self.last_epoch * alpha + lr_start\n        return lr\nclass CustomPiecewiseDecay(PiecewiseDecay):",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/solver/custom_lr.py:161-196"
+    },
+    "3159": {
+        "file_id": 263,
+        "content": "This code defines a custom learning rate (LR) scheduler for the PaddleVideo library. It uses a piecewise function to define different LRs at various epochs, and also implements a warmup phase with a linear decay from an initial LR to the first defined LR after the warmup period. The code provides functions to calculate the LR at each epoch based on the given steps, LR values, base LR, and maximum epoch.",
+        "type": "comment"
+    },
+    "3160": {
+        "file_id": 263,
+        "content": "    \"\"\"CustomPiecewiseDecay\"\"\"\n    def __init__(self, **kargs):\n        \"\"\"start\"\"\"\n        kargs.pop('num_iters')\n        super().__init__(**kargs)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/solver/custom_lr.py:197-201"
+    },
+    "3161": {
+        "file_id": 263,
+        "content": "This code defines a custom learning rate scheduler, which initializes an instance of the class and takes keyword arguments. The 'num_iters' argument is specifically excluded from being passed as a parameter.",
+        "type": "comment"
+    },
+    "3162": {
+        "file_id": 264,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/solver/lr.py",
+        "type": "filepath"
+    },
+    "3163": {
+        "file_id": 264,
+        "content": "The code constructs a learning rate scheduler for PaddleVideo's VideoQualityAssessment module, using the PiecewiseDecay method and handling learning rate configurations. It creates an LR scheduler instance based on name and updates num_iters if iter_step is present.",
+        "type": "summary"
+    },
+    "3164": {
+        "file_id": 264,
+        "content": "\"\"\"\n# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport copy\nimport paddle\nfrom . import custom_lr\ndef build_lr(cfg, num_iters):\n    \"\"\"\n    Build a learning rate scheduler accroding to ```OPTIMIZER``` configuration, and it always pass into the optimizer.\n    In configuration:\n    learning_rate:\n        name: 'PiecewiseDecay'\n        boundaries: [20, 60]\n        values: [0.00025, 0.000025, 0.0000025]\n    Returns:\n        A paddle.optimizer.lr instance.\n    \"\"\"",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/solver/lr.py:1-33"
+    },
+    "3165": {
+        "file_id": 264,
+        "content": "This code builds a learning rate scheduler according to the \"OPTIMIZER\" configuration. It uses the PiecewiseDecay method with specified boundaries and values. The learning rate scheduler is always passed into the optimizer.",
+        "type": "comment"
+    },
+    "3166": {
+        "file_id": 264,
+        "content": "    cfg_copy = cfg.copy()\n    #when learning_rate is LRScheduler\n    if cfg_copy.get('learning_rate') and isinstance(cfg_copy['learning_rate'],\n                                                    dict):\n        cfg_copy['learning_rate'] = build_lr(\n            cfg_copy['learning_rate'],\n            num_iters)  #not support only inner iter_step\n    lr_name = cfg_copy.pop('name')\n    if cfg_copy.get('iter_step'):\n        cfg_copy['num_iters'] = num_iters\n        cfg_copy.pop('iter_step')\n    return getattr(custom_lr, lr_name)(**cfg_copy)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/solver/lr.py:35-49"
+    },
+    "3167": {
+        "file_id": 264,
+        "content": "This code handles learning rate configuration in PaddleVideo's VideoQualityAssessment module. It checks if the learning rate is a dictionary and modifies it accordingly, then creates an instance of the appropriate LR scheduler based on the specified name. If an iter_step is present, it updates num_iters before removing it.",
+        "type": "comment"
+    },
+    "3168": {
+        "file_id": 265,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/solver/optimizer.py",
+        "type": "filepath"
+    },
+    "3169": {
+        "file_id": 265,
+        "content": "This code constructs an optimizer and learning rate scheduler for parameter optimization, adjustable parameters, and applies regularizers to prevent overfitting. It sets weight decay based on name and value from configuration and returns the optimizer with specified parameters.",
+        "type": "summary"
+    },
+    "3170": {
+        "file_id": 265,
+        "content": "\"\"\"\n# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport copy\nimport paddle\ndef build_optimizer(cfg, lr_scheduler, parameter_list=None):\n    \"\"\"\n    Build an optimizer and learning rate scheduler to optimize parameters accroding to ```OPTIMIZER``` field in configuration .\n    In configuration:\n    OPTIMIZER:\n        name: Momentum\n        momentum: 0.9\n        weight_decay: 0.001\n    or\n    OPTIMIZER:\n        name: Momentum\n        momentum: 0.9\n        weight_decay:",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/solver/optimizer.py:1-36"
+    },
+    "3171": {
+        "file_id": 265,
+        "content": "This code builds an optimizer and learning rate scheduler for parameter optimization based on the given configuration file. It allows for different optimizer types (e.g., Momentum) with adjustable parameters like momentum and weight decay.",
+        "type": "comment"
+    },
+    "3172": {
+        "file_id": 265,
+        "content": "            name: \"L1\"\n            value: 0.001\n    Momentum optimizer will be applied to optimize network and L1Decay regularizer will be applied to avoid overfit.\n    OPTIMIZER:\n        name: Adam\n        weight_decay:\n            name: \"L2\"\n            value: 0.001\n    Adam optimizer will be applied to optimize network and L2Decay regularizer will applied to avoid overfit.\n    Refer to ```https://www.paddlepaddle.org.cn/documentation/docs/en/develop/api/paddle/regularizer/L2Decay_en.html``` for more details.\n    Args:\n        cfg (dict): optimizer configuration.\n        lr_schduler: learning rate scheduler.\n        parameter_list (list): parameters to be optimized.\n    Returns:\n        optimizer (paddle.optimizer): paddle optimizer.\n    \"\"\"\n    cfg_copy = cfg.copy()\n    #XXX check none and illegal cfg!!!\n    opt_name = cfg_copy.pop('name')\n    # deal with weight decay\n    if cfg_copy.get('weight_decay'):\n        if isinstance(cfg_copy.get('weight_decay'), float) or 'L1' in cfg_copy.get('weight_decay').get('name').upper():",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/solver/optimizer.py:37-68"
+    },
+    "3173": {
+        "file_id": 265,
+        "content": "This code defines an optimizer function that creates an optimizer based on the provided configuration. It uses an Adam optimizer to optimize a network and applies an L2Decay regularizer to avoid overfitting. The L1Decay regularizer can also be applied. The function takes an optimizer configuration dictionary, learning rate scheduler, and a list of parameters to be optimized as inputs and returns a paddle optimizer object. It checks for none and illegal configurations.",
+        "type": "comment"
+    },
+    "3174": {
+        "file_id": 265,
+        "content": "            cfg_copy['weight_decay'] = cfg_copy.get('weight_decay').get('value')\n        elif 'L2' in cfg_copy.get('weight_decay').get('name').upper():\n            cfg_copy['weight_decay'] = paddle.regularizer.L2Decay(cfg_copy.get('weight_decay').get('value'))\n        else:\n            raise ValueError\n    cfg_copy.pop('learning_rate')\n    return getattr(paddle.optimizer, opt_name)(lr_scheduler,\n                                               parameters=parameter_list,\n                                               **cfg_copy)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/solver/optimizer.py:69-79"
+    },
+    "3175": {
+        "file_id": 265,
+        "content": "This code sets the weight decay based on its name and value from configuration. If 'L2' is in the name, it adds L2 Decay regularizer. Otherwise, it raises a ValueError. It then removes learning_rate from config and returns an optimizer with specified parameters and other configurations.",
+        "type": "comment"
+    },
+    "3176": {
+        "file_id": 266,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/tasks/__init__.py",
+        "type": "filepath"
+    },
+    "3177": {
+        "file_id": 266,
+        "content": "This code is a part of PaddleVideo's VideoQualityAssessment module and it imports and defines functions for training and testing models.",
+        "type": "summary"
+    },
+    "3178": {
+        "file_id": 266,
+        "content": "\"\"\"\n# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom .train import train_model\nfrom .test import test_model\n__all__ = ['train_model', 'test_model']",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/tasks/__init__.py:1-20"
+    },
+    "3179": {
+        "file_id": 266,
+        "content": "This code is a part of PaddleVideo's VideoQualityAssessment module and it imports and defines functions for training and testing models.",
+        "type": "comment"
+    },
+    "3180": {
+        "file_id": 267,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/tasks/test.py",
+        "type": "filepath"
+    },
+    "3181": {
+        "file_id": 267,
+        "content": "This code tests a model using Paddle framework, constructs multi-card datasets, enables parallel processing with DataParallel, updates state dictionary for evaluation. Batch size is set, metric object built based on configuration, and data iterated over from loader, using either parallel or sequential testing, updating metric per batch before accumulating results.",
+        "type": "summary"
+    },
+    "3182": {
+        "file_id": 267,
+        "content": "\"\"\"\n# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport paddle\nfrom paddlevideo.utils import get_logger\nfrom ..loader.builder import build_dataloader, build_dataset\nfrom ..metrics import build_metric\nfrom ..modeling.builder import build_model\nfrom paddlevideo.utils import load\nimport time\nlogger = get_logger(\"paddlevideo\")\n@paddle.no_grad()\ndef test_model(cfg, weights, parallel=True):\n    \"\"\"Test model entry\n    Args:\n        cfg (dict): configuration.\n        weights (str): weights path to load.",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/tasks/test.py:1-35"
+    },
+    "3183": {
+        "file_id": 267,
+        "content": "This code is a function named \"test_model\" which tests a given model using specified configuration and weights path. It uses Paddle framework and utilizes functions from paddlevideo.utils, loader.builder, metrics, and modeling.builder to perform the testing.",
+        "type": "comment"
+    },
+    "3184": {
+        "file_id": 267,
+        "content": "        parallel (bool): Whether to do multi-cards testing. Default: True.\n    \"\"\"\n    # 1. Construct model.\n    model = build_model(cfg.MODEL)\n    if parallel:\n        model = paddle.DataParallel(model)\n    # 2. Construct dataset and dataloader.\n    cfg.DATASET.test.test_mode = True\n    dataset = build_dataset((cfg.DATASET.test, cfg.PIPELINE.test))\n    batch_size = cfg.DATASET.get(\"test_batch_size\", 1)\n    places = paddle.set_device('gpu')\n    # default num worker: 0, which means no subprocess will be created\n    num_workers = cfg.DATASET.get('num_workers', 0)\n    dataloader_setting = dict(batch_size=batch_size,\n                              num_workers=num_workers,\n                              places=places,\n                              drop_last=False,\n                              shuffle=False)\n    data_loader = build_dataloader(dataset, **dataloader_setting)\n    model.eval()\n    state_dicts = load(weights)\n    model.set_state_dict(state_dicts)\n    # add params to metrics\n    cfg.METRIC.data_size = len(dataset)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/tasks/test.py:36-66"
+    },
+    "3185": {
+        "file_id": 267,
+        "content": "This code constructs a model and dataset for multi-card testing. It uses DataParallel to enable parallel processing on multiple GPUs, builds the dataloader with specified settings, sets the model to evaluation mode, loads state dictionaries from weights file, and updates the model's state dictionary. The metric data size is set to the length of the dataset.",
+        "type": "comment"
+    },
+    "3186": {
+        "file_id": 267,
+        "content": "    cfg.METRIC.batch_size = batch_size\n    Metric = build_metric(cfg.METRIC)\n    for batch_id, data in enumerate(data_loader):\n        if parallel:\n            outputs = model._layers.test_step(data)\n        else:\n            outputs = model.test_step(data)\n        Metric.update(batch_id, data, outputs)\n    Metric.accumulate()",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/tasks/test.py:67-78"
+    },
+    "3187": {
+        "file_id": 267,
+        "content": "This code sets the batch size, builds a metric object based on configuration, and iterates over data from a loader. Inside the loop, it either uses parallel or sequential testing to get outputs, then updates the metric for each batch before accumulating results.",
+        "type": "comment"
+    },
+    "3188": {
+        "file_id": 268,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/tasks/train.py",
+        "type": "filepath"
+    },
+    "3189": {
+        "file_id": 268,
+        "content": "This code utilizes PaddleVideo library to train a video quality assessment model with GPU support, parallel processing, and distributed training. It includes data loaders, solvers, optimization, logging, and validation for efficient model training.",
+        "type": "summary"
+    },
+    "3190": {
+        "file_id": 268,
+        "content": "\"\"\"\n# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport time\nimport os.path as osp\nimport paddle\nimport paddle.distributed.fleet as fleet\nfrom ..loader.builder import build_dataloader, build_dataset\nfrom ..modeling.builder import build_model\nfrom ..solver import build_lr, build_optimizer\nfrom ..metrics import build_metric\nfrom ..utils import do_preciseBN\nfrom paddlevideo.utils import get_logger, coloring\nfrom paddlevideo.utils import (AverageMeter, build_rec_record, log_batch,",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/tasks/train.py:1-28"
+    },
+    "3191": {
+        "file_id": 268,
+        "content": "This code is part of the PaddleVideo library for video quality assessment. It imports necessary modules, and uses builders to construct data loaders, datasets, models, solvers, and metrics. It also includes utilities for logging and batch processing.",
+        "type": "comment"
+    },
+    "3192": {
+        "file_id": 268,
+        "content": "                               log_epoch, save, load, mkdir)\n#from paddlevideo.metrics import QualityMetric\nimport numpy as np\nfrom scipy import stats\ndef train_model(cfg,\n                weights=None,\n                parallel=True,\n                validate=True,\n                amp=False,\n                fleet=False):\n    \"\"\"Train model entry\n    Args:\n    \tcfg (dict): configuration.\n        weights (str): weights path for finetuning.\n    \tparallel (bool): Whether multi-cards training. Default: True.\n        validate (bool): Whether to do evaluation. Default: False.\n    \"\"\"\n    if fleet:\n        fleet.init(is_collective=True)\n    logger = get_logger(\"paddlevideo\")\n    batch_size = cfg.DATASET.get('batch_size', 8)\n    valid_batch_size = cfg.DATASET.get('valid_batch_size', batch_size)\n    places = paddle.set_device('gpu')\n    # default num worker: 0, which means no subprocess will be created\n    num_workers = cfg.DATASET.get('num_workers', 0)\n    model_name = cfg.model_name\n    output_dir = cfg.get(\"output_dir\", \"./output/model_name/\")",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/tasks/train.py:29-61"
+    },
+    "3193": {
+        "file_id": 268,
+        "content": "This function trains a model with specified configuration. It uses GPU for computation, and allows for parallel processing if multiple GPUs are available. Optionally, it performs validation during training and can also be used for fleet-based distributed training. The trained model's output directory is defined in the configuration file.",
+        "type": "comment"
+    },
+    "3194": {
+        "file_id": 268,
+        "content": "    mkdir(output_dir)\n    # 1. Construct model\n    model = build_model(cfg.MODEL)\n    if parallel:\n        model = paddle.DataParallel(model)\n    if fleet:\n        model = paddle.distributed_model(model)\n    # 2. Construct dataset and dataloader\n    train_dataset = build_dataset((cfg.DATASET.train, cfg.PIPELINE.train))\n    train_dataloader_setting = dict(batch_size=batch_size,\n                                    num_workers=num_workers,\n                                    collate_fn_cfg=cfg.get('MIX', None),\n                                    places=places)\n    train_loader = build_dataloader(train_dataset, **train_dataloader_setting)\n    if validate:\n        valid_dataset = build_dataset((cfg.DATASET.valid, cfg.PIPELINE.valid))\n        validate_dataloader_setting = dict(\n            batch_size=valid_batch_size,\n            num_workers=num_workers,\n            places=places,\n            drop_last=False,\n            shuffle=cfg.DATASET.get(\n                'shuffle_valid',\n                False)  #NOTE: attention lstm need shuffle valid data.",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/tasks/train.py:62-89"
+    },
+    "3195": {
+        "file_id": 268,
+        "content": "Code snippet creates a directory, builds the model based on configuration, and sets up data loaders for training and validation datasets. It also handles parallelization and distributed model usage if specified.",
+        "type": "comment"
+    },
+    "3196": {
+        "file_id": 268,
+        "content": "        )\n        valid_loader = build_dataloader(valid_dataset,\n                                        **validate_dataloader_setting)\n    # 3. Construct solver.\n    lr = build_lr(cfg.OPTIMIZER.learning_rate, len(train_loader))\n    optimizer = build_optimizer(cfg.OPTIMIZER,\n                                lr,\n                                parameter_list=model.parameters())\n    if fleet:\n        optimizer = fleet.distributed_optimizer(optimizer)\n    # Resume\n    resume_epoch = cfg.get(\"resume_epoch\", 0)\n    if resume_epoch:\n        filename = osp.join(output_dir,\n                            model_name + \"_epoch_{}\".format(resume_epoch))\n        resume_model_dict = load(filename + '.pdparams')\n        resume_opt_dict = load(filename + '.pdopt')\n        model.set_state_dict(resume_model_dict)\n        optimizer.set_state_dict(resume_opt_dict)\n    # Finetune:\n    if weights:\n        assert resume_epoch == 0, \"Conflict occurs when finetuning, please switch resume function off by setting resume_epoch to 0 or not indicating it.\"",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/tasks/train.py:90-113"
+    },
+    "3197": {
+        "file_id": 268,
+        "content": "Building a valid data loader, constructing a solver with specified optimizer and learning rate, resuming training from a previous epoch or finetuning the model.",
+        "type": "comment"
+    },
+    "3198": {
+        "file_id": 268,
+        "content": "        model_dict = load(weights)\n        model.set_state_dict(model_dict)\n    # 4. Train Model\n    ###AMP###\n    if amp:\n        scaler = paddle.amp.GradScaler(init_loss_scaling=1024)\n    best = 0.\n    max_SROCC = 0\n    max_PLCC = 0\n    Metric = build_metric(cfg.METRIC)\n    for epoch in range(0, cfg.epochs):\n        if epoch < resume_epoch:\n            logger.info(\n                \"| epoch: [{epoch+1}] <= resume_epoch: [{ resume_epoch}], continue... \"\n            )\n            continue\n        model.train()\n        record_list = build_rec_record(cfg.MODEL)\n        tic = time.time()\n        train_output = []\n        train_label = []\n        for i, data in enumerate(train_loader):\n            record_list['reader_time'].update(time.time() - tic)\n            # 4.1 forward\n            ###AMP###\n            if amp:\n                with paddle.amp.auto_cast(\n                        custom_black_list={\"temporal_shift\", \"reduce_mean\"}):\n                    if parallel:\n                        outputs = model._layers.train_step(data)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/tasks/train.py:114-147"
+    },
+    "3199": {
+        "file_id": 268,
+        "content": "The code loads a model and sets its state dict. Then, it proceeds to train the model if not in resume phase. It builds record_list for metrics calculation and iterates through data from train loader to forward pass and calculate metrics. If AMP is enabled, auto-casting is used during training steps.",
+        "type": "comment"
+    }
+}

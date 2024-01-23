@@ -1,0 +1,540 @@
+{
+    "2700": {
+        "file_id": 210,
+        "content": "    # feature\n    feature_path = imgs_path.replace(\"frames\", \"features\") + '.pkl'\n    video_features = pickle.load(open(feature_path, 'rb'))\n    # proposal\n    basename = imgs_path.replace('frames', 'mp4') + '.mp4'\n    bmn_results = prop_dict[basename]\n    material = {'feature': video_features, 'proposal': bmn_results}\n    t0 = time.time()\n    outputs = model.predict(cfg, material)\n    # outputs = model.infer(np.random.rand(32, 8, 3, 224, 224).astype(np.float32))\n    # print(outputs.shape)\n    t1 = time.time()\n    results = {'actions': outputs}\n    with open('results.json', 'w', encoding='utf-8') as f:\n        data = json.dumps(results, indent=4, ensure_ascii=False)\n        f.write(data)\n    print('cost time = {} min'.format((t1 - t0) / 60.0))",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/models/lstm_infer.py:138-158"
+    },
+    "2701": {
+        "file_id": 210,
+        "content": "This code loads video features and proposals, then predicts action using the LSTM model. The results are saved in a JSON file and the time taken is printed.",
+        "type": "comment"
+    },
+    "2702": {
+        "file_id": 211,
+        "content": "/applications/TableTennis/predict/action_detect/models/pptsm_infer.py",
+        "type": "filepath"
+    },
+    "2703": {
+        "file_id": 211,
+        "content": "This code initializes an InferModel class for \"PPTSM\" model inference using PaddlePaddle and GPU, performs inference, predicts feature lists from inputs, retrieves image files, assigns them to the model, prints output shapes, calculates prediction time.",
+        "type": "summary"
+    },
+    "2704": {
+        "file_id": 211,
+        "content": "\"\"\"\nppTSM InferModel\n\"\"\"\nimport sys\nimport numpy as np\nimport time\nsys.path.append('../')\nfrom utils.preprocess import get_images\nfrom utils.config_utils import parse_config\nimport reader\nfrom paddle.inference import Config\nfrom paddle.inference import create_predictor\nclass InferModel(object):\n    \"\"\"pptsm infer\"\"\"\n    def __init__(self, cfg, name='PPTSM'):\n        name = name.upper()\n        self.name = name\n        model_file = cfg[name]['model_file']\n        params_file = cfg[name]['params_file']\n        gpu_mem = cfg[name]['gpu_mem']\n        device_id = cfg[name]['device_id']\n        # model init\n        config = Config(model_file, params_file)\n        config.enable_use_gpu(gpu_mem, device_id)\n        config.switch_ir_optim(True)  # default true\n        config.enable_memory_optim()\n        # use zero copy\n        config.switch_use_feed_fetch_ops(False)\n        self.predictor = create_predictor(config)\n        input_names = self.predictor.get_input_names()\n        self.input_tensor = self.predictor.get_input_handle(input_names[0])",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/models/pptsm_infer.py:1-38"
+    },
+    "2705": {
+        "file_id": 211,
+        "content": "This code initializes an instance of the InferModel class for a specific model named \"PPTSM\". It takes in a configuration file (cfg) and sets up the necessary parameters for the model's inference process. The class uses PaddlePaddle library to create a predictor, which handles input and output data processing and enables GPU memory optimization for faster computation.",
+        "type": "comment"
+    },
+    "2706": {
+        "file_id": 211,
+        "content": "        output_names = self.predictor.get_output_names()\n        self.output_tensor = self.predictor.get_output_handle(output_names[1])\n    def infer(self, input):\n        \"\"\"infer\"\"\"\n        self.input_tensor.copy_from_cpu(input)\n        self.predictor.run()\n        output = self.output_tensor.copy_to_cpu()\n        return output\n    def predict(self, infer_config):\n        \"\"\"predict\"\"\"\n        infer_reader = reader.get_reader(self.name, 'infer', infer_config)\n        feature_list = []\n        for infer_iter, data in enumerate(infer_reader()):\n            inputs = [items[:-1] for items in data]\n            inputs = np.array(inputs)\n            output = self.infer(inputs)\n            feature_list.append(np.squeeze(output))\n        feature_list = np.vstack(feature_list)\n        return feature_list\nif __name__ == \"__main__\":\n    cfg_file = '/home/work/inference/configs/configs.yaml'\n    cfg = parse_config(cfg_file)\n    model = InferModel(cfg)\n    imgs_path = '/home/work/datasets/WorldCup2018/frames/6e577252c4004961ac7caa738a52c238/'",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/models/pptsm_infer.py:40-68"
+    },
+    "2707": {
+        "file_id": 211,
+        "content": "This code is for an InferModel class that performs inference on video frames using a pre-trained model. It uses the get_output_names and get_output_handle methods from the predictor to specify the desired output tensor. The infer method takes input data, runs the inference, and returns the output tensor. The predict method reads input data from a specified directory or config file, applies inference on frames, and returns a feature list.",
+        "type": "comment"
+    },
+    "2708": {
+        "file_id": 211,
+        "content": "    imgs_list = get_images(imgs_path)\n    t0 = time.time()\n    cfg['PPTSM']['frame_list'] = imgs_list\n    outputs = model.predict(cfg)\n    # outputs = model.infer(np.random.rand(32, 8, 3, 224, 224).astype(np.float32))\n    t1 = time.time()\n    print(outputs.shape)\n    print('cost time = {} min'.format((t1 - t0) / 60.0))",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/models/pptsm_infer.py:69-77"
+    },
+    "2709": {
+        "file_id": 211,
+        "content": "This code retrieves image files from a specified path, assigns them to a model for inference and prints the resulting shape of the outputs. It also calculates and displays the time taken for the prediction process.",
+        "type": "comment"
+    },
+    "2710": {
+        "file_id": 212,
+        "content": "/applications/TableTennis/predict/action_detect/reader/__init__.py",
+        "type": "filepath"
+    },
+    "2711": {
+        "file_id": 212,
+        "content": "This code imports various reader classes and registers them using the regist_reader function. It sorts the registrations alphabetically. The BMNINFReader reads data from files with a \"BMN\" extension, while FeatureReader reads action data. No readers are registered for TSM or PPTSM in this version of the code.",
+        "type": "summary"
+    },
+    "2712": {
+        "file_id": 212,
+        "content": "\"\"\"\nread map for model\n\"\"\"\nfrom reader.reader_utils import regist_reader, get_reader\n# import reader.tsminf_reader as tsminf_reader\n# import reader.audio_reader as audio_reader\nimport reader.bmninf_reader as bmninf_reader\nimport reader.feature_reader as feature_reader\n# regist reader, sort by alphabet\n# regist_reader(\"TSM\", tsminf_reader.TSMINFReader)\n# regist_reader(\"PPTSM\", tsminf_reader.TSMINFReader)\n# regist_reader(\"AUDIO\", audio_reader.AudioReader)\nregist_reader(\"BMN\", bmninf_reader.BMNINFReader)\nregist_reader(\"ACTION\", feature_reader.FeatureReader)",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/reader/__init__.py:1-15"
+    },
+    "2713": {
+        "file_id": 212,
+        "content": "This code imports various reader classes and registers them using the regist_reader function. It sorts the registrations alphabetically. The BMNINFReader reads data from files with a \"BMN\" extension, while FeatureReader reads action data. No readers are registered for TSM or PPTSM in this version of the code.",
+        "type": "comment"
+    },
+    "2714": {
+        "file_id": 213,
+        "content": "/applications/TableTennis/predict/action_detect/reader/bmninf_reader.py",
+        "type": "filepath"
+    },
+    "2715": {
+        "file_id": 213,
+        "content": "The code introduces the BMNINFReader class for data reading in PaddleVideo's TableTennis app, initializes a table tennis action detection class, creates a dataset, and defines an inference reader function.",
+        "type": "summary"
+    },
+    "2716": {
+        "file_id": 213,
+        "content": "\"\"\"\n# @File  : bmninf_reader.py\n# @Author: macaihong\n# @Date  : 2019/12/15\n# @Desc  :\n\"\"\"\nimport os\nimport random\nimport pickle\nimport json\nimport numpy as np\nimport multiprocessing\nimport numpy as np\nfrom .reader_utils import DataReader\ndef get_sw_prop(duration, window=200, step=10):\n    \"\"\"\n    get_sw_prop\n    \"\"\"\n    pr = []\n    local_boxes = []\n    for k in np.arange(0, duration - window + step, step):\n        start_id = k\n        end_id = min(duration, k + window)\n        if end_id - start_id < window:\n            start_id = end_id - window\n        local_boxes = (start_id, end_id)\n        pr.append(local_boxes)\n    def valid_proposal(duration, span):\n        \"\"\"\n        valid_proposal\n        \"\"\"\n        # fileter proposals\n        # a valid proposal should have at least one second in the video\n        real_span = min(duration, span[1]) - span[0]\n        return real_span >= 1\n    pr = list(filter(lambda x: valid_proposal(duration, x), pr))\n    return pr\nclass BMNINFReader(DataReader):\n    \"\"\"\n    Data reader for BMN model, which was stored as features extracted by prior networks",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/reader/bmninf_reader.py:1-49"
+    },
+    "2717": {
+        "file_id": 213,
+        "content": "This code defines a class BMNINFReader for data reading in PaddleVideo's TableTennis application. It uses the get_sw_prop function to retrieve valid proposal spans, filters them based on having at least one second of video duration, and returns the filtered proposal list.",
+        "type": "comment"
+    },
+    "2718": {
+        "file_id": 213,
+        "content": "    dataset cfg: feat_path, feature path,\n                 tscale, temporal length of BM map,\n                 dscale, duration scale of BM map,\n                 anchor_xmin, anchor_xmax, the range of each point in the feature sequence,\n                 batch_size, batch size of input data,\n                 num_threads, number of threads of data processing\n    \"\"\"\n    def __init__(self, name, mode, cfg, material=None):\n        self.name = name\n        self.mode = mode\n        self.tscale = cfg[self.name.upper()]['tscale']  # 200\n        self.dscale = cfg[self.name.upper()]['dscale']  # 200\n        # self.subset = cfg[self.name.upper()]['subset']\n        self.tgap = 1. / self.tscale\n        self.step = cfg[self.name.upper()]['window_step']\n        self.material = material\n        src_feature = self.material\n        image_feature = src_feature['image_feature']\n        # pcm_feature = src_feature['pcm_feature']\n        # pcm_feature = pcm_feature.reshape((pcm_feature.shape[0] * 5, 640))\n        # print(rgb_feature.shape, audio_feature.shape, pcm_feature.shape)",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/reader/bmninf_reader.py:50-72"
+    },
+    "2719": {
+        "file_id": 213,
+        "content": "This code is initializing a class that reads data from BMNINF files for table tennis action detection. The class takes in arguments like name, mode, configuration (cfg), and material. It sets the temporal length of BM map (tscale) and duration scale of BM map (dscale). It also calculates other values such as step size and uses them to reshape feature data.",
+        "type": "comment"
+    },
+    "2720": {
+        "file_id": 213,
+        "content": "        # min_length = min(image_feature.shape[0], pcm_feature.shape[0])\n        #if min_length == 0:\n        #    continue\n        # image_feature = image_feature[:min_length, :]\n        # pcm_feature = pcm_feature[:min_length, :]\n        # self.features = np.concatenate((image_feature, pcm_feature), axis=1)\n        self.features = image_feature\n        self.duration = len(self.features)\n        self.window = self.tscale\n        self.get_dataset_dict()\n        self.get_match_map()\n        self.batch_size = cfg[self.name.upper()]['batch_size']\n        if (mode == 'test') or (mode == 'infer'):\n            self.num_threads = 1  # set num_threads as 1 for test and infer\n    def get_dataset_dict(self):\n        \"\"\"\n        get_dataset_dict\n        \"\"\"\n        self.video_list = get_sw_prop(self.duration, self.window, self.step)\n    def get_match_map(self):\n        \"\"\"\n        get_match_map\n        \"\"\"\n        match_map = []\n        for idx in range(self.tscale):\n            tmp_match_window = []\n            xmin = self.tgap * idx",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/reader/bmninf_reader.py:73-103"
+    },
+    "2721": {
+        "file_id": 213,
+        "content": "This code is creating a dataset for video analysis. It concatenates image and audio features, sets the duration, window size, and retrieves the list of videos to be analyzed in the dataset. The code also handles test and infer modes by setting the number of threads accordingly.",
+        "type": "comment"
+    },
+    "2722": {
+        "file_id": 213,
+        "content": "            for jdx in range(1, self.tscale + 1):\n                xmax = xmin + self.tgap * jdx\n                tmp_match_window.append([xmin, xmax])\n            match_map.append(tmp_match_window)\n        match_map = np.array(match_map)\n        match_map = np.transpose(match_map, [1, 0, 2])\n        match_map = np.reshape(match_map, [-1, 2])\n        self.match_map = match_map\n        self.anchor_xmin = [self.tgap * i for i in range(self.tscale)]\n        self.anchor_xmax = [self.tgap * i for i in range(1, self.tscale + 1)]\n    def load_file(self, video_wind):\n        \"\"\"\n        load_file\n        \"\"\"\n        start_feat_id = video_wind[0]\n        end_feat_id = video_wind[1]\n        video_feat = self.features[video_wind[0]:video_wind[1]]\n        video_feat = video_feat.T\n        video_feat = video_feat.astype(\"float32\")\n        return video_feat\n    def create_reader(self):\n        \"\"\"\n        reader creator for ctcn model\n        \"\"\"\n        return self.make_infer_reader()\n    def make_infer_reader(self):\n        \"\"\"",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/reader/bmninf_reader.py:104-133"
+    },
+    "2723": {
+        "file_id": 213,
+        "content": "The code defines a class with methods to load video features, create a reader for ctcn model inference, and define match_map which seems to be related to table tennis action detection. The load_file method takes a window of feature ids and loads the corresponding video features. The create_reader method returns an inferential reader for the ctcn model. The make_infer_reader method is used to create the reader object.",
+        "type": "comment"
+    },
+    "2724": {
+        "file_id": 213,
+        "content": "        reader for inference\n        \"\"\"\n        def reader():\n            \"\"\"\n            reader\n            \"\"\"\n            batch_out = []\n            # for video_name in self.video_list:\n            for video_wind in self.video_list:\n                video_idx = self.video_list.index(video_wind)\n                video_feat = self.load_file(video_wind)\n                batch_out.append(\n                    (video_feat, video_wind, [self.duration, self.dscale]))\n                if len(batch_out) == self.batch_size:\n                    yield batch_out\n                    batch_out = []\n            if len(batch_out) > 0:\n                yield batch_out\n        return reader",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/reader/bmninf_reader.py:134-154"
+    },
+    "2725": {
+        "file_id": 213,
+        "content": "This code defines a reader function for inference that iterates over video files and appends data to a batch. It yields the batches when their size reaches the specified batch_size, and at the end of iteration if there's still remaining data.",
+        "type": "comment"
+    },
+    "2726": {
+        "file_id": 214,
+        "content": "/applications/TableTennis/predict/action_detect/reader/feature_reader.py",
+        "type": "filepath"
+    },
+    "2727": {
+        "file_id": 214,
+        "content": "This code reads the YouTube-8M dataset, featuring three models (LSTM, attention cluster, nextVlad), and is used for table tennis action detection. It uses cPickle and numpy, and a feature reader initializes for training or inference batches, extracting image, audio, and pcm features.",
+        "type": "summary"
+    },
+    "2728": {
+        "file_id": 214,
+        "content": "\"\"\"\nattention-lstm feature reader\n\"\"\"\n#  Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport sys\ntry:\n    import cPickle as pickle\n    from cStringIO import StringIO\nexcept ImportError:\n    import pickle\nimport numpy as np\nimport random\nimport code\nfrom .reader_utils import DataReader\nclass FeatureReader(DataReader):\n    \"\"\"\n    Data reader for youtube-8M dataset, which was stored as features extracted by prior networks\n    This is for the three models: lstm, attention cluster, nextvlad",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/reader/feature_reader.py:1-34"
+    },
+    "2729": {
+        "file_id": 214,
+        "content": "This code is a data reader for the YouTube-8M dataset, which contains features extracted by prior networks for three models: LSTM, attention cluster, and nextVlad. It uses cPickle to load data from storage and numpy for numerical operations.",
+        "type": "comment"
+    },
+    "2730": {
+        "file_id": 214,
+        "content": "    dataset cfg: num_classes\n                 batch_size\n                 list\n                 NextVlad only: eigen_file\n    \"\"\"\n    def __init__(self, name, mode, cfg, material=None):\n        self.name = name\n        self.mode = mode\n        self.batch_size = cfg[self.name.upper()]['batch_size']\n        self.feature = material['feature']\n        self.proposal = material['proposal']\n        self.fps = 5\n    def create_reader(self):\n        \"\"\"\n        create_reader\n        \"\"\"\n        image_feature_list = self.feature['image_feature']\n        audio_feature_list = self.feature['audio_feature']\n        pcm_feature_list = self.feature['pcm_feature']\n        pcm_feature_list = pcm_feature_list.reshape(\n            (pcm_feature_list.shape[0] * 5, 640))\n        fl = self.proposal\n        if self.mode == 'train':\n            random.shuffle(fl)\n        def reader():\n            \"\"\"\n            reader\n            \"\"\"\n            batch_out = []\n            for prop_info in fl:\n                start_id = int(prop_info['start'])",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/reader/feature_reader.py:36-71"
+    },
+    "2731": {
+        "file_id": 214,
+        "content": "This code initializes a feature reader for table tennis action detection. It takes in parameters such as name, mode, configuration, and material. The reader creates lists of image, audio, and pcm features, reshapes the pcm_feature_list, and shuffles proposal list if in train mode. It then defines a reader function that iterates through proposal list to create batches for training or inference.",
+        "type": "comment"
+    },
+    "2732": {
+        "file_id": 214,
+        "content": "                end_id = int(prop_info['end'])\n                bmn_score = float(prop_info['score'])\n                try:\n                    image_feature = image_feature_list[start_id:end_id]\n                    audio_feature = audio_feature_list[int(start_id / self.fps\n                                                           ):int(end_id /\n                                                                 self.fps)]\n                    pcm_feature = pcm_feature_list[start_id:end_id]\n                    # image_feature = np.concatenate((image_feature, pcm_feature), axis=1)\n                    batch_out.append(\n                        (image_feature, audio_feature, 0, prop_info))\n                    if len(batch_out) == self.batch_size:\n                        yield batch_out\n                        batch_out = []\n                except Exception as e:\n                    continue\n        return reader",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/reader/feature_reader.py:72-91"
+    },
+    "2733": {
+        "file_id": 214,
+        "content": "This code segment is part of a feature reader for Table Tennis action prediction. It extracts image, audio, and pcm features from their respective lists based on start and end IDs. If batch size is reached, it yields the batch and resets the batch.",
+        "type": "comment"
+    },
+    "2734": {
+        "file_id": 215,
+        "content": "/applications/TableTennis/predict/action_detect/reader/reader_utils.py",
+        "type": "filepath"
+    },
+    "2735": {
+        "file_id": 215,
+        "content": "The code defines `ReaderZoo` class for handling errors in PaddleVideo TableTennis, allowing registration and retrieval of different types of readers using named parameters.",
+        "type": "summary"
+    },
+    "2736": {
+        "file_id": 215,
+        "content": "\"\"\"\nreader_util\n\"\"\"\n#  Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport random\nimport numpy as np\nclass ReaderNotFoundError(Exception):\n    \"\"\"\n    \"Error: reader not found\"\n    \"\"\"\n    def __init__(self, reader_name, avail_readers):\n        super(ReaderNotFoundError, self).__init__()\n        self.reader_name = reader_name\n        self.avail_readers = avail_readers\n    def __str__(self):\n        msg = \"Reader {} Not Found.\\nAvailiable readers:\\n\".format(\n            self.reader_name)",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/reader/reader_utils.py:1-33"
+    },
+    "2737": {
+        "file_id": 215,
+        "content": "This Python script defines a ReaderNotFoundError exception and a class for handling reader-related errors in the PaddleVideo TableTennis application. It includes license information and allows for checking if a specified reader is available by comparing it to a list of available readers.",
+        "type": "comment"
+    },
+    "2738": {
+        "file_id": 215,
+        "content": "        for reader in self.avail_readers:\n            msg += \"  {}\\n\".format(reader)\n        return msg\nclass DataReader(object):\n    \"\"\"\n    data reader for video input\n    \"\"\"\n    def __init__(self, model_name, mode, cfg):\n        self.name = model_name\n        self.mode = mode\n        self.cfg = cfg\n    def create_reader(self):\n        \"\"\"\n        Not implemented\n        \"\"\"\n        pass\n    def get_config_from_sec(self, sec, item, default=None):\n        \"\"\"\n        get_config_from_sec\n        \"\"\"\n        if sec.upper() not in self.cfg:\n            return default\n        return self.cfg[sec.upper()].get(item, default)\nclass ReaderZoo(object):\n    \"\"\"\n    ReaderZoo\n    \"\"\"\n    def __init__(self):\n        \"\"\"\n        __init__\n        \"\"\"\n        self.reader_zoo = {}\n    def regist(self, name, reader):\n        \"\"\"\n        regist\n        \"\"\"\n        assert reader.__base__ == DataReader, \"Unknow model type {}\".format(\n            type(reader))\n        self.reader_zoo[name] = reader\n    def get(self, name, mode, cfg, material=None):",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/reader/reader_utils.py:34-81"
+    },
+    "2739": {
+        "file_id": 215,
+        "content": "This code defines a `DataReader` class and a `ReaderZoo` class. The `DataReader` class is a data reader for video input, with methods such as `create_reader`, which should be implemented but is currently empty, and `get_config_from_sec`, which gets configuration from a section in the given config file. The `ReaderZoo` class registers different types of readers based on their names and ensures they inherit from the `DataReader` class. The code also includes functionality to retrieve a reader given its name, mode, configuration, and optionally a material type.",
+        "type": "comment"
+    },
+    "2740": {
+        "file_id": 215,
+        "content": "        \"\"\"\n        get\n        \"\"\"\n        for k, v in self.reader_zoo.items():\n            if k == name:\n                return v(name, mode, cfg, material)\n        raise ReaderNotFoundError(name, self.reader_zoo.keys())\n# singleton reader_zoo\nreader_zoo = ReaderZoo()\ndef regist_reader(name, reader):\n    \"\"\"\n    regist_reader\n    \"\"\"\n    reader_zoo.regist(name, reader)\ndef get_reader(name, mode, cfg, material=None):\n    \"\"\"\n    get_reader\n    \"\"\"\n    reader_model = reader_zoo.get(name, mode, cfg, material)\n    return reader_model.create_reader()",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/reader/reader_utils.py:82-107"
+    },
+    "2741": {
+        "file_id": 215,
+        "content": "This code defines a singleton reader_zoo, allows for registration of readers using the regist_reader() function, and retrieves the registered reader using get_reader() function. The reader instance is created by calling create_reader() on the retrieved reader model.",
+        "type": "comment"
+    },
+    "2742": {
+        "file_id": 216,
+        "content": "/applications/TableTennis/predict/action_detect/utils/config_utils.py",
+        "type": "filepath"
+    },
+    "2743": {
+        "file_id": 216,
+        "content": "The code is a part of PaddleVideo's TableTennis application, containing an AttrDict class and parse_config function for parsing YAML configuration files using yaml and ast libraries. It also imports the logger module for logging purposes, and logs a separator string to indicate context changes.",
+        "type": "summary"
+    },
+    "2744": {
+        "file_id": 216,
+        "content": "\"\"\"\nconfig_utils\n\"\"\"\n#  Copyright (c) 2018 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport yaml\nimport ast\nimport logger\nlogger = logger.Logger()\nCONFIG_SECS = [\n    'train',\n    'valid',\n    'test',\n    'infer',\n]\nclass AttrDict(dict):\n    \"\"\"\n    AttrDict\n    \"\"\"\n    def __getattr__(self, key):\n        return self[key]\n    def __setattr__(self, key, value):\n        if key in self.__dict__:\n            self.__dict__[key] = value\n        else:\n            self[key] = value\ndef parse_config(cfg_file):",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/utils/config_utils.py:1-47"
+    },
+    "2745": {
+        "file_id": 216,
+        "content": "The code is part of the PaddleVideo TableTennis application and contains a class called AttrDict that extends the Python dictionary functionality. The file also includes the parse_config function, which likely reads and parses configuration files. The code uses the yaml and ast libraries for processing configuration data in a format-agnostic manner. Additionally, it defines a list of configuration types (CONFIG_SECS) and utilizes the logger module for logging purposes.",
+        "type": "comment"
+    },
+    "2746": {
+        "file_id": 216,
+        "content": "    \"\"\"Load a config file into AttrDict\"\"\"\n    import yaml\n    with open(cfg_file, 'r') as fopen:\n        yaml_config = AttrDict(yaml.load(fopen, Loader=yaml.Loader))\n    create_attr_dict(yaml_config)\n    return yaml_config\ndef create_attr_dict(yaml_config):\n    \"\"\"create_attr_dict\"\"\"\n    for key, value in yaml_config.items():\n        if isinstance(value, dict):\n            yaml_config[key] = value = AttrDict(value)\n        if isinstance(value, str):\n            try:\n                value = ast.literal_eval(value)\n            except BaseException:\n                pass\n        if isinstance(value, AttrDict):\n            create_attr_dict(yaml_config[key])\n        else:\n            yaml_config[key] = value\n    return\ndef print_configs(cfg, mode):\n    \"\"\"print_configs\"\"\"\n    logger.info(\n        \"---------------- {:>5} Arguments ----------------\".format(mode))\n    for sec, sec_items in cfg.items():\n        logger.info(\"{}:\".format(sec))\n        for k, v in sec_items.items():\n            logger.info(\"    {}:{}\".format(k, v))",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/utils/config_utils.py:48-80"
+    },
+    "2747": {
+        "file_id": 216,
+        "content": "This code imports the yaml library and loads a configuration file into an AttrDict object, allowing for easier manipulation of nested dictionary data. It also includes functions to create an AttrDict from a string and print the configurations in a formatted manner.",
+        "type": "comment"
+    },
+    "2748": {
+        "file_id": 216,
+        "content": "    logger.info(\"-------------------------------------------------\")",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/utils/config_utils.py:81-81"
+    },
+    "2749": {
+        "file_id": 216,
+        "content": "This code snippet logs a separator string to the logger, indicating a change in context or section within the program.",
+        "type": "comment"
+    },
+    "2750": {
+        "file_id": 217,
+        "content": "/applications/TableTennis/predict/action_detect/utils/preprocess.py",
+        "type": "filepath"
+    },
+    "2751": {
+        "file_id": 217,
+        "content": "Code file \"preprocess.py\" contains four functions: \n1. ffmpeg_frames extracts frames from a video using ffmpeg and saves them as jpg files in a specified folder, at the specified frame rate.\n2. ffmpeg_pcm extracts audio from a video and saves it as a PCM file.\n3. ffmpeg_mp4 downloads a video file from a URL to the local machine.\n4. get_images retrieves all image files in a directory, sorts them, and stores their paths in a list.",
+        "type": "summary"
+    },
+    "2752": {
+        "file_id": 217,
+        "content": "\"\"\" extract frames and pcm\"\"\"\nimport os\nimport sys\nimport shutil\ndef ffmpeg_frames(mp4_addr, frame_out_folder, fps=5):\n    \"\"\"ffmpeg_frames\"\"\"\n    if os.path.exists(frame_out_folder):\n        shutil.rmtree(frame_out_folder)\n    os.makedirs(frame_out_folder)\n    cmd = './src/utils/ffmpeg -v 0 -i %s -r %d -q 0 %s/%s.jpg' % (\n        mp4_addr, fps, frame_out_folder, '%08d')\n    os.system(cmd)\ndef ffmpeg_pcm(mp4_addr, save_file_name):\n    \"\"\"ffmpeg_pcm\"\"\"\n    cmd = './src/utils/ffmpeg -y  -i %s  -acodec pcm_s16le -f s16le -ac 1 -ar 16000 %s -v 0' \\\n        % (mp4_addr, save_file_name)\n    os.system(cmd)\ndef ffmpeg_mp4(mp4_url, mp4_addr):\n    \"\"\"ffmpeg_mp4\"\"\"\n    cmd = \"wget %s -O %s -q\" % (mp4_url, mp4_addr)\n    print(\"cmd = \", cmd)\n    os.system(cmd)\ndef get_images(image_path):\n    \"\"\"get_images\"\"\"\n    images = sorted(os.listdir(image_path))\n    images = images\n    images_path_list = [image_path + '/' + im for im in images]\n    return images_path_list",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/utils/preprocess.py:1-36"
+    },
+    "2753": {
+        "file_id": 217,
+        "content": "Code file \"preprocess.py\" contains four functions: \n1. ffmpeg_frames extracts frames from a video using ffmpeg and saves them as jpg files in a specified folder, at the specified frame rate.\n2. ffmpeg_pcm extracts audio from a video and saves it as a PCM file.\n3. ffmpeg_mp4 downloads a video file from a URL to the local machine.\n4. get_images retrieves all image files in a directory, sorts them, and stores their paths in a list.",
+        "type": "comment"
+    },
+    "2754": {
+        "file_id": 218,
+        "content": "/applications/TableTennis/predict/action_detect/utils/process_result.py",
+        "type": "filepath"
+    },
+    "2755": {
+        "file_id": 218,
+        "content": "This function calculates video results by implementing one-dimensional non-maximal suppression, removes overlapping detections, and processes video properties. It takes in various parameters such as label map file, fps, score threshold, iou threshold, and frame offset.",
+        "type": "summary"
+    },
+    "2756": {
+        "file_id": 218,
+        "content": "\"\"\"\n# @File  : process_result.py\n# @Author: macaihong\n# @Date  : 2019/12/15\n# @Desc  :\n\"\"\"\nimport sys\nimport os\nimport re\nimport numpy as np\nimport pickle\nimport json\nimport logger\nlogger = logger.Logger()\ndef get_data_res(label_map, data, topk):\n    \"\"\"get_data_res\"\"\"\n    sum_vid = len(data)\n    video_result = []\n    for i in range(sum_vid):\n        vid_name = data[i][0][0]\n        # true_label predict_start predict_end predict_score predict_len gt_iou gt_start gt_ioa\n        feature_start_id = float(data[i][0][1]['start'])\n        feature_end_id = float(data[i][0][1]['end'])\n        feature_stage1_score = data[i][0][1]['score']\n        predict_res = []\n        for k in range(topk):\n            score_top = data[i][1][k]\n            labelid_top = data[i][2][k]\n            label_iou = data[i][3]\n            labelname_top = label_map[str(labelid_top)]\n            video_result.append([\n                feature_start_id, feature_end_id, labelid_top, labelname_top,\n                score_top, label_iou\n            ])\n    return video_result",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/utils/process_result.py:1-39"
+    },
+    "2757": {
+        "file_id": 218,
+        "content": "This function takes in label_map, data, and topk as input arguments. It calculates the video result based on the given parameters and returns it. The video result is a list of lists where each sub-list contains the feature start ID, feature end ID, label ID, label name, score, and label IOU for each action detected in the video.",
+        "type": "comment"
+    },
+    "2758": {
+        "file_id": 218,
+        "content": "def base_nms(bboxes, thresh, delta=0, nms_id=2):\n    \"\"\"\n    One-dimensional non-maximal suppression\n    :param bboxes: [[vid, label, st, ed, score, ...], ...]\n    :param thresh:\n    :return:\n    \"\"\"\n    \"\"\"\n    t1 = bboxes[:, 0]\n    t2 = bboxes[:, 1]\n    scores = bboxes[:, nms_id]\n    \"\"\"\n    t1 = np.array([max(0, x[0] - delta) for x in bboxes])\n    t2 = np.array([x[1] + delta for x in bboxes])\n    scores = np.array([x[nms_id] for x in bboxes])\n    durations = t2 - t1\n    order = scores.argsort()[::-1]\n    keep = []\n    while order.size > 0:\n        i = order[0]\n        keep.append(i)\n        tt1 = np.maximum(t1[i], t1[order[1:]])\n        tt2 = np.minimum(t2[i], t2[order[1:]])\n        intersection = tt2 - tt1\n        IoU = intersection / (durations[i] + durations[order[1:]] -\n                              intersection).astype(float)\n        inds = np.where(IoU <= thresh)[0]\n        order = order[inds + 1]\n    return [bboxes[i] for i in keep]\ndef process_proposal(source_prop_box,\n                     min_frame_thread=5,",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/utils/process_result.py:42-78"
+    },
+    "2759": {
+        "file_id": 218,
+        "content": "This code implements one-dimensional non-maximal suppression, which performs non-overlapping detection on bounding boxes. The function takes in a list of bounding boxes and removes any overlapping detections with an Intersection over Union (IoU) threshold greater than the given threshold. The resulting list contains only the non-overlapping detections.",
+        "type": "comment"
+    },
+    "2760": {
+        "file_id": 218,
+        "content": "                     nms_thresh=0.7,\n                     score_thresh=0.01):\n    \"\"\"process_video_prop\"\"\"\n    prop_box = []\n    for items in source_prop_box:\n        start_frame = float(items[0])\n        end_frame = float(items[1])\n        score = float(items[2])\n        if end_frame - start_frame < min_frame_thread or score < score_thresh:\n            continue\n        prop_box.append([start_frame, end_frame, score])\n    prop_box_keep = base_nms(prop_box, nms_thresh)\n    prop_res = []\n    for res in prop_box_keep:\n        prop_res.append({'start': res[0], 'end': res[1], 'score': res[2]})\n    return prop_res\ndef process_video_classify(video_prop, fps, score_thread, iou_thread, \\\n                           nms_id=5, nms_thread=0.01, nms_delta=10, backgroundid=0):\n    \"\"\"process_video_classify\"\"\"\n    prop_filter = []\n    for item in video_prop:\n        if item[2] == backgroundid:\n            continue\n        prop_filter.append(item)\n    # prop_filter = sorted(prop_filter, key=lambda x: x[nms_id], reverse=True)\n    prop_filter = base_nms(prop_filter, nms_thread, nms_delta, nms_id)",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/utils/process_result.py:79-110"
+    },
+    "2761": {
+        "file_id": 218,
+        "content": "The code contains two functions: `process_video_prop` and `process_video_classify`. The first function processes video properties based on start frame, end frame, and score thresholds. It applies non-maximum suppression (NMS) to remove redundant or weak detections. The second function filters video properties based on background id and performs NMS for specific parameters.",
+        "type": "comment"
+    },
+    "2762": {
+        "file_id": 218,
+        "content": "    prop_filter = sorted(prop_filter, key=lambda x: x[0])\n    video_results = []\n    for item in prop_filter:\n        start_sec = item[0] / fps\n        end_sec = item[1] / fps\n        start_id_frame = item[0]\n        end_id_frame = item[1]\n        # start_time = \"%02d:%02d:%02d\" % ((start_id_frame / fps) / 3600, \\\n        #     ((start_id_frame / fps) % 3600) / 60, (start_id_frame / fps) % 60)\n        # end_time = \"%02d:%02d:%02d\" % ((end_id_frame / fps) / 3600, \\\n        #     ((end_id_frame / fps) % 3600) / 60, (end_id_frame / fps) % 60)\n        start_time = int(start_id_frame / fps)\n        end_time = int(end_id_frame / fps)\n        label_id = item[2]\n        label_name = item[3]\n        label_classify_score = item[4]\n        label_iou_score = item[5]\n        if label_classify_score > score_thread and label_iou_score > iou_thread:\n            video_results.append({\n                \"start_time\": start_time,\n                \"end_time\": end_time,\n                \"label_id\": label_id,\n                \"label_name\": label_name,",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/utils/process_result.py:111-136"
+    },
+    "2763": {
+        "file_id": 218,
+        "content": "This code sorts prop_filter based on timestamps, then iterates over the sorted list to extract start and end times, label IDs, and scores. It appends these details to video_results if the classify score is greater than a threshold and IOU score is also above the threshold.",
+        "type": "comment"
+    },
+    "2764": {
+        "file_id": 218,
+        "content": "                \"classify_score\": label_classify_score,\n                \"iou_score\": label_iou_score\n            })\n    return video_results\ndef get_action_result(result_info, label_map_file, fps, score_thread=0, \\\n                      iou_thread=0, nms_id=5, nms_thread=0.01, frame_offset=10, topk=1):\n    \"\"\"get_action_result\"\"\"\n    label_map = json.load(open(label_map_file, 'r', encoding='utf-8'))\n    org_result = get_data_res(label_map, result_info, topk)\n    nms_result = process_video_classify(org_result, fps, score_thread,\n                                        iou_thread, nms_id, nms_thread,\n                                        frame_offset)\n    return nms_result",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/action_detect/utils/process_result.py:137-155"
+    },
+    "2765": {
+        "file_id": 218,
+        "content": "This function, `get_action_result`, takes in `result_info`, `label_map_file`, `fps`, `score_thread`, `iou_thread`, `nms_id`, `nms_thread`, and `frame_offset` as parameters. It uses the `json.load()` method to load a label map from the file specified by `label_map_file`. The function then calls `get_data_res` with the loaded label map, `result_info`, and `topk` to obtain original results (`org_result`). Finally, it processes these original results using `process_video_classify()`, passing in additional parameters such as `fps`, `score_thread`, `iou_thread`, `nms_id`, `nms_thread`, and `frame_offset`. The function returns the non-maximum suppression (`nms`) result.",
+        "type": "comment"
+    },
+    "2766": {
+        "file_id": 219,
+        "content": "/applications/TableTennis/predict/eval.py",
+        "type": "filepath"
+    },
+    "2767": {
+        "file_id": 219,
+        "content": "This code performs object detection in computer vision tasks and evaluates table tennis action predictions, computing evaluation metrics to optimize F1 scores. The best performing combination is stored for future use.",
+        "type": "summary"
+    },
+    "2768": {
+        "file_id": 219,
+        "content": "\"\"\"\nget instance for lstm\n根据gts计算每个proposal_bmn的iou、ioa、label等信息\n\"\"\"\nimport os\nimport sys\nimport json\nimport random\nimport pickle\nimport numpy as np\nimport io\nsys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')\ndataset = \"/home/work/datasets\"\nlabel_index_file = './configs/index_label_football_7.json'\neval_datasets = ['EuroCup2016']\nlabel_files = {\n    'train': 'label_cls8_train.json',\n    'validation': 'label_cls8_val.json'\n}\nglobal fps, mode\nlabel_index = json.load(open(label_index_file, 'rb'))\ndef load_gts():\n    global fps\n    gts_data = {'fps': 0, 'gts': {}}\n    for eval_data in eval_datasets:\n        for item, value in label_files.items():\n            label_file = '{}/{}/{}'.format(dataset, eval_data, value)\n            gts = json.load(open(label_file, 'rb'))\n            gts_data['fps'] = gts['fps']\n            fps = gts['fps']\n            for gt in gts['gts']:\n                gt['mode'] = item\n                basename = '{}/{}/mp4/{}'.format(dataset, eval_data,\n                                                 os.path.basename(gt['url']))",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/eval.py:1-41"
+    },
+    "2769": {
+        "file_id": 219,
+        "content": "This code is importing necessary libraries and defining global variables. It loads ground truth data from specified labels for different datasets and evaluation splits, setting frame per second (fps) values as well. It uses these loaded gts to calculate proposal-box related information based on ground truth sequence.",
+        "type": "comment"
+    },
+    "2770": {
+        "file_id": 219,
+        "content": "                gts_data['gts'][basename] = gt\n    return gts_data['gts']\ndef computeIoU(e1, e2):\n    \"\"\"\n    clc iou and ioa\n    \"\"\"\n    if not (e1['label'] == e2['label'] and e1['basename'] == e2['basename']):\n        return 0.\n    area1 = e1[\"end\"] - e1[\"start\"]\n    area2 = e2[\"end\"] - e2[\"start\"]\n    x1 = np.maximum(e1[\"start\"], e2[\"start\"])\n    x2 = np.minimum(e1[\"end\"], e2[\"end\"])\n    inter = np.maximum(0.0, x2 - x1)\n    iou = 0.0 if (area1 + area2 -\n                  inter) == 0 else inter * 1.0 / (area1 + area2 - inter)\n    if not mode == 'proposal':\n        iou = 0.0 if area2 == 0 else inter * 1.0 / area2\n    return iou\ndef convert_proposal(boxes, basename, score_threshold=0.01):\n    boxes = sorted(boxes, key=lambda x: float(x['score']), reverse=True)\n    res = []\n    for box in boxes:\n        if not float(box['score']) >= score_threshold:\n            continue\n        res.append({\n            'basename': basename,\n            'start': int(float(box['start']) / fps),\n            'end': int(float(box['end']) / fps),",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/eval.py:42-73"
+    },
+    "2771": {
+        "file_id": 219,
+        "content": "This code defines a function to compute the intersection of union (IoU) between two intervals, and another function that converts a list of proposals into final detections based on a score threshold. The computed IoU is used to filter out unwanted proposals, and only keep those with high confidence scores. This can be useful for object detection tasks in computer vision applications.",
+        "type": "comment"
+    },
+    "2772": {
+        "file_id": 219,
+        "content": "            'label': 0\n        })\n    return res\ndef convert_classify(boxes, basename, iou_threshold, score_threshold):\n    boxes = sorted(boxes,\n                   key=lambda x:\n                   (float(x['classify_score']), float(x['iou_score'])),\n                   reverse=True)\n    def convert_time_to_frame(time_type):\n        return int(time_type)\n        h, m, s = time_type.split(':')\n        return int(h) * 3600 + int(m) * 60 + int(s)\n    res = []\n    for box in boxes:\n        if not (box['iou_score'] >= iou_threshold\n                and box['classify_score'] >= score_threshold):\n            continue\n        res.append({\n            'basename': basename,\n            'start': convert_time_to_frame(box['start_time']),\n            'end': convert_time_to_frame(box['end_time']),\n            'label': box['label_id']\n        })\n    return res\ndef convert_groundtruth(boxes, basename, phase=None):\n    res = []\n    for box in boxes:\n        for item in box['label_ids']:\n            label = 0 if phase == 'proposal' else item",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/eval.py:74-108"
+    },
+    "2773": {
+        "file_id": 219,
+        "content": "The code contains three functions: 'convert_classify', 'convert_groundtruth', and 'convert_time_to_frame'. The 'convert_classify' function sorts boxes based on their classify and iou scores, then appends qualified boxes to a result list. 'convert_groundtruth' appends box labels to the result list based on the phase parameter. The 'convert_time_to_frame' function converts time strings to frames.",
+        "type": "comment"
+    },
+    "2774": {
+        "file_id": 219,
+        "content": "            res.append({\n                'basename': basename,\n                'start': box['start_id'],\n                'end': box['end_id'],\n                'label': label\n            })\n    return res\ndef print_head(iou):\n    print(\"\\nioa = {:.1f}\".format(iou))\n    res_str = ''\n    for item in ['label_name']:\n        res_str += '{:<12s}'.format(item)\n    for item in [\n            'label_id', 'precision', 'recall', 'hit_prop', 'num_prop',\n            'hit_gts', 'num_gts'\n    ]:\n        res_str += '{:<10s}'.format(item)\n    print(res_str)\ndef print_result(res_dict, label='avg'):\n    if label == 'avg':\n        res_str = '{:<22s}'.format(str(label))\n    else:\n        res_str = '{0:{2}<6s}{1:<10s}'.format(label_index[str(label)],\n                                              str(label), chr(12288))\n    for item in ['prec', 'recall']:\n        res_str += '{:<10.4f}'.format(res_dict[item])\n    for item in ['hit_prop', 'num_prop', 'hit_gts', 'num_gts']:\n        res_str += '{:<10d}'.format(res_dict[item])\n    print(res_str)",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/eval.py:109-142"
+    },
+    "2775": {
+        "file_id": 219,
+        "content": "This code contains three functions: \"res.append\" appends a dictionary to a list with information about video frames, \"print_head\" prints headers for table output, and \"print_result\" prints the evaluation results of the model in a formatted way. The code is likely part of an image classification or object detection algorithm that evaluates the performance of the model on a set of video frames.",
+        "type": "comment"
+    },
+    "2776": {
+        "file_id": 219,
+        "content": "def evaluation(res_boxes, gts_boxes, label_range, iou_range, show_sub=False):\n    iou_map = [computeIoU(resId, gtsId) for resId in res_boxes \\\n                                        for gtsId in gts_boxes]\n    iou_map = np.array(iou_map).reshape((len(res_boxes), len(gts_boxes)))\n    hit_map_prop_total = np.max(iou_map, axis=1)\n    hit_map_index_total = np.argmax(iou_map, axis=1)\n    res_dict = ['hit_prop', 'num_prop', 'hit_gts', 'num_gts']\n    for iou_threshold in iou_range:\n        if show_sub:\n            print_head(iou_threshold)\n        iou_prop = np.array([k >= iou_threshold for k in hit_map_prop_total])\n        average_results = {}\n        for label_id in label_range:\n            sub_results = {}\n            label_prop = np.array([k['label'] == label_id for k in res_boxes])\n            label_gts = np.array([k['label'] == label_id for k in gts_boxes])\n            sub_results['num_prop'] = sum(label_prop)\n            sub_results['num_gts'] = sum(label_gts)\n            if sub_results['num_prop'] == 0:",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/eval.py:145-166"
+    },
+    "2777": {
+        "file_id": 219,
+        "content": "Function `evaluation` takes in lists of predicted boxes (`res_boxes`) and ground truth boxes (`gts_boxes`), along with IOU and label ranges. It computes intersection over union (IoU) between each predicted box and ground truth box, creating a map of IoUs. The map is then reshaped into a 2D array for easier computation. The function calculates the maximum IoU per row in the map, and the index of this maximum value. It also loops through label and IOU ranges to calculate various statistics for subsets of labels and IOU thresholds. If `show_sub` is True, it prints a header indicating the current subset being evaluated. If there are no predicted boxes for a particular label in the current iteration, the function skips that iteration without computing results.",
+        "type": "comment"
+    },
+    "2778": {
+        "file_id": 219,
+        "content": "                hit_prop_index = []\n            else:\n                hit_prop_index = label_prop & iou_prop\n            sub_results['hit_prop'] = sum(hit_prop_index)\n            sub_results['hit_gts'] = len(\n                set(hit_map_index_total[hit_prop_index]))\n            sub_results['prec'] = 0.0 if sub_results['num_prop'] == 0 \\\n                                      else sub_results['hit_prop'] * 1.0 / sub_results['num_prop']\n            sub_results['recall'] = 0.0 if sub_results['num_gts'] == 0 \\\n                                        else sub_results['hit_gts'] * 1.0 / sub_results['num_gts']\n            if show_sub:\n                print_result(sub_results, label=label_id)\n            for item in res_dict:\n                if not item in average_results:\n                    average_results[item] = 0\n                average_results[item] += sub_results[item]\n        if len(label_range) == 1:  # proposal 不需要输出average值\n            continue\n        average_results['prec'] = 0.0 if average_results['num_prop'] == 0 \\",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/eval.py:167-186"
+    },
+    "2779": {
+        "file_id": 219,
+        "content": "The code calculates precision and recall scores for a set of results. It checks if there are any hits, then calculates the hit properties and ground truths. If show_sub is True, it prints the subresults for each label. The average results are also updated based on these calculations.",
+        "type": "comment"
+    },
+    "2780": {
+        "file_id": 219,
+        "content": "                                      else average_results['hit_prop'] * 1.0 / average_results['num_prop']\n        average_results['recall'] = 0.0 if average_results['num_gts'] == 0 \\\n                                        else average_results['hit_gts'] * 1.0 / average_results['num_gts']\n        if show_sub:\n            print_result(average_results)\n        average_results['F1'] = 0.0 if (average_results['prec'] + average_results['recall'] == 0) \\\n                                    else 2 * average_results['prec'] * average_results['recall'] / \\\n                                            (average_results['prec'] + average_results['recall'])\n        return average_results\ndef get_eval_results(predicts,\n                     gts_data,\n                     phase,\n                     iou_threshold=0.3,\n                     score_threshold=0.3,\n                     show_sub=False):\n    global mode\n    mode = phase\n    res_boxes = []\n    gts_boxes = []\n    for ped_data in predicts:\n        basename = ped_data['video_name']",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/eval.py:187-210"
+    },
+    "2781": {
+        "file_id": 219,
+        "content": "This code calculates average precision and recall for a table tennis prediction model. It returns an F1 score, considers IOU and score thresholds, handles different phases, and optionally prints the results.",
+        "type": "comment"
+    },
+    "2782": {
+        "file_id": 219,
+        "content": "        # eval sub data\n        such_eval = False\n        for eval_name in eval_datasets:\n            if eval_name in basename:\n                such_eval = True\n                break\n        if not such_eval:\n            continue\n        gts = gts_data[basename]['actions']\n        if phase == 'proposal':\n            res_boxes.extend(\n                convert_proposal(ped_data['bmn_results'], basename,\n                                 score_threshold))\n            gts_boxes.extend(\n                convert_groundtruth(gts, basename, phase='proposal'))\n            label_range = [0]\n            iou_range = np.arange(0.1, 1, 0.1)\n        else:\n            res_boxes.extend(\n                convert_classify(ped_data['action_results'], basename,\n                                 iou_threshold, score_threshold))\n            gts_boxes.extend(convert_groundtruth(gts, basename))\n            label_range = range(1, len(label_index))\n            iou_range = np.arange(0.5, 0.6, 0.1)\n    eval_results = evaluation(res_boxes,\n                              gts_boxes,",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/eval.py:212-239"
+    },
+    "2783": {
+        "file_id": 219,
+        "content": "This code evaluates the performance of a video analysis model for table tennis. It determines if the data is an evaluation dataset and then extends the results and ground truth boxes based on the phase (proposal or classification). It sets label and iou thresholds for evaluation and finally calculates the evaluation results.",
+        "type": "comment"
+    },
+    "2784": {
+        "file_id": 219,
+        "content": "                              label_range,\n                              iou_range,\n                              show_sub=show_sub)\n    return eval_results\nif __name__ == \"__main__\":\n    result_file = sys.argv[1]\n    predicts = json.load(open(result_file, 'r', encoding='utf-8'))\n    gts_data = load_gts()\n    get_eval_results(predicts,\n                     gts_data,\n                     'proposal',\n                     score_threshold=0.03,\n                     show_sub=True)\n    #get_eval_results(predicts, gts_data, 'actions')\n    best_F1 = -0.1\n    best_res = {}\n    best_iou_threshold = 0.\n    best_score_threshold = 0.\n    for iou_threshold in np.arange(0.1, 0.9, 0.1):\n        for score_threshold in np.arange(0.1, 1, 0.1):\n            avg_res = get_eval_results(predicts,\n                                       gts_data,\n                                       'actions',\n                                       iou_threshold=iou_threshold,\n                                       score_threshold=score_threshold,\n                                       show_sub=False)",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/eval.py:240-270"
+    },
+    "2785": {
+        "file_id": 219,
+        "content": "This code evaluates the performance of table tennis action predictions. It takes in predicted results and ground truth data, then computes evaluation metrics for different IOU and score thresholds. The best performing combination is stored for future reference.",
+        "type": "comment"
+    },
+    "2786": {
+        "file_id": 219,
+        "content": "            if best_F1 < avg_res['F1']:\n                best_F1 = avg_res['F1']\n                best_res = avg_res\n                best_iou_threshold = iou_threshold\n                best_score_threshold = score_threshold\n    print(\"best iou threshold = {:.1f}\".format(best_iou_threshold))\n    print(\"best score threshold = {:.1f}\".format(best_score_threshold))\n    print('best F1 score = {:.4f}'.format(best_F1))\n    print_head(0.5)\n    print_result(best_res)\n    get_eval_results(predicts,\n                     gts_data,\n                     'actions',\n                     iou_threshold=best_iou_threshold,\n                     score_threshold=best_score_threshold,\n                     show_sub=True)",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/eval.py:271-287"
+    },
+    "2787": {
+        "file_id": 219,
+        "content": "This code snippet is optimizing the iou and score thresholds for better F1 scores, then printing them and using the best values to get evaluation results.",
+        "type": "comment"
+    },
+    "2788": {
+        "file_id": 220,
+        "content": "/applications/TableTennis/predict/predict.py",
+        "type": "filepath"
+    },
+    "2789": {
+        "file_id": 220,
+        "content": "The code sets up an environment for video prediction using PaddleVideo's TableTennis application, initializing an ActionDetection object and loading a model to predict actions and body movements in each video, storing results in a JSON file.",
+        "type": "summary"
+    },
+    "2790": {
+        "file_id": 220,
+        "content": "import os\nimport sys\nimport json\nsys.path.append('action_detect')\nfrom action import ActionDetection\nif __name__ == '__main__':\n    dataset_dir = \"/home/work/datasets/EuroCup2016\"\n    model_predict = ActionDetection(cfg_file=\"./configs/configs.yaml\")\n    model_predict.load_model()\n    video_url = os.path.join(dataset_dir, 'url_val.list')\n    with open(video_url, 'r') as f:\n        lines = f.readlines()\n    lines = [os.path.join(dataset_dir, k.strip()) for k in lines]\n    results = []\n    for line in lines:\n        video_name = line\n        print(video_name)\n        imgs_path = video_name.replace(\".mp4\", \"\").replace(\"mp4\", \"frames\")\n        pcm_path = video_name.replace(\".mp4\", \".pcm\").replace(\"mp4\", \"pcm\")\n        bmn_results, action_results = model_predict.infer(imgs_path, pcm_path)\n        results.append({\n            'video_name': line,\n            'bmn_results': bmn_results,\n            'action_results': action_results\n        })\n    with open('results.json', 'w', encoding='utf-8') as f:\n        data = json.dumps(results, indent=4, ensure_ascii=False)",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/predict.py:1-35"
+    },
+    "2791": {
+        "file_id": 220,
+        "content": "This code is setting up an environment for video prediction using the PaddleVideo's TableTennis application. It appends the \"action_detect\" directory to the Python path, initializes an ActionDetection object with a configuration file, loads the model, and then iterates through a list of video URLs to predict actions and body movements in each video, storing the results in a JSON file.",
+        "type": "comment"
+    },
+    "2792": {
+        "file_id": 220,
+        "content": "        f.write(data)",
+        "type": "code",
+        "location": "/applications/TableTennis/predict/predict.py:36-36"
+    },
+    "2793": {
+        "file_id": 220,
+        "content": "Writes the data to file.",
+        "type": "comment"
+    },
+    "2794": {
+        "file_id": 221,
+        "content": "/applications/TableTennis/val_split.py",
+        "type": "filepath"
+    },
+    "2795": {
+        "file_id": 221,
+        "content": "This code loads a JSON file, splits the ground truth sequences (gts) into training and validation sets, and saves them as separate JSON files. It uses the json module for reading and writing JSON data. The original file is labeled 'label_cls14_train.json' and has gts from index 0 to 4 in the validation set, and gts from index 5 onwards in the training set. The code also writes a new validation set in '/home/aistudio/data/label_cls14_val.json' with the same fps (25).",
+        "type": "summary"
+    },
+    "2796": {
+        "file_id": 221,
+        "content": "import json\nwith open('/home/aistudio/data/label_cls14_train.json') as f:\n    data = json.load(f)\nf.close()\nval = {'gts': data['gts'][0:5], 'fps': 25}\njsonString = json.dumps(val, indent=4, ensure_ascii=False)\njsonFile = open('/home/aistudio/data/label_cls14_val.json', 'w')\njsonFile.write(jsonString)\njsonFile.close()\ntrain = {'gts': data['gts'][5:], 'fps': 25}\njsonString = json.dumps(train, indent=4, ensure_ascii=False)\njsonFile = open('/home/aistudio/data/label_cls14_train.json', 'w')\njsonFile.write(jsonString)\njsonFile.close()",
+        "type": "code",
+        "location": "/applications/TableTennis/val_split.py:1-19"
+    },
+    "2797": {
+        "file_id": 221,
+        "content": "This code loads a JSON file, splits the ground truth sequences (gts) into training and validation sets, and saves them as separate JSON files. It uses the json module for reading and writing JSON data. The original file is labeled 'label_cls14_train.json' and has gts from index 0 to 4 in the validation set, and gts from index 5 onwards in the training set. The code also writes a new validation set in '/home/aistudio/data/label_cls14_val.json' with the same fps (25).",
+        "type": "comment"
+    },
+    "2798": {
+        "file_id": 222,
+        "content": "/applications/VideoQualityAssessment/README.md",
+        "type": "filepath"
+    },
+    "2799": {
+        "file_id": 222,
+        "content": "This code develops a PaddlePaddle 2.1 video quality assessment model using ppTSM network on KonVid-150k dataset, supports multigpu distributed training and evaluation, and references two papers for improved user experience and SROCC/PLCC scores.",
+        "type": "summary"
+    }
+}

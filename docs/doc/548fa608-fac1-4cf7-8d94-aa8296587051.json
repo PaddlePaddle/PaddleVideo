@@ -1,0 +1,15 @@
+{
+    "summary": "This code introduces the PP-TSM, a high-performance and efficient video recognition model optimized based on TSM in PaddleVideo. It outlines various strategies like ImageNet pretraining, data augmentation, and optimizer improvements to enhance performance and achieve fast inference speed on V101 GPU with top-1 accuracy on UCF101 and Kinetics400 datasets.",
+    "details": [
+        {
+            "comment": "This code describes the PP-TSM, a high-performance and efficient video recognition model optimized based on TSM in PaddleVideo. It mentions its better performance and inference speed compared to TSM paper and other open source TSM models. Requires PaddlePaddle2.0 for execution. When using ImageNet for pretrain and 8X1 sample, it achieves high top-1 accuracy on UCF101 and Kinetics400 datasets with fast inference speed on V100 GPU.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/english_documents/tutorials/pp-tsm.md\":0-21",
+            "content": "# High performance recognition 2D architecture PP-TSM\nPP-TSM\uff1aAn Effective and Efficient video-recognition model   \nPP-TSM is an optimized model based on TSM in PaddleVideo,   \nwhose performance (top-1 on UCF101 and Kinetics400) and inference spped   \nare better than TSM paper(https://arxiv.org/abs/1811.08383 ) and   \nother open source TSM\uff0cPaddlePaddle2.0(available on pip now) or   \nDaily Version( https://www.paddlepaddle.org.cn/documentation/docs/zh/install/Tables.html#whl-dev )   \nis required to run PP-TSM.    \nWhen only use ImageNet for pretrain and only use 8X1 sample\uff0c  \nPP-TSM\u2019s top1 reached to 89.5% and 73.5% on UCF101 and Kinetics400,   \nand inference speed of FP32 on single V100 is 147 VPS on Kinectics400 dataset.  \ninference speed of FP16 with TensorRT on single V100 isTODO.  \nAs far as we know, under the same conditions,    \ntop1=73.5% on Kinetics400 is the best performance for 2D video model until now.  \nPP-TSM improved performance and speed of TSM with following methods:   \n1\u3001Model Tweaks: ResNet50vd  \uff0c+2.5%  "
+        },
+        {
+            "comment": "This code outlines several strategies implemented to improve the performance of a model, including ImageNet pretraining, better batch size and L2 values, label smoothing, better learning rate decay, data augmentation, and updated epoch numbers. The code also mentions using Knowledge Distillation, optimizer improvements, and plans for integrating PaddleInference.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/english_documents/tutorials/pp-tsm.md\":22-31",
+            "content": "2\u3001ImageNet pretrain weights based on Knowledge Distillation  \uff0c +1.3%    \n3\u3001beter batch size  \uff0c+0.2%   \n4\u3001beter L2  \uff0c+0.3%  \n5\u3001label_smoothing  \uff0c+0.2%  \n6\u3001beter lr decay  \uff0c+0.15%  \n7\u3001Data augmentation  \uff0c+0.3%  \n8\u3001beter epoch num  \uff0c+0.15%  \n9\u3001bn strategy  \uff0c+0.4%  \n10\u3001integrated PaddleInference  \n11\u3001more strategies todo: Knowledge Distillation\u3001optimizer and so on.  "
+        }
+    ]
+}

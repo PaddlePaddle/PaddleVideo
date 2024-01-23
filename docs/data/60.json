@@ -1,0 +1,544 @@
+{
+    "6000": {
+        "file_id": 479,
+        "content": "import numpy\nclass AveragePrecisionCalculator(object):\n    \"\"\"Calculate the average precision and average precision at n.\"\"\"\n    def __init__(self, top_n=None):\n        \"\"\"Construct an AveragePrecisionCalculator to calculate average precision.\n    This class is used to calculate the average precision for a single label.\n    Args:\n      top_n: A positive Integer specifying the average precision at n, or\n        None to use all provided data points.\n    Raises:\n      ValueError: An error occurred when the top_n is not a positive integer.\n    \"\"\"\n        if not ((isinstance(top_n, int) and top_n >= 0) or top_n is None):\n            raise ValueError(\"top_n must be a positive integer or None.\")\n        self._top_n = top_n  # average precision at n\n        self._total_positives = 0  # total number of positives have seen\n        self._heap = []  # max heap of (prediction, actual)\n    @property\n    def heap_size(self):\n        \"\"\"Gets the heap size maintained in the class.\"\"\"\n        return len(self._heap)\n    @property",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/average_precision_calculator.py:57-86"
+    },
+    "6001": {
+        "file_id": 479,
+        "content": "AveragePrecisionCalculator is a class used for calculating the average precision and average precision at n. It constructs an object to calculate average precision for single label, with optional top_n parameter for average precision at n. If top_n is not positive integer or None, a ValueError is raised. The class maintains heap of (prediction, actual) pairs and total positives seen. Heap size can be queried using the heap_size property.",
+        "type": "comment"
+    },
+    "6002": {
+        "file_id": 479,
+        "content": "    def num_accumulated_positives(self):\n        \"\"\"Gets the number of positive samples that have been accumulated.\"\"\"\n        return self._total_positives\n    def accumulate(self, predictions, actuals, num_positives=None):\n        \"\"\"Accumulate the predictions and their ground truth labels.\n    After the function call, we may call peek_ap_at_n to actually calculate\n    the average precision.\n    Note predictions and actuals must have the same shape.\n    Args:\n      predictions: a list storing the prediction scores.\n      actuals: a list storing the ground truth labels. Any value\n      larger than 0 will be treated as positives, otherwise as negatives.\n      num_positives = If the 'predictions' and 'actuals' inputs aren't complete,\n      then it's possible some true positives were missed in them. In that case,\n      you can provide 'num_positives' in order to accurately track recall.\n    Raises:\n      ValueError: An error occurred when the format of the input is not the\n      numpy 1-D array or the shape of predictions and actuals does not match.",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/average_precision_calculator.py:87-108"
+    },
+    "6003": {
+        "file_id": 479,
+        "content": "This code defines a class that calculates the average precision in video object detection tasks. It provides methods to accumulate positive samples and return the total number of positives. The accumulate method takes prediction scores, ground truth labels, and optional num_positives parameter for accurate tracking when inputs are incomplete.",
+        "type": "comment"
+    },
+    "6004": {
+        "file_id": 479,
+        "content": "    \"\"\"\n        if len(predictions) != len(actuals):\n            raise ValueError(\n                \"the shape of predictions and actuals does not match.\")\n        if not num_positives is None:\n            if not isinstance(num_positives,\n                              numbers.Number) or num_positives < 0:\n                raise ValueError(\n                    \"'num_positives' was provided but it wan't a nonzero number.\"\n                )\n        if not num_positives is None:\n            self._total_positives += num_positives\n        else:\n            self._total_positives += numpy.size(numpy.where(actuals > 0))\n        topk = self._top_n\n        heap = self._heap\n        for i in range(numpy.size(predictions)):\n            if topk is None or len(heap) < topk:\n                heapq.heappush(heap, (predictions[i], actuals[i]))\n            else:\n                if predictions[i] > heap[0][0]:  # heap[0] is the smallest\n                    heapq.heappop(heap)\n                    heapq.heappush(heap, (predictions[i], actuals[i]))",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/average_precision_calculator.py:109-134"
+    },
+    "6005": {
+        "file_id": 479,
+        "content": "This code checks if the length of predictions and actuals match. It also ensures that num_positives is a nonzero number, then adds positives to total_positives. The code uses heapq to push and pop elements in a priority queue based on top_n, ensuring correctness and efficiency.",
+        "type": "comment"
+    },
+    "6006": {
+        "file_id": 479,
+        "content": "    def clear(self):\n        \"\"\"Clear the accumulated predictions.\"\"\"\n        self._heap = []\n        self._total_positives = 0\n    def peek_ap_at_n(self):\n        \"\"\"Peek the non-interpolated average precision at n.\n    Returns:\n      The non-interpolated average precision at n (default 0).\n      If n is larger than the length of the ranked list,\n      the average precision will be returned.\n    \"\"\"\n        if self.heap_size <= 0:\n            return 0\n        predlists = numpy.array(list(zip(*self._heap)))\n        ap = self.ap_at_n(predlists[0],\n                          predlists[1],\n                          n=self._top_n,\n                          total_num_positives=self._total_positives)\n        return ap\n    @staticmethod\n    def ap(predictions, actuals):\n        \"\"\"Calculate the non-interpolated average precision.\n    Args:\n      predictions: a numpy 1-D array storing the sparse prediction scores.\n      actuals: a numpy 1-D array storing the ground truth labels. Any value\n      larger than 0 will be treated as positives, otherwise as negatives.",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/average_precision_calculator.py:136-166"
+    },
+    "6007": {
+        "file_id": 479,
+        "content": "This code defines a class that calculates non-interpolated average precision. It has methods to clear accumulated predictions, peek the non-interpolated average precision at n, and calculate non-interpolated average precision from prediction and actual scores. The class uses numpy arrays and requires positive labels to be greater than 0 and negative labels as 0.",
+        "type": "comment"
+    },
+    "6008": {
+        "file_id": 479,
+        "content": "    Returns:\n      The non-interpolated average precision at n.\n      If n is larger than the length of the ranked list,\n      the average precision will be returned.\n    Raises:\n      ValueError: An error occurred when the format of the input is not the\n      numpy 1-D array or the shape of predictions and actuals does not match.\n    \"\"\"\n        return AveragePrecisionCalculator.ap_at_n(predictions, actuals, n=None)\n    @staticmethod\n    def ap_at_n(predictions, actuals, n=20, total_num_positives=None):\n        \"\"\"Calculate the non-interpolated average precision.\n    Args:\n      predictions: a numpy 1-D array storing the sparse prediction scores.\n      actuals: a numpy 1-D array storing the ground truth labels. Any value\n      larger than 0 will be treated as positives, otherwise as negatives.\n      n: the top n items to be considered in ap@n.\n      total_num_positives : (optionally) you can specify the number of total\n        positive\n      in the list. If specified, it will be used in calculation.\n    Returns:",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/average_precision_calculator.py:168-192"
+    },
+    "6009": {
+        "file_id": 479,
+        "content": "This code calculates the non-interpolated average precision at a specified number 'n' from given predictions and actuals. It raises a ValueError if the input format is not a numpy 1D array, or the shape of predictions and actuals does not match.",
+        "type": "comment"
+    },
+    "6010": {
+        "file_id": 479,
+        "content": "      The non-interpolated average precision at n.\n      If n is larger than the length of the ranked list,\n      the average precision will be returned.\n    Raises:\n      ValueError: An error occurred when\n      1) the format of the input is not the numpy 1-D array;\n      2) the shape of predictions and actuals does not match;\n      3) the input n is not a positive integer.\n    \"\"\"\n        if len(predictions) != len(actuals):\n            raise ValueError(\n                \"the shape of predictions and actuals does not match.\")\n        if n is not None:\n            if not isinstance(n, int) or n <= 0:\n                raise ValueError(\"n must be 'None' or a positive integer.\"\n                                 \" It was '%s'.\" % n)\n        ap = 0.0\n        predictions = numpy.array(predictions)\n        actuals = numpy.array(actuals)\n        # add a shuffler to avoid overestimating the ap\n        predictions, actuals = AveragePrecisionCalculator._shuffle(\n            predictions, actuals)\n        sortidx = sorted(range(len(predictions)),",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/average_precision_calculator.py:193-220"
+    },
+    "6011": {
+        "file_id": 479,
+        "content": "This function calculates the non-interpolated average precision at a given rank 'n'. It checks if the lengths of predictions and actuals match, ensures 'n' is an integer greater than zero, and shuffles the lists to avoid overestimation. If any errors occur, it raises a ValueError.",
+        "type": "comment"
+    },
+    "6012": {
+        "file_id": 479,
+        "content": "                         key=lambda k: predictions[k],\n                         reverse=True)\n        if total_num_positives is None:\n            numpos = numpy.size(numpy.where(actuals > 0))\n        else:\n            numpos = total_num_positives\n        if numpos == 0:\n            return 0\n        if n is not None:\n            numpos = min(numpos, n)\n        delta_recall = 1.0 / numpos\n        poscount = 0.0\n        # calculate the ap\n        r = len(sortidx)\n        if n is not None:\n            r = min(r, n)\n        for i in range(r):\n            if actuals[sortidx[i]] > 0:\n                poscount += 1\n                ap += poscount / (i + 1) * delta_recall\n        return ap\n    @staticmethod\n    def _shuffle(predictions, actuals):\n        random.seed(0)\n        suffidx = random.sample(range(len(predictions)), len(predictions))\n        predictions = predictions[suffidx]\n        actuals = actuals[suffidx]\n        return predictions, actuals\n    @staticmethod\n    def _zero_one_normalize(predictions, epsilon=1e-7):",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/average_precision_calculator.py:221-256"
+    },
+    "6013": {
+        "file_id": 479,
+        "content": "This function calculates the average precision (AP) of a set of predictions and actuals. It first sorts the predictions by value, then calculates recall and precision to compute AP. If a total number of positives is provided, it uses that instead of counting non-zero actuals. The function also includes helper methods for shuffling the data and normalizing predictions with an epsilon value.",
+        "type": "comment"
+    },
+    "6014": {
+        "file_id": 479,
+        "content": "        \"\"\"Normalize the predictions to the range between 0.0 and 1.0.\n    For some predictions like SVM predictions, we need to normalize them before\n    calculate the interpolated average precision. The normalization will not\n    change the rank in the original list and thus won't change the average\n    precision.\n    Args:\n      predictions: a numpy 1-D array storing the sparse prediction scores.\n      epsilon: a small constant to avoid denominator being zero.\n    Returns:\n      The normalized prediction.\n    \"\"\"\n        denominator = numpy.max(predictions) - numpy.min(predictions)\n        ret = (predictions - numpy.min(predictions)) / numpy.max(\n            denominator, epsilon)\n        return ret",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/average_precision_calculator.py:257-274"
+    },
+    "6015": {
+        "file_id": 479,
+        "content": "This function normalizes the predictions to a range of 0.0-1.0, ensuring that the rank in the original list remains unchanged and does not affect the average precision calculation. It prevents division by zero using a small epsilon value.",
+        "type": "comment"
+    },
+    "6016": {
+        "file_id": 480,
+        "content": "/paddlevideo/metrics/youtube8m/eval_util.py",
+        "type": "filepath"
+    },
+    "6017": {
+        "file_id": 480,
+        "content": "This code imports libraries, defines a merging function and uses Paddlevideo classes for evaluation. It calculates Hit@1, measures video-level precision, averages results to assess model performance. The function computes top-k triplet predictions, raises ValueError if k is not a positive integer, and initializes HitOneMetric class for evaluation metrics in Youtube8m's PaddleVideo module.",
+        "type": "summary"
+    },
+    "6018": {
+        "file_id": 480,
+        "content": "# Copyright 2016 Google Inc. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#      http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS-IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"Provides functions to help with evaluating models.\"\"\"\nimport numpy as np\nimport paddle\nfrom paddlevideo.utils import get_logger\nfrom ..base import BaseMetric\nfrom ..registry import METRIC\nfrom . import average_precision_calculator as ap_calculator\nfrom . import mean_average_precision_calculator as map_calculator\nlogger = get_logger(\"paddlevideo\")\ndef flatten(l):\n    \"\"\" Merges a list of lists into a single list. \"\"\"\n    return [item for sublist in l for item in sublist]",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/eval_util.py:1-29"
+    },
+    "6019": {
+        "file_id": 480,
+        "content": "The code provides functions for evaluating models. It imports necessary libraries, defines a function to merge multiple lists into one, and includes classes for Average Precision Calculator and Mean Average Precision Calculator from the paddlevideo module.",
+        "type": "comment"
+    },
+    "6020": {
+        "file_id": 480,
+        "content": "def calculate_hit_at_one(predictions, actuals):\n    \"\"\"\n    Hit@k: indicates the fraction of test samples that contain at least\n    one of the ground truth labels in the top k predictions,\n    i.e topk.\n    Args:\n        predictions: Matrix containing the outputs of the model.\n        Dimensions are 'batch' x 'num_classes'.\n        actuals: Matrix containing the ground truth labels.\n        Dimensions are 'batch' x 'num_classes'.\n    Returns:\n        float: The average hit at one across the entire batch.\n    \"\"\"\n    top_prediction = np.argmax(predictions, 1)\n    hits = actuals[np.arange(actuals.shape[0]), top_prediction]\n    return np.mean(hits)\ndef calculate_precision_at_equal_recall_rate(predictions, actuals):\n    \"\"\"\n    PERR: measures the video-level annotation precision when we retrieve the same number\n     of entities per video as there are in the ground-truth.\n    More details please refer to:  https://arxiv.org/abs/1609.08675\n    Args:\n        predictions: Matrix containing the outputs of the model.\n        Dimensions are 'batch' x 'num_classes'.",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/eval_util.py:32-60"
+    },
+    "6021": {
+        "file_id": 480,
+        "content": "Calculates Hit@1, the fraction of samples with at least one ground truth label in top predictions.\nMeasures video-level annotation precision when retrieving the same number of entities as ground truth.",
+        "type": "comment"
+    },
+    "6022": {
+        "file_id": 480,
+        "content": "        actuals: Matrix containing the ground truth labels.\n        Dimensions are 'batch' x 'num_classes'.\n    Returns:\n        float: The average precision at equal recall rate across the entire batch.\n    \"\"\"\n    aggregated_precision = 0.0\n    num_videos = actuals.shape[0]\n    for row in np.arange(num_videos):\n        num_labels = int(np.sum(actuals[row]))\n        top_indices = np.argpartition(predictions[row],\n                                      -num_labels)[-num_labels:]\n        item_precision = 0.0\n        for label_index in top_indices:\n            if predictions[row][label_index] > 0:\n                item_precision += actuals[row][label_index]\n        item_precision /= top_indices.size\n        aggregated_precision += item_precision\n    aggregated_precision /= num_videos\n    return aggregated_precision\ndef calculate_gap(predictions, actuals, top_k=20):\n    \"\"\"\n    GAP: the global average precision.\n    Only the top_k predictions are taken for each of the videos.\n    Args:\n        predictions: Matrix containing the outputs of the model.",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/eval_util.py:61-90"
+    },
+    "6023": {
+        "file_id": 480,
+        "content": "The code calculates the average precision at equal recall rate and global average precision for a batch of videos. It iterates over each video, determines the number of labels, finds the top indices based on predictions, calculates item-wise precision, aggregates these precisions for all videos, and returns the averaged precision as well as the gap score.",
+        "type": "comment"
+    },
+    "6024": {
+        "file_id": 480,
+        "content": "        Dimensions are 'batch' x 'num_classes'.\n        actuals: Matrix containing the ground truth labels.\n        Dimensions are 'batch' x 'num_classes'.\n        top_k: How many predictions to use per video.\n    Returns:\n        float: The global average precision.\n    \"\"\"\n    gap_calculator = ap_calculator.AveragePrecisionCalculator()\n    sparse_predictions, sparse_labels, num_positives = top_k_by_class(\n        predictions, actuals, top_k)\n    gap_calculator.accumulate(flatten(sparse_predictions),\n                              flatten(sparse_labels), sum(num_positives))\n    return gap_calculator.peek_ap_at_n()\ndef top_k_by_class(predictions, labels, k=20):\n    \"\"\"Extracts the top k predictions for each video, sorted by class.\n    Args:\n        predictions: A numpy matrix containing the outputs of the model.\n        Dimensions are 'batch' x 'num_classes'.\n        k: the top k non-zero entries to preserve in each prediction.\n    Returns:\n        A tuple (predictions,labels, true_positives). 'predictions' and 'labels'",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/eval_util.py:91-116"
+    },
+    "6025": {
+        "file_id": 480,
+        "content": "This code calculates the global average precision by first extracting the top k predictions for each video, sorted by class. It then accumulates these results using an AveragePrecisionCalculator and returns the global average precision.",
+        "type": "comment"
+    },
+    "6026": {
+        "file_id": 480,
+        "content": "        are lists of lists of floats. 'true_positives' is a list of scalars. The\n        length of the lists are equal to the number of classes. The entries in the\n        predictions variable are probability predictions, and\n        the corresponding entries in the labels variable are the ground truth for\n        those predictions. The entries in 'true_positives' are the number of true\n        positives for each class in the ground truth.\n    Raises:\n        ValueError: An error occurred when the k is not a positive integer.\n    \"\"\"\n    if k <= 0:\n        raise ValueError(\"k must be a positive integer.\")\n    k = min(k, predictions.shape[1])\n    num_classes = predictions.shape[1]\n    prediction_triplets = []\n    for video_index in range(predictions.shape[0]):\n        prediction_triplets.extend(\n            top_k_triplets(predictions[video_index], labels[video_index], k))\n    out_predictions = [[] for v in range(num_classes)]\n    out_labels = [[] for v in range(num_classes)]\n    for triplet in prediction_triplets:",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/eval_util.py:117-137"
+    },
+    "6027": {
+        "file_id": 480,
+        "content": "This function takes in a list of lists containing probability predictions and ground truth labels for multiple classes, and calculates top-k triplet predictions based on the given k value. It raises a ValueError if k is not a positive integer. The function then creates empty lists to store output predictions and labels for each class.",
+        "type": "comment"
+    },
+    "6028": {
+        "file_id": 480,
+        "content": "        out_predictions[triplet[0]].append(triplet[1])\n        out_labels[triplet[0]].append(triplet[2])\n    out_true_positives = [np.sum(labels[:, i]) for i in range(num_classes)]\n    return out_predictions, out_labels, out_true_positives\ndef top_k_triplets(predictions, labels, k=20):\n    \"\"\"Get the top_k for a 1-d numpy array. Returns a sparse list of tuples in\n    (prediction, class) format\"\"\"\n    m = len(predictions)\n    k = min(k, m)\n    indices = np.argpartition(predictions, -k)[-k:]\n    return [(index, predictions[index], labels[index]) for index in indices]\n@METRIC.register\nclass HitOneMetric(BaseMetric):\n    \"\"\"A class to store the evaluation metrics.\"\"\"\n    def __init__(self,\n                 num_class,\n                 top_k,\n                 data_size,\n                 batch_size,\n                 log_interval=20):\n        \"\"\"Construct an HitOneMetric object to store the evaluation metrics.\"\"\"\n        self.hit_at_one = []\n        self.perr = []\n        self.gap = []\n        super().__init__(data_size, batch_size, log_interval)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/eval_util.py:138-167"
+    },
+    "6029": {
+        "file_id": 480,
+        "content": "This code calculates top-k predictions and labels from given predictions and labels arrays, and then initializes HitOneMetric class to store the evaluation metrics.",
+        "type": "comment"
+    },
+    "6030": {
+        "file_id": 480,
+        "content": "    def accumulate(self):\n        logger.info(\n            '[TEST] finished, hit_at_one = {:.5f}, perr = {:.5f}, gap = {:.5f}'.\n            format(np.mean(np.array(self.hit_at_one)),\n                   np.mean(np.array(self.perr)), np.mean(np.array(self.gap))))\n    def clear(self):\n        \"\"\"Clear the evaluation metrics and reset the HitOneMetric object.\"\"\"\n        self.hit_at_one = []\n        self.perr = []\n        self.gap = []\n    def update(self, batch_id, data, outputs):\n        \"\"\"update metrics during each iter\n        \"\"\"\n        hit_at_one = paddle.to_tensor(outputs['hit_at_one'])\n        perr = paddle.to_tensor(outputs['perr'])\n        gap = paddle.to_tensor(outputs['gap'])\n        # NOTE(shipping): deal with multi cards validate\n        if self.world_size > 1:\n            hit_at_one = paddle.distributed.all_reduce(\n                hit_at_one,\n                op=paddle.distributed.ReduceOp.SUM) / self.world_size\n            perr = paddle.distributed.all_reduce(\n                perr, op=paddle.distributed.ReduceOp.SUM) / self.world_size",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/eval_util.py:169-193"
+    },
+    "6031": {
+        "file_id": 480,
+        "content": "The code defines a HitOneMetric class for evaluating metrics in a video prediction task. The accumulate method calculates mean values of hit_at_one, perr, and gap, and logs the results as information. The clear method resets all metrics to an empty list. The update method updates the metric with each iteration, taking into account multi-card validation using PaddlePaddle's distributed functions.",
+        "type": "comment"
+    },
+    "6032": {
+        "file_id": 480,
+        "content": "            gap = paddle.distributed.all_reduce(\n                gap, op=paddle.distributed.ReduceOp.SUM) / self.world_size\n        self.hit_at_one.append(hit_at_one.numpy())\n        self.perr.append(perr.numpy())\n        self.gap.append(gap.numpy())\n        # preds ensemble\n        if batch_id % self.log_interval == 0:\n            logger.info(\"[TEST] Processing batch {}/{}...\".format(\n                batch_id,\n                self.data_size // (self.batch_size * self.world_size),\n            ))",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/eval_util.py:194-205"
+    },
+    "6033": {
+        "file_id": 480,
+        "content": "This code snippet is a part of the Youtube8m evaluation module in PaddleVideo. It calculates the gap between ground truth and prediction for each batch, performs all-reduce on the gap, appends it to the corresponding list. Also, logs information about processing batches during testing.",
+        "type": "comment"
+    },
+    "6034": {
+        "file_id": 481,
+        "content": "/paddlevideo/metrics/youtube8m/mean_average_precision_calculator.py",
+        "type": "filepath"
+    },
+    "6035": {
+        "file_id": 481,
+        "content": "This code uses MeanAveragePrecisionCalculator to calculate mAP for ranked lists, initializes AveragePrecisionCalculator objects, supports interpolated precisions, and ensures shape compatibility. It averages average precisions of each class to provide the final result as mAP.",
+        "type": "summary"
+    },
+    "6036": {
+        "file_id": 481,
+        "content": "# Copyright 2016 Google Inc. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#      http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS-IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"Calculate the mean average precision.\nIt provides an interface for calculating mean average precision\nfor an entire list or the top-n ranked items.\nExample usages:\nWe first call the function accumulate many times to process parts of the ranked\nlist. After processing all the parts, we call peek_map_at_n\nto calculate the mean average precision.\n```\nimport random\np = np.array([[random.random() for _ in xrange(50)] for _ in xrange(1000)])",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/mean_average_precision_calculator.py:1-27"
+    },
+    "6037": {
+        "file_id": 481,
+        "content": "This code calculates the mean average precision for a ranked list of items. It provides an interface to calculate this metric for the entire list or top-n ranked items. The example usage demonstrates accumulating data in parts and then using peek_map_at_n function to calculate the final result. The provided numpy array is used for demonstration purposes, representing a ranked list of values.",
+        "type": "comment"
+    },
+    "6038": {
+        "file_id": 481,
+        "content": "a = np.array([[random.choice([0, 1]) for _ in xrange(50)]\n     for _ in xrange(1000)])\n# mean average precision for 50 classes.\ncalculator = mean_average_precision_calculator.MeanAveragePrecisionCalculator(\n            num_class=50)\ncalculator.accumulate(p, a)\naps = calculator.peek_map_at_n()\n```\n\"\"\"\nimport numpy\nfrom . import average_precision_calculator\nclass MeanAveragePrecisionCalculator(object):\n    \"\"\"This class is to calculate mean average precision.\n  \"\"\"\n    def __init__(self, num_class):\n        \"\"\"Construct a calculator to calculate the (macro) average precision.\n    Args:\n      num_class: A positive Integer specifying the number of classes.\n      top_n_array: A list of positive integers specifying the top n for each\n      class. The top n in each class will be used to calculate its average\n      precision at n.\n      The size of the array must be num_class.\n    Raises:\n      ValueError: An error occurred when num_class is not a positive integer;\n      or the top_n_array is not a list of positive integers.",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/mean_average_precision_calculator.py:28-59"
+    },
+    "6039": {
+        "file_id": 481,
+        "content": "Creates a numpy array with 1000 samples, each containing 50 binary random choices. Initializes MeanAveragePrecisionCalculator object with specified number of classes (in this case, 50). Accumulates predictions and ground truth for calculating average precision. Retrieves the average precision map at a given point in time.",
+        "type": "comment"
+    },
+    "6040": {
+        "file_id": 481,
+        "content": "    \"\"\"\n        if not isinstance(num_class, int) or num_class <= 1:\n            raise ValueError(\"num_class must be a positive integer.\")\n        self._ap_calculators = []  # member of AveragePrecisionCalculator\n        self._num_class = num_class  # total number of classes\n        for i in range(num_class):\n            self._ap_calculators.append(\n                average_precision_calculator.AveragePrecisionCalculator())\n    def accumulate(self, predictions, actuals, num_positives=None):\n        \"\"\"Accumulate the predictions and their ground truth labels.\n    Args:\n      predictions: A list of lists storing the prediction scores. The outer\n      dimension corresponds to classes.\n      actuals: A list of lists storing the ground truth labels. The dimensions\n      should correspond to the predictions input. Any value\n      larger than 0 will be treated as positives, otherwise as negatives.\n      num_positives: If provided, it is a list of numbers representing the\n      number of true positives for each class. If not provided, the number of",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/mean_average_precision_calculator.py:60-80"
+    },
+    "6041": {
+        "file_id": 481,
+        "content": "This code defines a class for calculating Mean Average Precision (mAP) in the context of video classification. The constructor checks if num_class is a positive integer and initializes a list to store AveragePrecisionCalculator objects. The accumulate method takes predictions and actuals as input, accumulating prediction scores with their corresponding ground truth labels. If num_positives is provided, it represents the number of true positives for each class; otherwise, it defaults to no value.",
+        "type": "comment"
+    },
+    "6042": {
+        "file_id": 481,
+        "content": "      true positives will be inferred from the 'actuals' array.\n    Raises:\n      ValueError: An error occurred when the shape of predictions and actuals\n      does not match.\n    \"\"\"\n        if not num_positives:\n            num_positives = [None for i in predictions.shape[1]]\n        calculators = self._ap_calculators\n        for i in range(len(predictions)):\n            calculators[i].accumulate(predictions[i], actuals[i],\n                                      num_positives[i])\n    def clear(self):\n        for calculator in self._ap_calculators:\n            calculator.clear()\n    def is_empty(self):\n        return ([calculator.heap_size for calculator in self._ap_calculators] ==\n                [0 for _ in range(self._num_class)])\n    def peek_map_at_n(self):\n        \"\"\"Peek the non-interpolated mean average precision at n.\n    Returns:\n      An array of non-interpolated average precision at n (default 0) for each\n      class.\n    \"\"\"\n        aps = [\n            self._ap_calculators[i].peek_ap_at_n()\n            for i in range(self._num_class)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/mean_average_precision_calculator.py:81-112"
+    },
+    "6043": {
+        "file_id": 481,
+        "content": "This code calculates the mean average precision for each class in a dataset, and provides methods to clear and check if the calculators are empty. The peek_map_at_n function returns an array of non-interpolated average precisions at n for each class. It also checks for shape compatibility between predictions and actuals arrays.",
+        "type": "comment"
+    },
+    "6044": {
+        "file_id": 481,
+        "content": "        ]\n        return aps",
+        "type": "code",
+        "location": "/paddlevideo/metrics/youtube8m/mean_average_precision_calculator.py:113-114"
+    },
+    "6045": {
+        "file_id": 481,
+        "content": "This code calculates the mean average precision (mAP) by averaging the average precisions of each class. It returns the mAP value as a result.",
+        "type": "comment"
+    },
+    "6046": {
+        "file_id": 482,
+        "content": "/paddlevideo/metrics/yowo_metric.py",
+        "type": "filepath"
+    },
+    "6047": {
+        "file_id": 482,
+        "content": "The code adds a YOWOMetric class to the PaddleVideo framework for measuring YOWO metrics in two stages: saving test results and calculating metrics from saved results files. The code also handles batch processing, logging progress, and evaluates mAP metrics.",
+        "type": "summary"
+    },
+    "6048": {
+        "file_id": 482,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os.path as osp\nimport os\nfrom paddlevideo.utils import get_logger\nfrom .registry import METRIC\nfrom .base import BaseMetric\nfrom .ucf24_utils import get_mAP\nlogger = get_logger(\"paddlevideo\")\n@METRIC.register\nclass YOWOMetric(BaseMetric):\n    \"\"\"\n    Metrics for YOWO. Two Stages in this metric:\n    (1) Get test results using trained model, results will be saved in YOWOMetric.result_path;\n    (2) Calculate metrics using results file from stage (1).",
+        "type": "code",
+        "location": "/paddlevideo/metrics/yowo_metric.py:1-30"
+    },
+    "6049": {
+        "file_id": 482,
+        "content": "This code defines a YOWOMetric class within the PaddleVideo framework. The class measures metrics for YOWO in two stages: first, it saves test results using a trained model, and then calculates metrics from the saved results file.",
+        "type": "comment"
+    },
+    "6050": {
+        "file_id": 482,
+        "content": "    \"\"\"\n    def __init__(self,\n                 data_size,\n                 batch_size,\n                 gt_folder,\n                 result_path,\n                 threshold=0.5,\n                 save_path=None,\n                 log_interval=1):\n        \"\"\"\n        Init for BMN metrics.\n        Params:\n            gtfolder:groundtruth folder path for ucf24\n        \"\"\"\n        super().__init__(data_size, batch_size, log_interval)\n        self.result_path = result_path\n        self.gt_folder = gt_folder\n        self.threshold = threshold\n        self.save_path = save_path\n        if not osp.isdir(self.result_path):\n            os.makedirs(self.result_path)\n    def update(self, batch_id, data, outputs):\n        frame_idx = outputs['frame_idx']\n        boxes = outputs[\"boxes\"]\n        for j in range(len(frame_idx)):\n            detection_path = osp.join(self.result_path, frame_idx[j])\n            with open(detection_path, 'w+') as f_detect:\n                for box in boxes[j]:\n                    x1 = round(float(box[0] - box[2] / 2.0) * 320.0)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/yowo_metric.py:31-62"
+    },
+    "6051": {
+        "file_id": 482,
+        "content": "The code initializes an instance of a BMN metrics class with specified parameters. It checks if the result path exists and creates it if not, then updates the metric by writing detection results to corresponding files in the result path for each batch.",
+        "type": "comment"
+    },
+    "6052": {
+        "file_id": 482,
+        "content": "                    y1 = round(float(box[1] - box[3] / 2.0) * 240.0)\n                    x2 = round(float(box[0] + box[2] / 2.0) * 320.0)\n                    y2 = round(float(box[1] + box[3] / 2.0) * 240.0)\n                    det_conf = float(box[4])\n                    for j in range((len(box) - 5) // 2):\n                        cls_conf = float(box[5 + 2 * j].item())\n                        prob = det_conf * cls_conf\n                        f_detect.write(\n                            str(int(box[6]) + 1) + ' ' + str(prob) + ' ' + str(x1) + ' ' + str(y1) + ' ' + str(\n                                x2) + ' ' + str(y2) + '\\n')\n        if batch_id % self.log_interval == 0:\n            logger.info(\"[TEST] Processing batch {}/{} ...\".format(\n                batch_id,\n                self.data_size // (self.batch_size * self.world_size)))\n    def accumulate(self):\n        metric_list = get_mAP(self.gt_folder, self.result_path, self.threshold, self.save_path)\n        for info in metric_list:\n            logger.info(info)",
+        "type": "code",
+        "location": "/paddlevideo/metrics/yowo_metric.py:63-82"
+    },
+    "6053": {
+        "file_id": 482,
+        "content": "This code snippet is part of the PaddleVideo library. It calculates and writes yolo v5 box information into a file, handling batch processing and logging progress with an interval. The accumulate function collects mAP metrics for evaluation.",
+        "type": "comment"
+    },
+    "6054": {
+        "file_id": 483,
+        "content": "/paddlevideo/modeling/__init__.py",
+        "type": "filepath"
+    },
+    "6055": {
+        "file_id": 483,
+        "content": "The code imports modules from PaddleVideo library, initializes a model registry, and provides functions for building video recognition models and defining loss functions.",
+        "type": "summary"
+    },
+    "6056": {
+        "file_id": 483,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .assigners import MaxIoUAssignerAVA\nfrom .backbones import ResNet\nfrom .builder import (build_backbone, build_head, build_localizer, build_loss,\n                      build_recognizer)\nfrom .framework.detectors import BaseDetector, FastRCNN, TwoStageDetector\nfrom .framework.recognizers import BaseRecognizer, Recognizer2D\nfrom .heads import (AVARoIHead, BaseHead, BBoxHeadAVA, SingleRoIExtractor3D,\n                    TSNHead)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/__init__.py:1-22"
+    },
+    "6057": {
+        "file_id": 483,
+        "content": "This code is an import statement from the PaddleVideo library, including various modules for backbones, builders, detectors, recognizers, and heads. It also includes license information and copyright details. The code allows users to access and build models using these imported modules.",
+        "type": "comment"
+    },
+    "6058": {
+        "file_id": 483,
+        "content": "from .losses import CrossEntropyLoss\nfrom .registry import (BACKBONES, DETECTORS, HEADS, LOCALIZERS, LOSSES,\n                       PARTITIONERS, RECOGNIZERS, ROI_EXTRACTORS)\nfrom .samplers import RandomSampler\nfrom .weight_init import kaiming_normal_, trunc_normal_, weight_init_\n__all__ = [\n    'BACKBONES', 'HEADS', 'RECOGNIZERS', 'LOCALIZERS', 'PARTITIONERS', 'LOSSES',\n    'build_recognizer', 'build_localizer', 'build_head', 'build_backbone',\n    'build_loss', 'ResNet', 'TSNHead', 'BaseHead', 'BaseRecognizer',\n    'Recognizer2d', 'CrossEntropyLoss', 'ROI_EXTRACTORS',\n    'SingleRoIExtractor3D', 'AVARoIHead', 'BBoxHeadAVA', 'MaxIoUAssignerAVA',\n    'RandomSampler', 'DETECTORS', 'kaiming_normal_', 'trunc_normal_',\n    'weight_init_'\n]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/__init__.py:23-37"
+    },
+    "6059": {
+        "file_id": 483,
+        "content": "This code imports various modules, initializes a registry of models and functions, and lists all the available ones. It also defines a few key functions like `build_recognizer` and `build_localizer`, as well as some important loss functions such as `CrossEntropyLoss`. The code is part of PaddleVideo's modeling package and seems to be involved in building different parts of a video recognition model.",
+        "type": "comment"
+    },
+    "6060": {
+        "file_id": 484,
+        "content": "/paddlevideo/modeling/assigners/__init__.py",
+        "type": "filepath"
+    },
+    "6061": {
+        "file_id": 484,
+        "content": "This code imports the MaxIoUAssignerAVA class from the max_iou_assigner_ava module and adds it to the __all__ list, making it importable by default. The comment at the top of the file contains license information and copyright notices.",
+        "type": "summary"
+    },
+    "6062": {
+        "file_id": 484,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .max_iou_assigner_ava import MaxIoUAssignerAVA\n__all__ = ['MaxIoUAssignerAVA']",
+        "type": "code",
+        "location": "/paddlevideo/modeling/assigners/__init__.py:1-17"
+    },
+    "6063": {
+        "file_id": 484,
+        "content": "This code imports the MaxIoUAssignerAVA class from the max_iou_assigner_ava module and adds it to the __all__ list, making it importable by default. The comment at the top of the file contains license information and copyright notices.",
+        "type": "comment"
+    },
+    "6064": {
+        "file_id": 485,
+        "content": "/paddlevideo/modeling/assigners/max_iou_assigner_ava.py",
+        "type": "filepath"
+    },
+    "6065": {
+        "file_id": 485,
+        "content": "The code defines AssignResult class, initializes MaxIoUAssignerAVA, assigns GT boxes to bboxes using max IOU method and handles multi-class cases. It's registered at BBOX_ASSIGNERS.",
+        "type": "summary"
+    },
+    "6066": {
+        "file_id": 485,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport numpy as np\nfrom ..registry import BBOX_ASSIGNERS\nfrom ..bbox_utils import bbox_overlaps\nclass AssignResult():\n    def __init__(self, num_gts, gt_inds, max_overlaps, labels=None):\n        self.num_gts = num_gts\n        self.gt_inds = gt_inds\n        self.max_overlaps = max_overlaps\n        self.labels = labels\n    def add_gt_(self, gt_labels):\n        \"\"\"Add ground truth as assigned results.  \"\"\"",
+        "type": "code",
+        "location": "/paddlevideo/modeling/assigners/max_iou_assigner_ava.py:1-27"
+    },
+    "6067": {
+        "file_id": 485,
+        "content": "This code defines a class called \"AssignResult\" for storing the assigned results, including number of gts, ground truth indexes, maximum overlaps, and labels if available. It also includes a method called \"add_gt_\" to add ground truth as assigned results.",
+        "type": "comment"
+    },
+    "6068": {
+        "file_id": 485,
+        "content": "        self_inds = paddle.arange(1, len(gt_labels) + 1, dtype=\"int32\")\n        gt_inds_squeeze = paddle.squeeze(self.gt_inds, axis=0)\n        self.gt_inds = paddle.concat([self_inds, gt_inds_squeeze])\n        gt_label_ones = paddle.full((len(gt_labels), ), 1, dtype='float32')\n        max_overlaps_squeeze = paddle.squeeze(self.max_overlaps, axis=0)\n        self.max_overlaps = paddle.concat([gt_label_ones, max_overlaps_squeeze])\n        if self.labels is not None:\n            self.labels = paddle.concat([gt_labels, self.labels])\n@BBOX_ASSIGNERS.register()\nclass MaxIoUAssignerAVA():\n    \"\"\"Assign a corresponding gt bbox or background to each bbox.  \"\"\"\n    def __init__(self,\n                 pos_iou_thr,\n                 neg_iou_thr,\n                 min_pos_iou=.0,\n                 gt_max_assign_all=True,\n                 ignore_iof_thr=-1,\n                 ignore_wrt_candidates=True,\n                 match_low_quality=True,\n                 gpu_assign_thr=-1,\n                 iou_calculator=dict(type='BboxOverlaps2D')):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/assigners/max_iou_assigner_ava.py:28-49"
+    },
+    "6069": {
+        "file_id": 485,
+        "content": "This code initializes a MaxIoUAssignerAVA object by setting the self_inds and gt_inds attributes using paddle.arange and paddle.squeeze functions, concatenating them with paddle.concat function. It also sets max_overlaps attribute by concatenating gt_label_ones and max_overlaps_squeeze, and updates labels attribute if not None. The class is then registered at BBOX_ASSIGNERS with the decorator @BBOX_ASSIGNERS.register().",
+        "type": "comment"
+    },
+    "6070": {
+        "file_id": 485,
+        "content": "        self.pos_iou_thr = pos_iou_thr\n        self.neg_iou_thr = neg_iou_thr\n        self.min_pos_iou = min_pos_iou\n        self.gt_max_assign_all = gt_max_assign_all\n        self.ignore_iof_thr = ignore_iof_thr\n        self.ignore_wrt_candidates = ignore_wrt_candidates\n        self.gpu_assign_thr = gpu_assign_thr\n        self.match_low_quality = match_low_quality\n    def assign(self, \n               bboxes, \n               gt_bboxes, \n               gt_labels=None):\n        \"\"\"Assign gt to bboxes.  \"\"\"\n        overlaps = bbox_overlaps(gt_bboxes, bboxes)\n        assign_result = self.assign_wrt_overlaps(overlaps, gt_labels)\n        return assign_result\n    def assign_wrt_overlaps(self, overlaps, gt_labels=None):\n        \"\"\"Assign w.r.t. the overlaps of bboxes with gts.  \"\"\"\n        num_gts, num_bboxes = overlaps.shape[0], overlaps.shape[1]\n        # 1. assign -1\n        assigned_gt_inds = paddle.full((num_bboxes, ), -1, dtype='int32')\n        # for each anchor, which gt best overlaps with it\n        # for each anchor, the max iou of all gts",
+        "type": "code",
+        "location": "/paddlevideo/modeling/assigners/max_iou_assigner_ava.py:50-75"
+    },
+    "6071": {
+        "file_id": 485,
+        "content": "The code defines a class that assigns ground truth (GT) boxes to bboxes. It takes in bboxes and GT bboxes as input, and returns the assignment result. The function assign_wrt_overlaps calculates assigned_gt_inds based on the overlaps of bboxes with gts.",
+        "type": "comment"
+    },
+    "6072": {
+        "file_id": 485,
+        "content": "        max_overlaps, argmax_overlaps = paddle.topk(overlaps, k=1, axis=0)\n        # for each gt, which anchor best overlaps with it\n        # for each gt, the max iou of all proposals\n        gt_max_overlaps, gt_argmax_overlaps = paddle.topk(overlaps, k=1, axis=1) \n        # 2. assign negative: below the negative inds are set to be 0\n        match_labels = paddle.full(argmax_overlaps.shape, -1, dtype='int32')\n        match_labels = paddle.where(max_overlaps < self.neg_iou_thr,\n                            paddle.zeros_like(match_labels), match_labels)\n        # 3. assign positive: above positive IoU threshold\n        argmax_overlaps_int32 = paddle.cast(argmax_overlaps, 'int32')\n        match_labels = paddle.where(max_overlaps >= self.pos_iou_thr,\n                                argmax_overlaps_int32 + 1, match_labels)\n        assigned_gt_inds = match_labels\n        if self.match_low_quality:\n            # Low-quality matching will overwirte the assigned_gt_inds\n            # assigned in Step 3. Thus, the assigned gt might not be the",
+        "type": "code",
+        "location": "/paddlevideo/modeling/assigners/max_iou_assigner_ava.py:76-93"
+    },
+    "6073": {
+        "file_id": 485,
+        "content": "This code assigns positive and negative labels to anchors based on their IoU with ground truth boxes. If the max IoU is above a certain threshold, it's considered positive. If it's below another threshold, it's negative. This process helps determine which anchor best overlaps with each ground truth box.",
+        "type": "comment"
+    },
+    "6074": {
+        "file_id": 485,
+        "content": "            # best one for prediction.\n            # For example, if bbox A has 0.9 and 0.8 iou with GT bbox\n            # 1 & 2, bbox 1 will be assigned as the best target for bbox A\n            # in step 3. However, if GT bbox 2's gt_argmax_overlaps = A,\n            # bbox A's assigned_gt_inds will be overwritten to be bbox B.\n            # This might be the reason that it is not used in ROI Heads.\n            for i in range(num_gts):\n                if gt_max_overlaps.numpy()[i] >= self.min_pos_iou:\n                    if self.gt_max_assign_all:\n                        equal_x_np = overlaps[i, :].numpy()\n                        equal_y_np = gt_max_overlaps[i].numpy()\n                        max_iou_inds = np.equal(equal_x_np, equal_y_np)\n                        max_iou_inds = paddle.to_tensor(max_iou_inds)\n                        max_iou_inds = paddle.reshape( max_iou_inds, [1,max_iou_inds.shape[0]] )\n                        match_labels_gts = paddle.full(max_iou_inds.shape, i+1, dtype='int32')\n                        match_labels = paddle.where(max_iou_inds, match_labels_gts, match_labels)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/assigners/max_iou_assigner_ava.py:94-109"
+    },
+    "6075": {
+        "file_id": 485,
+        "content": "This code iterates over each ground truth (GT) bounding box, and if the IOU with a detection is above the minimum allowed position IOU, it checks whether all overlapping detections should be assigned to this GT. It creates a tensor of boolean values representing the assignment for each detection and GT pair. This is done by comparing the overlaps matrix and gt_max_overlaps, then reshaping and replacing match labels accordingly.",
+        "type": "comment"
+    },
+    "6076": {
+        "file_id": 485,
+        "content": "                        assigned_gt_inds = match_labels\n                    else:\n                        assigned_gt_inds[gt_argmax_overlaps[i]] = i + 1\n        if gt_labels is not None:\n            # consider multi-class case (AVA)\n            assert len(gt_labels[0]) > 1\n            assigned_labels = paddle.full([num_bboxes, len(gt_labels[0])], 0, dtype='float32')\n            assigned_gt_inds_reshape = assigned_gt_inds.reshape([assigned_gt_inds.shape[1]])\n            pos_inds = paddle.nonzero( assigned_gt_inds_reshape , as_tuple=False)\n            pos_inds_num = float(paddle.numel(pos_inds))\n            if pos_inds_num > 0:\n                pos_inds = paddle.squeeze(pos_inds, axis = 1 )\n                assigned_gt_inds_squeeze = paddle.squeeze(assigned_gt_inds, axis=0)\n                assigned_gt_inds_select = paddle.index_select(assigned_gt_inds_squeeze, pos_inds) - 1\n                gt_labels_select = paddle.index_select(gt_labels, assigned_gt_inds_select)\n                A = assigned_gt_inds_squeeze",
+        "type": "code",
+        "location": "/paddlevideo/modeling/assigners/max_iou_assigner_ava.py:110-126"
+    },
+    "6077": {
+        "file_id": 485,
+        "content": "This code assigns ground truth (GT) labels and indices for maximum IOU Assigner in the AVA dataset. It handles both multi-class cases with multiple classes per label. If there is a match, GT indices are assigned, otherwise, it assigns index + 1. Finally, it considers the multi-class case by asserting the existence of more than one class and assigns zeros to the initial labels array before updating them based on the selected gt_labels.",
+        "type": "comment"
+    },
+    "6078": {
+        "file_id": 485,
+        "content": "                X = assigned_gt_inds_squeeze - 1\n                Y = paddle.zeros_like(X)\n                if A.shape[0]==1:\n                    if float(A) > 0:\n                        T=X\n                    else:\n                        T=Y\n                else:\n                    T = paddle.where(A>0, X, Y)\n                S = paddle.index_select(gt_labels, T)\n                AE = paddle.expand(A, [S.shape[1], A.shape[0]]) \n                AET = paddle.transpose(AE, perm=[1, 0])\n                R = paddle.where(AET>0, S, assigned_labels) \n                assigned_labels = R\n        else:\n            assigned_labels = None\n        ret = AssignResult(\n            num_gts,\n            assigned_gt_inds,\n            max_overlaps,\n            labels=assigned_labels)\n        return ret",
+        "type": "code",
+        "location": "/paddlevideo/modeling/assigners/max_iou_assigner_ava.py:127-148"
+    },
+    "6079": {
+        "file_id": 485,
+        "content": "This code snippet is part of a max IOU assigner implementation in PaddleVideo. It assigns labels to objects based on the maximum IoU (intersection over union) threshold. If there's only one object, it assigns the ground truth index if the overlap is greater than 0, otherwise sets it to 0. For multiple objects, it uses a where statement to select the max IOU assignment. The assigned labels are then returned as part of the AssignResult.",
+        "type": "comment"
+    },
+    "6080": {
+        "file_id": 486,
+        "content": "/paddlevideo/modeling/backbones/__init__.py",
+        "type": "filepath"
+    },
+    "6081": {
+        "file_id": 486,
+        "content": "This code initializes and defines various backbone models for video analysis tasks in PaddleVideo, including ResNet, Vision Transformer, AGCN, and popular models such as ResNetTSN_MRI, ResNetTSM_MRI, and SwinTransformer3D. These models form the foundation for object detection, segmentation, motion estimation, and various computer vision applications in PaddlePaddle framework.",
+        "type": "summary"
+    },
+    "6082": {
+        "file_id": 486,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .actbert import BertForMultiModalPreTraining\nfrom .adds import ADDS_DepthNet\nfrom .agcn import AGCN\nfrom .asrf import ASRF\nfrom .bmn import BMN\nfrom .cfbi import CFBI\nfrom .movinet import MoViNet\nfrom .ms_tcn import MSTCN\nfrom .resnet import ResNet\nfrom .resnet_slowfast import ResNetSlowFast\nfrom .resnet_slowfast_MRI import ResNetSlowFast_MRI\nfrom .resnet_tsm import ResNetTSM\nfrom .resnet_tsm_MRI import ResNetTSM_MRI",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/__init__.py:1-27"
+    },
+    "6083": {
+        "file_id": 486,
+        "content": "This code is an initialization file for backbone models in PaddleVideo. It imports various model classes from submodules, including BertForMultiModalPreTraining, ADDS_DepthNet, AGCN, ASRF, BMN, CFBI, MoViNet, MSTCN, ResNet, ResNetSlowFast, ResNetSlowFast_MRI, and ResNetTSM, ResNetTSM_MRI. These models can be used for video analysis tasks in the PaddlePaddle framework.",
+        "type": "comment"
+    },
+    "6084": {
+        "file_id": 486,
+        "content": "from .resnet_tsn_MRI import ResNetTSN_MRI\nfrom .resnet_tweaks_tsm import ResNetTweaksTSM\nfrom .resnet_tweaks_tsn import ResNetTweaksTSN\nfrom .stgcn import STGCN\nfrom .swin_transformer import SwinTransformer3D\nfrom .transnetv2 import TransNetV2\nfrom .vit import VisionTransformer\nfrom .vit_tweaks import VisionTransformer_tweaks\nfrom .ms_tcn import MSTCN\nfrom .asrf import ASRF\nfrom .resnet_tsn_MRI import ResNetTSN_MRI\nfrom .resnet_tsm_MRI import ResNetTSM_MRI\nfrom .resnet_slowfast_MRI import ResNetSlowFast_MRI\nfrom .cfbi import CFBI\nfrom .ctrgcn import CTRGCN\nfrom .agcn2s import AGCN2s\nfrom .movinet import MoViNet\nfrom .resnet3d_slowonly import ResNet3dSlowOnly\nfrom .toshift_vit import TokenShiftVisionTransformer\nfrom .pptsm_mv2 import PPTSM_MobileNetV2\nfrom .pptsm_mv3 import PPTSM_MobileNetV3\nfrom .pptsm_v2 import PPTSM_v2\nfrom .yowo import YOWO\n__all__ = [\n    'ResNet', 'ResNetTSM', 'ResNetTweaksTSM', 'ResNetSlowFast', 'BMN',\n    'ResNetTweaksTSN', 'VisionTransformer', 'STGCN', 'AGCN', 'TransNetV2',\n    'ADDS_DepthNet', 'VisionTransformer_tweaks', 'BertForMultiModalPreTraining',",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/__init__.py:28-55"
+    },
+    "6085": {
+        "file_id": 486,
+        "content": "The code imports various backbone models for video analysis from different modules within the PaddleVideo library, including ResNet, Vision Transformer, STGCN, AGCN, and more. The models are used for tasks like object detection, segmentation, and motion estimation in video processing.",
+        "type": "comment"
+    },
+    "6086": {
+        "file_id": 486,
+        "content": "    'ResNetTSN_MRI', 'ResNetTSM_MRI', 'ResNetSlowFast_MRI', 'CFBI', 'MSTCN',\n    'ASRF', 'MoViNet', 'SwinTransformer3D', 'CTRGCN',\n    'TokenShiftVisionTransformer', 'AGCN2s', 'PPTSM_MobileNetV2',\n    'PPTSM_MobileNetV3', 'PPTSM_v2', 'ResNet3dSlowOnly', 'YOWO'\n]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/__init__.py:56-60"
+    },
+    "6087": {
+        "file_id": 486,
+        "content": "This code defines a list of available backbones for video processing tasks, including popular models such as ResNetTSN_MRI, ResNetTSM_MRI, and SwinTransformer3D. These backbones serve as the foundation for various computer vision applications in PaddleVideo.",
+        "type": "comment"
+    },
+    "6088": {
+        "file_id": 487,
+        "content": "/paddlevideo/modeling/backbones/actbert.py",
+        "type": "filepath"
+    },
+    "6089": {
+        "file_id": 487,
+        "content": "The code presents a PaddlePaddle BertEmbeddings class for BERT model embeddings in video action recognition, utilizing self-attention and ACTBERT's backbone for multimodal inputs including text, video, and action data.",
+        "type": "summary"
+    },
+    "6090": {
+        "file_id": 487,
+        "content": "# copyright (c) 2021 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport sys\nimport numpy as np\nimport math\nimport copy\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nfrom paddle.nn import (Conv2D, BatchNorm2D, Linear, Dropout)\nfrom paddle.nn.initializer import Constant, Normal\nfrom ...utils.save_load import load_ckpt\nfrom ..registry import BACKBONES\nfrom ..weight_init import weight_init_\nACT2FN = {\"gelu\": F.gelu, \"relu\": F.relu, \"swish\": F.swish}\nclass BertEmbeddings(nn.Layer):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/actbert.py:1-32"
+    },
+    "6091": {
+        "file_id": 487,
+        "content": "This code is a Python file containing a class named \"BertEmbeddings\" within the PaddlePaddle framework. The class inherits from nn.Layer and appears to contain embeddings for the BERT model. This code also includes comments with copyright information, license details, and an import section with necessary libraries. It introduces a dictionary, ACT2FN, that maps activation functions for use in the BertEmbeddings class.",
+        "type": "comment"
+    },
+    "6092": {
+        "file_id": 487,
+        "content": "    \"\"\"Construct the embeddings from word, position and token_type embeddings.\n    \"\"\"\n    def __init__(self, vocab_size, max_position_embeddings, type_vocab_size,\n                 hidden_size, hidden_dropout_prob):\n        super(BertEmbeddings, self).__init__()\n        self.word_embeddings = nn.Embedding(vocab_size,\n                                            hidden_size,\n                                            padding_idx=0)\n        self.position_embeddings = nn.Embedding(max_position_embeddings,\n                                                hidden_size)\n        self.token_type_embeddings = nn.Embedding(type_vocab_size, hidden_size)\n        self.LayerNorm = nn.LayerNorm(hidden_size, epsilon=1e-12)\n        self.dropout = nn.Dropout(hidden_dropout_prob)\n    def forward(self, input_ids, token_type_ids=None):\n        seq_length = input_ids.shape[1]\n        position_ids = paddle.arange(end=seq_length, dtype=\"int64\")\n        position_ids = position_ids.unsqueeze(0).expand_as(input_ids)\n        if token_type_ids is None:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/actbert.py:33-52"
+    },
+    "6093": {
+        "file_id": 487,
+        "content": "BertEmbeddings initializes word, position, and token_type embeddings for a given vocabulary size, maximum position embedding size, type vocab size, hidden size, and hidden dropout probability. Forward function uses input ids and token type ids to generate position ids and then combines the different embeddings with layer normalization and dropout.",
+        "type": "comment"
+    },
+    "6094": {
+        "file_id": 487,
+        "content": "            token_type_ids = paddle.zeros_like(input_ids)\n        words_embeddings = self.word_embeddings(input_ids)  #8,36  -> 8,36,768\n        position_embeddings = self.position_embeddings(\n            position_ids)  #8,36  -> 8,36,768\n        token_type_embeddings = self.token_type_embeddings(\n            token_type_ids)  #8,36  -> 8,36,768\n        embeddings = words_embeddings + position_embeddings + token_type_embeddings\n        embeddings = self.LayerNorm(embeddings)\n        embeddings = self.dropout(embeddings)\n        return embeddings\nclass BertImageEmbeddings(nn.Layer):\n    def __init__(self, v_feature_size, v_hidden_size, v_hidden_dropout_prob):\n        super(BertImageEmbeddings, self).__init__()\n        self.image_embeddings = nn.Linear(v_feature_size, v_hidden_size)\n        self.image_location_embeddings = nn.Linear(5, v_hidden_size)\n        self.LayerNorm = nn.LayerNorm(v_hidden_size, epsilon=1e-12)\n        self.dropout = nn.Dropout(v_hidden_dropout_prob)\n    def forward(self, input_ids, input_loc):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/actbert.py:53-75"
+    },
+    "6095": {
+        "file_id": 487,
+        "content": "This code defines the `ActBert` class, which is a backbone model for video action recognition. It initializes word embeddings, position embeddings, and token type embeddings. The class also includes a forward function that combines these embeddings, applies layer normalization and dropout, and returns the result. Additionally, there's the `BertImageEmbeddings` class which takes image features and their locations as input and uses linear layers to generate embeddings for both, followed by layer normalization and dropout.",
+        "type": "comment"
+    },
+    "6096": {
+        "file_id": 487,
+        "content": "        img_embeddings = self.image_embeddings(\n            input_ids)  #8,37,2048 -> 8,37,1024\n        loc_embeddings = self.image_location_embeddings(\n            input_loc)  #8,37,5 -> 8,37,1024\n        embeddings = self.LayerNorm(img_embeddings + loc_embeddings)\n        embeddings = self.dropout(embeddings)\n        return embeddings  # shape: bs*seq_len*hs\nclass BertActionEmbeddings(nn.Layer):\n    def __init__(self, a_feature_size, a_hidden_size, a_hidden_dropout_prob):\n        super(BertActionEmbeddings, self).__init__()\n        self.action_embeddings = nn.Linear(a_feature_size, a_hidden_size)\n        self.LayerNorm = nn.LayerNorm(a_hidden_size, epsilon=1e-12)\n        self.dropout = nn.Dropout(a_hidden_dropout_prob)\n    def forward(self, input_ids):\n        action_embeddings = self.action_embeddings(\n            input_ids)  #8,5,2048 -> 8,5,768\n        embeddings = self.LayerNorm(action_embeddings)\n        embeddings = self.dropout(embeddings)\n        return embeddings\nclass BertSelfAttention(nn.Layer):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/actbert.py:76-100"
+    },
+    "6097": {
+        "file_id": 487,
+        "content": "This code defines two classes: `BertActionEmbeddings` and `BertSelfAttention`. The former takes action features as input, linearly projects them into hidden states, normalizes these using LayerNorm, applies dropout, and returns the embeddings. The latter performs self-attention over the embeddings produced by `BertActionEmbeddings`, applies a feed-forward network, applies LayerNorm, and finally applies dropout before returning the output.",
+        "type": "comment"
+    },
+    "6098": {
+        "file_id": 487,
+        "content": "    def __init__(self, hidden_size, num_attention_heads,\n                 attention_probs_dropout_prob):\n        super(BertSelfAttention, self).__init__()\n        if hidden_size % num_attention_heads != 0:\n            raise ValueError(\n                \"The hidden size (%d) is not a multiple of the number of attention \"\n                \"heads (%d)\" % (hidden_size, num_attention_heads))\n        self.num_attention_heads = num_attention_heads\n        self.attention_head_size = int(hidden_size / num_attention_heads)\n        self.all_head_size = self.num_attention_heads * self.attention_head_size\n        self.query = nn.Linear(hidden_size, self.all_head_size)\n        self.key = nn.Linear(hidden_size, self.all_head_size)\n        self.value = nn.Linear(hidden_size, self.all_head_size)\n        self.dropout = nn.Dropout(attention_probs_dropout_prob)\n    def transpose_for_scores(self, x):\n        new_x_shape = x.shape[:-1] + [\n            self.num_attention_heads,\n            self.attention_head_size,\n        ]\n        x = x.reshape(new_x_shape)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/actbert.py:101-123"
+    },
+    "6099": {
+        "file_id": 487,
+        "content": "This code defines a BertSelfAttention class with parameters: hidden_size, num_attention_heads, and attention_probs_dropout_prob. It checks if the hidden size is divisible by the number of attention heads. If not, it raises a ValueError. Then, it calculates attention_head_size and all_head_size. Finally, it initializes query, key, value linear layers and dropout layer for attention probabilities.",
+        "type": "comment"
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "summary": "This Python function builds a module from a config dictionary, checks its validity, retrieves an object class from a registry, and returns an instance with optional parameters.",
+    "details": [
+        {
+            "comment": "This code snippet is a Python function that builds a module from a config dictionary. It checks if the input is a dictionary and verifies if the specified key exists. Then it makes a copy of the dictionary and removes the specified key, returning the constructed object. The registry is used to search for the type of the module.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/utils/build_utils.py\":0-29",
+            "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\ndef build(cfg, registry, key='name'):\n    \"\"\"Build a module from config dict.\n    Args:\n        cfg (dict): Config dict. It should at least contain the key.\n        registry (XXX): The registry to search the type from.\n        key (str): the key.\n    Returns:\n        obj: The constructed object.\n    \"\"\"\n    assert isinstance(cfg, dict) and key in cfg\n    cfg_copy = cfg.copy()\n    obj_type = cfg_copy.pop(key)"
+        },
+        {
+            "comment": "The code retrieves an object class from a registry based on the provided \"obj_type\", and if not found, raises a KeyError with an informative message. It then returns an instance of the retrieved class with optional configuration parameters.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/utils/build_utils.py\":31-35",
+            "content": "    obj_cls = registry.get(obj_type)\n    if obj_cls is None:\n        raise KeyError('{} is not in the {} registry'.format(\n                obj_type, registry.name))\n    return obj_cls(**cfg_copy)"
+        }
+    ]
+}

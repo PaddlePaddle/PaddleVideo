@@ -1,0 +1,543 @@
+{
+    "4100": {
+        "file_id": 347,
+        "content": "  fetch_type: 1\n  shape: 400\n}\n```\n### Service deployment and requests\nThe `python_serving` directory contains the code for starting the pipeline service, C++ serving service (TODO) and sending prediction requests, including:\n```bash\n__init__.py\nconfigs/xxx.yaml            # start the configuration file of the pipeline service\npipeline_http_client.py     # python script for sending pipeline prediction request via http\npipeline_rpc_client.py      # python script for sending pipeline prediction request in rpc mode\nrecognition_web_service.py  # python script that starts the pipeline server\nutils.py                    # common functions used in inference, such as parse_file_paths, numpy_to_base64, video_to_numpy\n```\n#### Python Serving\n- Go to the working directory:\n```bash\ncd deploy/python_serving\n```\n- Start the service:\n```bash\n# Start in the current command line window and stay in front\npython3.7 recognition_web_service.py -n PPTSM -c configs/PP-TSM.yaml\n# Start in the background, the logs printed during the process will be redirected and saved to log.txt",
+        "type": "code",
+        "location": "/deploy/python_serving/readme_en.md:120-145"
+    },
+    "4101": {
+        "file_id": 347,
+        "content": "This code snippet is for starting the PaddleVideo pipeline service in Python using the recognition_web_service.py script. The `-n` flag specifies the name of the model, and the `-c` flag points to the configuration file for the pipeline service.",
+        "type": "comment"
+    },
+    "4102": {
+        "file_id": 347,
+        "content": "python3.7 recognition_web_service.py -n PPTSM -c configs/PP-TSM.yaml &>log.txt &\n```\n- send request:\n```bash\n# Send a prediction request in http and receive the result\npython3.7 pipeline_http_client.py -i ../../data/example.avi\n# Send a prediction request in rpc and receive the result\npython3.7 pipeline_rpc_client.py -i ../../data/example.avi\n```\nAfter a successful run, the results of the model prediction will be printed in the cmd window, and the results are as follows:\n```bash\n# http method print result\n{'err_no': 0, 'err_msg': '', 'key': ['label', 'prob'], 'value': [\"['archery']\", '[0.9907388687133789]'], 'tensors ': []}\n# The result of printing in rpc mode\nPipelineClient::predict pack_data time:1645631086.764019\nPipelineClient::predict before time:1645631086.8485317\nkey: \"label\"\nkey: \"prob\"\nvalue: \"[\\'archery\\']\"\nvalue: \"[0.9907388687133789]\"\n```\n## FAQ\n**Q1**: No result is returned after the request is sent or an output decoding error is prompted\n**A1**: Do not set the proxy when starting the service an",
+        "type": "code",
+        "location": "/deploy/python_serving/readme_en.md:146-175"
+    },
+    "4103": {
+        "file_id": 347,
+        "content": "This code is running a web service for model prediction and two client scripts to send prediction requests via HTTP and RPC, printing the results in the command line. The result shows an example output with probabilities and labels for a given input video file. If no result is returned or there's an output decoding error, it might be related to the proxy setting when starting the service.",
+        "type": "comment"
+    },
+    "4104": {
+        "file_id": 347,
+        "content": "d sending the request. You can close the proxy before starting the service and sending the request. The command to close the proxy is:\n```\nunset https_proxy\nunset http_proxy\n```\n**Q2**: There is no response after the server is started, and it has been stopped at `start proxy service`\n**A2**: It is likely that a problem was encountered during the startup process. You can view the detailed error message in the `./deploy/python_serving/PipelineServingLogs/pipeline.log` log file\nFor more service deployment types, such as `RPC prediction service`, you can refer to Serving's [github official website](https://github.com/PaddlePaddle/Serving/tree/v0.7.0/examples)",
+        "type": "code",
+        "location": "/deploy/python_serving/readme_en.md:175-185"
+    },
+    "4105": {
+        "file_id": 347,
+        "content": "Closing the proxy before starting the service and sending request using \"unset https_proxy; unset http_proxy\". No response after server started, check log file for error message at \"./deploy/python_serving/PipelineServingLogs/pipeline.log\". For more deployment types like RPC prediction service, refer to Serving's GitHub official website.",
+        "type": "comment"
+    },
+    "4106": {
+        "file_id": 348,
+        "content": "/deploy/python_serving/recognition_web_service.py",
+        "type": "filepath"
+    },
+    "4107": {
+        "file_id": 348,
+        "content": "This code sets up PaddleVideo, imports libraries, and defines preprocessing pipelines for image recognition web services using PaddlePaddle. It includes a `VideoOp` class for video operations and a \"VideoService\" class for preprocessing and post-processing methods.",
+        "type": "summary"
+    },
+    "4108": {
+        "file_id": 348,
+        "content": "# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport argparse\nimport base64\nimport os\nimport sys\nfrom typing import Callable, Dict, List\nimport numpy as np\n__dir__ = os.path.dirname(os.path.abspath(__file__))\nsys.path.append(os.path.abspath(os.path.join(__dir__, '../../')))\nfrom paddle_serving_app.reader import Sequential\nfrom paddlevideo.loader.pipelines import (CenterCrop, Image2Array,\n                                          Normalization, Sampler, Scale,",
+        "type": "code",
+        "location": "/deploy/python_serving/recognition_web_service.py:1-28"
+    },
+    "4109": {
+        "file_id": 348,
+        "content": "This code is importing necessary libraries and modules, setting up the path for the PaddleVideo project, and defining several image processing pipelines including CenterCrop, Image2Array, Normalization, Sampler, and Scale. The purpose of this code is to provide a base for building an image recognition web service using PaddlePaddle.",
+        "type": "comment"
+    },
+    "4110": {
+        "file_id": 348,
+        "content": "                                          TenCrop)\ntry:\n    from paddle_serving_server_gpu.web_service import Op, WebService\nexcept ImportError:\n    from paddle_serving_server.web_service import Op, WebService\nVALID_MODELS = [\"PPTSM\", \"PPTSN\"]\ndef get_preprocess_seq(model_name: str) -> List[Callable]:\n    \"\"\"get preprocess sequence by model name\n    Args:\n        model_name (str): model name for web serving, such as 'PPTSM', 'PPTSN'\n    Returns:\n        List[Callable]: preprocess operators in list.\n    \"\"\"\n    if model_name == 'PPTSM':\n        preprocess_seq = [\n            Sampler(8, 1, valid_mode=True),\n            Scale(256),\n            CenterCrop(224),\n            Image2Array(),\n            Normalization([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])\n        ]\n    elif model_name == 'PPTSN':\n        preprocess_seq = [\n            Sampler(25, 1, valid_mode=True, select_left=True),\n            Scale(256, fixed_ratio=True, do_round=True, backend='cv2'),\n            TenCrop(224),\n            Image2Array(),\n            Normalization([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])",
+        "type": "code",
+        "location": "/deploy/python_serving/recognition_web_service.py:29-62"
+    },
+    "4111": {
+        "file_id": 348,
+        "content": "This code defines a function called get_preprocess_seq that returns a list of preprocessing operators based on the model name passed as an argument. The model names accepted are \"PPTSM\" and \"PPTSN\". The function checks the model name, and depending on its value, it constructs and returns a sequence of preprocess operators including Sampler, Scale, CenterCrop, Image2Array, and Normalization. These operations prepare the input data for a specific model before feeding into the model for prediction or inference.",
+        "type": "comment"
+    },
+    "4112": {
+        "file_id": 348,
+        "content": "        ]\n    else:\n        raise ValueError(\n            f\"model_name must in {VALID_MODELS}, but got {model_name}\")\n    return preprocess_seq\ndef np_softmax(x: np.ndarray, axis=0) -> np.ndarray:\n    \"\"\"softmax function\n    Args:\n        x (np.ndarray): logits.\n    Returns:\n        np.ndarray: probs.\n    \"\"\"\n    x -= np.max(x, axis=axis, keepdims=True)\n    x = np.exp(x) / np.sum(np.exp(x), axis=axis, keepdims=True)\n    return x\nclass VideoOp(Op):\n    def init_op(self):\n        \"\"\"init_op\n        \"\"\"\n        self.seq = Sequential(get_preprocess_seq(args.name))\n        self.label_dict = {}\n        with open(\"../../data/k400/Kinetics-400_label_list.txt\", \"r\") as fin:\n            for line in fin:\n                label_ind, label_name = line.strip().split(' ')\n                label_ind = int(label_ind)\n                self.label_dict[label_ind] = label_name.strip()\n    def preprocess(self, input_dicts: Dict, data_id: int, log_id: int):\n        \"\"\"preprocess\n        Args:\n            input_dicts (Dict): input_dicts.\n            data_id (int): data_id.",
+        "type": "code",
+        "location": "/deploy/python_serving/recognition_web_service.py:63-102"
+    },
+    "4113": {
+        "file_id": 348,
+        "content": "This code snippet defines a class `VideoOp` that initializes an object with a preprocessing sequence and a dictionary of labels. The `preprocess()` method takes input dictionaries, data ID, and log ID as arguments to perform some operation on video data. The `init_op()` method is responsible for setting up the preprocessing sequence and label dictionary.",
+        "type": "comment"
+    },
+    "4114": {
+        "file_id": 348,
+        "content": "            log_id (int): log_id.\n        Returns:\n            output_data: data for process stage.\n            is_skip_process: skip process stage or not, False default\n            prod_errcode: None default, otherwise, product errores occured.\n                          It is handled in the same way as exception.\n            prod_errinfo: \"\" default.\n        \"\"\"\n        (_, input_dict), = input_dicts.items()\n        for key in input_dict.keys():\n            if key == \"frames\":\n                frame_data = base64.b64decode(input_dict[key].encode('utf8'))\n                frame_data = np.fromstring(frame_data, np.uint8)\n            elif key == 'frames_shape':\n                shape_data = eval(input_dict[key])\n            else:\n                raise ValueError(f\"unexpected key received: {key}\")\n        frame_data = frame_data.reshape(shape_data)\n        frame_len = frame_data.shape[0]\n        frame_data = np.split(frame_data, frame_len, axis=0)\n        frame_data = [frame.squeeze(0) for frame in frame_data]\n        results = {",
+        "type": "code",
+        "location": "/deploy/python_serving/recognition_web_service.py:103-125"
+    },
+    "4115": {
+        "file_id": 348,
+        "content": "This code function takes input_dicts, decodes and reshapes the 'frames' data into numpy array, splits it based on frame length, then squeezes the dimensions and stores the result in results dictionary. It also handles unexpected keys by raising ValueError.",
+        "type": "comment"
+    },
+    "4116": {
+        "file_id": 348,
+        "content": "            'frames': frame_data,\n            'frames_len': frame_len,\n            'format': 'video',\n            'backend': 'cv2'\n        }\n        results = self.seq(results)\n        tmp_inp = np.expand_dims(results['imgs'], axis=0)  # [b,t,c,h,w]\n        # The input for the network is input_data[0], so need to add 1 dimension at the beginning\n        tmp_inp = np.expand_dims(tmp_inp, axis=0).copy()  # [1,b,t,c,h,w]\n        return {\"data_batch_0\": tmp_inp}, False, None, \"\"\n    def postprocess(self, input_dicts: Dict, fetch_dict: Dict, data_id: int,\n                    log_id: int):\n        \"\"\"postprocess\n        Args:\n            input_dicts (Dict): data returned in preprocess stage, dict(for single predict) or list(for batch predict).\n            fetch_dict (Dict): data returned in process stage, dict(for single predict) or list(for batch predict).\n            data_id (int): inner unique id, increase auto.\n            log_id (int): logid, 0 default.\n        Returns:\n            fetch_dict: fetch result must be dict type.",
+        "type": "code",
+        "location": "/deploy/python_serving/recognition_web_service.py:126-149"
+    },
+    "4117": {
+        "file_id": 348,
+        "content": "This code defines two methods: 'preprocess' and 'postprocess'. The 'preprocess' method takes input data in frames, sets the backend as cv2, expands dimensions for input to the network, and returns tmp_inp with a shape of [1,b,t,c,h,w]. The 'postprocess' method receives input_dicts from preprocess stage, fetch_dict from process stage, data_id, and log_id. It then returns the fetch result as a dictionary type.",
+        "type": "comment"
+    },
+    "4118": {
+        "file_id": 348,
+        "content": "            prod_errcode: None default, otherwise, product errores occured.\n                          It is handled in the same way as exception.\n            prod_errinfo: \"\" default.\n        \"\"\"\n        score_list = fetch_dict[\"outputs\"]\n        result = {\"label\": [], \"prob\": []}\n        for score in score_list:\n            score = np_softmax(score)\n            score = score.tolist()\n            max_score = max(score)\n            max_index = score.index(max_score)\n            result[\"label\"].append(self.label_dict[max_index])\n            result[\"prob\"].append(max_score)\n        result[\"label\"] = str(result[\"label\"])\n        result[\"prob\"] = str(result[\"prob\"])\n        return result, None, \"\"\nclass VideoService(WebService):\n    def get_pipeline_response(self, read_op):\n        \"\"\"get_pipeline_response\n        Args:\n            read_op ([type]): [description]\n        Returns:\n            [type]: [description]\n        \"\"\"\n        video_op = VideoOp(name=\"video\", input_ops=[read_op])\n        return video_op\ndef parse_args():",
+        "type": "code",
+        "location": "/deploy/python_serving/recognition_web_service.py:150-182"
+    },
+    "4119": {
+        "file_id": 348,
+        "content": "This code defines a class and a function. The class, \"VideoService\", extends the \"WebService\" class and has a method called \"get_pipeline_response\". The method takes an input operation (read_op) as its argument and returns a VideoOp object with the given read_op as its input. The function \"parse_args\" is used to parse command line arguments. It seems that this code is related to video processing and handling inputs/outputs in some kind of pipeline or web service.",
+        "type": "comment"
+    },
+    "4120": {
+        "file_id": 348,
+        "content": "    # general params\n    parser = argparse.ArgumentParser(\"PaddleVideo Web Serving model script\")\n    parser.add_argument(\n        '-n',\n        '--name',\n        type=str,\n        default='PPTSM',\n        help='model name used in web serving, such as PPTSM, PPTSN...')\n    parser.add_argument('-c',\n                        '--config',\n                        type=str,\n                        default='configs/PP-TSM.yaml',\n                        help='serving config file path')\n    return parser.parse_args()\nif __name__ == '__main__':\n    # get args such as serving config yaml path.\n    args = parse_args()\n    # start serving\n    uci_service = VideoService(name=\"video\")\n    uci_service.prepare_pipeline_config(yaml_file=args.config)\n    uci_service.run_service()",
+        "type": "code",
+        "location": "/deploy/python_serving/recognition_web_service.py:183-208"
+    },
+    "4121": {
+        "file_id": 348,
+        "content": "This code parses command-line arguments, initializes a PaddleVideo VideoService object with the provided configuration file and runs the service. The name of the model used in web serving is \"PPTSM\".",
+        "type": "comment"
+    },
+    "4122": {
+        "file_id": 349,
+        "content": "/deploy/python_serving/utils.py",
+        "type": "filepath"
+    },
+    "4123": {
+        "file_id": 349,
+        "content": "This code utilizes two functions: \"numpy_to_base64\" converts numpy arrays to base64 strings and \"video_to_numpy\" reads video frames with OpenCV, returning a stack of frames as a numpy array. The parse_file_paths function retrieves file paths or directories containing .avi/.mp4 files and joins them.",
+        "type": "summary"
+    },
+    "4124": {
+        "file_id": 349,
+        "content": "# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport base64\nimport os\nimport os.path as osp\nimport cv2\nimport numpy as np\ndef numpy_to_base64(array: np.ndarray) -> str:\n    \"\"\"numpy_to_base64\n    Args:\n        array (np.ndarray): input ndarray.\n    Returns:\n        bytes object: encoded str.\n    \"\"\"\n    return base64.b64encode(array).decode('utf8')\ndef video_to_numpy(file_path: str) -> np.ndarray:\n    \"\"\"decode video with cv2 and return stacked frames\n       as numpy.",
+        "type": "code",
+        "location": "/deploy/python_serving/utils.py:1-37"
+    },
+    "4125": {
+        "file_id": 349,
+        "content": "This code contains two functions: \"numpy_to_base64\" and \"video_to_numpy\". The first function converts a numpy array to a base64 encoded string. The second function decodes a video file using OpenCV (cv2) and returns a stack of frames as a numpy array.",
+        "type": "comment"
+    },
+    "4126": {
+        "file_id": 349,
+        "content": "    Args:\n        file_path (str): video file path.\n    Returns:\n        np.ndarray: [T,H,W,C] in uint8.\n    \"\"\"\n    cap = cv2.VideoCapture(file_path)\n    videolen = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))\n    decoded_frames = []\n    for i in range(videolen):\n        ret, frame = cap.read()\n        # maybe first frame is empty\n        if ret is False:\n            continue\n        img = frame[:, :, ::-1]\n        decoded_frames.append(img)\n    decoded_frames = np.stack(decoded_frames, axis=0)\n    return decoded_frames\ndef parse_file_paths(input_path: str) -> list:\n    \"\"\"get data pathes from input_path\n    Args:\n        input_path (str): input file path or directory which contains input file(s).\n    Returns:\n        list: path(es) of input file(s)\n    \"\"\"\n    assert osp.exists(input_path), \\\n        f\"{input_path} did not exists!\"\n    if osp.isfile(input_path):\n        files = [\n            input_path,\n        ]\n    else:\n        files = os.listdir(input_path)\n        files = [\n            file for file in files\n            if (file.endswith(\".avi\") or file.endswith(\".mp4\"))",
+        "type": "code",
+        "location": "/deploy/python_serving/utils.py:39-78"
+    },
+    "4127": {
+        "file_id": 349,
+        "content": "The code reads video frames from a file path and returns them as numpy array. The parse_file_paths function retrieves either the file path or directory containing .avi/.mp4 files.",
+        "type": "comment"
+    },
+    "4128": {
+        "file_id": 349,
+        "content": "        ]\n        files = [osp.join(input_path, file) for file in files]\n    return files",
+        "type": "code",
+        "location": "/deploy/python_serving/utils.py:79-81"
+    },
+    "4129": {
+        "file_id": 349,
+        "content": "This code is joining the input_path with each file in the files list and returning the resulting list of file paths.",
+        "type": "comment"
+    },
+    "4130": {
+        "file_id": 350,
+        "content": "/deploy/slim/quant_post_static.py",
+        "type": "filepath"
+    },
+    "4131": {
+        "file_id": 350,
+        "content": "The code introduces a quantization function in PaddleVideo for GPU utilization and performs post-training quantization in static graph mode, writing the quantized model for execution on specified placement. It checks if executed directly, parses command-line arguments, and calls appropriate functions based on GPU usage flag.",
+        "type": "summary"
+    },
+    "4132": {
+        "file_id": 350,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport argparse\nimport os\nimport os.path as osp\nimport sys\nimport numpy as np\nimport paddle\nfrom paddleslim.quant import quant_post_static\n__dir__ = os.path.dirname(os.path.abspath(__file__))\nsys.path.append(os.path.abspath(os.path.join(__dir__, '../../')))\nfrom paddlevideo.loader.builder import build_dataloader, build_dataset\nfrom paddlevideo.utils import get_config, get_logger\ndef parse_args():\n    def str2bool(v):",
+        "type": "code",
+        "location": "/deploy/slim/quant_post_static.py:1-32"
+    },
+    "4133": {
+        "file_id": 350,
+        "content": "This code is likely part of a larger program and it begins by defining the licensing information, then imports necessary libraries for the function. It also includes the path to other related files and defines a function parse_args(). This suggests that the function will be used later to parse command line arguments or configuration file data.",
+        "type": "comment"
+    },
+    "4134": {
+        "file_id": 350,
+        "content": "        return v.lower() in (\"true\", \"t\", \"1\")\n    parser = argparse.ArgumentParser(\"PaddleVideo Inference model script\")\n    parser.add_argument(\n        '-c',\n        '--config',\n        type=str,\n        default=\n        '../../configs/recognition/pptsm/pptsm_k400_frames_uniform_quantization.yaml',\n        help='quantization config file path')\n    parser.add_argument('-o',\n                        '--override',\n                        action='append',\n                        default=[],\n                        help='config options to be overridden')\n    parser.add_argument(\"--use_gpu\",\n                        type=str2bool,\n                        default=True,\n                        help=\"whether use gpui during quantization\")\n    return parser.parse_args()\ndef post_training_quantization(cfg, use_gpu: bool = True):\n    \"\"\"Quantization entry\n    Args:\n        cfg (dict): quntization configuration.\n        use_gpu (bool, optional): whether to use gpu during quantization. Defaults to True.\n    \"\"\"\n    logger = get_logger(\"paddlevideo\")",
+        "type": "code",
+        "location": "/deploy/slim/quant_post_static.py:33-63"
+    },
+    "4135": {
+        "file_id": 350,
+        "content": "This code defines a function for post-training quantization in PaddleVideo. It includes an argument parser to specify the configuration file path and optionally override config options. The function also takes a boolean parameter for whether to use GPU during quantization, and logs messages using get_logger(\"paddlevideo\").",
+        "type": "comment"
+    },
+    "4136": {
+        "file_id": 350,
+        "content": "    place = paddle.CUDAPlace(0) if use_gpu else paddle.CPUPlace()\n    # get defined params\n    batch_nums = cfg.DATASET.pop('batch_nums')\n    batch_size = cfg.DATASET.get('batch_size', 1)\n    num_workers = cfg.DATASET.get('num_workers', 0)\n    inference_file_name = cfg.get('model_name', 'inference')\n    inference_model_dir = cfg.get('inference_model_dir',\n                                  f'./inference/{inference_file_name}')\n    quant_output_dir = cfg.get('quant_output_dir',\n                               osp.join(inference_model_dir, 'quant_model'))\n    # build dataloader for quantization, lite data is enough\n    slim_dataset = build_dataset((cfg.DATASET.quant, cfg.PIPELINE.quant))\n    slim_dataloader_setting = dict(batch_size=batch_size,\n                                   num_workers=num_workers,\n                                   places=place,\n                                   drop_last=False,\n                                   shuffle=False)\n    slim_loader = build_dataloader(slim_dataset, **slim_dataloader_setting)",
+        "type": "code",
+        "location": "/deploy/slim/quant_post_static.py:65-84"
+    },
+    "4137": {
+        "file_id": 350,
+        "content": "This code configures the placement (CPU or GPU) based on use_gpu flag, retrieves defined parameters from cfg, builds a dataloader for quantization with specified dataset and settings.",
+        "type": "comment"
+    },
+    "4138": {
+        "file_id": 350,
+        "content": "    logger.info(\"Build slim_loader finished\")\n    def sample_generator(loader):\n        def __reader__():\n            for indx, data in enumerate(loader):\n                # must return np.ndarray, not paddle.Tensor\n                videos = np.array(data[0])\n                yield videos\n        return __reader__\n    # execute quantization in static graph mode\n    paddle.enable_static()\n    exe = paddle.static.Executor(place)\n    logger.info(\"Staring Post-Training Quantization...\")\n    quant_post_static(executor=exe,\n                      model_dir=inference_model_dir,\n                      quantize_model_path=quant_output_dir,\n                      sample_generator=sample_generator(slim_loader),\n                      model_filename=f'{inference_file_name}.pdmodel',\n                      params_filename=f'{inference_file_name}.pdiparams',\n                      batch_size=batch_size,\n                      batch_nums=batch_nums,\n                      algo='KL')\n    logger.info(\"Post-Training Quantization finished...\")",
+        "type": "code",
+        "location": "/deploy/slim/quant_post_static.py:86-114"
+    },
+    "4139": {
+        "file_id": 350,
+        "content": "This code performs post-training quantization for a model, enabling static graph mode in PaddlePaddle and using the specified sample generator for data processing. It also utilizes a specific algorithm (KL) for quantization and writes the quantized model to disk. The execution is done with an executor on the given place.",
+        "type": "comment"
+    },
+    "4140": {
+        "file_id": 350,
+        "content": "if __name__ == '__main__':\n    args = parse_args()\n    cfg = get_config(args.config, overrides=args.override)\n    post_training_quantization(cfg, args.use_gpu)",
+        "type": "code",
+        "location": "/deploy/slim/quant_post_static.py:117-120"
+    },
+    "4141": {
+        "file_id": 350,
+        "content": "The code checks if the script is being executed directly, then parses command-line arguments and gets a configuration file. It then calls a function for post-training quantization based on GPU usage flag.",
+        "type": "comment"
+    },
+    "4142": {
+        "file_id": 351,
+        "content": "/deploy/slim/readme.md",
+        "type": "filepath"
+    },
+    "4143": {
+        "file_id": 351,
+        "content": "This code introduces PaddleVideo's model compression using PaddleSlim, demonstrates PP-TSM quantized model prediction and pruning methods, providing recommendations for hyperparameters when using quantized training with pre-trained models.",
+        "type": "summary"
+    },
+    "4144": {
+        "file_id": 351,
+        "content": "## Slim功能介绍\n复杂的模型有利于提高模型的性能，但也导致模型中存在一定冗余。此部分提供精简模型的功能，包括两部分：模型量化（量化训练、离线量化）、模型剪枝。\n其中模型量化将全精度缩减到定点数减少这种冗余，达到减少模型计算复杂度，提高模型推理性能的目的。\n模型量化可以在基本不损失模型的精度的情况下，将FP32精度的模型参数转换为Int8精度，减小模型参数大小并加速计算，使用量化后的模型在移动端等部署时更具备速度优势。\n模型剪枝将CNN中不重要的卷积核裁剪掉，减少模型参数量，从而降低模型计算复杂度。\n本教程将介绍如何使用飞桨模型压缩库PaddleSlim做PaddleVideo模型的压缩。\n[PaddleSlim](https://github.com/PaddlePaddle/PaddleSlim) 集成了模型剪枝、量化（包括量化训练和离线量化）、蒸馏和神经网络搜索等多种业界常用且领先的模型压缩功能，如果您感兴趣，可以关注并了解。\n在开始本教程之前，建议先了解[PaddleVideo模型的训练方法](../../docs/zh-CN/usage.md)以及[PaddleSlim](https://paddleslim.readthedocs.io/zh_CN/latest/index.html)\n## 快速开始\n当训练出一个模型后，如果希望进一步的压缩模型大小并加速预测，可使用量化或者剪枝的方法压缩模型。\n模型压缩主要包括五个步骤：\n1. 安装 PaddleSlim\n2. 准备训练好的模型\n3. 模型压缩\n4. 导出量化推理模型\n5. 量化模型预测部署\n### 1. 安装PaddleSlim\n* 可以通过pip install的方式进行安装。\n```bash\npython3.7 -m pip install paddleslim -i https://pypi.tuna.tsinghua.edu.cn/simple\n```\n* 如果获取PaddleSlim的最新特性，可以从源码安装。\n```bash\ngit clone https://github.com/PaddlePaddle/PaddleSlim.git\ncd Paddleslim\npython3.7 setup.py install\n```\n### 2. 准备训练好的模型\nPaddleVideo提供了一系列训练好的[模型](../../docs/zh-CN/model_zoo/README.md)，如果待量化的模型不在列表中，需要按照[常规训练](../../docs/zh-CN/usage.md)方法得到训练好的模型。",
+        "type": "code",
+        "location": "/deploy/slim/readme.md:2-44"
+    },
+    "4145": {
+        "file_id": 351,
+        "content": "This code provides an introduction to the slim functionality of PaddleVideo's model compression using PaddleSlim. It explains the purpose and benefits of model quantization and pruning, and how to use PaddleSlim for PaddleVideo model compression.",
+        "type": "comment"
+    },
+    "4146": {
+        "file_id": 351,
+        "content": "### 3. 模型压缩\n进入PaddleVideo根目录\n```bash\ncd PaddleVideo\n```\n离线量化代码位于`deploy/slim/quant_post_static.py`。\n#### 3.1 模型量化\n量化训练包括离线量化训练和在线量化训练(TODO)，在线量化训练效果更好，需加载预训练模型，在定义好量化策略后即可对模型进行量化。\n##### 3.1.1 在线量化训练\nTODO\n##### 3.1.2 离线量化\n**注意**：目前离线量化，必须使用已经训练好的模型导出的`inference model`进行量化。一般模型导出`inference model`可参考[教程](../../docs/zh-CN/usage.md#5-模型推理).\n一般来说，离线量化损失模型精度较多。\n以PP-TSM模型为例，生成`inference model`后，离线量化运行方式如下\n```bash\n# 下载并解压出少量数据用于离线量化的校准\npushd ./data/k400\nwget -nc https://videotag.bj.bcebos.com/Data/k400_rawframes_small.tar\ntar -xf k400_rawframes_small.tar\npopd\n# 然后进入deploy/slim目录下\ncd deploy/slim\n# 执行离线量化命令\npython3.7 quant_post_static.py \\\n-c ../../configs/recognition/pptsm/pptsm_k400_frames_uniform_quantization.yaml \\\n--use_gpu=True\n```\n除`use_gpu`外，所有的量化环境参数都在`pptsm_k400_frames_uniform_quantization.yaml`文件中进行配置\n其中`inference_model_dir`表示上一步导出的`inference model`目录路径，`quant_output_dir`表示量化模型的输出目录路径\n执行成功后，在`quant_output_dir`的目录下生成了`__model__`文件和`__params__`文件，这二者用于存储生成的离线量化模型\n类似`inference model`的使用方法，接下来可以直接用这两个文件进行预测部署，无需再重新导出模型。",
+        "type": "code",
+        "location": "/deploy/slim/readme.md:46-91"
+    },
+    "4147": {
+        "file_id": 351,
+        "content": "This code snippet explains the process of offline quantization in PaddleVideo for model compression. It mentions that the code is located in `deploy/slim/quant_post_static.py`. The snippet also details the steps involved in offline quantization, including using a pre-trained model and specifying the quantization strategy in a configuration file. The process generates an output directory with `__model__` and `__params__` files that can be used for deployment without re-exporting the model.",
+        "type": "comment"
+    },
+    "4148": {
+        "file_id": 351,
+        "content": "```bash\n# 使用PP-TSM离线量化模型进行预测\n# 回到PaddleVideo目录下\ncd ../../\n# 使用量化模型进行预测\npython3.7 tools/predict.py \\\n--input_file data/example.avi \\\n--config configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml \\\n--model_file ./inference/ppTSM/quant_model/__model__ \\\n--params_file ./inference/ppTSM/quant_model/__params__ \\\n--use_gpu=True \\\n--use_tensorrt=False\n```\n输出如下：\n```bash\nCurrent video file: data/example.avi\n        top-1 class: 5\n        top-1 score: 0.9997928738594055\n```\n#### 3.2 模型剪枝\nTODO\n### 4. 导出模型\nTODO\n### 5. 模型部署\n上述步骤导出的模型可以通过PaddleLite的opt模型转换工具完成模型转换。\n模型部署的可参考\n[Serving Python部署](../python_serving/readme.md)\n[Serving C++部署](../cpp_serving/readme.md)\n## 训练超参数建议\n* 量化训练时，建议加载常规训练得到的预训练模型，加速量化训练收敛。\n* 量化训练时，建议初始学习率修改为常规训练的`1/20~1/10`，同时将训练epoch数修改为常规训练的`1/5~1/2`，学习率策略方面，加上Warmup，其他配置信息不建议修改。",
+        "type": "code",
+        "location": "/deploy/slim/readme.md:93-133"
+    },
+    "4149": {
+        "file_id": 351,
+        "content": "This code snippet demonstrates the usage of PP-TSM quantized model for prediction in PaddleVideo. It directs the user to navigate into the PaddleVideo directory and then executes a python script with specific parameters such as input file, configuration file, model files, and flags for GPU and TensorRT utilization. The output shows the recognized top-1 class and score. The code also mentions additional information on how to prune models, export them, and deploy them in Python or C++ settings by referring to separate documentation sections. It provides recommendations for training hyperparameters when using quantized training with pre-trained models.",
+        "type": "comment"
+    },
+    "4150": {
+        "file_id": 352,
+        "content": "/deploy/slim/readme_en.md",
+        "type": "filepath"
+    },
+    "4151": {
+        "file_id": 352,
+        "content": "PaddleSlim is a library for model compression in PaddleVideo, offering quantization, pruning, distillation, and search for enhanced inference performance and reduced computational complexity. It can be installed via pip install and demonstrates PP-TSM offline quantization with deployment options in Python and C++ using PaddleLite's opt tool.",
+        "type": "summary"
+    },
+    "4152": {
+        "file_id": 352,
+        "content": "## Slim function introduction\nA complex model is beneficial to improve the performance of the model, but it also leads to some redundancy in the model. This part provides the function of reducing the model, including two parts: model quantization (quantization training, offline quantization), model pruning.\nAmong them, model quantization reduces the full precision to fixed-point numbers to reduce this redundancy, so as to reduce the computational complexity of the model and improve the inference performance of the model.\nModel quantization can convert FP32-precision model parameters to Int8-precision without losing the accuracy of the model, reducing the size of model parameters and speeding up the calculation. Using the quantized model has a speed advantage when deploying on mobile terminals.\nModel pruning cuts out the unimportant convolution kernels in the CNN, reduces the amount of model parameters, and thus reduces the computational complexity of the model.\nThis tutorial will introduce how to use PaddleSlim, a paddle model compression library, to compress PaddleVideo models.",
+        "type": "code",
+        "location": "/deploy/slim/readme_en.md:1-9"
+    },
+    "4153": {
+        "file_id": 352,
+        "content": "This code introduces PaddleSlim, a model compression library for compressing PaddleVideo models. It includes functions for model quantization (reducing full precision to fixed-point numbers) and model pruning (cutting unimportant convolution kernels). This improves inference performance and reduces computational complexity while preserving accuracy.",
+        "type": "comment"
+    },
+    "4154": {
+        "file_id": 352,
+        "content": "[PaddleSlim](https://github.com/PaddlePaddle/PaddleSlim) integrates model pruning, quantization (including quantization training and offline quantization), distillation and neural network search and other commonly used and leading model compression functions in the industry. If you are interested, you can follow and understand.\nBefore starting this tutorial, it is recommended to understand [PaddleVideo model training method](../../docs/zh-CN/usage.md) and [PaddleSlim](https://paddleslim.readthedocs.io/zh_CN/ latest/index.html)\n## quick start\nAfter training a model, if you want to further compress the model size and speed up prediction, you can use quantization or pruning to compress the model.\nModel compression mainly includes five steps:\n1. Install PaddleSlim\n2. Prepare the trained model\n3. Model Compression\n4. Export the quantitative inference model\n5. Quantitative Model Prediction Deployment\n### 1. Install PaddleSlim\n* It can be installed by pip install.\n```bash\npython3.7 -m pip install paddleslim -i https://pypi.tuna.tsinghua.edu.cn/simple",
+        "type": "code",
+        "location": "/deploy/slim/readme_en.md:10-30"
+    },
+    "4155": {
+        "file_id": 352,
+        "content": "This code snippet provides a brief introduction to PaddleSlim, which offers model pruning, quantization, distillation, and neural network search for model compression. It highlights the quick start process, explaining that after training a model, quantization or pruning can be used to further compress it while speeding up predictions. The code then provides instructions on how to install PaddleSlim via pip install.",
+        "type": "comment"
+    },
+    "4156": {
+        "file_id": 352,
+        "content": "```\n* If you get the latest features of PaddleSlim, you can install it from source.\n```bash\ngit clone https://github.com/PaddlePaddle/PaddleSlim.git\ncd Paddleslim\npython3.7 setup.py install\n```\n### 2. Prepare the trained model\nPaddleVideo provides a series of trained [models](../../docs/zh-CN/model_zoo/README.md). If the model to be quantized is not in the list, you need to follow the [regular training](../ ../docs/zh-CN/usage.md) method to get the trained model.\n### 3. Model Compression\nGo to PaddleVideo root directory\n```bash\ncd PaddleVideo\n```\nThe offline quantization code is located in `deploy/slim/quant_post_static.py`.\n#### 3.1 Model Quantization\nQuantization training includes offline quantization training and online quantization training (TODO). The effect of online quantization training is better. The pre-training model needs to be loaded, and the model can be quantized after the quantization strategy is defined.\n##### 3.1.1 Online quantitative training\nTODO\n##### 3.1.2 Offline Quantization\n**Note",
+        "type": "code",
+        "location": "/deploy/slim/readme_en.md:31-64"
+    },
+    "4157": {
+        "file_id": 352,
+        "content": "In this code, it explains how to install the latest features of PaddleSlim, prepare a trained model for quantization (either using provided models or regular training), and perform model compression including offline quantization. The offline quantization process requires pre-training model loading and defining the quantization strategy.",
+        "type": "comment"
+    },
+    "4158": {
+        "file_id": 352,
+        "content": "**: For offline quantization, you must use the `inference model` exported from the trained model for quantization. For general model export `inference model`, please refer to [Tutorial](../../docs/zh-CN/usage.md#5-Model Inference).\nGenerally speaking, the offline quantization loss model has more accuracy.\nTaking the PP-TSM model as an example, after generating the `inference model`, the offline quantization operation is as follows\n```bash\n# download a small amount of data for calibration\npushd ./data/k400\nwget -nc https://videotag.bj.bcebos.com/Data/k400_rawframes_small.tar\ntar -xf k400_rawframes_small.tar\npopd\n# then switch to deploy/slim\ncd deploy/slim\n# execute quantization script\npython3.7 quant_post_static.py \\\n-c ../../configs/recognition/pptsm/pptsm_k400_frames_uniform_quantization.yaml \\\n--use_gpu=True\n```\nAll quantization environment parameters except `use_gpu` are configured in `pptsm_k400_frames_uniform_quantization.yaml` file\nWhere `inference_model_dir` represents the directory path of the ",
+        "type": "code",
+        "location": "/deploy/slim/readme_en.md:64-87"
+    },
+    "4159": {
+        "file_id": 352,
+        "content": "The code explains the process of offline quantization for a trained model using the PaddleVideo framework. The user must first export an inference model from the trained model and download calibration data before executing the quantization script with specific parameters. The configuration file, `pptsm_k400_frames_uniform_quantization.yaml`, contains all quantization environment parameters except for `use_gpu`.",
+        "type": "comment"
+    },
+    "4160": {
+        "file_id": 352,
+        "content": "`inference model` exported in the previous step, and `quant_output_dir` represents the output directory path of the quantization model\nAfter successful execution, the `__model__` file and the `__params__` file are generated in the `quant_output_dir` directory, which are used to store the generated offline quantization model\nSimilar to the usage of `inference model`, you can directly use these two files for prediction deployment without re-exporting the model.\n```bash\n# Use PP-TSM offline quantization model for prediction\n# Go back to the PaddleVideo directory\ncd ../../\n# Use the quantized model to make predictions\npython3.7 tools/predict.py \\\n--input_file data/example.avi \\\n--config configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml \\\n--model_file ./inference/ppTSM/quant_model/__model__ \\\n--params_file ./inference/ppTSM/quant_model/__params__ \\\n--use_gpu=True \\\n--use_tensorrt=False\n```\nThe output is as follows:\n```bash\nCurrent video file: data/example.avi\n        top-1 class: 5\n        top-1 score: 0.9997928738594055",
+        "type": "code",
+        "location": "/deploy/slim/readme_en.md:87-111"
+    },
+    "4161": {
+        "file_id": 352,
+        "content": "This code demonstrates how to use the PP-TSM offline quantization model for prediction. After exporting the inference model, the __model__ and __params__ files are generated in the specified output directory (quant_output_dir). These files can be used directly for prediction deployment without re-exporting the model. The provided example uses Python's tools/predict.py script to make predictions on a video file (data/example.avi), using the specified configuration (configs/recognition/pptsm/pptsm_k400_frames_uniform.yaml). The results include the top-1 class and score.",
+        "type": "comment"
+    },
+    "4162": {
+        "file_id": 352,
+        "content": "```\n#### 3.2 Model pruning\nTODO\n### 4. Export the model\nTODO\n### 5. Model Deployment\nThe model exported in the above steps can be converted through the opt model conversion tool of PaddleLite.\nReference for model deployment\n[Serving Python Deployment](../python_serving/readme.md)\n[Serving C++ Deployment](../cpp_serving/readme.md)\n## Training hyperparameter suggestions\n* During quantitative training, it is recommended to load the pre-trained model obtained from regular training to accelerate the convergence of quantitative training.\n* During quantitative training, it is recommended to modify the initial learning rate to `1/20~1/10` of conventional training, and modify the number of training epochs to `1/5~1/2` of conventional training. In terms of learning rate strategy, add On Warmup, other configuration information is not recommended to be modified.",
+        "type": "code",
+        "location": "/deploy/slim/readme_en.md:112-132"
+    },
+    "4163": {
+        "file_id": 352,
+        "content": "This code provides an overview of model pruning, exporting the model, and deployment. It mentions using PaddleLite's opt model conversion tool for deployment and refers to two serving deployments: Python and C++. For quantitative training, it suggests loading pre-trained models, adjusting learning rates, and modifying the number of epochs while maintaining other configuration settings unchanged.",
+        "type": "comment"
+    },
+    "4164": {
+        "file_id": 353,
+        "content": "/english_documents/benchmark.md",
+        "type": "filepath"
+    },
+    "4165": {
+        "file_id": 353,
+        "content": "This code compares PaddleVideo's speed with popular frameworks, highlighting Slowfast's 2x faster speed and evaluates action segmentation model performance on Breakfast dataset. Tested on V100 GPU with batch size 2.",
+        "type": "summary"
+    },
+    "4166": {
+        "file_id": 353,
+        "content": "[简体中文](../zh-CN/benchmark.md) | English\n# Benchmark\nWe compare our results with some popular frameworks and official releases in terms of speed.\n## Environment\n### Hardware\n- 8 NVIDIA Tesla V100 (16G) GPUs\n- Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz\n### Software\n- Python 3.7\n- PaddlePaddle2.0\n- CUDA 10.1\n- CUDNN 7.6.3\n- NCCL 2.1.15\n- GCC 8.2.0\n## Experiments and Statistics\nThe statistic is the average training time, including data processing and model training time, and the training speed is measured with ips(instance per second). Note that we skip the first 50 iters as they may contain the device warmup time.\nHere we compare PaddleVideo with the other video understanding toolkits in the same data and model settings.\nTo ensure the fairness of the comparison, the comparison experiments were conducted under the same hardware environment and using the same dataset. The dataset we used is generated by the [data preparation](dataset/k400.md), and in each model setting, the same data preprocessing methods are applied to make sure the same feature input.",
+        "type": "code",
+        "location": "/english_documents/benchmark.md:1-27"
+    },
+    "4167": {
+        "file_id": 353,
+        "content": "This code provides a benchmark comparison of PaddleVideo with other popular frameworks and official releases in terms of speed. It specifies the environment, hardware, and software used for the experiments. The statistics include average training time and training speed measured in instances per second (ips). The dataset is prepared according to a specific method to ensure fairness in the comparison.",
+        "type": "comment"
+    },
+    "4168": {
+        "file_id": 353,
+        "content": "Significant improvement can be observed when comparing with other video understanding framework as shown in the table below, Especially the [Slowfast](../../configs/recognition/slowfast/slowfast.yaml) model is nearly 2x faster than the counterparts.\n## Results\n### Recognizers\n| Model | batch size <sub>x</sub> gpus | PaddleVideo(ips) | Reference(ips) | MMAction2 (ips)  | PySlowFast (ips)|\n| :------: | :-------------------:|:---------------:|:---------------: | :---------------:  |:---------------: |\n| [TSM](../../configs/recognition/tsm/tsm.yaml) | 16x8 | 58.1 | 46.04(temporal-shift-module) | To do | X |\n| [PPTSM](../../configs/recognition/tsm/pptsm.yaml) | 16x8 |  57.6 | X |    X   | X |\n| [TSN](../../configs/recognition/tsn/tsn.yaml) | 16x8 |  841.1 |  To do (tsn-pytorch) | To do | X |\n| [Slowfast](../../configs/recognition/slowfast/slowfast.yaml)| 16x8 | 99.5 | X | To do | 43.2 |\n| [Attention_LSTM](../../configs/recognition/attention_lstm/attention_lstm.yaml) |  128x8  | 112.6  | X | X | X |\n### Localizers",
+        "type": "code",
+        "location": "/english_documents/benchmark.md:29-45"
+    },
+    "4169": {
+        "file_id": 353,
+        "content": "This table compares the inference performance (ips) of various video understanding models using PaddleVideo. It shows the batch size, number of GPUs used, and ips for each model. Slowfast model stands out for its 2x faster speed compared to counterparts. TSM and TSN have higher ips than others, but the reference implementation is not available.",
+        "type": "comment"
+    },
+    "4170": {
+        "file_id": 353,
+        "content": "| Model | PaddleVideo(ips) |MMAction2 (ips) |BMN(boundary matching network) (ips)|\n| :--- | :---------------: | :-------------------------------------: | :-------------------------------------: |\n| [BMN](../../configs/localization/bmn.yaml)  | 43.84 | x | x |\n### Segmenters\nThis repo provides performance and accuracy comparison between classical and popular sequential action segmentation models\n| Model | Metrics | Value | Flops(M) |Params(M) | test time(ms) bs=1 | test time(ms) bs=2 | inference time(ms) bs=1 | inference time(ms) bs=2 |\n| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |\n| MS-TCN | F1@0.5 | 38.8% | 791.360 | 0.8 | 170 | - | 10.68 | - |\n| ASRF | F1@0.5 | 55.7% | 1,283.328 | 1.3 | 190 | - | 16.34 | - |\n* Model: model name, for example: PP-TSM\n* Metrics: Fill in the indicators used in the model test, and the data set used is **breakfast**\n* Value: Fill in the value corresponding to the metrics index, and generally keep two decimal places\n* Flops(M): The floating-",
+        "type": "code",
+        "location": "/english_documents/benchmark.md:47-64"
+    },
+    "4171": {
+        "file_id": 353,
+        "content": "This code provides a comparison of performance and accuracy between classical and popular sequential action segmentation models, with metrics such as F1@0.5, model names, Flops(M), Params(M), and test/inference times for different batch sizes. It is part of a repository that aims to compare these models using the Breakfast dataset.",
+        "type": "comment"
+    },
+    "4172": {
+        "file_id": 353,
+        "content": "point computation required for one forward operation of the model can be called `paddlevideo/tools/summary.py`script calculation (different models may need to be modified slightly), keep one decimal place, and measure it with data **input tensor with shape of (1, 2048, 1000)**\n* Params(M): The model parameter quantity, together with flops, will be calculated by the script, and one decimal place will be reserved\n* test time(ms) bs=1: When the python script starts the batchsize = 1 test, the time required for a sample is kept to two decimal places. The data set used in the test is **breakfast**.\n* test time(ms) bs=2: When the python script starts the batchsize = 2 test, the time required for a sample is kept to two decimal places. The sequential action segmentation model is generally a full convolution network, so the batch of training, testing and reasoning_ Size is 1. The data set used in the test is **breakfast**.\n* inference time(ms) bs=1: When the reasoning model is tested with GPU (def",
+        "type": "code",
+        "location": "/english_documents/benchmark.md:64-68"
+    },
+    "4173": {
+        "file_id": 353,
+        "content": "This code is describing the performance measurements for a PaddleVideo model. It calculates the model parameters (M), test time, and inference time with specific batch sizes and input tensor shapes. The test data used is \"breakfast\".",
+        "type": "comment"
+    },
+    "4174": {
+        "file_id": 353,
+        "content": "ault V100) with batchsize = 1, the time required for a sample is reserved to two decimal places. The dataset used for reasoning is **breakfast**.\n* inference time(ms) bs=2: When the reasoning model is tested with GPU (default V100) with batchsize = 1, the time required for a sample is reserved to two decimal places. The sequential action segmentation model is generally a full convolution network, so the batch of training, testing and reasoning_ Size is 1. The dataset used for reasoning is **breakfast**.",
+        "type": "code",
+        "location": "/english_documents/benchmark.md:68-69"
+    },
+    "4175": {
+        "file_id": 353,
+        "content": "The code states that the reasoning model is tested on a GPU (default V100) with batch size 2. The time required for a sample is reserved to two decimal places, and the dataset used for this particular reasoning process is \"breakfast\". Additionally, it mentions that the sequential action segmentation model is generally a full convolution network, which typically has a batch size of 1 during training, testing, and reasoning.",
+        "type": "comment"
+    },
+    "4176": {
+        "file_id": 354,
+        "content": "/english_documents/dataset/AVA.md",
+        "type": "filepath"
+    },
+    "4177": {
+        "file_id": 354,
+        "content": "The AVA dataset preparation includes downloading and cutting videos, extracting frames, and organizing into PaddleVideo's rawframes, videos, and annotation folders. The code provides a function to count video frames for processing and analysis purposes.",
+        "type": "summary"
+    },
+    "4178": {
+        "file_id": 354,
+        "content": "[简体中文](../../zh-CN/dataset/k400.md) | English\n# AVA Data Preparation\nThis document mainly introduces the preparation process of AVA dataset.\nIt mainly includes five parts: Video Data Download, Prepare Annotations, Cut video files,\nExtract the RGB frames, Pulling Proposal Files,et al.\nBefore we start, please make sure that the directory is located at `$PaddleVideo/data/ava/script`.\n---\n## 1. Video data Download\nFor basic dataset information, you can refer to the official website [AVA](https://research.google.com/ava/index.html).\nFor the dataset download, you can refer to the [AVA Download](https://github.com/cvdfoundation/ava-dataset) ，\nwhich introduce the way to download the dataset. We also provide the shell script for downloading the video files\n```shell\nbash download_videos.sh\n```\nFurthermore,considering the difficulty in downloading,\nwe upload the video files to Baidu cloud disk in the form of zip packages, and users can download it by themselves according to their needs.\n[Link]() <sup>coming soon</sup>.",
+        "type": "code",
+        "location": "/english_documents/dataset/AVA.md:1-23"
+    },
+    "4179": {
+        "file_id": 354,
+        "content": "This document introduces the AVA dataset preparation process, including video data download, annotation preparation, cutting video files, extracting RGB frames, and pulling proposal files. Ensure the directory is at `$PaddleVideo/data/ava/script`. Users can download the dataset from its official site or through a provided script. Video files are also available for download via Baidu cloud disk.",
+        "type": "comment"
+    },
+    "4180": {
+        "file_id": 354,
+        "content": "**Note: the video files should be placed in `data/ava/videos`**\n---\n## 2.Prepare Annotations\nNext, you can run the following script to prepare annotations.\n```shell\nbash download_annotations.sh\n```\nThis command will download `ava_v2.1.zip` for AVA `v2.1` annotation. If you need the AVA `v2.2` annotation, you can try the following script.\n```shell\nVERSION=2.2 bash download_annotations.sh\n```\n**Note: In fact,we will also provide the annotation zip files in Baidu cloud disk**\n---\n## 3. cut video files\nCut each video from its 15th to 30th minute and make them at 30 fps.\n```shell\nbash cut_videos.sh\n```\n---\n## 4. Extract RGB Frames\nyou can use the ffmpeg to extract RGB frames by the following script.\n```shell\nbash extract_rgb_frames.sh\n```\n---\n## 5.Pulling Proposal Files\nThe scripts are adapted from FAIR's [Long-Term Feature Banks](https://github.com/facebookresearch/video-long-term-feature-banks).\nRun the follow scripts to fetch pre-computed proposal list.\n```shell\nbash fetch_ava_proposals.sh\n```\n---\n## 6.Folder Structure\nAfter the whole data pipeline for AVA preparation.",
+        "type": "code",
+        "location": "/english_documents/dataset/AVA.md:26-78"
+    },
+    "4181": {
+        "file_id": 354,
+        "content": "This code outlines the steps to prepare a dataset for AVA, a video action recognition task. It involves downloading and extracting annotations, cutting videos to specific time ranges, extracting RGB frames with ffmpeg, and fetching pre-computed proposal lists. The final step shows the expected folder structure of the prepared dataset.",
+        "type": "comment"
+    },
+    "4182": {
+        "file_id": 354,
+        "content": "you can get the rawframes (RGB), videos and annotation files for AVA.\nIn the context of the whole project (for AVA only), the folder structure will look like:\n```\nPaddleVideo\n├── configs\n├── paddlevideo\n├── docs\n├── tools\n├── data\n│   ├── ava\n│   │   ├── annotations\n│   │   |   ├── ava_dense_proposals_train.FAIR.recall_93.9.pkl\n│   │   |   ├── ava_dense_proposals_val.FAIR.recall_93.9.pkl\n│   │   |   ├── ava_dense_proposals_test.FAIR.recall_93.9.pkl\n│   │   |   ├── ava_train_v2.1.csv\n│   │   |   ├── ava_val_v2.1.csv\n│   │   |   ├── ava_train_excluded_timestamps_v2.1.csv\n│   │   |   ├── ava_val_excluded_timestamps_v2.1.csv\n│   │   |   ├── ava_action_list_v2.1_for_activitynet_2018.pbtxt\n│   │   ├── videos\n│   │   │   ├── 053oq2xB3oU.mkv\n│   │   │   ├── 0f39OWEqJ24.mp4\n│   │   │   ├── ...\n│   │   ├── videos_15min\n│   │   │   ├── 053oq2xB3oU.mkv\n│   │   │   ├── 0f39OWEqJ24.mp4\n│   │   │   ├── ...\n│   │   ├── rawframes\n│   │   │   ├── 053oq2xB3oU\n|   │   │   │   ├── img_00001.jpg\n|   │   │   │   ├── img_00002.jpg\n|   │   │   │   ├── ...",
+        "type": "code",
+        "location": "/english_documents/dataset/AVA.md:79-112"
+    },
+    "4183": {
+        "file_id": 354,
+        "content": "The code represents the folder structure for AVA dataset in PaddleVideo, including rawframes (RGB), videos, and annotation files.",
+        "type": "comment"
+    },
+    "4184": {
+        "file_id": 354,
+        "content": "```",
+        "type": "code",
+        "location": "/english_documents/dataset/AVA.md:113-113"
+    },
+    "4185": {
+        "file_id": 354,
+        "content": "The code snippet defines a function that calculates the total number of frames in a given video. This can be useful for processing or analyzing videos, as it provides the necessary information about the duration of the video and how many frames to expect.",
+        "type": "comment"
+    },
+    "4186": {
+        "file_id": 355,
+        "content": "/english_documents/dataset/ActivityNet.md",
+        "type": "filepath"
+    },
+    "4187": {
+        "file_id": 355,
+        "content": "The code downloads, extracts and provides label information for 19228 videos' feature frames in \"activitynet_1.3_annotations.json\" for PaddleVideo model pre-training, using decompressed data from \"bmn_feat.tar.gz\". Users need to modify `feat_path` and `file_path` in the configuration file.",
+        "type": "summary"
+    },
+    "4188": {
+        "file_id": 355,
+        "content": "[简体中文](../../zh-CN/dataset/ActivityNet.md) | English\n# ActivityNet data preparation\n- [Introduction](#Introduction)\n- [Download](#Download)\n## Introduction\nActivityNet is a dataset for large-scale video understanding tasks, which can be used for tasks such as action localization, action recognition, etc.\n## Download\n1. The BMN model uses the processed ActivityNet 1.3 dataset. There are two ways to use it:\n    - Using our processed ActivityNet 1.3 dataset (compressed package is about 5.5G), each video has corresponding action labels, duration intervals, duration frames, duration seconds and other information\n        Download with the following command:\n        ```bash\n        wget https://paddlemodels.bj.bcebos.com/video_detection/bmn_feat.tar.gz # Download the processed video feature data\n        wget https://paddlemodels.bj.bcebos.com/video_detection/activitynet_1.3_annotations.json # Download the processed label data\n        ```\n        Or click the following hyperlinks to download:\n        [Video feature data](https://paddlemodels.bj.bcebos.com/video_detection/bmn_feat.tar.gz)",
+        "type": "code",
+        "location": "/english_documents/dataset/ActivityNet.md:1-24"
+    },
+    "4189": {
+        "file_id": 355,
+        "content": "ActivityNet is a large-scale dataset for video understanding tasks like action localization and recognition. The code provides instructions on how to download the processed ActivityNet 1.3 dataset, consisting of videos with corresponding labels, durations, and frames. Users can choose between two methods: downloading precompressed packages or clicking provided hyperlinks.",
+        "type": "comment"
+    },
+    "4190": {
+        "file_id": 355,
+        "content": "        [Video feature data](https://paddlemodels.bj.bcebos.com/video_detection/activitynet_1.3_annotations.json)\n        then decompression `bmn_feat.tar.gz`\n        ```bash\n        tar -xf bmn_feat.tar.gz\n        ```\n    - Extract features by yourself\n        First refer to [Download Instructions](https://github.com/activitynet/ActivityNet/tree/master/Crawler) to download the original dataset. When training this model, you need to use TSN to extract features from the source files first. You can [self-extract](https://github.com/yjxiong/temporal-segment-networks) video frame and optical flow information, and the pre-trained TSN model can be downloaded from [here](https://github.com/ yjxiong/anet2016-cuhk) download.\n    The information in the `activitynet_1.3_annotations.json` tag file is as follows:\n    ```json\n    {\n        \"v_QOlSCBRmfWY\": {\n            \"duration_second\": 82.73,\n            \"subset\": \"training\",\n            \"duration_frame\": 2067,\n            \"annotations\": [{\n                \"segment\": [6.195294851794072, 77.73085420904837],",
+        "type": "code",
+        "location": "/english_documents/dataset/ActivityNet.md:25-45"
+    },
+    "4191": {
+        "file_id": 355,
+        "content": "The code is explaining how to download and extract video feature data from the \"activitynet_1.3_annotations.json\" file for a model in PaddleVideo. It mentions decompressing the \"bmn_feat.tar.gz\" file, extracting features by yourself using TSN, and providing the necessary files and instructions to download and pre-train the TSN model. The \"activitynet_1.3_annotations.json\" file contains information about video annotations for training purposes.",
+        "type": "comment"
+    },
+    "4192": {
+        "file_id": 355,
+        "content": "                \"label\": \"Ballet\"\n            }],\n            \"feature_frame\": 2064\n        },\n        \"v_ehGHCYKzyZ8\": {\n            \"duration_second\": 61.7189999999999994,\n            \"subset\": \"training\",\n            \"duration_frame\": 1822,\n            \"annotations\": [{\n                \"segment\": [43.95990729267573, 45.401932082395355],\n                \"label\": \"Doing crunches\"\n            }],\n            \"feature_frame\": 1808\n        },\n        ...,\n        ...\n    }\n    ```\n    In the end, `19228` video feature npy files are obtained, corresponding to the `19228` label information in the `activitynet_1.3_annotations.json` file.\n2. Create a new `data/bmn_data` folder, and then unzip the video feature data after downloading and put it in this folder, and finally it should be organized into the following form:\n    ```\n    PaddleVideo\n    ├── data\n    │   ├── bmn_data\n    │   │   ├── fix_feat_100\n    │   │   │   ├── v___c8enCfzqw.npy\n    │   │   │   ├── v___dXUJsj3yo.npy\n    │   │   │   ├── ...\n    │   │   │\n    │   │   └── activitynet_1.3_annotations.json",
+        "type": "code",
+        "location": "/english_documents/dataset/ActivityNet.md:46-77"
+    },
+    "4193": {
+        "file_id": 355,
+        "content": "The code represents a dictionary containing label information and video feature frame data for 19228 videos. Each key represents a video, and the corresponding value is another dictionary with 'duration_second', 'subset', 'duration_frame', 'feature_frame' keys, and an array of 'annotations' which includes 'segment' (time range) and 'label' information. The code also mentions that there will be 19228 video feature npy files obtained from the activitynet_1.3_annotations.json file.",
+        "type": "comment"
+    },
+    "4194": {
+        "file_id": 355,
+        "content": "    ```\n3. Finally, modify the `feat_path` field in the configuration file configs/localization/bmn.yaml to specify the feature directory path, and the `file_path` field to specify the label file path.",
+        "type": "code",
+        "location": "/english_documents/dataset/ActivityNet.md:78-80"
+    },
+    "4195": {
+        "file_id": 355,
+        "content": "In the code, it is instructing to modify two fields in the configuration file. The `feat_path` field needs updating with the feature directory path, and the `file_path` should be specified for the label file path. This ensures proper data access during program execution.",
+        "type": "comment"
+    },
+    "4196": {
+        "file_id": 356,
+        "content": "/english_documents/dataset/Oxford_RobotCar.md",
+        "type": "filepath"
+    },
+    "4197": {
+        "file_id": 356,
+        "content": "The document explains the Oxford-RobotCar data preparation process for day-night depth estimation and provides related file download links. It outlines dataset preprocessing steps for ADDS-DepthNet training, including filtering, renaming, and image processing. The code showcases a directory structure with consistent training/verification sequences for day and night images.",
+        "type": "summary"
+    },
+    "4198": {
+        "file_id": 356,
+        "content": "[简体中文](../../zh-CN/dataset/Oxford_RobotCar.md) | English\n# Oxford-RobotCar-for-ADDS data preparation\n- [Introduction](#Introduction)\n- [Data Set Download](#Download)\n- [Preprocessing](#Preprocessing)\n- [1. Image De-distortion](#1-Image-de-distortion)\n- [2. Dynamic frame filter](#2-Dynamic-frame-filter)\n- [3. Image Rename](#3-Image-Rename)\n- [4. Preparation for Day-Pseudo Night Image Pair](#4-Day-Pseudo-Night-Image-Pair-Preparation)\n## Introduction\n[Oxford RobotCar Dataset](https://robotcar-dataset.robots.ox.ac.uk/) is a large-scale autonomous driving data set that contains a large amount of data in different autonomous driving scenarios.\nWhat is used here is to filter a part of the data used for day-night depth estimation from the original Oxford RobotCar data set, namely Oxford-RobotCar-for-ADDS.\nIf you want to use Oxford-RobotCar-for-ADDS, please cite the following papers:\n```latex\n@article{maddern20171,\n  title={1 year, 1000 km: The oxford robotcar dataset},\n  author={Maddern, Will and Pascoe, Geoffrey and Linegar, Chris and Newman, Paul},",
+        "type": "code",
+        "location": "/english_documents/dataset/Oxford_RobotCar.md:1-24"
+    },
+    "4199": {
+        "file_id": 356,
+        "content": "This is a brief introduction to the Oxford-RobotCar-for-ADDS data preparation document. It provides information on downloading and preprocessing the dataset for autonomous driving tasks, specifically day-night depth estimation. The original dataset can be found at the link provided in the text, and any use of this modified version should cite the referenced paper.",
+        "type": "comment"
+    }
+}

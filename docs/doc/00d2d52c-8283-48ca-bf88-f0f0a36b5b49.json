@@ -1,0 +1,10 @@
+{
+    "summary": "This code imports various reader classes and registers them using the regist_reader function. It sorts the registrations alphabetically. The BMNINFReader reads data from files with a \"BMN\" extension, while FeatureReader reads action data. No readers are registered for TSM or PPTSM in this version of the code.",
+    "details": [
+        {
+            "comment": "This code imports various reader classes and registers them using the regist_reader function. It sorts the registrations alphabetically. The BMNINFReader reads data from files with a \"BMN\" extension, while FeatureReader reads action data. No readers are registered for TSM or PPTSM in this version of the code.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/TableTennis/predict/action_detect/reader/__init__.py\":0-14",
+            "content": "\"\"\"\nread map for model\n\"\"\"\nfrom reader.reader_utils import regist_reader, get_reader\n# import reader.tsminf_reader as tsminf_reader\n# import reader.audio_reader as audio_reader\nimport reader.bmninf_reader as bmninf_reader\nimport reader.feature_reader as feature_reader\n# regist reader, sort by alphabet\n# regist_reader(\"TSM\", tsminf_reader.TSMINFReader)\n# regist_reader(\"PPTSM\", tsminf_reader.TSMINFReader)\n# regist_reader(\"AUDIO\", audio_reader.AudioReader)\nregist_reader(\"BMN\", bmninf_reader.BMNINFReader)\nregist_reader(\"ACTION\", feature_reader.FeatureReader)"
+        }
+    ]
+}

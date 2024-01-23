@@ -1,0 +1,545 @@
+{
+    "7600": {
+        "file_id": 556,
+        "content": "                                      y,\n                                      max_distance=9,\n                                      atrous_rate=1,\n                                      allow_downsample=True):\n    \"\"\"Computes pairwise squared l2 distances using a local search window.\n    Args:\n        x: Float32 tensor of shape [height, width, feature_dim].\n        y: Float32 tensor of shape [height, width, feature_dim].\n        max_distance: Integer, the maximum distance in pixel coordinates\n          per dimension which is considered to be in the search window.\n        atrous_rate: Integer, the atrous rate of local matching.\n        allow_downsample: Bool, if \"True\", downsample x and y\n          with a stride of 2.\n    Returns:\n        Float32 distances tensor of shape [height, width, (2 * max_distance + 1) ** 2].\n    \"\"\"\n    ori_height, ori_width, _ = x.shape\n    x = paddle.unsqueeze(paddle.transpose(x, [2, 0, 1]), axis=0)\n    y = paddle.unsqueeze(paddle.transpose(y, [2, 0, 1]), axis=0)\n    if allow_downsample:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:493-513"
+    },
+    "7601": {
+        "file_id": 556,
+        "content": "This function computes pairwise squared L2 distances using a local search window. It takes two tensors x and y of shape [height, width, feature_dim] as input. The maximum distance (max\\_distance) in pixel coordinates per dimension is considered in the search window. Atrous rate determines the local matching rate. If downsampling is allowed, the function downsamples the tensors with a stride of 2. It returns a float32 distances tensor of shape [height, width, (2 * max_distance + 1) ** 2].",
+        "type": "comment"
+    },
+    "7602": {
+        "file_id": 556,
+        "content": "        down_size = (int(ori_height / 2) + 1, int(ori_width / 2) + 1)\n        x = F.interpolate(x,\n                          size=down_size,\n                          mode='bilinear',\n                          align_corners=True)\n        y = F.interpolate(y,\n                          size=down_size,\n                          mode='bilinear',\n                          align_corners=True)\n    _, channels, height, width = x.shape\n    x2 = paddle.reshape(paddle.sum(paddle.pow(x, 2), axis=1),\n                        [height, width, 1])\n    y2 = paddle.reshape(paddle.sum(paddle.pow(y, 2), axis=1),\n                        [1, 1, height, width])\n    pad_max_distance = max_distance - max_distance % atrous_rate\n    # no change pad\n    padded_y = F.pad(y, (pad_max_distance, pad_max_distance, pad_max_distance,\n                         pad_max_distance))\n    padded_y2 = F.pad(y2, (pad_max_distance, pad_max_distance, pad_max_distance,\n                           pad_max_distance),\n                      value=WRONG_LABEL_PADDING_DISTANCE)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:514-537"
+    },
+    "7603": {
+        "file_id": 556,
+        "content": "The code resizes the input tensors x and y to a downsized version of half the original size using bilinear interpolation. It then calculates the squared values for x and y, reshapes them, pads the tensors with WRONG_LABEL_PADDING_DISTANCE to match the atrous rate, and assigns them to padded_y and padded_y2 variables.",
+        "type": "comment"
+    },
+    "7604": {
+        "file_id": 556,
+        "content": "    offset_y = paddle.transpose(\n        paddle.reshape(\n            F.unfold(x=padded_y,\n                     kernel_sizes=[height, width],\n                     strides=[atrous_rate, atrous_rate]),\n            [channels, height * width, -1]), [1, 0, 2])\n    offset_y2 = paddle.reshape(\n        F.unfold(padded_y2,\n                 kernel_sizes=[height, width],\n                 strides=[atrous_rate, atrous_rate]), [height, width, -1])\n    x = paddle.transpose(paddle.reshape(x, [channels, height * width, -1]),\n                         [1, 2, 0])\n    dists = x2 + offset_y2 - 2. * paddle.reshape(paddle.matmul(x, offset_y),\n                                                 [height, width, -1])\n    return dists\ndef local_matching(prev_frame_embedding,\n                   query_embedding,\n                   prev_frame_labels,\n                   dis_bias=0.,\n                   multi_local_distance=[15],\n                   ori_size=None,\n                   atrous_rate=1,\n                   use_float16=True,\n                   allow_downsample=True,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:539-566"
+    },
+    "7605": {
+        "file_id": 556,
+        "content": "This code snippet calculates the distance between embeddings of frames to measure similarity. It takes in two frame embeddings, their corresponding labels, and several optional parameters, including an atomic number for local distances, a size parameter, and whether to allow downsampling. The function uses Paddle's unfold operation to reshape the data, then calculates distances between these reshaped embeddings using a formula that involves matmul (matrix multiplication) operations. The final step is returning the calculated distances.",
+        "type": "comment"
+    },
+    "7606": {
+        "file_id": 556,
+        "content": "                   allow_parallel=True):\n    \"\"\"Computes nearest neighbor features while only allowing local matches.\n    Args:\n        prev_frame_embedding: [height, width, embedding_dim],\n          the embedding vectors for the last frame.\n        query_embedding: [height, width, embedding_dim],\n          the embedding vectors for the query frames.\n        prev_frame_labels: [height, width, n_objects],\n        the class labels of the previous frame.\n        multi_local_distance: A list of Integer,\n          a list of maximum distance allowed for local matching.\n        ori_size: (ori_height, ori_width),\n          the original spatial size. If \"None\", (ori_height, ori_width) = (height, width).\n        atrous_rate: Integer, the atrous rate of local matching.\n        use_float16: Bool, if \"True\", use float16 type for matching.\n        allow_downsample: Bool, if \"True\", downsample prev_frame_embedding and query_embedding\n          with a stride of 2.\n        allow_parallel: Bool, if \"True\", do matching in a parallel way. If \"False\", do matching in",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:567-584"
+    },
+    "7607": {
+        "file_id": 556,
+        "content": "This code computes nearest neighbor features for local matching in video segmentation. It takes embedding vectors, class labels, and a list of maximum distances as input. The function allows downsampling and parallel processing.",
+        "type": "comment"
+    },
+    "7608": {
+        "file_id": 556,
+        "content": "          a for-loop way, which will save GPU memory.\n    Returns:\n        nn_features: A float32 np.array of nearest neighbor features of shape\n          [1, height, width, n_objects, 1].\n    \"\"\"\n    max_distance = multi_local_distance[-1]\n    if ori_size is None:\n        height, width = prev_frame_embedding.shape[:2]\n        ori_size = (height, width)\n    obj_num = prev_frame_labels.shape[2]\n    pad = paddle.ones([1]) * WRONG_LABEL_PADDING_DISTANCE\n    if use_float16:\n        query_embedding = paddle.cast(query_embedding, dtype=\"float16\")\n        prev_frame_embedding = paddle.cast(prev_frame_embedding,\n                                           dtype=\"float16\")\n        pad = paddle.cast(pad, dtype=\"float16\")\n    if allow_parallel:\n        d = local_pairwise_distances_parallel(query_embedding,\n                                              prev_frame_embedding,\n                                              max_distance=max_distance,\n                                              atrous_rate=atrous_rate,\n                                              allow_downsample=allow_downsample)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:585-609"
+    },
+    "7609": {
+        "file_id": 556,
+        "content": "This function calculates nearest neighbor features by using local pairwise distances in a parallel manner, with options to cast data types and allow downsampling. It takes query and previous frame embeddings as input, and returns nearest neighbor features of shape [1, height, width, n_objects, 1].",
+        "type": "comment"
+    },
+    "7610": {
+        "file_id": 556,
+        "content": "    else:\n        d = local_pairwise_distances(query_embedding,\n                                     prev_frame_embedding,\n                                     max_distance=max_distance,\n                                     atrous_rate=atrous_rate,\n                                     allow_downsample=allow_downsample)\n    height, width = d.shape[:2]\n    labels = paddle.unsqueeze(paddle.transpose(prev_frame_labels, [2, 0, 1]), 1)\n    labels = paddle.unsqueeze(paddle.transpose(prev_frame_labels, [2, 0, 1]),\n                              axis=1)\n    if (height, width) != ori_size:\n        labels = F.interpolate(labels, size=(height, width), mode='nearest')\n    pad_max_distance = max_distance - max_distance % atrous_rate\n    atrous_max_distance = pad_max_distance // atrous_rate\n    #no change pad\n    padded_labels = F.pad(labels, (\n        pad_max_distance,\n        pad_max_distance,\n        pad_max_distance,\n        pad_max_distance,\n    ),\n                          mode='constant',\n                          value=0)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:610-635"
+    },
+    "7611": {
+        "file_id": 556,
+        "content": "This code calculates pairwise distances between query and previous frame embeddings. If the shape of the distances doesn't match the original size, it interpolates labels using nearest neighbor mode. The code then pads the labels with zeros to match the maximum distance considering the atrous rate.",
+        "type": "comment"
+    },
+    "7612": {
+        "file_id": 556,
+        "content": "    offset_masks = paddle.transpose(\n        paddle.reshape(\n            F.unfold(padded_labels,\n                     kernel_sizes=[height, width],\n                     strides=[atrous_rate, atrous_rate]),\n            [obj_num, height, width, -1]), [1, 2, 3, 0]) > 0.9\n    d_tiled = paddle.expand(paddle.unsqueeze(\n        d, axis=-1), [-1, -1, -1, obj_num])  # h, w, num_local_pos, obj_num\n    d_masked = paddle.where(offset_masks, d_tiled, pad)\n    dists = paddle.min(d_masked, axis=2)\n    multi_dists = [\n        paddle.unsqueeze(paddle.transpose(dists, [2, 0, 1]), axis=1)\n    ]  # n_objects, num_multi_local, h, w\n    reshaped_d_masked = paddle.reshape(d_masked, [\n        height, width, 2 * atrous_max_distance + 1, 2 * atrous_max_distance + 1,\n        obj_num\n    ])\n    for local_dis in multi_local_distance[:-1]:\n        local_dis = local_dis // atrous_rate\n        start_idx = atrous_max_distance - local_dis\n        end_idx = atrous_max_distance + local_dis + 1\n        new_d_masked = paddle.reshape(\n            reshaped_d_masked[:, :, start_idx:end_idx, start_idx:end_idx, :],",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:637-662"
+    },
+    "7613": {
+        "file_id": 556,
+        "content": "This code segment applies atrous spatial pyramid pooling in a PaddlePaddle implementation. It creates offset masks, performs element-wise masking, computes minimum distances, and reshapes the data for each local distance level to perform feature extraction at different scales.",
+        "type": "comment"
+    },
+    "7614": {
+        "file_id": 556,
+        "content": "            reshaped_d_masked[:, :, start_idx:end_idx,\n                              start_idx:end_idx, :].shape)\n        new_d_masked = paddle.reshape(new_d_masked,\n                                      [height, width, -1, obj_num])\n        new_dists = paddle.min(new_d_masked, axis=2)\n        new_dists = paddle.unsqueeze(paddle.transpose(new_dists, [2, 0, 1]),\n                                     axis=1)\n        multi_dists.append(new_dists)\n    multi_dists = paddle.concat(multi_dists, axis=1)\n    multi_dists = (F.sigmoid(multi_dists +\n                             paddle.reshape(dis_bias, [-1, 1, 1, 1])) - 0.5) * 2\n    if use_float16:\n        multi_dists = paddle.cast(multi_dists, dtype=\"float32\")\n    if (height, width) != ori_size:\n        multi_dists = F.interpolate(multi_dists,\n                                    size=ori_size,\n                                    mode='bilinear',\n                                    align_corners=True)\n    multi_dists = paddle.transpose(multi_dists, perm=[2, 3, 0, 1])",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:663-684"
+    },
+    "7615": {
+        "file_id": 556,
+        "content": "This code performs image segmentation by reshaping and resizing the distance matrix, calculating minimum distances, and applying sigmoid activation. It also handles cases where input size is not the original size.",
+        "type": "comment"
+    },
+    "7616": {
+        "file_id": 556,
+        "content": "    multi_dists = paddle.reshape(multi_dists,\n                                 [1, ori_size[0], ori_size[1], obj_num, -1])\n    return multi_dists\ndef calculate_attention_head(ref_embedding,\n                             ref_label,\n                             prev_embedding,\n                             prev_label,\n                             epsilon=1e-5):\n    ref_head = ref_embedding * ref_label\n    ref_head_pos = paddle.sum(ref_head, axis=(2, 3))\n    ref_head_neg = paddle.sum(ref_embedding, axis=(2, 3)) - ref_head_pos\n    ref_pos_num = paddle.sum(ref_label, axis=(2, 3))\n    ref_neg_num = paddle.sum(1. - ref_label, axis=(2, 3))\n    ref_head_pos = ref_head_pos / (ref_pos_num + epsilon)\n    ref_head_neg = ref_head_neg / (ref_neg_num + epsilon)\n    prev_head = prev_embedding * prev_label\n    prev_head_pos = paddle.sum(prev_head, axis=(2, 3))\n    prev_head_neg = paddle.sum(prev_embedding, axis=(2, 3)) - prev_head_pos\n    prev_pos_num = paddle.sum(prev_label, axis=(2, 3))\n    prev_neg_num = paddle.sum(1. - prev_label, axis=(2, 3))",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:685-709"
+    },
+    "7617": {
+        "file_id": 556,
+        "content": "This function calculates the attention heads for each object in a given scene. It takes reference and previous embeddings and labels as input, along with an optional epsilon value. It then computes the positional and negative head values, divides them by their respective counts (positive and negative labels), and returns the resulting attention heads for each object. The epsilon is added to avoid division by zero in the calculations.",
+        "type": "comment"
+    },
+    "7618": {
+        "file_id": 556,
+        "content": "    prev_head_pos = prev_head_pos / (prev_pos_num + epsilon)\n    prev_head_neg = prev_head_neg / (prev_neg_num + epsilon)\n    total_head = paddle.concat(\n        x=[ref_head_pos, ref_head_neg, prev_head_pos, prev_head_neg], axis=1)\n    return total_head\ndef calculate_attention_head_for_eval(ref_embeddings,\n                                      ref_labels,\n                                      prev_embedding,\n                                      prev_label,\n                                      epsilon=1e-5):\n    total_ref_head_pos = 0.\n    total_ref_head_neg = 0.\n    total_ref_pos_num = 0.\n    total_ref_neg_num = 0.\n    for idx in range(len(ref_embeddings)):\n        ref_embedding = ref_embeddings[idx]\n        ref_label = ref_labels[idx]\n        ref_head = ref_embedding * ref_label\n        ref_head_pos = paddle.sum(ref_head, axis=(2, 3))\n        ref_head_neg = paddle.sum(ref_embedding, axis=(2, 3)) - ref_head_pos\n        ref_pos_num = paddle.sum(ref_label, axis=(2, 3))\n        ref_neg_num = paddle.sum(1. - ref_label, axis=(2, 3))",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:710-736"
+    },
+    "7619": {
+        "file_id": 556,
+        "content": "This code calculates the attention head values for evaluation, where it sums up reference embeddings multiplied by their corresponding labels. It also accounts for positive and negative instances of reference embeddings by subtracting them from total sums. The final total_head is returned as a concatenated matrix.",
+        "type": "comment"
+    },
+    "7620": {
+        "file_id": 556,
+        "content": "        total_ref_head_pos = total_ref_head_pos + ref_head_pos\n        total_ref_head_neg = total_ref_head_neg + ref_head_neg\n        total_ref_pos_num = total_ref_pos_num + ref_pos_num\n        total_ref_neg_num = total_ref_neg_num + ref_neg_num\n    ref_head_pos = total_ref_head_pos / (total_ref_pos_num + epsilon)\n    ref_head_neg = total_ref_head_neg / (total_ref_neg_num + epsilon)\n    prev_head = prev_embedding * prev_label\n    prev_head_pos = paddle.sum(prev_head, axis=(2, 3))\n    prev_head_neg = paddle.sum(prev_embedding, axis=(2, 3)) - prev_head_pos\n    prev_pos_num = paddle.sum(prev_label, axis=(2, 3))\n    prev_neg_num = paddle.sum(1. - prev_label, axis=(2, 3))\n    prev_head_pos = prev_head_pos / (prev_pos_num + epsilon)\n    prev_head_neg = prev_head_neg / (prev_neg_num + epsilon)\n    total_head = paddle.concat(\n        x=[ref_head_pos, ref_head_neg, prev_head_pos, prev_head_neg], axis=1)\n    return total_head",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segment/utils.py:737-754"
+    },
+    "7621": {
+        "file_id": 556,
+        "content": "This code calculates and returns a total head value by accumulating reference (ref) head values and previous (prev) head values, then normalizing them. It handles potential zero-division cases with a small epsilon for stability. The resulting total head consists of reference positive (pos), reference negative (neg), previous positive (pos), and previous negative (neg) head components concatenated along axis 1.",
+        "type": "comment"
+    },
+    "7622": {
+        "file_id": 557,
+        "content": "/paddlevideo/modeling/framework/segmenters/__init__.py",
+        "type": "filepath"
+    },
+    "7623": {
+        "file_id": 557,
+        "content": "This code is part of the PaddleVideo library and defines a segmenter module. It includes three classes: BaseSegmenter, MSTCN, and ASRF. These classes are used for video frame-level feature extraction, semantic segmentation, and audio source separation respectively. The __all__ variable lists all exported names in this package.",
+        "type": "summary"
+    },
+    "7624": {
+        "file_id": 557,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom .base import BaseSegmenter\nfrom .ms_tcn import MSTCN\nfrom .asrf import ASRF\n__all__ = ['BaseSegmenter', 'MSTCN', 'ASRF']",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/__init__.py:1-17"
+    },
+    "7625": {
+        "file_id": 557,
+        "content": "This code is part of the PaddleVideo library and defines a segmenter module. It includes three classes: BaseSegmenter, MSTCN, and ASRF. These classes are used for video frame-level feature extraction, semantic segmentation, and audio source separation respectively. The __all__ variable lists all exported names in this package.",
+        "type": "comment"
+    },
+    "7626": {
+        "file_id": 558,
+        "content": "/paddlevideo/modeling/framework/segmenters/asrf.py",
+        "type": "filepath"
+    },
+    "7627": {
+        "file_id": 558,
+        "content": "The PaddleVideo framework's ASRF segmentation model uses a backbone for feature extraction and head network for classification. It performs forward passes, post-processing, inference, validates using loss and F1@0.50 score, and extracts class outputs for results.",
+        "type": "summary"
+    },
+    "7628": {
+        "file_id": 558,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom ...registry import SEGMENTERS\nfrom .base import BaseSegmenter\nimport paddle\nimport paddle.nn.functional as F\nfrom .utils import ASRFPostProcessing\n@SEGMENTERS.register()\nclass ASRF(BaseSegmenter):\n    \"\"\"ASRF model framework.\"\"\"\n    def __init__(self,\n                 postprocessing_method,\n                 boundary_threshold,\n                 backbone=None,\n                 head=None,\n                 loss=None):\n        super().__init__(backbone=backbone, head=head, loss=loss)\n        self.postprocessing_method = postprocessing_method",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/asrf.py:1-33"
+    },
+    "7629": {
+        "file_id": 558,
+        "content": "Class ASRF is a segmenter model in PaddleVideo framework. It takes arguments like postprocessing_method, boundary_threshold, backbone, head, and loss for initialization.",
+        "type": "comment"
+    },
+    "7630": {
+        "file_id": 558,
+        "content": "        self.boundary_threshold = boundary_threshold\n    def forward_net(self, video_feature):\n        \"\"\"Define how the model is going to train, from input to output.\n        \"\"\"\n        if self.backbone is not None:\n            feature = self.backbone(video_feature)\n        else:\n            feature = video_feature\n        if self.head is not None:\n            network_outputs = self.head(feature)\n        else:\n            network_outputs = None\n        return network_outputs\n    def train_step(self, data_batch):\n        \"\"\"Training step.\n        \"\"\"\n        feature, label, boundary = data_batch\n        # call forward\n        outputs_cls, outputs_boundary = self.forward_net(feature)\n        # transfer data\n        outputs_cls_np = outputs_cls[-1].numpy()\n        outputs_boundary_np = outputs_boundary[-1].numpy()\n        # caculate loss\n        if self.loss is not None:\n            output_loss = self.loss(feature, outputs_cls, label,\n                                    outputs_boundary, boundary)\n        else:\n            output_loss = None",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/asrf.py:34-67"
+    },
+    "7631": {
+        "file_id": 558,
+        "content": "The code defines a model for segmentation, which has a forward function and train step. It uses a backbone for feature extraction and a head network for classification. The train_step calculates loss using the defined loss function if it's not None.",
+        "type": "comment"
+    },
+    "7632": {
+        "file_id": 558,
+        "content": "        # predict post process\n        predicted = ASRFPostProcessing(outputs_cls_np, outputs_boundary_np,\n                                       self.postprocessing_method)\n        predicted = paddle.squeeze(predicted)\n        loss_metrics = dict()\n        loss_metrics['loss'] = output_loss\n        loss_metrics['F1@0.50'] = self.head.get_F1_score(predicted, label)\n        return loss_metrics\n    def val_step(self, data_batch):\n        \"\"\"Validating setp.\n        \"\"\"\n        feature, label, boundary = data_batch\n        # call forward\n        outputs_cls, outputs_boundary = self.forward_net(feature)\n        # transfer data\n        outputs_cls_np = outputs_cls[-1].numpy()\n        outputs_boundary_np = outputs_boundary[-1].numpy()\n        ## caculate loss\n        if self.loss is not None:\n            output_loss = self.loss(feature, outputs_cls, label,\n                                    outputs_boundary, boundary)\n        else:\n            output_loss = None\n        # predict post process\n        predicted = ASRFPostProcessing(outputs_cls_np, outputs_boundary_np,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/asrf.py:69-100"
+    },
+    "7633": {
+        "file_id": 558,
+        "content": "The code snippet represents the ASRF model's validation step. It predicts the outputs for the given inputs, calculates loss if applicable, and performs post-processing using ASRFPostProcessing function. The function then returns a dictionary of metrics including the 'loss' value and the 'F1@0.50' score.",
+        "type": "comment"
+    },
+    "7634": {
+        "file_id": 558,
+        "content": "                                       self.postprocessing_method)\n        predicted = paddle.squeeze(predicted)\n        outputs_dict = dict()\n        outputs_dict['loss'] = output_loss\n        outputs_dict['F1@0.50'] = self.head.get_F1_score(predicted, label)\n        return outputs_dict\n    def test_step(self, data_batch):\n        \"\"\"Testing setp.\n        \"\"\"\n        feature, _, _ = data_batch\n        outputs_dict = dict()\n        # call forward\n        outputs_cls, outputs_boundary = self.forward_net(feature)\n        # transfer data\n        outputs_cls_np = outputs_cls[-1].numpy()\n        outputs_boundary_np = outputs_boundary[-1].numpy()\n        # predict post process\n        predicted = ASRFPostProcessing(outputs_cls_np, outputs_boundary_np,\n                                       self.postprocessing_method)\n        outputs_dict['predict'] = paddle.to_tensor(predicted[0, :])\n        outputs_dict['output_np'] = F.sigmoid(outputs_cls[-1])\n        return outputs_dict\n    def infer_step(self, data_batch):\n        \"\"\"Infering setp.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/asrf.py:101-129"
+    },
+    "7635": {
+        "file_id": 558,
+        "content": "This code is for a model that performs segmentation using ASRF (Adaptive Sparsely Represented Field) method. It consists of functions for forward pass, post processing, and inference steps. The forward_net function takes input features and returns predicted classes and boundaries. The test_step performs testing by calling the forward_net function and applying post-processing to the results. The infer_step performs inference on data_batch using ASRFPostProcessing. It outputs the predicted segmentation, sigmoid-transformed output, and returns them in a dictionary for further processing or evaluation.",
+        "type": "comment"
+    },
+    "7636": {
+        "file_id": 558,
+        "content": "        \"\"\"\n        feature = data_batch[0]\n        # call forward\n        outputs_cls, outputs_boundary = self.forward_net(feature)\n        # transfer data\n        outputs_cls_np = outputs_cls[-1]\n        outputs_boundary_np = outputs_boundary[-1]\n        outputs = [\n            outputs_cls_np, outputs_boundary_np,\n            F.sigmoid(outputs_cls[-1])\n        ]\n        return outputs",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/asrf.py:130-143"
+    },
+    "7637": {
+        "file_id": 558,
+        "content": "This code segment performs the forward pass on a feature, then extracts last outputs for class and boundary, applies sigmoid to the last output of class, and returns all in a list as results.",
+        "type": "comment"
+    },
+    "7638": {
+        "file_id": 559,
+        "content": "/paddlevideo/modeling/framework/segmenters/base.py",
+        "type": "filepath"
+    },
+    "7639": {
+        "file_id": 559,
+        "content": "The BaseSegmenter class serves as a foundation for PaddleVideo segmenters, handling training, validation, testing, and inference with a mode parameter. Subclasses must implement train_step, valid_step, test_step, and feature extraction modules.",
+        "type": "summary"
+    },
+    "7640": {
+        "file_id": 559,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom abc import abstractmethod\nfrom ... import builder\nimport paddle.nn as nn\nclass BaseSegmenter(nn.Layer):\n    \"\"\"Base class for segementers.\n    All segementers should subclass it.\n    All subclass should overwrite:\n    - Methods:``train_step``, supporting to forward when training.\n    - Methods:``valid_step``, supporting to forward when validating.\n    - Methods:``test_step``, supporting to forward when testing.\n    Args:\n        backbone (dict): Backbone modules to extract feature.\n        head (dict): Classification head to process feature.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/base.py:1-30"
+    },
+    "7641": {
+        "file_id": 559,
+        "content": "The code is defining a BaseSegmenter class, which serves as the base class for all segmenters. It requires subclasses to override train_step, valid_step, and test_step methods. The class also accepts backbone and head modules to extract features and process them respectively.",
+        "type": "comment"
+    },
+    "7642": {
+        "file_id": 559,
+        "content": "    \"\"\"\n    def __init__(self, backbone=None, head=None, loss=None):\n        super().__init__()\n        # build backbone\n        if backbone is not None:\n            self.backbone = builder.build_backbone(backbone)\n            if hasattr(self.backbone, 'init_weights'):\n                self.backbone.init_weights()\n        else:\n            self.backbone = None\n        # build head\n        if head is not None:\n            self.head_name = head.name\n            self.head = builder.build_head(head)\n            if hasattr(self.head, 'init_weights'):\n                self.head.init_weights()\n        else:\n            self.head = None\n        # build loss\n        if loss is not None:\n            self.loss_name = loss.name\n            self.loss = builder.build_loss(loss)\n            if hasattr(self.loss, 'init_weights'):\n                self.loss.init_weights()\n        else:\n            self.loss = None\n    def forward(self, data_batch, mode='infer'):\n        \"\"\"\n        1. Define how the model is going to run, from input to output.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/base.py:32-63"
+    },
+    "7643": {
+        "file_id": 559,
+        "content": "This code defines a segmenter base class for PaddleVideo. It initializes the backbone, head, and loss layers based on user input. The `forward` method specifies how the model processes data in either infer or train mode. Initializing weights is optional but can be called if the layer supports it.",
+        "type": "comment"
+    },
+    "7644": {
+        "file_id": 559,
+        "content": "        2. Console of train, valid, test or infer step\n        3. Set mode='infer' is used for saving inference model, refer to tools/export_model.py\n        \"\"\"\n        if mode == 'train':\n            return self.train_step(data_batch)\n        elif mode == 'valid':\n            return self.val_step(data_batch)\n        elif mode == 'test':\n            return self.test_step(data_batch)\n        elif mode == 'infer':\n            return self.infer_step(data_batch)\n        else:\n            raise NotImplementedError\n    @abstractmethod\n    def train_step(self, data_batch, **kwargs):\n        \"\"\"Training step.\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def val_step(self, data_batch, **kwargs):\n        \"\"\"Validating step.\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def test_step(self, data_batch, **kwargs):\n        \"\"\"Test step.\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def infer_step(self, data_batch, **kwargs):\n        \"\"\"Infer step.\n        \"\"\"",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/base.py:64-99"
+    },
+    "7645": {
+        "file_id": 559,
+        "content": "This code defines a base class for segmenters that supports training, validation, testing, and inference steps. The `mode` parameter determines which step to execute, and abstract methods must be implemented by subclasses for each step.",
+        "type": "comment"
+    },
+    "7646": {
+        "file_id": 559,
+        "content": "        raise NotImplementedError",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/base.py:100-100"
+    },
+    "7647": {
+        "file_id": 559,
+        "content": "This code block raises a NotImplementedError, indicating that the current implementation of the function or method is not complete and requires further development.",
+        "type": "comment"
+    },
+    "7648": {
+        "file_id": 560,
+        "content": "/paddlevideo/modeling/framework/segmenters/ms_tcn.py",
+        "type": "filepath"
+    },
+    "7649": {
+        "file_id": 560,
+        "content": "The MSTCN model is a video segmentation tool that extends BaseSegmenter class, includes an optional backbone and head, and defines training/validation steps with loss calculation. The code includes three functions: forward_net for training, test_step for testing, and infer_step for inference.",
+        "type": "summary"
+    },
+    "7650": {
+        "file_id": 560,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom ...registry import SEGMENTERS\nfrom .base import BaseSegmenter\nimport paddle\nimport paddle.nn.functional as F\n@SEGMENTERS.register()\nclass MSTCN(BaseSegmenter):\n    \"\"\"MS-TCN model framework.\"\"\"\n    def forward_net(self, video_feature):\n        \"\"\"Define how the model is going to train, from input to output.\n        \"\"\"\n        if self.backbone is not None:\n            feature = self.backbone(video_feature)\n        else:\n            feature = video_feature\n        if self.head is not None:\n            cls_score = self.head(feature)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/ms_tcn.py:1-33"
+    },
+    "7651": {
+        "file_id": 560,
+        "content": "Class MSTCN defines a model for video segmentation, extending BaseSegmenter class. It contains an optional backbone and head for feature extraction and classification. The forward_net function maps input to output through these components if present.",
+        "type": "comment"
+    },
+    "7652": {
+        "file_id": 560,
+        "content": "        else:\n            cls_score = None\n        return cls_score\n    def train_step(self, data_batch):\n        \"\"\"Training step.\n        \"\"\"\n        video_feat, video_gt = data_batch\n        # call forward\n        output = self.forward_net(video_feat)\n        loss = 0.\n        for i in range(len(output)):\n            loss += self.head.loss(output[i], video_gt)\n        predicted = paddle.argmax(output[-1], axis=1)\n        predicted = paddle.squeeze(predicted)\n        loss_metrics = dict()\n        loss_metrics['loss'] = loss\n        loss_metrics['F1@0.50'] = self.head.get_F1_score(predicted, video_gt)\n        return loss_metrics\n    def val_step(self, data_batch):\n        \"\"\"Validating setp.\n        \"\"\"\n        video_feat, video_gt = data_batch\n        # call forward\n        output = self.forward_net(video_feat)\n        loss = 0.\n        for i in range(len(output)):\n            loss += self.head.loss(output[i], video_gt)\n        predicted = paddle.argmax(output[-1], axis=1)\n        predicted = paddle.squeeze(predicted)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/ms_tcn.py:34-70"
+    },
+    "7653": {
+        "file_id": 560,
+        "content": "This code defines a training step, validation step, and a method to predict the class score for video segmentation. The training step calculates the loss based on the forward network output and ground truth labels, while the validation step does the same but doesn't return a loss. Both methods return predicted results and loss metrics.",
+        "type": "comment"
+    },
+    "7654": {
+        "file_id": 560,
+        "content": "        outputs_dict = dict()\n        outputs_dict['loss'] = loss\n        outputs_dict['F1@0.50'] = self.head.get_F1_score(predicted, video_gt)\n        return outputs_dict\n    def test_step(self, data_batch):\n        \"\"\"Testing setp.\n        \"\"\"\n        video_feat, _ = data_batch\n        outputs_dict = dict()\n        # call forward\n        output = self.forward_net(video_feat)\n        predicted = paddle.argmax(output[-1], axis=1)\n        predicted = paddle.squeeze(predicted)\n        outputs_dict['predict'] = predicted\n        outputs_dict['output_np'] = F.sigmoid(output[-1])\n        return outputs_dict\n    def infer_step(self, data_batch):\n        \"\"\"Infering setp.\n        \"\"\"\n        video_feat = data_batch[0]\n        # call forward\n        output = self.forward_net(video_feat)\n        predicted = paddle.argmax(output[-1], axis=1)\n        predicted = paddle.squeeze(predicted)\n        output_np = F.sigmoid(output[-1])\n        return predicted, output_np",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/ms_tcn.py:72-101"
+    },
+    "7655": {
+        "file_id": 560,
+        "content": "This code defines three functions: \"forward_net\" for training, \"test_step\" for testing, and \"infer_step\" for inference. The forward pass of the model is called within each function. In the training step, the loss is calculated and an F1 score is computed using the head module. The predicted labels are also stored. For testing and inference, the predicted labels and output after sigmoid activation are returned separately.",
+        "type": "comment"
+    },
+    "7656": {
+        "file_id": 561,
+        "content": "/paddlevideo/modeling/framework/segmenters/utils.py",
+        "type": "filepath"
+    },
+    "7657": {
+        "file_id": 561,
+        "content": "The GaussianSmoothing class in PaddlePaddle applies 1D gaussian smoothing for image processing tasks, and the code initializes weights and biases for a neural network layer with Kaiming Uniform method.",
+        "type": "summary"
+    },
+    "7658": {
+        "file_id": 561,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# https://github.com/yiskw713/asrf/libs/postprocess.py\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nimport numpy as np\nimport math\nclass GaussianSmoothing(nn.Layer):\n    \"\"\"\n    Apply gaussian smoothing on a 1d tensor.\n    Filtering is performed seperately for each channel\n    in the input using a depthwise convolution.\n    Arguments:\n        channels (int, sequence): Number of channels of the input tensors. Output will\n            have this number of channels as well.\n        kernel_size (int, sequence): Size of the gaussian kernel.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/utils.py:1-30"
+    },
+    "7659": {
+        "file_id": 561,
+        "content": "This code defines a GaussianSmoothing class in PaddlePaddle for applying gaussian smoothing on 1D tensors. It uses depthwise convolution to filter each channel separately, with input and output channels remaining the same. The kernel size can be specified as an integer or sequence.",
+        "type": "comment"
+    },
+    "7660": {
+        "file_id": 561,
+        "content": "        sigma (float, sequence): Standard deviation of the gaussian kernel.\n    \"\"\"\n    def __init__(self, kernel_size=15, sigma=1.0):\n        super().__init__()\n        self.kernel_size = kernel_size\n        # The gaussian kernel is the product of the\n        # gaussian function of each dimension.\n        kernel = 1\n        meshgrid = paddle.arange(kernel_size)\n        meshgrid = paddle.cast(meshgrid, dtype='float32')\n        mean = (kernel_size - 1) / 2\n        kernel = kernel / (sigma * math.sqrt(2 * math.pi))\n        kernel = kernel * paddle.exp(-(((meshgrid - mean) / sigma)**2) / 2)\n        # Make sure sum of values in gaussian kernel equals 1.\n        # kernel = kernel / paddle.max(kernel)\n        self.kernel = paddle.reshape(kernel, [1, 1, -1])\n    def forward(self, inputs):\n        \"\"\"\n        Apply gaussian filter to input.\n        Arguments:\n            input (paddle.Tensor): Input to apply gaussian filter on.\n        Returns:\n            filtered (paddle.Tensor): Filtered output.\n        \"\"\"\n        _, c, _ = inputs.shape",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/utils.py:31-62"
+    },
+    "7661": {
+        "file_id": 561,
+        "content": "This code initializes a Gaussian kernel with specified kernel size and sigma. The kernel is then applied to the input during forward pass to filter the data.",
+        "type": "comment"
+    },
+    "7662": {
+        "file_id": 561,
+        "content": "        inputs = F.pad(inputs,\n                       pad=((self.kernel_size - 1) // 2,\n                            (self.kernel_size - 1) // 2),\n                       mode=\"reflect\",\n                       data_format='NCL')\n        kernel = paddle.expand(self.kernel, shape=[c, 1, self.kernel_size])\n        return F.conv1d(inputs, weight=kernel, groups=c)\ndef argrelmax(prob, threshold=0.7):\n    \"\"\"\n    Calculate arguments of relative maxima.\n    prob: np.array. boundary probability maps distributerd in [0, 1]\n    prob shape is (T)\n    ignore the peak whose value is under threshold\n    Return:\n        Index of peaks for each batch\n    \"\"\"\n    # ignore the values under threshold\n    prob[prob < threshold] = 0.0\n    # calculate the relative maxima of boundary maps\n    # treat the first frame as boundary\n    peak = np.concatenate(\n        [\n            np.ones((1), dtype=np.bool),\n            (prob[:-2] < prob[1:-1]) & (prob[2:] < prob[1:-1]),\n            np.zeros((1), dtype=np.bool),\n        ],\n        axis=0,\n    )",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/utils.py:63-95"
+    },
+    "7663": {
+        "file_id": 561,
+        "content": "This code defines a convolution operation and an argrelmax function for image processing. The conv1d function performs 1D convolutions on the input tensor, with padding, kernel expansion, and return as output. The argrelmax function calculates the arguments of relative maxima in boundary probability maps, ignoring values below a certain threshold. This code seems to be related to image segmentation or edge detection tasks.",
+        "type": "comment"
+    },
+    "7664": {
+        "file_id": 561,
+        "content": "    peak_idx = np.where(peak)[0].tolist()\n    return peak_idx\ndef is_probability(x):\n    assert x.ndim == 3\n    if x.shape[1] == 1:\n        # sigmoid\n        if x.min() >= 0 and x.max() <= 1:\n            return True\n        else:\n            return False\n    else:\n        # softmax\n        _sum = np.sum(x, axis=1).astype(np.float32)\n        _ones = np.ones_like(_sum, dtype=np.float32)\n        return np.allclose(_sum, _ones)\ndef convert2probability(x):\n    \"\"\"\n    Args: x (N, C, T)\n    \"\"\"\n    assert x.ndim == 3\n    if is_probability(x):\n        return x\n    else:\n        if x.shape[1] == 1:\n            # sigmoid\n            prob = 1 / (1 + np.exp(-x))\n        else:\n            # softmax\n            prob = np.exp(x) / np.sum(np.exp(x), axis=1)\n        return prob.astype(np.float32)\ndef convert2label(x):\n    assert x.ndim == 2 or x.ndim == 3\n    if x.ndim == 2:\n        return x.astype(np.int64)\n    else:\n        if not is_probability(x):\n            x = convert2probability(x)\n        label = np.argmax(x, axis=1)\n        return label.astype(np.int64)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/utils.py:97-146"
+    },
+    "7665": {
+        "file_id": 561,
+        "content": "The code provides functions to convert tensors into probabilities or labels. The 'is_probability' function checks if a tensor is in the form of sigmoid or softmax outputs and returns True/False accordingly. The 'convert2probability' function converts tensors into probabilities based on whether they are sigmoid or softmax outputs. Lastly, 'convert2label' function converts tensors (2D or 3D) into labels by either casting to int64 directly for 2D or first converting the tensor to probability and then finding the index of maximum value along the appropriate axis.",
+        "type": "comment"
+    },
+    "7666": {
+        "file_id": 561,
+        "content": "def refinement_with_boundary(outputs, boundaries, boundary_threshold):\n    \"\"\"\n    Get segments which is defined as the span b/w two boundaries,\n    and decide their classes by majority vote.\n    Args:\n        outputs: numpy array. shape (N, C, T)\n            the model output for frame-level class prediction.\n        boundaries: numpy array.  shape (N, 1, T)\n            boundary prediction.\n        boundary_threshold: the threshold of the size of action segments. float(default=0.7)\n    Return:\n        preds: np.array. shape (N, T)\n            final class prediction considering boundaries.\n    \"\"\"\n    preds = convert2label(outputs)\n    boundaries = convert2probability(boundaries)\n    for i, (output, pred, boundary) in enumerate(zip(outputs, preds,\n                                                     boundaries)):\n        idx = argrelmax(boundary[0, :], threshold=boundary_threshold)\n        # add the index of the last action ending\n        T = pred.shape[0]\n        idx.append(T)\n        # majority vote\n        for j in range(len(idx) - 1):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/utils.py:149-176"
+    },
+    "7667": {
+        "file_id": 561,
+        "content": "This function refines the segmented action outputs based on boundary predictions, and performs majority vote to decide class labels. The inputs include model output (outputs) for frame-level class prediction, boundary prediction (boundaries), and an optional threshold (boundary_threshold). It converts outputs and boundaries into label and probability format respectively. For each sequence, it finds the indices of maximum boundary values above the threshold, appends the last action end index, then performs majority vote on each interval between adjacent max boundaries. The function returns the final class prediction considering boundaries in a numpy array format (preds).",
+        "type": "comment"
+    },
+    "7668": {
+        "file_id": 561,
+        "content": "            count = np.bincount(pred[idx[j]:idx[j + 1]])\n            modes = np.where(count == count.max())[0]\n            if len(modes) == 1:\n                mode = modes\n            else:\n                if outputs.ndim == 3:\n                    # if more than one majority class exist\n                    prob_sum_max = 0\n                    for m in modes:\n                        prob_sum = output[m, idx[j]:idx[j + 1]].sum()\n                        if prob_sum_max < prob_sum:\n                            mode = m\n                            prob_sum_max = prob_sum\n                else:\n                    # decide first mode when more than one majority class\n                    # have the same number during oracle experiment\n                    mode = modes[0]\n            preds[i, idx[j]:idx[j + 1]] = mode\n    return preds\ndef relabeling(outputs, theta_t):\n    \"\"\"\n        Relabeling small action segments with their previous action segment\n        Args:\n            output: the results of action segmentation. (N, T) or (N, C, T)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/utils.py:177-203"
+    },
+    "7669": {
+        "file_id": 561,
+        "content": "This code segment performs action segmentation by detecting the majority class in each chunk and relabeling smaller action segments with their previous action segment. It uses numpy's bincount and where functions to find majority classes, and has separate logic for cases with multiple majority classes depending on the dimension of outputs. The results are stored in preds array.",
+        "type": "comment"
+    },
+    "7670": {
+        "file_id": 561,
+        "content": "            theta_t: the threshold of the size of action segments.\n        Return:\n            relabeled output. (N, T)\n        \"\"\"\n    preds = convert2label(outputs)\n    for i in range(preds.shape[0]):\n        # shape (T,)\n        last = preds[i][0]\n        cnt = 1\n        for j in range(1, preds.shape[1]):\n            if last == preds[i][j]:\n                cnt += 1\n            else:\n                if cnt > theta_t:\n                    cnt = 1\n                    last = preds[i][j]\n                else:\n                    preds[i][j - cnt:j] = preds[i][j - cnt - 1]\n                    cnt = 1\n                    last = preds[i][j]\n        if cnt <= theta_t:\n            preds[i][j - cnt:j] = preds[i][j - cnt - 1]\n    return preds\ndef smoothing(outputs, filter_func):\n    \"\"\"\n        Smoothing action probabilities with gaussian filter.\n        Args:\n            outputs: frame-wise action probabilities. (N, C, T)\n        Return:\n            predictions: final prediction. (N, T)\n        \"\"\"\n    outputs = convert2probability(outputs)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/utils.py:204-242"
+    },
+    "7671": {
+        "file_id": 561,
+        "content": "The code defines two functions: \"relabel\" and \"smoothing\". The relabel function takes predicted action segment labels, applies a threshold to merge adjacent segments with overlapping actions, and returns the relabeled output. The smoothing function applies a Gaussian filter to frame-wise action probabilities, resulting in final predictions.",
+        "type": "comment"
+    },
+    "7672": {
+        "file_id": 561,
+        "content": "    outputs = filter_func(paddle.to_tensor(outputs)).numpy()\n    preds = convert2label(outputs)\n    return preds\ndef ASRFPostProcessing(outputs_cls,\n                       outputs_boundary,\n                       refinement_method,\n                       boundary_threshold=0.7,\n                       theta_t=15,\n                       kernel_size=15):\n    \"\"\"\n    ASRF post processing is to refine action boundary\n    Args:\n        outputs_cls: the results of action segmentation. (N, T) or (N, C, T)\n        outputs_boundary: action boundary probability. (N, 1, T)\n        refinement_method: the way of refine predict boundary and classification. str\n        boundary_threshold: the threshold of the size of action segments. float(default=0.7)\n        theta_t: the threshold of the size of action segments. int(default=15)\n        kernel_size: Size of the gaussian kernel. int(default=15)\n    Return:\n        preds output. (N, T)\n    \"\"\"\n    func = [\n        \"refinement_with_boundary\",\n        \"relabeling\",\n        \"smoothing\",",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/utils.py:243-270"
+    },
+    "7673": {
+        "file_id": 561,
+        "content": "This code is implementing ASRF post-processing for refining action boundary and classification. It takes in outputs_cls (action segmentation results), outputs_boundary (action boundary probability), refinement_method, boundary_threshold, theta_t (threshold of the size of action segments), and kernel_size as arguments. The code applies three processing steps: \"refinement_with_boundary\", \"relabeling\", and \"smoothing\" to refine the predict boundary and classification. It returns the preds output which is a (N, T) shape.",
+        "type": "comment"
+    },
+    "7674": {
+        "file_id": 561,
+        "content": "    ]\n    if refinement_method == \"smoothing\":\n        filter_func = GaussianSmoothing(kernel_size)\n        preds = smoothing(outputs_cls, filter_func)\n    elif refinement_method == \"relabeling\":\n        preds = relabeling(outputs_cls, theta_t)\n    elif refinement_method == \"refinement_with_boundary\":\n        preds = refinement_with_boundary(outputs_cls, outputs_boundary,\n                                         boundary_threshold)\n    else:\n        preds = np.zeros((1, 1))\n        assert refinement_method in func\n    return paddle.to_tensor(preds)\ndef _calculate_fan_in_and_fan_out(tensor):\n    dimensions = len(tensor.shape)\n    if dimensions < 2:\n        raise ValueError(\"Fan in and fan out can not be computed \\\n        for tensor with fewer than 2 dimensions\")\n    if dimensions == 2:  # Linear\n        fan_in = tensor.shape[1]\n        fan_out = tensor.shape[0]\n    else:\n        num_input_fmaps = tensor.shape[1]\n        num_output_fmaps = tensor.shape[0]\n        receptive_field_size = 1\n        if tensor.dim() > 2:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/utils.py:271-301"
+    },
+    "7675": {
+        "file_id": 561,
+        "content": "This code segment defines a function that takes an input tensor and calculates the fan-in and fan-out. It also applies different refinement methods to outputs_cls based on the user-specified refinement method. If an invalid method is chosen, it returns a zero tensor. The code includes functions for smoothing, relabeling, and refinement with boundary.",
+        "type": "comment"
+    },
+    "7676": {
+        "file_id": 561,
+        "content": "            receptive_field_size = tensor[0][0].numel()\n        fan_in = num_input_fmaps * receptive_field_size\n        fan_out = num_output_fmaps * receptive_field_size\n    return fan_in, fan_out\ndef calculate_gain(nonlinearity=None, a=None):\n    if nonlinearity == 'tanh':\n        return 5.0 / 3\n    elif nonlinearity == 'relu':\n        return math.sqrt(2.0)\n    elif nonlinearity == 'leaky_relu':\n        if a is not None:\n            return math.sqrt(2.0 / (1 + a**2))\n        else:\n            return math.sqrt(2.0 / (1 + 0.01**2))\n    elif nonlinearity == 'selu':\n        return 3.0 / 4\n    else:\n        return 1\ndef KaimingUniform_like_torch(weight_npy,\n                              mode='fan_in',\n                              nonlinearity='leaky_relu'):\n    fan_in, fan_out = _calculate_fan_in_and_fan_out(weight_npy)\n    if mode == 'fan_in':\n        fan_mode = fan_in\n    else:\n        fan_mode = fan_out\n    a = math.sqrt(5.0)\n    gain = calculate_gain(nonlinearity=nonlinearity, a=a)\n    std = gain / math.sqrt(fan_mode)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/utils.py:302-335"
+    },
+    "7677": {
+        "file_id": 561,
+        "content": "This code calculates the gain and fan-in/fan-out values for weight initialization in a neural network. It supports different nonlinearities such as 'tanh', 'relu', 'leaky_relu', and 'selu'. The function KaimingUniform_like_torch initializes weights using the Kaiming Uniform method with the specified nonlinearity, fan mode (fan_in or fan_out), and standard deviation of the initialization.",
+        "type": "comment"
+    },
+    "7678": {
+        "file_id": 561,
+        "content": "    bound = math.sqrt(3.0) * std\n    return np.random.uniform(-bound, bound, weight_npy.shape)\ndef init_bias(weight_npy, bias_npy):\n    fan_in, fan_out = _calculate_fan_in_and_fan_out(weight_npy)\n    bound = 1.0 / math.sqrt(fan_in)\n    return np.random.uniform(-bound, bound, bias_npy.shape)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/framework/segmenters/utils.py:336-343"
+    },
+    "7679": {
+        "file_id": 561,
+        "content": "This code initializes weights and biases for a neural network layer. It calculates the fan-in and fan-out, determines bounds based on standard deviation or square root of three times the standard deviation for weights, and uses a uniform distribution within those bounds to initialize the weights and biases.",
+        "type": "comment"
+    },
+    "7680": {
+        "file_id": 562,
+        "content": "/paddlevideo/modeling/heads/__init__.py",
+        "type": "filepath"
+    },
+    "7681": {
+        "file_id": 562,
+        "content": "This code imports various head classes from different modules in the PaddleVideo library for video object detection, segmentation, or action recognition tasks, and adds them to the `__all__` list for easy access.",
+        "type": "summary"
+    },
+    "7682": {
+        "file_id": 562,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .adds_head import AddsHead\nfrom .asrf_head import ASRFHead\nfrom .attention_lstm_head import AttentionLstmHead, ActionAttentionLstmHead\nfrom .base import BaseHead\nfrom .bbox_head import BBoxHeadAVA\nfrom .cfbi_head import CollaborativeEnsemblerMS\nfrom .i3d_head import I3DHead\nfrom .movinet_head import MoViNetHead\nfrom .ms_tcn_head import MSTCNHead\nfrom .pptimesformer_head import ppTimeSformerHead\nfrom .pptsm_head import ppTSMHead",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/__init__.py:1-25"
+    },
+    "7683": {
+        "file_id": 562,
+        "content": "This code is importing various classes from different modules in the PaddleVideo library. These classes represent different types of heads used in video modeling, such as AttentionLstmHead and BBoxHeadAVA. The code also includes licenses and copyright information for the PaddlePaddle Authors.",
+        "type": "comment"
+    },
+    "7684": {
+        "file_id": 562,
+        "content": "from .pptsn_head import ppTSNHead\nfrom .roi_head import AVARoIHead\nfrom .single_straight3d import SingleRoIExtractor3D\nfrom .slowfast_head import SlowFastHead\nfrom .stgcn_head import STGCNHead\nfrom .timesformer_head import TimeSformerHead\nfrom .transnetv2_head import TransNetV2Head\nfrom .tsm_head import TSMHead\nfrom .tsn_head import TSNHead\nfrom .ms_tcn_head import MSTCNHead\nfrom .asrf_head import ASRFHead\nfrom .ctrgcn_head import CTRGCNHead\nfrom .movinet_head import MoViNetHead\nfrom .agcn2s_head import AGCN2sHead\nfrom .token_shift_head import TokenShiftHead\n__all__ = [\n    'BaseHead', 'TSNHead', 'TSMHead', 'ppTSMHead', 'ppTSNHead', 'SlowFastHead',\n    'AttentionLstmHead', 'TimeSformerHead', 'STGCNHead', 'TransNetV2Head',\n    'I3DHead', 'SingleRoIExtractor3D', 'AVARoIHead', 'BBoxHeadAVA', 'AddsHead',\n    'ppTimeSformerHead', 'CollaborativeEnsemblerMS', 'MSTCNHead', 'ASRFHead',\n    'MoViNetHead', 'CTRGCNHead', 'TokenShiftHead', 'ActionAttentionLstmHead',\n    'AGCN2sHead'\n]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/__init__.py:26-49"
+    },
+    "7685": {
+        "file_id": 562,
+        "content": "This code imports various head classes from different modules and adds them to the `__all__` list, making them accessible for import when using this module. These head classes are used in video object detection, segmentation or action recognition tasks. They include ppTSNHead, TSNHead, TSMHead, ppTSMHead, SlowFastHead, TimeSformerHead and more. Each head class has its own specific functionality for different tasks.",
+        "type": "comment"
+    },
+    "7686": {
+        "file_id": 563,
+        "content": "/paddlevideo/modeling/heads/adds_head.py",
+        "type": "filepath"
+    },
+    "7687": {
+        "file_id": 563,
+        "content": "The \"AddsHead\" class in PaddleVideo handles object detection, loss calculation during training and metrics like abs_rel, rmse in inference, while supporting multi-GPU scenarios with all-reduce operations.",
+        "type": "summary"
+    },
+    "7688": {
+        "file_id": 563,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport cv2\nimport numpy as np\nimport paddle.nn as nn\nfrom paddlevideo.utils import get_dist_info\nimport paddle\nfrom ..builder import build_loss\nfrom ..registry import HEADS\nMIN_DEPTH = 1e-3\nMAX_DEPTH = 80\n@HEADS.register()\nclass AddsHead(nn.Layer):\n    \"\"\"TimeSformerHead Head.\n    Args:\n        num_classes (int): The number of classes to be classified.\n        in_channels (int): The number of channles in input feature.",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/adds_head.py:1-33"
+    },
+    "7689": {
+        "file_id": 563,
+        "content": "This code is part of the PaddleVideo library, defining a class called AddsHead for object detection. It uses input features with specific number of channels and classes to be classified. The class is registered in the registry under HEADS. MIN_DEPTH and MAX_DEPTH constants define the minimum and maximum depth values respectively.",
+        "type": "comment"
+    },
+    "7690": {
+        "file_id": 563,
+        "content": "        loss_cfg (dict): Config for building config. Default: dict(name='CrossEntropyLoss').\n        std(float): Std(Scale) value in normal initilizar. Default: 0.01.\n        kwargs (dict, optional): Any keyword argument to initialize.\n    \"\"\"\n    def __init__(self,\n                 avg_reprojection,\n                 disparity_smoothness,\n                 no_ssim,\n                 loss_cfg=dict(name='ADDSLoss'),\n                 max_gt_depth=60,\n                 pred_depth_scale_factor=1):\n        super(AddsHead, self).__init__()\n        loss_cfg['avg_reprojection'] = avg_reprojection\n        loss_cfg['disparity_smoothness'] = disparity_smoothness\n        loss_cfg['no_ssim'] = no_ssim\n        self.max_gt_depth = max_gt_depth\n        self.pred_depth_scale_factor = pred_depth_scale_factor\n        self.loss_func = build_loss(loss_cfg)\n    def forward(self):\n        raise NotImplemented\n    def loss(self, inputs, outputs):\n        if self.training:\n            return self.loss_func(inputs, outputs)\n        else:\n            abs_rel, sq_rel, rmse, rmse_log, a1, a2, a3 = self.get_metrics(",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/adds_head.py:34-62"
+    },
+    "7691": {
+        "file_id": 563,
+        "content": "The code represents the initialization and forward pass of a class named \"AddsHead\". The class takes in parameters like avg_reprojection, disparity_smoothness, no_ssim, etc. It builds a loss function using build_loss method with the provided configuration (loss_cfg). During training, it returns the result of the loss function on inputs and outputs. In inference mode, it uses get_metrics method to calculate metrics such as abs_rel, sq_rel, rmse, rmse_log, a1, a2, a3.",
+        "type": "comment"
+    },
+    "7692": {
+        "file_id": 563,
+        "content": "                outputs['pred_disp'], outputs['gt'])\n            outputs['abs_rel'] = abs_rel\n            outputs['sq_rel'] = sq_rel\n            outputs['rmse'] = rmse\n            outputs['rmse_log'] = rmse_log\n            outputs['a1'] = a1\n            outputs['a2'] = a2\n            outputs['a3'] = a3\n            return outputs\n    def get_metrics(self, pred_disp, gt_depth):\n        gt_height, gt_width = gt_depth.shape[:2]\n        pred_disp = cv2.resize(pred_disp, (gt_width, gt_height))\n        pred_depth = 1 / pred_disp\n        mask = gt_depth > 0\n        pred_depth = pred_depth[mask]\n        gt_depth = gt_depth[mask]\n        pred_depth *= self.pred_depth_scale_factor\n        ratio = np.median(gt_depth) / np.median(pred_depth)\n        pred_depth *= ratio\n        pred_depth[pred_depth < MIN_DEPTH] = MIN_DEPTH\n        pred_depth[pred_depth > MAX_DEPTH] = MAX_DEPTH\n        mask2 = gt_depth <= self.max_gt_depth\n        pred_depth = pred_depth[mask2]\n        gt_depth = gt_depth[mask2]\n        abs_rel, sq_rel, rmse, rmse_log, a1, a2, a3 = self.compute_errors(",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/adds_head.py:63-95"
+    },
+    "7693": {
+        "file_id": 563,
+        "content": "This code snippet defines an \"AddsHead\" class that returns a dictionary of metrics including absolute relative error, squared relative error, root mean square error, and additional error measures. The get_metrics function resizes the predicted displacement to match the ground truth depth, scales and adjusts the predicted depth based on certain factors, and then computes the specified errors using another function.",
+        "type": "comment"
+    },
+    "7694": {
+        "file_id": 563,
+        "content": "            gt_depth, pred_depth)\n        _, world_size = get_dist_info()\n        if world_size > 1:\n            # educe sum when valid\n            # TODO: there are some problems with multi gpu gather code.\n            abs_rel = paddle.to_tensor(abs_rel)\n            sq_rel = paddle.to_tensor(sq_rel)\n            rmse = paddle.to_tensor(rmse)\n            rmse_log = paddle.to_tensor(rmse_log)\n            a1 = paddle.to_tensor(a1)\n            a2 = paddle.to_tensor(a2)\n            a3 = paddle.to_tensor(a3)\n            abs_rel = paddle.distributed.all_reduce(\n                abs_rel, op=paddle.distributed.ReduceOp.SUM) / world_size\n            sq_rel = paddle.distributed.all_reduce(\n                sq_rel, op=paddle.distributed.ReduceOp.SUM) / world_size\n            rmse = paddle.distributed.all_reduce(\n                rmse, op=paddle.distributed.ReduceOp.SUM) / world_size\n            rmse_log = paddle.distributed.all_reduce(\n                rmse_log, op=paddle.distributed.ReduceOp.SUM) / world_size\n            a1 = paddle.distributed.all_reduce(",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/adds_head.py:96-117"
+    },
+    "7695": {
+        "file_id": 563,
+        "content": "This code is performing all-reduce operations on tensors for multi-GPU scenarios, ensuring that the sum of tensor values across GPUs is reduced and then divided by the total number of participating GPUs. This allows for accurate averaging of results when working with multiple GPUs in a distributed environment.",
+        "type": "comment"
+    },
+    "7696": {
+        "file_id": 563,
+        "content": "                a1, op=paddle.distributed.ReduceOp.SUM) / world_size\n            a2 = paddle.distributed.all_reduce(\n                a2, op=paddle.distributed.ReduceOp.SUM) / world_size\n            a3 = paddle.distributed.all_reduce(\n                a3, op=paddle.distributed.ReduceOp.SUM) / world_size\n            return abs_rel.item(), sq_rel.item(), rmse.item(), rmse_log.item(\n            ), a1.item(), a2.item(), a3.item()\n        return abs_rel, sq_rel, rmse, rmse_log, a1, a2, a3\n    def compute_errors(self, gt, pred):\n        \"\"\"Computation of error metrics between predicted and ground truth depths\n        \"\"\"\n        thresh = np.maximum((gt / pred), (pred / gt))\n        a1 = (thresh < 1.25).mean()\n        a2 = (thresh < 1.25**2).mean()\n        a3 = (thresh < 1.25**3).mean()\n        rmse = (gt - pred)**2\n        rmse = np.sqrt(rmse.mean())\n        rmse_log = (np.log(gt) - np.log(pred))**2\n        rmse_log = np.sqrt(rmse_log.mean())\n        abs_rel = np.mean(np.abs(gt - pred) / gt)\n        sq_rel = np.mean(((gt - pred)**2) / gt)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/adds_head.py:118-144"
+    },
+    "7697": {
+        "file_id": 563,
+        "content": "The code defines a function that computes error metrics between predicted and ground truth depths. It uses all-reduce operations to calculate average values and returns multiple metrics including absolute relative error, squared relative error, RMSE, log RMSE, and three averages (a1, a2, a3) indicating the percentage of thresholds below certain levels.",
+        "type": "comment"
+    },
+    "7698": {
+        "file_id": 563,
+        "content": "        return abs_rel, sq_rel, rmse, rmse_log, a1, a2, a3",
+        "type": "code",
+        "location": "/paddlevideo/modeling/heads/adds_head.py:146-146"
+    },
+    "7699": {
+        "file_id": 563,
+        "content": "This code returns six metrics: abs_rel, sq_rel, rmse, rmse_log, a1, and a2. These metrics are likely related to evaluating the performance of some model or algorithm in a regression task. The 'abs_rel' might stand for absolute relative error, 'sq_rel' could be squared relative error, 'rmse' represents root mean squared error, 'rmse_log' could be the logarithm of rmse, and 'a1', 'a2', and 'a3' are possibly other evaluation metrics.",
+        "type": "comment"
+    }
+}

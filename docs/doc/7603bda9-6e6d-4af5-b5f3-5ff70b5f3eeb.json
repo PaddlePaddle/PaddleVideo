@@ -1,0 +1,10 @@
+{
+    "summary": "This code imports and registers various readers for different formats (TSM, PPTSM, AUDIO, BMN, ACTION) to read map files for the model. The readers are registered in alphabetical order.",
+    "details": [
+        {
+            "comment": "This code imports and registers various readers for different formats (TSM, PPTSM, AUDIO, BMN, ACTION) to read map files for the model. The readers are registered in alphabetical order.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/BasketballAction/predict/action_detect/reader/__init__.py\":0-14",
+            "content": "\"\"\"\nread map for model\n\"\"\"\nfrom reader.reader_utils import regist_reader, get_reader\nimport reader.tsminf_reader as tsminf_reader\nimport reader.audio_reader as audio_reader\nimport reader.bmninf_reader as bmninf_reader\nimport reader.feature_reader as feature_reader\n# regist reader, sort by alphabet\nregist_reader(\"TSM\", tsminf_reader.TSMINFReader)\nregist_reader(\"PPTSM\", tsminf_reader.TSMINFReader)\nregist_reader(\"AUDIO\", audio_reader.AudioReader)\nregist_reader(\"BMN\", bmninf_reader.BMNINFReader)\nregist_reader(\"ACTION\", feature_reader.FeatureReader)"
+        }
+    ]
+}

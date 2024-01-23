@@ -1,0 +1,10 @@
+{
+    "summary": "This code snippet appears to be a list of URLs pointing to various MP4 video files. The file names are hashed strings, indicating that the videos may have been previously used for storage or identification purposes.",
+    "details": [
+        {
+            "comment": "This code snippet appears to be a list of URLs pointing to various MP4 video files. The file names are hashed strings, indicating that the videos may have been previously used for storage or identification purposes.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/FootballAction/datasets/EuroCup2016/url_val.list\":0-4",
+            "content": "mp4/5572686cb90f440988ded956a60e555d.mp4\nmp4/f6e64ee9b13a4088b24c45c257894c1e.mp4\nmp4/259856b769044b4d8dc94076deb356bf.mp4\nmp4/1f0a0698e38d493988fe42a50f7e8723.mp4\nmp4/8cfb4e605af44055b1576c37eb0e3209.mp4"
+        }
+    ]
+}

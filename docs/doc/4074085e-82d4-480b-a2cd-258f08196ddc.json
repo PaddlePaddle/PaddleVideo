@@ -1,0 +1,10 @@
+{
+    "summary": "This code contains four functions that utilize the FFmpeg tool for handling video and audio files. \"ffmpeg_frames\" extracts frames from a given MP4 file, \"ffmpeg_pcm\" extracts audio in PCM format, \"ffmpeg_mp4\" downloads an MP4 file, and \"get_images\" lists the images inside a specified image directory.",
+    "details": [
+        {
+            "comment": "This code contains four functions that utilize the FFmpeg tool for handling video and audio files. \"ffmpeg_frames\" extracts frames from a given MP4 file, \"ffmpeg_pcm\" extracts audio in PCM format, \"ffmpeg_mp4\" downloads an MP4 file, and \"get_images\" lists the images inside a specified image directory.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/BasketballAction/predict/action_detect/utils/preprocess.py\":0-34",
+            "content": "\"\"\" extract frames and pcm\"\"\"\nimport os\nimport sys\nimport shutil\ndef ffmpeg_frames(mp4_addr, frame_out_folder, fps=5):\n    \"\"\"ffmpeg_frames\"\"\"\n    if os.path.exists(frame_out_folder):\n        shutil.rmtree(frame_out_folder)\n    os.makedirs(frame_out_folder)\n    cmd = './src/utils/ffmpeg -v 0 -i %s -r %d -q 0 %s/%s.jpg' % (mp4_addr, fps, frame_out_folder, '%08d')\n    os.system(cmd)\ndef ffmpeg_pcm(mp4_addr, save_file_name):\n    \"\"\"ffmpeg_pcm\"\"\"\n    cmd = './src/utils/ffmpeg -y  -i %s  -acodec pcm_s16le -f s16le -ac 1 -ar 16000 %s -v 0' \\\n        % (mp4_addr, save_file_name)\n    os.system(cmd)\ndef ffmpeg_mp4(mp4_url, mp4_addr):\n    \"\"\"ffmpeg_mp4\"\"\"\n    cmd = \"wget %s -O %s -q\" % (mp4_url, mp4_addr)\n    print (\"cmd = \", cmd)\n    os.system(cmd)\ndef get_images(image_path):\n    \"\"\"get_images\"\"\"\n    images = sorted(os.listdir(image_path))\n    images = images\n    images_path_list = [image_path + '/' + im for im in images]\n    return images_path_list"
+        }
+    ]
+}

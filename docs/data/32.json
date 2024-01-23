@@ -1,0 +1,541 @@
+{
+    "3200": {
+        "file_id": 268,
+        "content": "                        ## required for DataParallel, will remove in next version\n                        model._reducer.prepare_for_backward(\n                            list(model._find_varbase(outputs)))\n                    else:\n                        outputs = model.train_step(data)\n                train_output.extend(outputs['output'])\n                train_label.extend(outputs['label'])\n                avg_loss = outputs['loss']\n                scaled = scaler.scale(avg_loss)\n                scaled.backward()\n                # keep prior to 2.0 design\n                scaler.minimize(optimizer, scaled)\n                optimizer.clear_grad()\n            else:\n                if parallel:\n                    outputs = model._layers.train_step(data)\n                    ## required for DataParallel, will remove in next version\n                    model._reducer.prepare_for_backward(\n                        list(model._find_varbase(outputs)))\n                else:\n                    outputs = model.train_step(data)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/tasks/train.py:148-171"
+    },
+    "3201": {
+        "file_id": 268,
+        "content": "This code handles the model training step for video quality assessment. It uses the model's `train_step` function to calculate outputs and labels, then extends them to the train_output and train_label lists respectively. The average loss is calculated and scaled before its backward pass. Finally, it performs optimization by minimizing the scaler and clearing gradients.",
+        "type": "comment"
+    },
+    "3202": {
+        "file_id": 268,
+        "content": "                train_output.extend(outputs['output'])\n                train_label.extend(outputs['label'])\n                # 4.2 backward\n                avg_loss = outputs['loss']\n                avg_loss.backward()\n                # 4.3 minimize\n                optimizer.step()\n                optimizer.clear_grad()\n            # log record\n            record_list['lr'].update(optimizer._global_learning_rate(),\n                                     batch_size)\n            for name, value in outputs.items():\n                if name == 'output' or name == 'label':\n                    continue\n                record_list[name].update(value, batch_size)\n            record_list['batch_time'].update(time.time() - tic)\n            tic = time.time()\n            if i % cfg.get(\"log_interval\", 10) == 0:\n                ips = \"ips: {:.5f} instance/sec.\".format(\n                    batch_size / record_list[\"batch_time\"].val)\n                log_batch(record_list, i, epoch + 1, cfg.epochs, \"train\", ips)\n            # learning rate iter step",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/tasks/train.py:173-198"
+    },
+    "3203": {
+        "file_id": 268,
+        "content": "Code snippet performs backward propagation, optimizes model parameters, logs training progress and learning rate, updates metrics, and logs information at specified intervals.",
+        "type": "comment"
+    },
+    "3204": {
+        "file_id": 268,
+        "content": "            if cfg.OPTIMIZER.learning_rate.get(\"iter_step\"):\n                lr.step()\n        # learning rate epoch step\n        if not cfg.OPTIMIZER.learning_rate.get(\"iter_step\"):\n            lr.step()\n        train_PLCC, train_SROCC = Metric.accumulate_train(\n            train_output, train_label)\n        logger.info(\"train_SROCC={}\".format(train_SROCC))\n        logger.info(\"train_PLCC={}\".format(train_PLCC))\n        ips = \"ips: {:.5f} instance/sec.\".format(\n            batch_size * record_list[\"batch_time\"].count /\n            record_list[\"batch_time\"].sum)\n        log_epoch(record_list, epoch + 1, \"train\", ips)\n        eval_output = []\n        eval_label = []\n        def evaluate(best, max_SROCC, max_PLCC):\n            \"\"\"evaluate\"\"\"\n            model.eval()\n            record_list = build_rec_record(cfg.MODEL)\n            record_list.pop('lr')\n            tic = time.time()\n            for i, data in enumerate(valid_loader):\n                if parallel:\n                    outputs = model._layers.val_step(data)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/tasks/train.py:199-229"
+    },
+    "3205": {
+        "file_id": 268,
+        "content": "This code is part of a training process for a video quality assessment model. It checks if the learning rate should be updated by an iterative step, then updates it accordingly. The code calculates the train_SROCC and train_PLCC metrics to track progress, logs this information, and evaluates the model's performance on a separate validation dataset. A record of the training process is maintained to monitor batch time and other relevant statistics.",
+        "type": "comment"
+    },
+    "3206": {
+        "file_id": 268,
+        "content": "                else:\n                    outputs = model.val_step(data)\n                eval_output.extend(outputs['output'])\n                eval_label.extend(outputs['label'])\n                # log_record\n                for name, value in outputs.items():\n                    if name == 'output' or name == 'label':\n                        continue\n                    record_list[name].update(value, batch_size)\n                record_list['batch_time'].update(time.time() - tic)\n                tic = time.time()\n                if i % cfg.get(\"log_interval\", 10) == 0:\n                    ips = \"ips: {:.5f} instance/sec.\".format(\n                        batch_size / record_list[\"batch_time\"].val)\n                    log_batch(record_list, i, epoch + 1, cfg.epochs, \"val\", ips)\n            eval_PLCC, eval_SROCC = Metric.accumulate_train(\n                eval_output, eval_label)\n            logger.info(\"val_SROCC={}\".format(eval_SROCC))\n            logger.info(\"val_PLCC={}\".format(eval_PLCC))\n            if max_SROCC <= eval_SROCC and max_PLCC <= eval_PLCC:",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/tasks/train.py:230-254"
+    },
+    "3207": {
+        "file_id": 268,
+        "content": "This code is part of a model's validation step during training. It collects outputs and labels from the model, updates logging records, and logs validation metrics such as SROCC and PLCC. If these metrics are greater than the previous maximum values, it updates the max values.",
+        "type": "comment"
+    },
+    "3208": {
+        "file_id": 268,
+        "content": "                max_SROCC = eval_SROCC\n                max_PLCC = eval_PLCC\n                logger.info(\"max_SROCC={}\".format(max_SROCC))\n                logger.info(\"max_PLCC={}\".format(max_PLCC))\n                save(optimizer.state_dict(),\n                     osp.join(output_dir, model_name + \"_best.pdopt\"))\n                save(model.state_dict(),\n                     osp.join(output_dir, model_name + \"_best.pdparams\"))\n            ips = \"ips: {:.5f} instance/sec.\".format(\n                batch_size * record_list[\"batch_time\"].count /\n                record_list[\"batch_time\"].sum)\n            log_epoch(record_list, epoch + 1, \"val\", ips)\n            return best, max_SROCC, max_PLCC\n        # use precise bn to improve acc\n        if cfg.get(\"PRECISEBN\") and (epoch % cfg.PRECISEBN.preciseBN_interval\n                                     == 0 or epoch == cfg.epochs - 1):\n            do_preciseBN(\n                model, train_loader, parallel,\n                min(cfg.PRECISEBN.num_iters_preciseBN, len(train_loader)))",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/tasks/train.py:255-276"
+    },
+    "3209": {
+        "file_id": 268,
+        "content": "This code snippet is responsible for storing the best optimizer and model states, logging instance per second (ips) during validation phase, and optionally performing precise batch normalization if configuration allows. It returns the best parameters, maximum SROCC, and maximum PLCC values.",
+        "type": "comment"
+    },
+    "3210": {
+        "file_id": 268,
+        "content": "        # 5. Validation\n        if validate and (epoch % cfg.get(\"val_interval\", 1) == 0\n                         or epoch == cfg.epochs - 1):\n            with paddle.no_grad():\n                best, max_SROCC, max_PLCC = evaluate(best, max_SROCC, max_PLCC)\n        # 6. Save model\n        if epoch % cfg.get(\"save_interval\", 1) == 0 or epoch == cfg.epochs - 1:\n            save(\n                optimizer.state_dict(),\n                osp.join(output_dir,\n                         model_name + \"_epoch_{}.pdopt\".format(epoch)))\n            save(\n                model.state_dict(),\n                osp.join(output_dir,\n                         model_name + \"_epoch_{}.pdparams\".format(epoch)))\n    logger.info('training {model_name} finished')",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/tasks/train.py:278-295"
+    },
+    "3211": {
+        "file_id": 268,
+        "content": "This code block performs validation and model saving in a training process. It validates the model every 'val_interval' epochs or on the last epoch, and saves optimizer and model states every 'save_interval' epochs or on the last epoch. The logger then informs that training is finished.",
+        "type": "comment"
+    },
+    "3212": {
+        "file_id": 269,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/utils/__init__.py",
+        "type": "filepath"
+    },
+    "3213": {
+        "file_id": 269,
+        "content": "This code is a module for the PaddleVideo package that includes various utility functions and classes, such as Registry, build_utils, config, logger, record, dist_utils, save_load, and precise_bn. It also defines __all__ to include Registry and build.",
+        "type": "summary"
+    },
+    "3214": {
+        "file_id": 269,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom .registry import Registry\nfrom .build_utils import build\nfrom .config import *\nfrom .logger import setup_logger, coloring, get_logger\nfrom .record import AverageMeter, build_record, build_rec_record, log_batch, log_epoch\nfrom .dist_utils import get_dist_info, main_only\nfrom .save_load import save, load, load_ckpt, mkdir\nfrom .precise_bn import do_preciseBN\n__all__ = ['Registry', 'build']",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/__init__.py:1-25"
+    },
+    "3215": {
+        "file_id": 269,
+        "content": "This code is a module for the PaddleVideo package that includes various utility functions and classes, such as Registry, build_utils, config, logger, record, dist_utils, save_load, and precise_bn. It also defines __all__ to include Registry and build.",
+        "type": "comment"
+    },
+    "3216": {
+        "file_id": 270,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/utils/build_utils.py",
+        "type": "filepath"
+    },
+    "3217": {
+        "file_id": 270,
+        "content": "This Python function builds a module from a config dictionary, checks its validity, retrieves an object class from a registry, and returns an instance with optional parameters.",
+        "type": "summary"
+    },
+    "3218": {
+        "file_id": 270,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\ndef build(cfg, registry, key='name'):\n    \"\"\"Build a module from config dict.\n    Args:\n        cfg (dict): Config dict. It should at least contain the key.\n        registry (XXX): The registry to search the type from.\n        key (str): the key.\n    Returns:\n        obj: The constructed object.\n    \"\"\"\n    assert isinstance(cfg, dict) and key in cfg\n    cfg_copy = cfg.copy()\n    obj_type = cfg_copy.pop(key)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/build_utils.py:1-30"
+    },
+    "3219": {
+        "file_id": 270,
+        "content": "This code snippet is a Python function that builds a module from a config dictionary. It checks if the input is a dictionary and verifies if the specified key exists. Then it makes a copy of the dictionary and removes the specified key, returning the constructed object. The registry is used to search for the type of the module.",
+        "type": "comment"
+    },
+    "3220": {
+        "file_id": 270,
+        "content": "    obj_cls = registry.get(obj_type)\n    if obj_cls is None:\n        raise KeyError('{} is not in the {} registry'.format(\n                obj_type, registry.name))\n    return obj_cls(**cfg_copy)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/build_utils.py:32-36"
+    },
+    "3221": {
+        "file_id": 270,
+        "content": "The code retrieves an object class from a registry based on the provided \"obj_type\", and if not found, raises a KeyError with an informative message. It then returns an instance of the retrieved class with optional configuration parameters.",
+        "type": "comment"
+    },
+    "3222": {
+        "file_id": 271,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/utils/config.py",
+        "type": "filepath"
+    },
+    "3223": {
+        "file_id": 271,
+        "content": "This code includes the AttrDict class and functions for managing config files in PaddleVideo. These functions handle dictionary creation, config file parsing, recursive printing, and value overriding.",
+        "type": "summary"
+    },
+    "3224": {
+        "file_id": 271,
+        "content": "\"\"\"\n# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport os\nimport yaml\nfrom paddlevideo.utils.logger import coloring, get_logger, setup_logger\n__all__ = ['get_config']\nlogger = setup_logger(\"./\", name=\"paddlevideo\", level=\"INFO\")\nclass AttrDict(dict):\n    \"\"\"Attr Dict\"\"\"\n    def __getattr__(self, key):\n        return self[key]\n    def __setattr__(self, key, value):\n        if key in self.__dict__:\n            self.__dict__[key] = value\n        else:\n            self[key] = value",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/config.py:1-35"
+    },
+    "3225": {
+        "file_id": 271,
+        "content": "This code file contains the definition of a class AttrDict, which is used to handle configurations in the PaddleVideo library. It also sets up a logger for logging information related to PaddleVideo. The __all__ variable holds the list of functions/classes that are exported by this module. This file is part of PaddleVideo's utility package.",
+        "type": "comment"
+    },
+    "3226": {
+        "file_id": 271,
+        "content": "def create_attr_dict(yaml_config):\n    \"\"\"create attr dict\"\"\"\n    from ast import literal_eval\n    for key, value in yaml_config.items():\n        if type(value) is dict:\n            yaml_config[key] = value = AttrDict(value)\n        if isinstance(value, str):\n            try:\n                value = literal_eval(value)\n            except BaseException:\n                pass\n        if isinstance(value, AttrDict):\n            create_attr_dict(yaml_config[key])\n        else:\n            yaml_config[key] = value\ndef parse_config(cfg_file):\n    \"\"\"Load a config file into AttrDict\"\"\"\n    with open(cfg_file, 'r') as fopen:\n        yaml_config = AttrDict(yaml.load(fopen, Loader=yaml.SafeLoader))\n    create_attr_dict(yaml_config)\n    return yaml_config\ndef print_dict(d, delimiter=0):\n    \"\"\"\n    Recursively visualize a dict and\n    indenting acrrording by the relationship of keys.\n    \"\"\"\n    placeholder = \"-\" * 60\n    for k, v in sorted(d.items()):\n        if isinstance(v, dict):\n            logger.info(\"{}{} : \".format(delimiter * \" \", coloring(k,",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/config.py:38-71"
+    },
+    "3227": {
+        "file_id": 271,
+        "content": "This code defines three functions: \"create_attr_dict\", \"parse_config\", and \"print_dict\". The \"create_attr_dict\" function converts specific values in a dictionary to AttrDict objects. The \"parse_config\" function loads a configuration file into an AttrDict object after applying the create_attr_dict function to it. Finally, the \"print_dict\" function recursively prints out the contents of a dictionary, indented based on their relationships.",
+        "type": "comment"
+    },
+    "3228": {
+        "file_id": 271,
+        "content": "                                                                   \"HEADER\")))\n            print_dict(v, delimiter + 4)\n        elif isinstance(v, list) and len(v) >= 1 and isinstance(v[0], dict):\n            logger.info(\"{}{} : \".format(delimiter * \" \",\n                                         coloring(str(k), \"HEADER\")))\n            for value in v:\n                print_dict(value, delimiter + 4)\n        else:\n            logger.info(\"{}{} : {}\".format(delimiter * \" \",\n                                           coloring(k, \"HEADER\"),\n                                           coloring(v, \"OKGREEN\")))\n        if k.isupper():\n            logger.info(placeholder)\ndef print_config(config):\n    \"\"\"\n    visualize configs\n    Arguments:\n        config: configs\n    \"\"\"\n    print_dict(config)\ndef check_config(config):\n    \"\"\"\n    Check config\n    \"\"\"\n    pass\ndef override(dl, ks, v):\n    \"\"\"\n    Recursively replace dict of list\n    Args:\n        dl(dict or list): dict or list to be replaced\n        ks(list): list of keys\n        v(str): value to be replaced",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/config.py:72-110"
+    },
+    "3229": {
+        "file_id": 271,
+        "content": "This code defines functions to print and check config files. The \"print_config\" function visualizes the config file by printing its content in a structured format, while the \"check_config\" function is currently a placeholder with no implementation. The \"override\" function allows recursive replacement of values within a dictionary or list.",
+        "type": "comment"
+    },
+    "3230": {
+        "file_id": 271,
+        "content": "    \"\"\"\n    def str2num(v):\n        \"\"\"str2num\"\"\"\n        try:\n            return eval(v)\n        except Exception:\n            return v\n    assert isinstance(dl, (list, dict)), (\"{} should be a list or a dict\")\n    assert len(ks) > 0, ('lenght of keys should larger than 0')\n    if isinstance(dl, list):\n        k = str2num(ks[0])\n        if len(ks) == 1:\n            assert k < len(dl), ('index({}) out of range({})'.format(k, dl))\n            dl[k] = str2num(v)\n        else:\n            override(dl[k], ks[1:], v)\n    else:\n        if len(ks) == 1:\n            #assert ks[0] in dl, ('{} is not exist in {}'.format(ks[0], dl))\n            if not ks[0] in dl:\n                logger.warning('A new filed ({}, {}) detected!'.format(ks[0], dl))\n            dl[ks[0]] = str2num(v)\n        else:\n            assert ks[0] in dl, (\n                '({}) doesn\\'t exist in {}, a new dict field is invalid'.format(\n                    ks[0], dl))\n            override(dl[ks[0]], ks[1:], v)\ndef override_config(config, options=None):\n    \"\"\"",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/config.py:111-142"
+    },
+    "3231": {
+        "file_id": 271,
+        "content": "This code defines a function `override_config` which takes in a config and optionally an options parameter. It checks if the config is either a list or dictionary, and ensures that there are keys in the config. If the config is a list, it uses the `str2num` function to convert the first key into a number and then uses this index to set the corresponding value. If there's only one key, it checks if the index is within range before setting the value. If there are multiple keys, it calls the `override` function with the first key, remaining keys, and value. If the config is a dictionary, it checks if the first key exists in the dictionary. If it doesn't, it logs a warning about a new field being detected. It then sets the value using the first key or calls `override` for subsequent keys.",
+        "type": "comment"
+    },
+    "3232": {
+        "file_id": 271,
+        "content": "    Recursively override the config\n    Args:\n        config(dict): dict to be replaced\n        options(list): list of pairs(key0.key1.idx.key2=value)\n            such as: [\n                epochs=20',\n                'PIPELINE.train.transform.1.ResizeImage.resize_short=300'\n            ]\n    Returns:\n        config(dict): replaced config\n    \"\"\"\n    if options is not None:\n        for opt in options:\n            assert isinstance(opt,\n                              str), (\"option({}) should be a str\".format(opt))\n            assert \"=\" in opt, (\n                \"option({}) should contain a =\"\n                \"to distinguish between key and value\".format(opt))\n            pair = opt.split('=')\n            assert len(pair) == 2, (\"there can be only a = in the option\")\n            key, value = pair\n            keys = key.split('.')\n            override(config, keys, value)\n    return config\ndef get_config(fname, overrides=None, show=True):\n    \"\"\"\n    Read config from file\n    \"\"\"\n    assert os.path.exists(fname), ('config file({}) is not exist'.format(fname))",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/config.py:143-174"
+    },
+    "3233": {
+        "file_id": 271,
+        "content": "This code defines a function that recursively overrides the config with given options. It takes a dictionary (config) and a list of key-value pairs (options) as arguments, and returns the updated config after overriding. The function checks if the options are provided and in the correct format. If so, it splits the key-value pair, extracts the keys and values, and recursively overrides the config with these values. Finally, it returns the updated config. The code also includes a separate function that reads the config from a file and has optional parameters for overrides and displaying information.",
+        "type": "comment"
+    },
+    "3234": {
+        "file_id": 271,
+        "content": "    config = parse_config(fname)\n    override_config(config, overrides)\n    if show:\n        print_config(config)\n    check_config(config)\n    return config",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/config.py:175-180"
+    },
+    "3235": {
+        "file_id": 271,
+        "content": "This function parses a configuration file, applies any overrides, displays the config if requested, and checks its validity before returning it.",
+        "type": "comment"
+    },
+    "3236": {
+        "file_id": 272,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/utils/dist_utils.py",
+        "type": "filepath"
+    },
+    "3237": {
+        "file_id": 272,
+        "content": "This code includes utility functions for managing distributed computation in PaddleVideo's Video Quality Assessment application, providing current rank and world size info, and a decorator to limit function execution to the main process.",
+        "type": "summary"
+    },
+    "3238": {
+        "file_id": 272,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport functools\nimport paddle\nimport paddle.distributed as dist\ndef get_dist_info():\n    \"\"\"get_dist_info\"\"\"\n    world_size = dist.get_world_size()\n    rank = dist.get_rank()\n    return rank, world_size\ndef main_only(func):\n    \"\"\"main_only\"\"\"\n    @functools.wraps(func)\n    def wrapper(*args, **kwargs):\n        \"\"\"wrapper\"\"\"\n        rank, _ = get_dist_info()\n        if rank == 0:\n            return func(*args, **kwargs)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/dist_utils.py:1-35"
+    },
+    "3239": {
+        "file_id": 272,
+        "content": "This code provides utility functions for handling distributed computation in PaddleVideo's Video Quality Assessment application. The `get_dist_info()` function returns the current rank and world size, while `main_only(func)` is a decorator that ensures a function only runs on the main process (rank 0).",
+        "type": "comment"
+    },
+    "3240": {
+        "file_id": 272,
+        "content": "    return wrapper",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/dist_utils.py:36-36"
+    },
+    "3241": {
+        "file_id": 272,
+        "content": "This function returns the modified or wrapped object, which can be a tensor, model, or other data structure.",
+        "type": "comment"
+    },
+    "3242": {
+        "file_id": 273,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/utils/logger.py",
+        "type": "filepath"
+    },
+    "3243": {
+        "file_id": 273,
+        "content": "The code provides a logger class for PaddleVideo's Video Quality Assessment app, enabling logging for distributed apps with rank-based output to file or console. It initializes loggers and disables log event propagation when verbosity level is set to \"DEBUG\".",
+        "type": "summary"
+    },
+    "3244": {
+        "file_id": 273,
+        "content": "\"\"\"\n#   Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport logging\nimport os\nimport sys\nimport datetime\nfrom paddle.distributed import ParallelEnv\nColor = {\n    'RED': '\\033[31m',\n    'HEADER': '\\033[35m',  # deep purple\n    'PURPLE': '\\033[95m',  # purple\n    'OKBLUE': '\\033[94m',\n    'OKGREEN': '\\033[92m',\n    'WARNING': '\\033[93m',\n    'FAIL': '\\033[91m',\n    'ENDC': '\\033[0m'\n}\ndef coloring(message, color=\"OKGREEN\"):\n    \"\"\"coloring\"\"\"\n    assert color in Color.keys()",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/logger.py:1-40"
+    },
+    "3245": {
+        "file_id": 273,
+        "content": "This code snippet is from PaddleVideo's Video Quality Assessment application, and it contains a logger class for logging messages. The logger imports necessary modules like logging, os, sys, datetime, and ParallelEnv, along with defining color codes and a function for colored output.",
+        "type": "comment"
+    },
+    "3246": {
+        "file_id": 273,
+        "content": "    if os.environ.get('COLORING', True):\n        return Color[color] + str(message) + Color[\"ENDC\"]\n    else:\n        return message\nlogger_initialized = []\ndef setup_logger(output=None, name=\"paddlevideo\", level=\"INFO\"):\n    \"\"\"\n    Initialize the paddlevideo logger and set its verbosity level to \"INFO\".\n    Args:\n        output (str): a file name or a directory to save log. If None, will not save log file.\n            If ends with \".txt\" or \".log\", assumed to be a file name.\n            Otherwise, logs will be saved to `output/log.txt`.\n        name (str): the root module name of this logger\n    Returns:\n        logging.Logger: a logger\n    \"\"\"\n    def time_zone(sec, fmt):\n        real_time = datetime.datetime.now()\n        return real_time.timetuple()\n    logging.Formatter.converter = time_zone\n    logger = logging.getLogger(name)\n    if level == \"INFO\":\n        logger.setLevel(logging.INFO)\n    elif level==\"DEBUG\":\n        logger.setLevel(logging.DEBUG)\n    logger.propagate = False\n    if level == \"DEBUG\":\n        plain_formatter = logging.Formatter(",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/logger.py:41-74"
+    },
+    "3247": {
+        "file_id": 273,
+        "content": "Function `setup_logger` initializes the paddlevideo logger and sets its verbosity level to \"INFO\". It takes optional arguments for output file name or directory, and root module name. If the verbosity level is set to \"DEBUG\", the logger will have a lower threshold for logging messages. The function also disables propagation of log events to the root logger.",
+        "type": "comment"
+    },
+    "3248": {
+        "file_id": 273,
+        "content": "            \"[%(asctime)s] %(name)s %(levelname)s: %(message)s\",\n            datefmt=\"%m/%d %H:%M:%S\")\n    else:\n        plain_formatter = logging.Formatter(\n            \"[%(asctime)s] %(message)s\",\n            datefmt=\"%m/%d %H:%M:%S\")\n    # stdout logging: master only\n    local_rank = ParallelEnv().local_rank\n    if local_rank == 0:\n        ch = logging.StreamHandler(stream=sys.stdout)\n        ch.setLevel(logging.DEBUG)\n        formatter = plain_formatter\n        ch.setFormatter(formatter)\n        logger.addHandler(ch)\n    # file logging: all workers\n    if output is not None:\n        if output.endswith(\".txt\") or output.endswith(\".log\"):\n            filename = output\n        else:\n            filename = os.path.join(output, \".log.txt\")\n        if local_rank > 0:\n            filename = filename + \".rank{}\".format(local_rank)\n        # PathManager.mkdirs(os.path.dirname(filename))\n        os.makedirs(os.path.dirname(filename), exist_ok=True)\n        # fh = logging.StreamHandler(_cached_log_stream(filename)\n        fh = logging.FileHandler(filename, mode='a')",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/logger.py:75-103"
+    },
+    "3249": {
+        "file_id": 273,
+        "content": "This code sets up logging configuration for a distributed application. It uses a logger to handle log messages, and based on the local rank of each process, it determines whether to output logs to standard out, standard err, or a file. If no output is provided, it defaults to a \".log.txt\" file in the specified directory. The log files for different ranks are distinguished by appending the rank number. If the directory doesn't exist, it creates one before writing the logs.",
+        "type": "comment"
+    },
+    "3250": {
+        "file_id": 273,
+        "content": "        fh.setLevel(logging.DEBUG)\n        fh.setFormatter(plain_formatter)\n        logger.addHandler(fh)\n    logger_initialized.append(name)\n    return logger\ndef get_logger(name, output=None):\n    \"\"\"get logger\"\"\"\n    logger = logging.getLogger(name)\n    if name in logger_initialized:\n        return logger\n    return setup_logger(name=name, output=name)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/logger.py:104-117"
+    },
+    "3251": {
+        "file_id": 273,
+        "content": "This function `get_logger` sets up a logger with the given name. If the logger has already been initialized, it simply returns the existing logger. Otherwise, it calls `setup_logger` to initialize the logger with the given name and optional output. The logger is configured to handle debug level messages using plain formatter and this configuration is appended to the list of initialized loggers.",
+        "type": "comment"
+    },
+    "3252": {
+        "file_id": 274,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/utils/precise_bn.py",
+        "type": "filepath"
+    },
+    "3253": {
+        "file_id": 274,
+        "content": "This code updates batch normalization in PaddleVideo library, improving accuracy by using true mean and variance for validation during training.",
+        "type": "summary"
+    },
+    "3254": {
+        "file_id": 274,
+        "content": "\"\"\"\n# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport paddle\nimport itertools\nfrom paddlevideo.utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n\"\"\"\nImplement precise bn, which is useful for improving accuracy.\n\"\"\"\ndef do_preciseBN(model, data_loader, parallel, num_iters=200):\n    \"\"\"\n    Recompute and update the batch norm stats to make them more precise. During\n    training both BN stats and the weight are changing after every iteration, so\n    the running average can not precisely reflect the actual stats of the",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/precise_bn.py:1-31"
+    },
+    "3255": {
+        "file_id": 274,
+        "content": "This code snippet is part of the PaddleVideo library and aims to implement a precise batch normalization method. The function \"do_preciseBN\" takes in a model, data loader, parallel flag, and number of iterations as parameters. It updates the batch norm stats more precisely by recomputing them after every iteration during training. This improves accuracy by better reflecting the actual stats of the dataset.",
+        "type": "comment"
+    },
+    "3256": {
+        "file_id": 274,
+        "content": "    current model.\n    In this function, the BN stats are recomputed with fixed weights, to make\n    the running average more precise. Specifically, it computes the true average\n    of per-batch mean/variance instead of the running average.\n    This is useful to improve validation accuracy.\n    Args:\n        model: the model whose bn stats will be recomputed\n        data_loader: an iterator. Produce data as input to the model\n        num_iters: number of iterations to compute the stats.\n    Return:\n        the model with precise mean and variance in bn layers.\n    \"\"\"\n    bn_layers_list = [\n        m for m in model.sublayers()\n        if any((isinstance(m, bn_type)\n                for bn_type in (paddle.nn.BatchNorm1D, paddle.nn.BatchNorm2D,\n                                paddle.nn.BatchNorm3D))) and m.training\n    ]\n    if len(bn_layers_list) == 0:\n        return\n    # moving_mean=moving_mean*momentum+batch_mean*(1.−momentum)\n    # we set momentum=0. to get the true mean and variance during forward\n    momentum_actual = [bn._momentum for bn in bn_layers_list]",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/precise_bn.py:32-55"
+    },
+    "3257": {
+        "file_id": 274,
+        "content": "The function precisely computes BN stats with fixed weights for a model using a data loader and a specified number of iterations. It replaces running averages in BN layers with true mean and variance to improve validation accuracy.",
+        "type": "comment"
+    },
+    "3258": {
+        "file_id": 274,
+        "content": "    for bn in bn_layers_list:\n        bn._momentum = 0.\n    running_mean = [paddle.zeros_like(bn._mean)\n                    for bn in bn_layers_list]  #pre-ignore\n    running_var = [paddle.zeros_like(bn._variance) for bn in bn_layers_list]\n    ind = -1\n    for ind, data in enumerate(itertools.islice(data_loader, num_iters)):\n        logger.info(\"doing precise BN {} / {}...\".format(ind + 1, num_iters))\n        if parallel:\n            model._layers.train_step(data)\n        else:\n            model.train_step(data)\n        for i, bn in enumerate(bn_layers_list):\n            # Accumulates the bn stats.\n            running_mean[i] += (bn._mean - running_mean[i]) / (ind + 1)\n            running_var[i] += (bn._variance - running_var[i]) / (ind + 1)\n    assert ind == num_iters - 1, (\n        \"update_bn_stats is meant to run for {} iterations, but the dataloader stops at {} iterations.\"\n        .format(num_iters, ind))\n    # Sets the precise bn stats.\n    for i, bn in enumerate(bn_layers_list):\n        bn._mean.set_value(running_mean[i])",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/precise_bn.py:56-82"
+    },
+    "3259": {
+        "file_id": 274,
+        "content": "This code initializes zeroed variables and then performs precise batch normalization (BN) by accumulating the BN statistics for a specified number of iterations. It updates the mean and variance values for each Batch Normalization layer in the model, ensuring accurate and precise normalization during training.",
+        "type": "comment"
+    },
+    "3260": {
+        "file_id": 274,
+        "content": "        bn._variance.set_value(running_var[i])\n        bn._momentum = momentum_actual[i]",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/precise_bn.py:83-84"
+    },
+    "3261": {
+        "file_id": 274,
+        "content": "These lines update the batch normalization layer's variance and momentum values with the corresponding values from the running average array. This helps maintain the normal distribution of activation values in the neural network, improving performance.",
+        "type": "comment"
+    },
+    "3262": {
+        "file_id": 275,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/utils/record.py",
+        "type": "filepath"
+    },
+    "3263": {
+        "file_id": 275,
+        "content": "This code from PaddleVideo's VideoQualityAssessment module builds a record list for tracking metrics during training, appends metric names and AverageMeter instances for various frameworks and models, formats and logs epoch, mode, metric average, and image processing speed information with color-coded visual distinction.",
+        "type": "summary"
+    },
+    "3264": {
+        "file_id": 275,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nfrom collections import OrderedDict\nfrom .logger import get_logger, coloring\nlogger = get_logger(\"paddlevideo\")\n__all__ = ['AverageMeter', 'build_record', 'build_rec_record', 'log_batch', 'log_epoch']\ndef build_record(cfg):\n    framework_type = cfg.get('framework')\n    record_list = [\n        (\"loss\", AverageMeter('loss', '7.5f')),\n        (\"lr\", AverageMeter('lr', 'f', need_avg=False)),\n    ]\n    if 'Recognizer1D' in cfg.framework:  #TODO: required specify str in framework",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/record.py:1-29"
+    },
+    "3265": {
+        "file_id": 275,
+        "content": "This code is from the PaddleVideo library's VideoQualityAssessment module. It imports necessary classes and functions, defines logger variables, and provides a function to build a record list for loss and learning rate metrics. The framework type is specified, and if Recognizer1D is part of the specified framework, additional steps may be required.",
+        "type": "comment"
+    },
+    "3266": {
+        "file_id": 275,
+        "content": "        record_list.append((\"hit_at_one\", AverageMeter(\"hit_at_one\", '.5f')))\n        record_list.append((\"perr\", AverageMeter(\"perr\", '.5f')))\n        record_list.append((\"gap\", AverageMeter(\"gap\", '.5f')))\n    elif 'Recognizer' in cfg.framework:\n        record_list.append((\"top1\", AverageMeter(\"top1\", '.5f')))\n        record_list.append((\"top5\", AverageMeter(\"top5\", '.5f')))\n    record_list.append((\"batch_time\", AverageMeter('elapse', '.3f')))\n    record_list.append((\"reader_time\", AverageMeter('reader', '.3f')))\n    record_list = OrderedDict(record_list)\n    return record_list\ndef build_rec_record(cfg):\n    \"\"\"build rec record\"\"\"\n    framework_type = cfg.get('framework')\n    record_list = [\n        (\"loss\", AverageMeter('loss', '7.5f')),\n        (\"lr\", AverageMeter('lr', 'f', need_avg=False)),\n    ]\n    if 'Recognizer1D' in cfg.framework:  #TODO: required specify str in framework\n        record_list.append((\"hit_at_one\", AverageMeter(\"hit_at_one\", '.5f')))\n        record_list.append((\"perr\", AverageMeter(\"perr\", '.5f')))",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/record.py:30-51"
+    },
+    "3267": {
+        "file_id": 275,
+        "content": "This code is building a record list for tracking metrics during the training process. It appends various metric names to the record list along with their corresponding AverageMeter instances for different frameworks and models. The AverageMeter keeps track of the average value over time, and each meter has its format specifier for displaying the values. The code also includes a function build_rec_record to create the record list based on the given configuration (cfg).",
+        "type": "comment"
+    },
+    "3268": {
+        "file_id": 275,
+        "content": "        record_list.append((\"gap\", AverageMeter(\"gap\", '.5f')))\n    record_list.append((\"batch_time\", AverageMeter('elapse', '.3f')))\n    record_list.append((\"reader_time\", AverageMeter('reader', '.3f')))\n    record_list = OrderedDict(record_list)\n    return record_list\nclass AverageMeter(object):\n    \"\"\"\n    Computes and stores the average and current value\n    \"\"\"\n    def __init__(self, name='', fmt='f', need_avg=True):\n        self.name = name\n        self.fmt = fmt\n        self.need_avg = need_avg\n        self.reset()\n    def reset(self):\n        \"\"\" reset \"\"\"\n        self.val = 0\n        self.avg = 0\n        self.sum = 0\n        self.count = 0\n    def update(self, val, n=1):\n        \"\"\" update \"\"\"\n        if isinstance(val, paddle.Tensor):\n            val = float(val)\n        self.val = val\n        self.sum += val * n\n        self.count += n\n        self.avg = self.sum / self.count\n    @property\n    def total(self):\n        return '{self.name}_sum: {self.sum:{self.fmt}}'.format(self=self)\n    @property\n    def total_minute(self):",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/record.py:52-90"
+    },
+    "3269": {
+        "file_id": 275,
+        "content": "This code defines a function `record_list` and a class `AverageMeter`. The function creates a list of record names and their corresponding AverageMeter objects, then converts the list to an OrderedDict. The AverageMeter class computes and stores average values, resets upon initialization, updates with new values, and provides properties for displaying total sum and total sum in minutes.",
+        "type": "comment"
+    },
+    "3270": {
+        "file_id": 275,
+        "content": "        return '{self.name}_sum: {s:{self.fmt}} min'.format(s=self.sum / 60,\n                                                            self=self)\n    @property\n    def mean(self):\n        return '{self.name}_avg: {self.avg:{self.fmt}}'.format(\n            self=self) if self.need_avg else ''\n    @property\n    def value(self):\n        return '{self.name}: {self.val:{self.fmt}}'.format(self=self)\ndef log_batch(metric_list, batch_id, epoch_id, total_epoch, mode, ips):\n    metric_str = ' '.join([str(m.value) for m in metric_list.values()])\n    epoch_str = \"epoch:[{:>3d}/{:<3d}]\".format(epoch_id, total_epoch)\n    step_str = \"{:s} step:{:<4d}\".format(mode, batch_id)\n    logger.info(\"{:s} {:s} {:s}s {}\".format(\n        coloring(epoch_str, \"HEADER\") if batch_id == 0 else epoch_str,\n        coloring(step_str, \"PURPLE\"), coloring(metric_str, 'OKGREEN'), ips))\ndef log_epoch(metric_list, epoch, mode, ips):\n    metric_avg = ' '.join([str(m.mean) for m in metric_list.values()] +\n                          [metric_list['batch_time'].total])",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/record.py:91-115"
+    },
+    "3271": {
+        "file_id": 275,
+        "content": "The code provides functions to log batch and epoch information for a video quality assessment task. The `log_batch` function takes in metric list, batch ID, epoch ID, total epochs, mode, and ips as input and logs the metrics, current epoch/total epochs, and step details. The `log_epoch` function calculates the mean of the metrics and logs the mean values along with the total batch time for an epoch.",
+        "type": "comment"
+    },
+    "3272": {
+        "file_id": 275,
+        "content": "    end_epoch_str = \"END epoch:{:<3d}\".format(epoch)\n    logger.info(\"{:s} {:s} {:s}s {}\".format(coloring(end_epoch_str, \"RED\"),\n                                            coloring(mode, \"PURPLE\"),\n                                            coloring(metric_avg, \"OKGREEN\"),\n                                            ips))",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/record.py:117-122"
+    },
+    "3273": {
+        "file_id": 275,
+        "content": "This code snippet is formatting and logging information related to an epoch, mode, metric average, and image processing speed. It uses the \"coloring\" function to color certain parts of the log text (RED, PURPLE, OKGREEN) for better visual distinction. The logger then logs this information with time stamp.",
+        "type": "comment"
+    },
+    "3274": {
+        "file_id": 276,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/utils/registry.py",
+        "type": "filepath"
+    },
+    "3275": {
+        "file_id": 276,
+        "content": "The Registry class supports module customization, allowing users to register objects and retrieve them via unique names in a name-to-object mapping system.",
+        "type": "summary"
+    },
+    "3276": {
+        "file_id": 276,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nclass Registry(object):\n    \"\"\"\n    The registry that provides name -> object mapping, to support third-party users' custom modules.\n    To register an object:\n    .. code-block:: python\n        BACKBONES = Registry('backbone')\n        @BACKBONES.register()\n        class ResNet:\n            pass\n    Or:\n    .. code-block:: python\n        BACKBONES = Registry('backbone')\n        class ResNet:\n            pass\n        BACKBONES.register(ResNet)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/registry.py:1-35"
+    },
+    "3277": {
+        "file_id": 276,
+        "content": "The Registry class provides a name-to-object mapping, enabling third-party users to customize modules. To register an object, use @BACKBONES.register() or BACKBONES.register(ResNet).",
+        "type": "comment"
+    },
+    "3278": {
+        "file_id": 276,
+        "content": "    Usage: To build a module.\n    .. code-block:: python\n        backbone_name = \"ResNet\"\n        b = BACKBONES.get(backbone_name)()\n    \"\"\"\n    def __init__(self, name):\n        \"\"\"\n        Args:\n            name (str): the name of this registry\n        \"\"\"\n        self._name = name\n        self._obj_map = {}\n    def __contains__(self, key):\n        return self._obj_map.get(key) is not None\n    def _do_register(self, name, obj):\n        \"\"\"do register\"\"\"\n        assert (\n            name not in self._obj_map\n        ), \"An object named '{}' was already registered in '{}' registry!\".format(\n            name, self._name)\n        self._obj_map[name] = obj\n    def register(self, obj=None, name=None):\n        \"\"\"\n        Register the given object under the the name `obj.__name__`.\n        Can be used as either a decorator or not. See docstring of this class for usage.\n        \"\"\"\n        if obj is None:\n            # used as a decorator\n            def deco(func_or_class, name=name):\n                if name is None:\n                    name = func_or_class.__name__",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/registry.py:37-72"
+    },
+    "3279": {
+        "file_id": 276,
+        "content": "The code provides a registry class for building modules based on their names. It allows registration of objects with unique names, and can be used as a decorator or without. The usage example demonstrates how to get a backbone module using its name from the registered objects map.",
+        "type": "comment"
+    },
+    "3280": {
+        "file_id": 276,
+        "content": "                self._do_register(name, func_or_class)\n                return func_or_class\n            return deco\n        # used as a function call\n        if name is None:\n            name = obj.__name__\n        self._do_register(name, obj)\n    def get(self, name):\n        \"\"\"Get the registry record.\n        Args:\n            name (str): The class name.\n        Returns:\n            ret: The class.\n        \"\"\"\n        ret = self._obj_map.get(name)\n        if ret is None:\n            raise KeyError(\n                \"No object named '{}' found in '{}' registry!\".format(\n                    name, self._name))\n        return ret",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/registry.py:73-98"
+    },
+    "3281": {
+        "file_id": 276,
+        "content": "This code registers and retrieves objects in a registry. It allows registering functions or classes with optional names, and can retrieve the registered object by its name. The `get` function returns the class if found in the registry, otherwise raises KeyError.",
+        "type": "comment"
+    },
+    "3282": {
+        "file_id": 277,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/utils/save_load.py",
+        "type": "filepath"
+    },
+    "3283": {
+        "file_id": 277,
+        "content": "This code loads weights from a checkpoint file into a model, defines functions for saving, loading, and creating directories, using Paddle's save and load methods.",
+        "type": "summary"
+    },
+    "3284": {
+        "file_id": 277,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport os\nimport os.path as osp\nimport time\nimport pickle\nfrom tqdm import tqdm\nimport paddle\nfrom paddlevideo.utils import get_logger\nfrom paddlevideo.utils import main_only\n#XXX(shipping): maybe need load N times because of different cards have different params.\n@main_only\ndef load_ckpt(model, weight_path):\n    \"\"\"\n    load_ckpt\n    \"\"\"\n    #model.set_state_dict(state_dict)\n    if not osp.isfile(weight_path):",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/save_load.py:1-37"
+    },
+    "3285": {
+        "file_id": 277,
+        "content": "This code snippet is part of PaddleVideo's Video Quality Assessment application. It loads a checkpoint file into the provided model. If the weight path file does not exist, it will not be loaded, and the method returns immediately without any action. The function uses the \"os\" and \"tqdm\" libraries for file operations and progress bars, respectively. It also utilizes Paddle's \"set_state_dict\" method to load the model's parameters from the checkpoint file.",
+        "type": "comment"
+    },
+    "3286": {
+        "file_id": 277,
+        "content": "        raise IOError('{weight_path} is not a checkpoint file')\n    #state_dicts = load(weight_path)\n    logger = get_logger(\"paddlevideo\")\n    state_dicts = paddle.load(weight_path)\n    tmp = {}\n    total_len = len(model.state_dict())\n    localkeyname = [i for i in state_dicts]\n    with tqdm(total=total_len,\n              position=1,\n              bar_format='{desc}',\n              desc=\"Loading weights\") as desc:\n        #for item in tqdm(model.state_dict(), total=total_len, position=0):\n        for i, item in enumerate(\n                tqdm(model.state_dict(), total=total_len, position=0)):\n            name = item\n            desc.set_description('Loading %s' % name)\n            print(\"model name is {}, correspoding local name is {}\".format(\n                name, localkeyname[i]))\n            #tmp[name] = state_dicts[name]\n            tmp[name] = state_dicts[localkeyname[i]]\n            time.sleep(0.01)\n        ret_str = \"loading {:<20d} weights completed.\".format(\n            len(model.state_dict()))\n        desc.set_description(ret_str)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/save_load.py:38-63"
+    },
+    "3287": {
+        "file_id": 277,
+        "content": "This code snippet is attempting to load weights from a checkpoint file into a model. It first raises an error if the provided path does not correspond to a valid checkpoint file. The logger variable is assigned for logging purposes. Then, it uses Paddle's paddle.load() function to load the state dictionaries from the specified weight_path.\n\nThe code then initializes an empty dictionary 'tmp' and calculates the total length of the model's state dictionary. It creates a local key name list by iterating through state_dicts. \n\nNext, it uses tqdm to create a progress bar for displaying the loading process. For each item in the model's state dictionary, it checks if it exists in the loaded state dictionaries and assigns the corresponding value to 'tmp'. It also updates the description of the progress bar with the current name being loaded. Finally, upon completion, it sets a final description indicating that all weights have been loaded successfully.",
+        "type": "comment"
+    },
+    "3288": {
+        "file_id": 277,
+        "content": "        model.set_state_dict(tmp)\ndef mkdir(dir):\n    \"\"\"mkdir\"\"\"\n    if not os.path.exists(dir):\n        # avoid error when train with multiple gpus\n        try:\n            os.makedirs(dir)\n        except:\n            pass\n@main_only\ndef save(obj, path):\n    \"\"\"save\"\"\"\n    paddle.save(obj, path)\ndef load(file_name):\n    \"\"\"load\"\"\"\n    if not osp.isfile(file_name):\n        raise IOError('{file_name} not exist')\n    return paddle.load(file_name)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/utils/save_load.py:64-87"
+    },
+    "3289": {
+        "file_id": 277,
+        "content": "This code defines functions for saving, loading, and creating directories. The \"save\" function uses Paddle's save method to store an object at a specified path. The \"load\" function checks if the file exists before returning its contents using Paddle's load method. Lastly, the \"mkdir\" function creates a directory at the specified location, handling errors that may occur when training with multiple GPUs.",
+        "type": "comment"
+    },
+    "3290": {
+        "file_id": 278,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/version.py",
+        "type": "filepath"
+    },
+    "3291": {
+        "file_id": 278,
+        "content": "This code snippet contains the version information for PaddleVideo library. The version is set to \"0.0.1\" and it includes a copyright notice, license details, and specifies that this file should be used only in compliance with the Apache License, Version 2.0.",
+        "type": "summary"
+    },
+    "3292": {
+        "file_id": 278,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\n__all__ = [\"paddlevideo_version\"]\npaddlevideo_version = \"0.0.1\"",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/version.py:1-18"
+    },
+    "3293": {
+        "file_id": 278,
+        "content": "This code snippet contains the version information for PaddleVideo library. The version is set to \"0.0.1\" and it includes a copyright notice, license details, and specifies that this file should be used only in compliance with the Apache License, Version 2.0.",
+        "type": "comment"
+    },
+    "3294": {
+        "file_id": 279,
+        "content": "/applications/VideoQualityAssessment/run.sh",
+        "type": "filepath"
+    },
+    "3295": {
+        "file_id": 279,
+        "content": "This is a shell script for PaddlePaddle, setting CUDA_VISIBLE_DEVICES and executing commands like training, testing, and exporting models using tsm architecture. It also mentions running predict.py on example.avi with model files and disabling benchmarking for \"example\" model with 8 segments.",
+        "type": "summary"
+    },
+    "3296": {
+        "file_id": 279,
+        "content": "export CUDA_VISIBLE_DEVICES=0\n# run  training\npython3.7 -B -m paddle.distributed.launch --gpus=\"0\"  --log_dir=log_pptsm  main.py --amp  --validate -c configs/recognition/tsm/pptsm_regression.yaml\n# run testing\n#python3.7 -m paddle.distributed.launch --gpus=\"0,1,2,3\" --log_dir=log_pptsm main.py -c configs/recognition/tsm/pptsm_regression.yaml --test --weights=output/model_name/ppTSM_best.pdparams\n#finetune\n#python3 -m paddle.distributed.launch --gpus=\"0,1,2,3\" main.py --amp -c ./configs/recognition/tsm/pptsm_regression.yaml --validate --weights=./output/model_name/ppTSM_best.pdparams\n#resume\n#python3 -m paddle.distributed.launch --gpus=\"0,1,2,3\" main.py --amp -c ./configs/recognition/tsm/pptsm_regression.yaml --validate -o resume_epoch=2\n# export_models script\n# just use `example` as example, please replace to real name.\n#python3.7 tools/export_model.py -c configs/example.yaml -p output/model_name/ppTSM_best.pdparams -o ./inference\n# predict script\n# just use `example` as example, please replace to real name.",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/run.sh:1-19"
+    },
+    "3297": {
+        "file_id": 279,
+        "content": "The code is a shell script that sets the CUDA_VISIBLE_DEVICES environment variable and executes PaddlePaddle commands for training, testing, finetuning, resuming and exporting/predicting models. The commands use specific configurations (yaml files) for recognition tasks using tsm architecture. It mentions the file paths where necessary, such as the log directory, model weights, and output directories.",
+        "type": "comment"
+    },
+    "3298": {
+        "file_id": 279,
+        "content": "#python3.7 tools/predict.py -v example.avi --model_file \"./inference/example.pdmodel\" --params_file \"./inference/example.pdiparams\" --enable_benchmark=False --model=\"example\" --num_seg=8",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/run.sh:20-20"
+    },
+    "3299": {
+        "file_id": 279,
+        "content": "Running predict.py script on example.avi with specified model files and disabling benchmarking for the \"example\" model with 8 segments.",
+        "type": "comment"
+    }
+}

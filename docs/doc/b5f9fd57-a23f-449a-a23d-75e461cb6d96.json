@@ -1,0 +1,20 @@
+{
+    "summary": "This code provides a list of papers on action recognition and video classification, including TSN, SlowFast Networks, X3D, ECO, 3D ResNet, etc. The paper \"Action Recognition with Trajectory-Pooled Deep-Convolutional Descriptors\" presents an efficient method for recognizing actions from video sequences using deep convolutional descriptors and trajectory pooling.",
+    "details": [
+        {
+            "comment": "This code contains a list of useful papers related to action recognition and video classification, including TSN, TSM, SlowFast Networks, Non-local Neural Networks, X3D, ECO, 3D ResNet, TPN, EvaNet, RepFlow, MARS, StNet, and Attention Cluster.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/english_documents/tutorials/Action Recognition Papers\":0-15",
+            "content": "Useful Papers on Action Recognition and Video Classification.\nTSN: Temporal Segment Networks: Towards Good Practices for Deep Action Recognition, ECCV 2016\nTSM: Temporal Shift Module for Efficient Video Understanding, ICCV 2019\nSlowFast Networks for Video Recognition, ICCV 2019\nNon-local Neural Networks, CVPR 2018\nA Multigrid Method for Efficiently Training Video Models, CVPR2020\nX3D: Progressive Network Expansion for Efficient Video Recognition, CVPR2020\nECO: Efficient Convolutional Network for Online Video Understanding, ECCV 2018\n3D Resnet: Would Mega-scale Datasets Further Enhance Spatiotemporal 3D CNNs, CVPR 2018\nTPN: Temporal Pyramid Network for Action Recognition, CVPR 2020\nEvaNet: Evolving Space-Time Neural Architectures for Videos, ICCV 2019\nRepFlow: Representation Flow for Action Recognition, CVPR 2019\nMARS: Motion-Augmented RGB Stream for Action Recognition, CVPR 2019\nStNet: Local and Global Spatial-Temporal Modeling for Human Action Recognition, AAAI 2019\nAttention Cluster: Purely Attention Based Local Feature Integration for Video Classification"
+        },
+        {
+            "comment": "This code contains references to various research papers in the field of action recognition and video classification, highlighting different models and architectures for these tasks.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/english_documents/tutorials/Action Recognition Papers\":16-27",
+            "content": "NeXtVLAD: An Efficient Neural Network to Aggregate Frame-level Features for Large-scale Video Classification\nC-TCN: Action localization Model by Baidu, the Champion model of ActivityNet 2018\nNeural Graph Matching Networks for Fewshot 3D Action Recognition - M. Guo et al., ECCV2018.  \nTemporal 3D ConvNets using Temporal Transition Layer - A. Diba et al., CVPRW2018.  \nTemporal 3D ConvNets: New Architecture and Transfer Learning for Video Classification - A. Diba et al., arXiv2017.  \nAttentional Pooling for Action Recognition - R. Girdhar and D. Ramanan, NIPS2017.  \nFully Context-Aware Video Prediction - Byeon et al, arXiv2017.  \nHidden Two-Stream Convolutional Networks for Action Recognition - Y. Zhu et al, arXiv2017.  \nDynamic Image Networks for Action Recognition - H. Bilen et al, CVPR2016.   \nLong-term Recurrent Convolutional Networks for Visual Recognition and Description - J. Donahue et al, CVPR2015.  \nDescribing Videos by Exploiting Temporal Structure - L. Yao et al, ICCV2015. \nReal-time Action Recognition with Enhanced Motion Vector CNNs - B. Zhang et al, CVPR2016.  "
+        },
+        {
+            "comment": "This code refers to a paper titled \"Action Recognition with Trajectory-Pooled Deep-Convolutional Descriptors\" published in CVPR 2015 by authors L. Wang et al. This paper presents a method for action recognition using deep convolutional descriptors and trajectory pooling, offering an efficient approach to analyze and recognize actions from video sequences.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/english_documents/tutorials/Action Recognition Papers\":28-28",
+            "content": "Action Recognition with Trajectory-Pooled Deep-Convolutional Descriptors - L. Wang et al, CVPR2015. "
+        }
+    ]
+}

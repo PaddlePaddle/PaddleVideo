@@ -1,0 +1,10 @@
+{
+    "summary": "This script exports CUDA device settings and FLAGS for efficient GPU usage, then executes a Python file to train an Attention LSTM Ernie model using the specified configuration file. The logs are saved at specific intervals, with pre-trained checkpoints used as well.",
+    "details": [
+        {
+            "comment": "This script exports CUDA device settings and FLAGS for efficient GPU usage, then executes a Python file to train an Attention LSTM Ernie model using the specified configuration file. The logs are saved at specific intervals, with pre-trained checkpoints used as well.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/MultimodalVideoTag/train.sh\":0-12",
+            "content": "export CUDA_VISIBLE_DEVICES=0,1\nexport FLAGS_eager_delete_tensor_gb=0.0\nexport FLAGS_sync_nccl_allreduce=1\nexport FLAGS_fast_eager_deletion_mode=1\nexport FLAGS_fraction_of_gpu_memory_to_use=0.5\nexport FLAGS_reallocate_gpu_memory_in_mb=0\nexport FLAGS_memory_fraction_of_eager_deletion=1\npython scenario_lib/train.py --model_name=AttentionLstmErnie \\\n--config=./conf/conf.txt \\\n--log_interval=20 \\\n--valid_interval=1 \\\n--save_dir=checkpoints_save_new/ \\\n--pretrain=checkpoints_save/"
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "summary": "This code file is an __init__.py for EIVideo application, authored by Acer Zhang on Jan 6th. It sets root path and defines constants for temporary image and JSON file paths. The join_root_path function helps construct full paths from given partial paths.",
+    "details": [
+        {
+            "comment": "This code file is an __init__.py for EIVideo application, authored by Acer Zhang on Jan 6th. It sets root path and defines constants for temporary image and JSON file paths. The join_root_path function helps construct full paths from given partial paths.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/EIVideo/EIVideo/__init__.py\":0-15",
+            "content": "# Author: Acer Zhang\n# Datetime: 2022/1/6 \n# Copyright belongs to the author.\n# Please indicate the source for reprinting.\nimport os\nfrom EIVideo.version import __version__\nEI_VIDEO_ROOT = os.path.abspath(os.path.dirname(__file__))\nTEMP_IMG_SAVE_PATH = \"./temp.png\"\nTEMP_JSON_SAVE_PATH = \"./save.json\"\nTEMP_JSON_FINAL_PATH = \"./final.json\"\ndef join_root_path(path: str):\n    return os.path.join(EI_VIDEO_ROOT, path)"
+        }
+    ]
+}

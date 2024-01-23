@@ -1,0 +1,544 @@
+{
+    "1300": {
+        "file_id": 121,
+        "content": "            sub_results['prec'] = 0.0 if sub_results['num_prop'] == 0 \\\n                                      else sub_results['hit_prop'] * 1.0 / sub_results['num_prop']\n            sub_results['recall'] = 0.0 if sub_results['num_gts'] == 0 \\\n                                        else sub_results['hit_gts'] * 1.0 / sub_results['num_gts']\n            if show_sub:\n                print_result(sub_results, label=label_id)\n            for item in res_dict:\n                if not item in average_results:\n                    average_results[item] = 0\n                average_results[item] += sub_results[item]\n        if len(label_range) == 1:   # proposal 不需要输出average值\n            continue\n        average_results['prec'] = 0.0 if average_results['num_prop'] == 0 \\\n                                      else average_results['hit_prop'] * 1.0 / average_results['num_prop']\n        average_results['recall'] = 0.0 if average_results['num_gts'] == 0 \\\n                                        else average_results['hit_gts'] * 1.0 / average_results['num_gts']",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/eval.py:146-161"
+    },
+    "1301": {
+        "file_id": 121,
+        "content": "This code calculates precision and recall values for various subtasks, averages them if applicable, and stores the results in a dictionary. It also prints the result for each subtask if show_sub is set to True.",
+        "type": "comment"
+    },
+    "1302": {
+        "file_id": 121,
+        "content": "        if show_sub:\n            print_result(average_results)\n        average_results['F1'] = 0.0 if (average_results['prec'] + average_results['recall'] == 0) \\\n                                    else 2 * average_results['prec'] * average_results['recall'] / \\\n                                            (average_results['prec'] + average_results['recall'])\n        return average_results\ndef get_eval_results(predicts, gts_data, phase, iou_threshold = 0.3, score_threshold = 0.3, show_sub = False):\n    global mode\n    mode = phase\n    res_boxes = []\n    gts_boxes = []\n    for ped_data in predicts:\n        basename = ped_data['video_name']\n        # eval sub data\n        such_eval = False\n        for eval_name in eval_datasets:\n            if eval_name in basename:\n                such_eval = True\n                break\n        if not such_eval:\n            continue\n        gts = gts_data[basename]['actions']\n        if phase == 'proposal':\n            res_boxes.extend(convert_proposal(ped_data['bmn_results'], basename, score_threshold))",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/eval.py:162-189"
+    },
+    "1303": {
+        "file_id": 121,
+        "content": "This code calculates evaluation results for FootballAction model predictions. It checks if the prediction is for a specific evaluation dataset and then processes proposal phase results, extracting bounding box coordinates from predicted proposals, and appending them to res_boxes list. F1 score is calculated based on precision and recall values. The function returns the average evaluation results (F1, precision, recall, IoU) for each video in the predicts dataset.",
+        "type": "comment"
+    },
+    "1304": {
+        "file_id": 121,
+        "content": "            gts_boxes.extend(convert_groundtruth(gts, basename, phase='proposal'))\n            label_range = [0]\n            iou_range = np.arange(0.1, 1, 0.1)\n        else:\n            res_boxes.extend(convert_classify(ped_data['action_results'], basename, iou_threshold, score_threshold))\n            gts_boxes.extend(convert_groundtruth(gts, basename))\n            label_range = range(1, len(label_index))\n            iou_range = np.arange(0.5, 0.6, 0.1)\n    eval_results = evaluation(res_boxes, gts_boxes, label_range, iou_range, show_sub = show_sub)\n    return eval_results\nif __name__ == \"__main__\":\n    result_file = sys.argv[1]\n    predicts = json.load(open(result_file, 'r', encoding='utf-8'))\n    gts_data = load_gts()\n    get_eval_results(predicts, gts_data, 'proposal', \n                     score_threshold = 0.03,\n                     show_sub = True)\n    #get_eval_results(predicts, gts_data, 'actions')\n    best_F1 = -0.1\n    best_res = {}\n    best_iou_threshold = 0.\n    best_score_threshold = 0.\n    for iou_threshold in np.arange(0.1, 0.9, 0.1):",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/eval.py:190-218"
+    },
+    "1305": {
+        "file_id": 121,
+        "content": "The code handles the evaluation of football action predictions. If ground truth is given, it extends proposal boxes and sets label range and iou range accordingly; otherwise, it extends classify results, ground truth boxes, and sets label range and iou range. It then calculates evaluation results using the specified functions. The code also allows for testing different iou_threshold and score_threshold combinations to find the best ones.",
+        "type": "comment"
+    },
+    "1306": {
+        "file_id": 121,
+        "content": "        for score_threshold in np.arange(0.1, 1, 0.1):\n            avg_res = get_eval_results(predicts, gts_data, 'actions', \n                                       iou_threshold = iou_threshold,\n                                       score_threshold = score_threshold,\n                                       show_sub = False)\n            if best_F1 < avg_res['F1']:\n                best_F1 = avg_res['F1']\n                best_res = avg_res\n                best_iou_threshold = iou_threshold\n                best_score_threshold = score_threshold\n    print(\"best iou threshold = {:.1f}\".format(best_iou_threshold))\n    print(\"best score threshold = {:.1f}\".format(best_score_threshold))\n    print('best F1 score = {:.4f}'.format(best_F1))\n    print_head(0.5)\n    print_result(best_res)\n    get_eval_results(predicts, gts_data, 'actions', iou_threshold = best_iou_threshold,\n                                                    score_threshold = best_score_threshold,\n                                                    show_sub = True)",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/eval.py:219-237"
+    },
+    "1307": {
+        "file_id": 121,
+        "content": "The code iterates through score thresholds and calculates the average results for each threshold. It selects the best F1 score, stores corresponding iou_threshold and score_threshold. Finally, it prints these values along with a headline and a detailed result, then saves the best results by running the get_eval_results function again.",
+        "type": "comment"
+    },
+    "1308": {
+        "file_id": 122,
+        "content": "/applications/FootballAction/predict/predict.py",
+        "type": "filepath"
+    },
+    "1309": {
+        "file_id": 122,
+        "content": "The code loads an action detection model, reads a list of videos from a URL file, and for each video, it prints its name, creates paths for image frames and audio, calls the infer function to get bone-coordinate matrices (bmn_results) and action results, stores them in a list named 'results', and writes JSON data to \"results.json\" file.",
+        "type": "summary"
+    },
+    "1310": {
+        "file_id": 122,
+        "content": "import os\nimport sys\nimport json\nsys.path.append('action_detect')\nfrom action import ActionDetection\nif __name__ == '__main__':\n    #dataset_dir = \"/workspace/PaddleVideo/applications/FootballAction/datasets/EuroCup2016\"\n    dataset_dir = \"../datasets/EuroCup2016\"\n    model_predict = ActionDetection(cfg_file=\"./configs/configs.yaml\")\n    model_predict.load_model()\n    video_url = os.path.join(dataset_dir, 'url_val.list')\n    with open(video_url, 'r') as f:\n        lines = f.readlines()\n    lines = [os.path.join(dataset_dir, k.strip()) for k in lines]\n    results = []\n    for line in lines:\n        video_name = line\n        print(video_name)\n        imgs_path = video_name.replace(\".mp4\", \"\").replace(\"mp4\", \"frames\")\n        pcm_path = video_name.replace(\".mp4\", \".pcm\").replace(\"mp4\", \"pcm\")\n        bmn_results, action_results = model_predict.infer(imgs_path, pcm_path)\n        results.append({\n            'video_name': line,\n            'bmn_results': bmn_results,\n            'action_results': action_results\n        })",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/predict.py:1-33"
+    },
+    "1311": {
+        "file_id": 122,
+        "content": "This code is importing necessary libraries, setting the path to access an action detection model. The model is loaded and a list of videos are read from a URL file. For each video, its name is printed, the required paths for image frames and audio are created, and the action detection model's infer function is called to get bone-coordinate matrices (bmn_results) and action results. These results are then stored in a list named 'results'.",
+        "type": "comment"
+    },
+    "1312": {
+        "file_id": 122,
+        "content": "    with open('results.json', 'w', encoding='utf-8') as f:\n        data = json.dumps(results, indent=4, ensure_ascii=False)\n        f.write(data)",
+        "type": "code",
+        "location": "/applications/FootballAction/predict/predict.py:35-37"
+    },
+    "1313": {
+        "file_id": 122,
+        "content": "Writes JSON data to \"results.json\" file, ensuring UTF-8 encoding and readable indentation for improved readability.",
+        "type": "comment"
+    },
+    "1314": {
+        "file_id": 123,
+        "content": "/applications/Ma-Net/README.md",
+        "type": "filepath"
+    },
+    "1315": {
+        "file_id": 123,
+        "content": "The code is for the PaddleVideo application's MA-Net model, supporting testing and training on DAVIS dataset with pretrained models for stage1 and stage1+stage2. It runs \"run_local.sh\" script to execute local environment for the MA-Net model in PaddleVideo.",
+        "type": "summary"
+    },
+    "1316": {
+        "file_id": 123,
+        "content": "[简体中文](README_cn.md) | English\n# Ma-Net\n## Contents\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Inference](#Inference)\n## Introduction\nThis is the paddle implementation of the CVPR2020 paper \"[Memory aggregation networks for efficient interactive video object segmentation](https://arxiv.org/abs/2003.13246)\".\n![avatar](images/1836-teaser.gif)\nThis code currently supports model test and model training on DAVIS  dataset,  and model inference on any given video will be provided in few days.\n## Data\nPlease refer to DAVIS data download and preparation doc [DAVIS-data](dataloaders/DAVIS2017.md)\n## Train and Test\n- You can download [pertained model for stage1](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/DeeplabV3_coco.pdparams) decompress it for stage1 training。\n- You can download [trained model of stage1](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MaNet_davis2017_stage1.pdparams) decompress it for stage2 training directly skipping stage1 training。\n```",
+        "type": "code",
+        "location": "/applications/Ma-Net/README.md:1-35"
+    },
+    "1317": {
+        "file_id": 123,
+        "content": "This code is for the PaddleVideo application, specifically Ma-Net, a CVPR2020 paper implementation. It currently supports model testing and training on DAVIS dataset, with inference on any video coming soon. Two pretrained models are provided for stage1 and stage1+stage2 training.",
+        "type": "comment"
+    },
+    "1318": {
+        "file_id": 123,
+        "content": "sh run_local.sh\n```\n- You can download [our model](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MANet_davis2017.pdparams) decompress it for testing.\nTest accuracy in DAVIS2017:\n| J@60  |  AUC  |\n| :---: | :---: |\n| 0.761 | 0.749 |",
+        "type": "code",
+        "location": "/applications/Ma-Net/README.md:36-47"
+    },
+    "1319": {
+        "file_id": 123,
+        "content": "This code snippet executes the \"run_local.sh\" script, which is used to run the local environment for the MA-Net model in the PaddleVideo application.",
+        "type": "comment"
+    },
+    "1320": {
+        "file_id": 124,
+        "content": "/applications/Ma-Net/README_cn.md",
+        "type": "filepath"
+    },
+    "1321": {
+        "file_id": 124,
+        "content": "This is the Chinese version of README file for Ma-Net video segmentation model implementation in Paddle. It introduces a Paddle implementation of CVPR 2020 paper, \"Memory aggregation networks for efficient interactive video object segmentation\". The code currently supports model training and testing on DAVIS dataset, with future support for model inference on any given video. Download stage1 pre-trained model or trained model for direct training, and use the provided model for testing. Achieved J@60 and AUC scores of 0.761 and 0.749 respectively on DAVIS2017 test set.",
+        "type": "summary"
+    },
+    "1322": {
+        "file_id": 124,
+        "content": "[English](README.md) | 简体中文\n# Ma-Net视频切分模型\n## 内容\n- [模型简介](#模型简介)\n- [数据准备](#数据准备)\n- [模型训练](#模型训练)\n- [模型测试](#模型测试)\n- [模型推理](#模型推理)\n## 模型简介\n这是CVPR2020论文\"[Memory aggregation networks for efficient interactive video object segmentation](https://arxiv.org/abs/2003.13246)\"的Paddle实现。\n![avatar](images/1836-teaser.gif)\n此代码目前支持在 DAVIS 数据集上进行模型测试和模型训练，并且将在之后提供对任何给定视频的模型推理。\n## 数据准备\nDAVIS数据下载及准备请参考[DAVIS2017数据准备](dataloaders/DAVIS2017_cn.md)\n## 模型训练与测试\n- 您可以下载[paddle版本的stage1预训练模型](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/DeeplabV3_coco.pdparams) 解压缩它以用于训练的第一阶段。\n- 您可以下载[stage1训练结果模型](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MaNet_davis2017_stage1.pdparams) 解压缩它以直接训练的第二阶段跳过第一阶段的训练。\n  ```bash\n  sh run.sh\n  ```\n- 您可以下载[我们的模型](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/MANet_davis2017.pdparams) 解压缩它以用于测试。\n在 DAVIS2017上的测试精度:\n| J@60  |  AUC  |\n| :---: | :---: |\n| 0.761 | 0.749 |",
+        "type": "code",
+        "location": "/applications/Ma-Net/README_cn.md:1-46"
+    },
+    "1323": {
+        "file_id": 124,
+        "content": "This is the Chinese version of README file for Ma-Net video segmentation model implementation in Paddle. It introduces a Paddle implementation of CVPR 2020 paper, \"Memory aggregation networks for efficient interactive video object segmentation\". The code currently supports model training and testing on DAVIS dataset, with future support for model inference on any given video. Download stage1 pre-trained model or trained model for direct training, and use the provided model for testing. Achieved J@60 and AUC scores of 0.761 and 0.749 respectively on DAVIS2017 test set.",
+        "type": "comment"
+    },
+    "1324": {
+        "file_id": 125,
+        "content": "/applications/Ma-Net/config.py",
+        "type": "filepath"
+    },
+    "1325": {
+        "file_id": 125,
+        "content": "The code imports libraries and sets up an argument parser for PaddleVideo's Ma-Net application. It defines a function, configures model parameters, and trains video object detection tasks. The `--TEST_CHECKPOINT` and `--TEST_MODE` arguments are initialized with default values, and the training epoch count is calculated based on batch size and total steps.",
+        "type": "summary"
+    },
+    "1326": {
+        "file_id": 125,
+        "content": "import paddle\nimport argparse\nimport os\nimport sys\nimport cv2\nimport time\ndef str2bool(v):\n    if isinstance(v, bool):\n        return v\n    if v.lower() in ('yes', 'true', 't', 'y', '1'):\n        return True\n    elif v.lower() in ('no', 'false', 'f', 'n', '0'):\n        return False\n    else:\n        raise argparse.ArgumentTypeError('Boolean value expected.')\nparser = argparse.ArgumentParser(description='intvos config')\nparser.add_argument('--ROOT_DIR',\n                    type=str,\n                    default=os.path.abspath(\n                        os.path.join(os.path.dirname(\"__file__\"))))\nparser.add_argument('--EXP_NAME', type=str, default='deeplabv3+coco')\nparser.add_argument('--SAVE_RESULT_DIR', type=str, default='../afs/result/')\nparser.add_argument('--SAVE_VOS_RESULT_DIR', type=str, default='')\nparser.add_argument('--NUM_WORKER', type=int, default=4)\nparser.add_argument('--KNNS', type=int, default=1)\nparser.add_argument('--PRETRAINED_MODEL',\n                    type=str,\n                    default='./model_best.pth.tar')",
+        "type": "code",
+        "location": "/applications/Ma-Net/config.py:1-32"
+    },
+    "1327": {
+        "file_id": 125,
+        "content": "This code is importing necessary libraries and defining a function. It also sets up an argument parser, and provides default values for various parameters including the root directory, experiment name, save result directories, number of workers, KNNs, and pre-trained model path.",
+        "type": "comment"
+    },
+    "1328": {
+        "file_id": 125,
+        "content": "parser.add_argument(\n    '--RESULT_ROOT',\n    type=str,\n    default=os.path.join('../afs/vos_result/result_total_80000'))\n######DATA_CONFIG\nparser.add_argument('--DATA_NAME', type=str, default='COCO2017')\nparser.add_argument('--DATA_AUG', type=str2bool, default=True)\nparser.add_argument('--DATA_WORKERS', type=int, default=4)\nparser.add_argument('--DATA_RESCALE', type=int, default=416)\nparser.add_argument('--DATA_RANDOMCROP', type=int, default=416)\nparser.add_argument('--DATA_RANDOMROTATION', type=int, default=0)\nparser.add_argument('--DATA_RANDOM_H', type=int, default=10)\nparser.add_argument('--DATA_RANDOM_S', type=int, default=10)\nparser.add_argument('--DATA_RANDOM_V', type=int, default=10)\nparser.add_argument('--DATA_RANDOMFLIP', type=float, default=0.5)\nparser.add_argument('--DATA_ROOT', type=str, default='../data/DAVIS')\n######MODEL_CONFIG\nparser.add_argument('--MODEL_NAME', type=str, default='deeplabv3plus')\nparser.add_argument('--MODEL_BACKBONE', type=str, default='res101_atrous')\nparser.add_argument('--MODEL_OUTPUT_STRIDE', type=int, default=16)",
+        "type": "code",
+        "location": "/applications/Ma-Net/config.py:33-53"
+    },
+    "1329": {
+        "file_id": 125,
+        "content": "This code snippet is from the 'config.py' file in the PaddleVideo/applications/Ma-Net directory, and it defines command line arguments for the application. It sets default values for parameters related to result storage location, data configuration, and model configuration. These arguments can be overridden when running the application by specifying them on the command line.",
+        "type": "comment"
+    },
+    "1330": {
+        "file_id": 125,
+        "content": "parser.add_argument('--MODEL_ASPP_OUTDIM', type=int, default=256)\nparser.add_argument('--MODEL_SHORTCUT_DIM', type=int, default=48)\nparser.add_argument('--MODEL_SHORTCUT_KERNEL', type=int, default=1)\nparser.add_argument('--MODEL_NUM_CLASSES', type=int, default=21)\nparser.add_argument('--MODEL_SEMANTIC_EMBEDDING_DIM', type=int, default=100)\nparser.add_argument('--MODEL_HEAD_EMBEDDING_DIM', type=int, default=256)\nparser.add_argument('--MODEL_LOCAL_DOWNSAMPLE', type=str2bool, default=True)\nparser.add_argument('--MODEL_MAX_LOCAL_DISTANCE', type=int, default=12)\nparser.add_argument('--MODEL_SELECT_PERCENT', type=float, default=0.8)\nparser.add_argument('--MODEL_USEIntSeg', type=str2bool, default=False)\n######TRAIN_CONFIG\nparser.add_argument('--TRAIN_LR', type=float, default=0.0007)\nparser.add_argument('--TRAIN_LR_GAMMA', type=float, default=0.1)\nparser.add_argument('--TRAIN_MOMENTUM', type=float, default=0.9)\nparser.add_argument('--TRAIN_WEIGHT_DECAY', type=float, default=0.00004)\nparser.add_argument('--TRAIN_POWER', type=float, default=0.9)",
+        "type": "code",
+        "location": "/applications/Ma-Net/config.py:54-70"
+    },
+    "1331": {
+        "file_id": 125,
+        "content": "This code snippet is from the \"config.py\" file in PaddleVideo's Ma-Net application, and it sets various model parameters like output dimension, shortcut dimensions, kernel size, number of classes, embedding dimensions, downsampling method, selection percentage, and training parameters such as learning rate, gamma, momentum, weight decay, and power. These parameters are used to configure and train the Ma-Net model for video object detection tasks.",
+        "type": "comment"
+    },
+    "1332": {
+        "file_id": 125,
+        "content": "parser.add_argument('--TRAIN_BATCH_SIZE', type=int, default=2)\nparser.add_argument('--TRAIN_SHUFFLE', type=str2bool, default=True)\nparser.add_argument('--TRAIN_CLIP_GRAD_NORM', type=float, default=5.)\nparser.add_argument('--TRAIN_MINEPOCH', type=int, default=9)\nparser.add_argument('--TRAIN_TOTAL_STEPS', type=int, default=101000)\nparser.add_argument('--TRAIN_LOSS_LAMBDA', type=int, default=0)\nparser.add_argument('--TRAIN_TBLOG', type=str2bool, default=False)\nparser.add_argument('--TRAIN_BN_MOM', type=float,\n                    default=0.9997)  # fixed. difs between paddle and torch.\nparser.add_argument('--TRAIN_TOP_K_PERCENT_PIXELS', type=float, default=0.15)\nparser.add_argument('--TRAIN_HARD_MINING_STEP', type=int, default=50000)\nparser.add_argument('--TRAIN_LR_STEPSIZE', type=int, default=2000)\nparser.add_argument('--TRAIN_INTER_USE_TRUE_RESULT',\n                    type=str2bool,\n                    default=True)\nparser.add_argument('--TRAIN_RESUME_DIR', type=str, default='')\nparser.add_argument('--LOG_DIR', type=str, default=os.path.join('./log'))",
+        "type": "code",
+        "location": "/applications/Ma-Net/config.py:71-88"
+    },
+    "1333": {
+        "file_id": 125,
+        "content": "This code snippet is part of the configuration file for the Ma-Net application in PaddleVideo. It includes various arguments and their default values for training the model, such as batch size, shuffling, gradient norm, number of epochs, total steps, loss lambda, logging settings, BN momentum, top K percent pixels, hard mining step, LR step size, and resuming from a specific directory.",
+        "type": "comment"
+    },
+    "1334": {
+        "file_id": 125,
+        "content": "parser.add_argument('--TEST_CHECKPOINT',\n                    type=str,\n                    default='save_step_100000.pth')\nparser.add_argument('--TEST_MODE', type=str2bool, default=False)\ncfg = parser.parse_args()\ncfg.TRAIN_EPOCHS = int(200000 * cfg.TRAIN_BATCH_SIZE / 60.)",
+        "type": "code",
+        "location": "/applications/Ma-Net/config.py:90-96"
+    },
+    "1335": {
+        "file_id": 125,
+        "content": "This code snippet initializes the `--TEST_CHECKPOINT` and `--TEST_MODE` arguments using default values, then calculates the number of training epochs based on the batch size and the total number of steps.",
+        "type": "comment"
+    },
+    "1336": {
+        "file_id": 126,
+        "content": "/applications/Ma-Net/dataloaders/DAVIS2017.md",
+        "type": "filepath"
+    },
+    "1337": {
+        "file_id": 126,
+        "content": "This code snippet provides instructions for downloading the DAVIS2017 dataset and organizing its folder structure within the PaddleVideo project directory. It also provides a link to access the file \"DAVIS2017/ImageSets/2017/v_a_l_instances.txt\" if needed.",
+        "type": "summary"
+    },
+    "1338": {
+        "file_id": 126,
+        "content": "[简体中文](../../zh-CN/dataset/DAVIS2017.md) | English\n# DAVIS2017 Data Preparation\n## 1.Data Download\nDownload [DAVIS2017](https://data.vision.ee.ethz.ch/csergi/share/davis/DAVIS-2017-trainval-480p.zip) and [scribbles](https://data.vision.ee.ethz.ch/csergi/share/DAVIS-Interactive/DAVIS-2017-scribbles-trainval.zip) into one folder. Please refer to [DAVIS](https://davischallenge.org/davis2017/code.html).\nIf you need the file \"DAVIS2017/ImageSets/2017/v_a_l_instances.txt\", please refer to the link [google]( https://drive.google.com/file/d/1aLPaQ_5lyAi3Lk3d2fOc_xewSrfcrQlc/view?usp=sharing)\n## 2.Folder Structure\nIn the context of the whole project (for Ma-Net only), the folder structure will look like:\n```shell\nPaddleVideo\n├── configs\n├── paddlevideo\n├── docs\n├── tools\n├── data\n│ \t└── DAVIS2017\n│   │ \t├── Annotations\n│   │ \t├── ImageSets\n│   │ \t├── JPEGImages\n│   │ \t└── Scribbles\n```",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/DAVIS2017.md:1-27"
+    },
+    "1339": {
+        "file_id": 126,
+        "content": "This code snippet provides instructions for downloading the DAVIS2017 dataset and organizing its folder structure within the PaddleVideo project directory. It also provides a link to access the file \"DAVIS2017/ImageSets/2017/v_a_l_instances.txt\" if needed.",
+        "type": "comment"
+    },
+    "1340": {
+        "file_id": 127,
+        "content": "/applications/Ma-Net/dataloaders/DAVIS2017_cn.md",
+        "type": "filepath"
+    },
+    "1341": {
+        "file_id": 127,
+        "content": "This code provides instructions on how to download and organize the DAVIS2017 dataset for use in the Ma-Net application. It includes links to the necessary datasets, such as the DAVIS-2017-trainval-480p.zip and DAVIS-2017-scribbles-trainval.zip files, and provides a template directory structure for organizing the data within the PaddleVideo project.",
+        "type": "summary"
+    },
+    "1342": {
+        "file_id": 127,
+        "content": "[English](../../en/dataset/DAVIS2017.md) | 简体中文\n# DAVIS2017 数据集准备\n## 1.数据下载\n下载 [DAVIS2017](https://data.vision.ee.ethz.ch/csergi/share/davis/DAVIS-2017-trainval-480p.zip) 和 [scribbles](https://data.vision.ee.ethz.ch/csergi/share/DAVIS-Interactive/DAVIS-2017-scribbles-trainval.zip)到同一个文件夹中。请参阅[DAVIS](https://davischallenge.org/davis2017/code.html).\n如果您需要文件\"DAVIS2017/ImageSets/2017/v_a_l_instances.txt\"，请参阅[google](https://drive.google.com/file/d/1aLPaQ_5lyAi3Lk3d2fOc_xewSrfcrQlc/view?usp=sharing)链接\n## 2.目录结构\n整个项目(Ma-Net)的目录结构如下所示：\n```shell\nPaddleVideo\n├── configs\n├── paddlevideo\n├── docs\n├── tools\n├── data\n│ \t└── DAVIS2017\n│   │ \t├── Annotations\n│   │ \t├── ImageSets\n│   │ \t├── JPEGImages\n│   │ \t└── Scribbles\n```",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/DAVIS2017_cn.md:1-27"
+    },
+    "1343": {
+        "file_id": 127,
+        "content": "This code provides instructions on how to download and organize the DAVIS2017 dataset for use in the Ma-Net application. It includes links to the necessary datasets, such as the DAVIS-2017-trainval-480p.zip and DAVIS-2017-scribbles-trainval.zip files, and provides a template directory structure for organizing the data within the PaddleVideo project.",
+        "type": "comment"
+    },
+    "1344": {
+        "file_id": 128,
+        "content": "/applications/Ma-Net/dataloaders/custom_transforms_f.py",
+        "type": "filepath"
+    },
+    "1345": {
+        "file_id": 128,
+        "content": "This code performs data augmentation using resizing, cropping, and scaling/rotating transformations with cv2 libraries, offering fixed or random options. It also initializes segmentation variables, computes dilated areas, generates edge masks, and handles various data types for PaddlePaddle's video object detection task.",
+        "type": "summary"
+    },
+    "1346": {
+        "file_id": 128,
+        "content": "import os\nimport random\nimport cv2\nimport numpy as np\nimport paddle\nfrom PIL import Image\nimport dataloaders.helpers as helpers\nfrom davisinteractive.utils.operations import bresenham\nfrom paddle.vision.transforms import functional as F\ncv2.setNumThreads(0)\nNEW_BRANCH = True\nclass Resize(object):\n    \"\"\"Rescale the image in a sample to a given size.\n    Args:\n        output_size (tuple or int): Desired output size. If tuple, output is\n            matched to output_size. If int, smaller of image edges is matched\n            to output_size keeping aspect ratio the same.\n    \"\"\"\n    def __init__(self, output_size):\n        assert isinstance(output_size, (int, tuple))\n        if isinstance(output_size, int):\n            self.output_size = (output_size, output_size)\n        else:\n            self.output_size = output_size\n    #        self.seg_interpolation = cv2.INTER_CUBIC if is_continuous else cv2.INTER_NEAREST\n    #        self.fix = fix\n    def __call__(self, sample):\n        img1 = sample['img1']\n        # img2 = sample['img2']",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/custom_transforms_f.py:1-35"
+    },
+    "1347": {
+        "file_id": 128,
+        "content": "The code defines a Resize class that rescales images in a sample to the given output size. It accepts either an integer for uniform resizing or a tuple for specific dimensions. If the output size is not compatible with the image aspect ratio, it will be scaled proportionally. This class can process samples with one or more images (e.g., 'img1' and 'img2').",
+        "type": "comment"
+    },
+    "1348": {
+        "file_id": 128,
+        "content": "        # ref_img=sample['ref_img']\n        h, w = img1.shape[:2]\n        if self.output_size == (h, w):\n            return sample\n        else:\n            new_h, new_w = self.output_size\n        new_h, new_w = int(new_h), int(new_w)\n        for elem in sample.keys():\n            if 'meta' in elem:\n                continue\n            tmp = sample[elem]\n            if elem == 'img1' or elem == 'img2' or elem == 'ref_img':\n                flagval = cv2.INTER_CUBIC\n            else:\n                flagval = cv2.INTER_NEAREST\n            tmp = cv2.resize(tmp, dsize=(new_w, new_h), interpolation=flagval)\n            sample[elem] = tmp\n        return sample\nclass RandomCrop(object):\n    \"\"\"Crop randomly the image in a sample.\n    Args:\n        output_size (tuple or int): Desired output size. If int, square crop\n            is made.\n    \"\"\"\n    def __init__(self, output_size, step=None):\n        assert isinstance(output_size, (int, tuple))\n        if isinstance(output_size, int):\n            self.output_size = (output_size, output_size)",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/custom_transforms_f.py:36-69"
+    },
+    "1349": {
+        "file_id": 128,
+        "content": "This code is a custom transform that resizes images in a sample to a specific output size. It checks if the current image size matches the desired output size, and if not, it uses cv2.resize() function to resize each image in the sample while maintaining aspect ratio for specified elements (img1, img2, ref_img) using INTER_CUBIC interpolation and others using INTER_NEAREST. It returns the modified sample with images resized according to the output size specified. The RandomCrop class is used to crop an image randomly to a given output size.",
+        "type": "comment"
+    },
+    "1350": {
+        "file_id": 128,
+        "content": "        else:\n            assert len(output_size) == 2\n            self.output_size = output_size\n        self.step = step\n    def __call__(self, sample):\n        image = sample['img1']\n        h, w = image.shape[:2]\n        new_h, new_w = self.output_size\n        new_h = h if new_h >= h else new_h\n        new_w = w if new_w >= w else new_w\n        is_contain_obj = False\n        if self.step is None:\n            while not is_contain_obj:\n                #                step += 1\n                top = np.random.randint(0, h - new_h + 1)\n                left = np.random.randint(0, w - new_w + 1)\n                ref_scribble_label = sample['ref_scribble_label']\n                new_ref_scribble_label = ref_scribble_label[top:top + new_h,\n                                                            left:left + new_w]\n                if len(np.unique(new_ref_scribble_label)) == 1:\n                    continue\n                else:\n                    for elem in sample.keys():\n                        if 'meta' in elem:",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/custom_transforms_f.py:70-98"
+    },
+    "1351": {
+        "file_id": 128,
+        "content": "This code is part of a custom transform for image cropping. It takes an input sample, selects a random top and left position to crop the image, and checks if the corresponding reference scribble label has enough unique elements to proceed. If not, it continues selecting new positions until it finds one with enough unique elements in the scribble label. The step variable keeps track of how many times this loop has been executed.",
+        "type": "comment"
+    },
+    "1352": {
+        "file_id": 128,
+        "content": "                            continue\n                        tmp = sample[elem]\n                        tmp = tmp[top:top + new_h, left:left + new_w]\n                        sample[elem] = tmp\n                    break\n        else:\n            st = 0\n            while not is_contain_obj and st < self.step:\n                st += 1\n                top = np.random.randint(0, h - new_h + 1)\n                left = np.random.randint(0, w - new_w + 1)\n                ref_scribble_label = sample['ref_scribble_label']\n                new_ref_scribble_label = ref_scribble_label[top:top + new_h,\n                                                            left:left + new_w]\n                if len(np.unique(\n                        new_ref_scribble_label)) == 1 or st < self.step - 1:\n                    continue\n                else:\n                    for elem in sample.keys():\n                        if 'meta' in elem:\n                            continue\n                        tmp = sample[elem]\n                        tmp = tmp[top:top + new_h, left:left + new_w]",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/custom_transforms_f.py:99-124"
+    },
+    "1353": {
+        "file_id": 128,
+        "content": "This code is randomly selecting a region in the image and adjusting it to the new size while ensuring that there is at least one object present in the cropped region. It then updates the corresponding image and label based on this new crop.",
+        "type": "comment"
+    },
+    "1354": {
+        "file_id": 128,
+        "content": "                        sample[elem] = tmp\n                    break\n        return sample\nclass ScaleNRotate(object):\n    \"\"\"Scale (zoom-in, zoom-out) and Rotate the image and the ground truth.\n    Args:\n        two possibilities:\n        1.  rots (tuple): (minimum, maximum) rotation angle\n            scales (tuple): (minimum, maximum) scale\n        2.  rots [list]: list of fixed possible rotation angles\n            scales [list]: list of fixed possible scales\n    \"\"\"\n    def __init__(self, rots=(-30, 30), scales=(.75, 1.25)):\n        assert (isinstance(rots, type(scales)))\n        self.rots = rots\n        self.scales = scales\n    def __call__(self, sample):\n        if type(self.rots) == tuple:\n            # Continuous range of scales and rotations\n            rot = (self.rots[1] - self.rots[0]) * random.random() - \\\n                  (self.rots[1] - self.rots[0]) / 2\n            sc = (self.scales[1] - self.scales[0]) * random.random() - \\\n                 (self.scales[1] - self.scales[0]) / 2 + 1\n        elif type(self.rots) == list:",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/custom_transforms_f.py:125-154"
+    },
+    "1355": {
+        "file_id": 128,
+        "content": "The code defines a class called \"ScaleNRotate\" which applies scaling and rotation transformations to images and their corresponding ground truth. It takes two possible arguments for rotations and scales, either as tuples or lists. If the argument is a tuple, it randomly selects a rotation and scale within the defined range. If the argument is a list, it applies one of the fixed possible rotations and scales from the provided list. The code also initializes the instance variables \"rots\" and \"scales\" based on the input arguments.",
+        "type": "comment"
+    },
+    "1356": {
+        "file_id": 128,
+        "content": "            # Fixed range of scales and rotations\n            rot = self.rots[random.randint(0, len(self.rots))]\n            sc = self.scales[random.randint(0, len(self.scales))]\n        for elem in sample.keys():\n            if 'meta' in elem:\n                continue\n            tmp = sample[elem]\n            h, w = tmp.shape[:2]\n            center = (w / 2, h / 2)\n            assert (center != 0)  # Strange behaviour warpAffine\n            M = cv2.getRotationMatrix2D(center, rot, sc)\n            if ((tmp == 0) | (tmp == 1)).all():\n                flagval = cv2.INTER_NEAREST\n            else:\n                flagval = cv2.INTER_CUBIC\n            tmp = cv2.warpAffine(tmp, M, (w, h), flags=flagval)\n            sample[elem] = tmp\n        return sample\nclass RandomScale(object):\n    \"\"\"Randomly resize the image and the ground truth to specified scales.\n    Args:\n        scales (list): the list of scales\n    \"\"\"\n    def __init__(self, scales=[0.75, 1, 1.25]):\n        self.scales = scales\n    def __call__(self, sample):",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/custom_transforms_f.py:155-189"
+    },
+    "1357": {
+        "file_id": 128,
+        "content": "This code applies random scaling, rotation, and warping to an image and its corresponding metadata. It selects a random scale and rotation from predefined ranges for each element in the sample, adjusting the shape of the image and preserving its center point. The cv2.warpAffine function is used to perform the transformation, using interpolation flags based on whether the original image contains only 0s and 1s or not. Finally, it returns the transformed sample.",
+        "type": "comment"
+    },
+    "1358": {
+        "file_id": 128,
+        "content": "        # Fixed range of scales\n        sc = self.scales[random.randint(0, len(self.scales) - 1)]\n        for elem in sample.keys():\n            if 'meta' in elem:\n                continue\n            tmp = sample[elem]\n            if elem == 'img1' or elem == 'img2' or elem == 'ref_img':\n                flagval = cv2.INTER_CUBIC\n            else:\n                flagval = cv2.INTER_NEAREST\n            tmp = cv2.resize(tmp, None, fx=sc, fy=sc, interpolation=flagval)\n            sample[elem] = tmp\n        return sample\nclass RandomHorizontalFlip(object):\n    \"\"\"Horizontally flip the given image and ground truth randomly with a probability of 0.5.\"\"\"\n    def __init__(self, prob):\n        self.p = prob\n    def __call__(self, sample):\n        if random.random() < self.p:\n            for elem in sample.keys():\n                if 'meta' in elem:\n                    continue\n                tmp = sample[elem]\n                tmp = cv2.flip(tmp, flipCode=1)\n                sample[elem] = tmp\n        return sample\nclass SubtractMeanImage(object):",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/custom_transforms_f.py:191-229"
+    },
+    "1359": {
+        "file_id": 128,
+        "content": "The code includes classes for resizing, horizontally flipping, and subtracting the mean image from input data. The resizing function adjusts image size based on a randomly chosen scale from a fixed range. The RandomHorizontalFlip class flips images with a probability of 0.5. The SubtractMeanImage class subtracts a pre-calculated mean image from input images, presumably to normalize pixel values.",
+        "type": "comment"
+    },
+    "1360": {
+        "file_id": 128,
+        "content": "    def __init__(self, mean, change_channels=False):\n        self.mean = mean\n        self.change_channels = change_channels\n    def __call__(self, sample):\n        for elem in sample.keys():\n            if 'image' in elem:\n                if self.change_channels:\n                    sample[elem] = sample[elem][:, :, [2, 1, 0]]\n                sample[elem] = np.subtract(\n                    sample[elem], np.array(self.mean, dtype=np.float32))\n        return sample\n    def __str__(self):\n        return 'SubtractMeanImage' + str(self.mean)\nclass CustomScribbleInteractive(object):\n    def __init__(self,\n                 scribbles,\n                 first_frame,\n                 dilation=9,\n                 nocare_area=None,\n                 bresenham=True,\n                 use_previous_mask=False,\n                 previous_mask_path=None):\n        self.scribbles = scribbles\n        self.dilation = dilation\n        self.nocare_area = nocare_area\n        self.bresenham = bresenham\n        self.first_frame = first_frame",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/custom_transforms_f.py:230-261"
+    },
+    "1361": {
+        "file_id": 128,
+        "content": "This code defines two classes, 'SubtractMeanImage' and 'CustomScribbleInteractive'. The former subtracts the mean from each image in a sample to normalize them. The latter initializes an object for custom scribble interactive functionality with parameters like scribbles, first frame, dilation, nocare_area, bresenham, use_previous_mask, and previous_mask_path.",
+        "type": "comment"
+    },
+    "1362": {
+        "file_id": 128,
+        "content": "        self.use_previous_mask = use_previous_mask\n        self.previous_mask_path = previous_mask_path\n    def __call__(self, sample):\n        meta = sample['meta']\n        frame_num = int(meta['frame_id'])\n        im_size = meta['im_size']\n        # Initialize gt to zeros, no-care areas to ones\n        scr_gt = np.zeros(im_size)\n        scr_nocare = np.ones(im_size)\n        mask = np.zeros(im_size)\n        mask_neg = np.zeros(im_size)\n        # Get all the scribbles for the current frame\n        for scribble in self.scribbles[frame_num]:\n            points_scribble = np.round(\n                np.array(scribble['path']) * np.array(\n                    (im_size[1], im_size[0]))).astype(int)\n            if self.bresenham and len(points_scribble) > 1:\n                all_points = bresenham(points_scribble)\n            else:\n                all_points = points_scribble\n            # Check if scribble is of same id to mark as foreground, otherwise as background\n            if scribble['object_id'] == meta['obj_id']:",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/custom_transforms_f.py:262-288"
+    },
+    "1363": {
+        "file_id": 128,
+        "content": "This code initializes variables for segmentation mask, no-care area, and scribbles. It iterates over the scribbles of a specific frame and determines whether the scribble is foreground or background based on the object ID. The Bresenham algorithm is applied if specified in the configuration to generate all points for each scribble.",
+        "type": "comment"
+    },
+    "1364": {
+        "file_id": 128,
+        "content": "                mask[all_points[:, 1] - 1, all_points[:, 0] - 1] = 1\n            else:\n                mask_neg[all_points[:, 1] - 1, all_points[:, 0] - 1] = 1\n        if self.nocare_area is None:\n            nz = np.where(mask > 0)\n            nocare_area = int(.5 * np.sqrt(\n                (nz[0].max() - nz[0].min()) * (nz[1].max() - nz[1].min())))\n        else:\n            nocare_area = 100\n        # In case we are reading the first human annotation round\n        if frame_num == self.first_frame:\n            # Compute dilated foreground, background, and no-care area\n            scr_gt, scr_nocare = helpers.gt_from_scribble(\n                mask, dilation=self.dilation, nocare_area=nocare_area)\n            scr_gt_neg, _ = helpers.gt_from_scribble(mask_neg,\n                                                     dilation=self.dilation,\n                                                     nocare_area=None)\n            # Negative examples included in the training\n            scr_gt[scr_gt_neg > 0] = 0\n            scr_nocare[scr_gt_neg > 0] = 0",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/custom_transforms_f.py:289-310"
+    },
+    "1365": {
+        "file_id": 128,
+        "content": "This code segment appears to be responsible for generating ground truth (GT) masks from human-drawn scribbles. If the first frame is encountered, it computes dilated foreground and background masks along with a no-care area. It also excludes negative examples from the training set. The mask and nocare_area are computed based on the conditions in the code snippet.",
+        "type": "comment"
+    },
+    "1366": {
+        "file_id": 128,
+        "content": "        # For annotation rounds generated by the robot\n        else:\n            # Compute dilated foreground, background, and no-care area\n            scr_gt_extra, _ = helpers.gt_from_scribble(mask,\n                                                       dilation=self.dilation,\n                                                       nocare_area=None)\n            scr_gt_neg, _ = helpers.gt_from_scribble(mask_neg,\n                                                     dilation=self.dilation,\n                                                     nocare_area=None)\n            # Ignore pixels that are not foreground\n            if not self.use_previous_mask:\n                scr_nocare_extra = 1. - scr_gt_extra\n            else:\n                scr_nocare_extra = \\\n                    (cv2.imread(os.path.join(self.previous_mask_path, meta['seq_name'], str(meta['obj_id']),\n                                             meta['frame_id'] + '.png'), 0) > 0.8 * 255).astype(np.float32)\n            # Negative examples included in training",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/custom_transforms_f.py:312-330"
+    },
+    "1367": {
+        "file_id": 128,
+        "content": "This code computes dilated foreground, background, and no-care area for annotation rounds generated by the robot. It first generates scr_gt_extra and scr_gt_neg using the gt_from_scribble function from helpers module. Then it ignores pixels that are not foreground if use_previous_mask is False. Else, it reads a previous mask image, converts it into float32 format and assigns pixel values greater than 0.8*255 to 1. These computations will be used in the subsequent operations of the code.",
+        "type": "comment"
+    },
+    "1368": {
+        "file_id": 128,
+        "content": "            scr_gt_extra[scr_gt_neg > 0] = 0\n            scr_nocare_extra[scr_gt_neg > 0] = 0\n            scr_gt = np.maximum(scr_gt, scr_gt_extra)\n            scr_nocare_extra[scr_gt > 0] = 0\n            scr_nocare = np.minimum(scr_nocare, scr_nocare_extra)\n        sample['scribble_gt'] = scr_gt\n        sample['scribble_void_pixels'] = scr_nocare\n        return sample\nclass ToTensor(object):\n    \"\"\"Convert ndarrays in sample to Tensors.\"\"\"\n    def __call__(self, sample):\n        for elem in sample.keys():\n            if 'meta' in elem:\n                continue\n            tmp = sample[elem]\n            if tmp.ndim == 2:\n                tmp = tmp[:, :, np.newaxis]\n            else:\n                tmp = tmp / 255.\n                tmp -= (0.485, 0.456, 0.406)\n                tmp /= (0.229, 0.224, 0.225)\n            # swap color axis because\n            # numpy image: H x W x C\n            # paddle image: C X H X W\n            tmp = tmp.transpose([2, 0, 1])\n            sample[elem] = paddle.to_tensor(tmp)\n        return sample",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/custom_transforms_f.py:331-366"
+    },
+    "1369": {
+        "file_id": 128,
+        "content": "This code is part of a data loader in the Ma-Net application. It transforms image and mask data for PaddlePaddle's video object detection task. The code handles scribble ground truth (scribble_gt) and scribble void pixels (scribble_void_pixels), applying necessary adjustments to ensure correct formatting and values. It then uses the ToTensor class to convert ndarrays in samples to tensors, handling color axis swapping due to differences between numpy and PaddlePaddle image formats.",
+        "type": "comment"
+    },
+    "1370": {
+        "file_id": 128,
+        "content": "class GenerateEdge(object):\n    \"\"\"\n    \"\"\"\n    def __init__(self, edgesize=1):\n        self.edgesize = edgesize\n    def __call__(self, sample):\n        \"\"\"\n        \"\"\"\n        if \"label2\" in sample:\n            label2 = sample['label2']\n            kernel_size = 2 * self.edgesize + 1\n            maskedge = np.zeros_like(label2)\n            maskedge[np.where(label2[:, 1:] != label2[:, :-1])] = 1\n            maskedge[np.where(label2[1:, :] != label2[:-1, :])] = 1\n            maskedge = cv2.dilate(\n                maskedge, np.ones((kernel_size, kernel_size), dtype=np.uint8))\n            sample[\"edge_mask\"] = maskedge\n        else:\n            raise RuntimeError(\n                \"We need parsing mask to generate the edge mask.\")\n        return sample\nclass GenerateEdge_2(object):\n    \"\"\"\n    \"\"\"\n    def __init__(self, edgesize=1):\n        self.edgesize = edgesize\n    def __call__(self, sample):\n        \"\"\"\n        \"\"\"\n        if \"ref_frame_gt\" in sample:\n            label2 = sample['ref_frame_gt']\n            kernel_size = 2 * self.edgesize + 1",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/custom_transforms_f.py:369-405"
+    },
+    "1371": {
+        "file_id": 128,
+        "content": "The code defines two classes, `GenerateEdge` and `GenerateEdge_2`, which generate edge masks from the input samples. The edge masks are generated based on whether there is a \"label2\" or \"ref_frame_gt\" present in the sample. If these labels are present, a kernel is applied to create an edge mask, which is then added to the sample. If they are not present, a RuntimeError is raised.",
+        "type": "comment"
+    },
+    "1372": {
+        "file_id": 128,
+        "content": "            maskedge = np.zeros_like(label2)\n            maskedge[np.where(label2[:, 1:] != label2[:, :-1])] = 1\n            maskedge[np.where(label2[1:, :] != label2[:-1, :])] = 1\n            maskedge = cv2.dilate(\n                maskedge, np.ones((kernel_size, kernel_size), dtype=np.uint8))\n            sample[\"edge_mask\"] = maskedge\n        else:\n            raise RuntimeError(\n                \"We need parsing mask to generate the edge mask.\")\n        return sample",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/custom_transforms_f.py:406-416"
+    },
+    "1373": {
+        "file_id": 128,
+        "content": "This code checks if a parsing mask is provided. If it is, it creates an edge mask by comparing the labels horizontally and vertically. It then dilates the resulting mask using cv2.dilate and assigns it to sample[\"edge_mask\"]. If no parsing mask is provided, it raises a RuntimeError.",
+        "type": "comment"
+    },
+    "1374": {
+        "file_id": 129,
+        "content": "/applications/Ma-Net/dataloaders/davis_2017_f.py",
+        "type": "filepath"
+    },
+    "1375": {
+        "file_id": 129,
+        "content": "This code initializes a DAVIS 2017 dataset class for loading and preprocessing, creates a custom dataloader, prepares input for Ma-Net model, and outputs JSON files with sequence data.",
+        "type": "summary"
+    },
+    "1376": {
+        "file_id": 129,
+        "content": "from __future__ import division\nimport json\nimport os\nimport shutil\nimport numpy as np\nimport paddle, cv2\nfrom random import choice\nfrom paddle.io import Dataset\nimport json\nfrom PIL import Image\nfrom davisinteractive.utils.scribbles import scribbles2mask, annotated_frames\nimport sys\nsys.path.append(\"..\")\nfrom config import cfg\nimport time\nclass DAVIS2017_Test_Manager():\n    def __init__(self,\n                 split='val',\n                 root=cfg.DATA_ROOT,\n                 transform=None,\n                 rgb=False,\n                 seq_name=None):\n        self.split = split\n        self.db_root_dir = root\n        self.rgb = rgb\n        self.transform = transform\n        self.seq_name = seq_name\n    def get_image(self, idx):\n        frame_name = str(idx)\n        while len(frame_name) != 5:\n            frame_name = '0' + frame_name\n        imgpath = os.path.join(self.db_root_dir, 'JPEGImages/480p/',\n                               str(self.seq_name), frame_name + '.jpg')\n        img = cv2.imread(imgpath)\n        img = np.array(img, dtype=np.float32)",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:1-40"
+    },
+    "1377": {
+        "file_id": 129,
+        "content": "This code snippet defines a DAVIS2017_Test_Manager class for loading and managing test data from the DAVIS 2017 dataset. It accepts parameters such as split, root directory, transformations to apply, and sequence name. The get_image() method retrieves an image from the specified directory based on the index, reads it into a numpy array, and converts it into float32 data type. This class can be used for loading test images in the DAVIS 2017 dataset for further processing or analysis.",
+        "type": "comment"
+    },
+    "1378": {
+        "file_id": 129,
+        "content": "        sample = {'img': img}\n        if self.transform is not None:\n            sample = self.transform(sample)\n        return sample\nclass DAVIS2017_Feature_Extract(Dataset):\n    def __init__(self,\n                 split='val',\n                 root=cfg.DATA_ROOT,\n                 transform=None,\n                 rgb=False,\n                 seq_name=None):\n        self.split = split\n        self.db_root_dir = root\n        self.rgb = rgb\n        self.transform = transform\n        self.seq_name = seq_name\n        self.img_list = np.sort(\n            os.listdir(\n                os.path.join(self.db_root_dir, 'JPEGImages/480p/',\n                             str(seq_name))))\n    def __len__(self):\n        return len(self.img_list)\n    def __getitem__(self, idx):\n        img = self.img_list[idx]\n        imgpath = os.path.join(self.db_root_dir, 'JPEGImages/480p/',\n                               str(self.seq_name), img)\n        current_img = cv2.imread(imgpath)\n        current_img = np.array(current_img, dtype=np.float32)",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:41-73"
+    },
+    "1379": {
+        "file_id": 129,
+        "content": "This code is initializing a dataset for DAVIS2017, which contains images and their features. It loads the image list from a specified directory, and applies optional transformations to the samples before returning them. The dataset supports different splits (e.g., training or validation) and allows for specifying an optional sequence name.",
+        "type": "comment"
+    },
+    "1380": {
+        "file_id": 129,
+        "content": "        h, w, _ = current_img.shape\n        sample = {'img1': current_img}\n        sample['meta'] = {\n            'seq_name': self.seq_name,\n            'h_w': (h, w),\n            'img_path': imgpath\n        }\n        if self.transform is not None:\n            sample = self.transform(sample)\n        return sample\nclass DAVIS2017_VOS_Test(Dataset):\n    \"\"\"\n    \"\"\"\n    def __init__(self,\n                 split='val',\n                 root=cfg.DATA_ROOT,\n                 transform=None,\n                 rgb=False,\n                 result_root=None,\n                 seq_name=None):\n        self.split = split\n        self.db_root_dir = root\n        self.result_root = result_root\n        self.rgb = rgb\n        self.transform = transform\n        self.seq_name = seq_name\n        self.seq_list_file = os.path.join(\n            self.db_root_dir, 'ImageSets', '2017',\n            '_'.join(self.split) + '_instances.txt')\n        self.seqs = []\n        for splt in self.split:\n            with open(\n                    os.path.join(self.db_root_dir, 'ImageSets', '2017',",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:74-109"
+    },
+    "1381": {
+        "file_id": 129,
+        "content": "The code defines a DAVIS2017_VOS_Test dataset class which loads data from the DAVIS 2017 dataset for semantic segmentation tasks. It takes various parameters such as split, root directory, transformation function, if RGB images are required, result root directory, and sequence name. It reads a list of sequences from a file and returns an image sample along with its metadata (sequence name, height, width, and image path).",
+        "type": "comment"
+    },
+    "1382": {
+        "file_id": 129,
+        "content": "                                 self.split + '.txt')) as f:\n                seqs_tmp = f.readlines()\n            seqs_tmp = list(map(lambda elem: elem.strip(), seqs_tmp))\n            self.seqs.extend(seqs_tmp)\n        if not self._check_preprocess():\n            self._preprocess()\n        assert self.seq_name in self.seq_dict.keys(\n        ), '{} not in {} set.'.format(self.seq_name, '_'.join(self.split))\n        names_img = np.sort(\n            os.listdir(\n                os.path.join(self.db_root_dir, 'JPEGImages/480p/',\n                             str(seq_name))))\n        img_list = list(\n            map(lambda x: os.path.join('JPEGImages/480p/', str(seq_name), x),\n                names_img))\n        name_label = np.sort(\n            os.listdir(\n                os.path.join(self.db_root_dir, 'Annotations/480p/',\n                             str(seq_name))))\n        labels = list(\n            map(lambda x: os.path.join('Annotations/480p/', str(seq_name), x),\n                name_label))\n        if not os.path.isfile(",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:110-135"
+    },
+    "1383": {
+        "file_id": 129,
+        "content": "The code reads sequences from a file and extends the existing sequence list. It then checks if preprocessing is required and performs it if necessary. The code asserts that the sequence name exists in the dictionary of sequences. Next, it retrieves image names and label names, creating lists of image paths and label paths respectively. Finally, it ensures that a specific file exists.",
+        "type": "comment"
+    },
+    "1384": {
+        "file_id": 129,
+        "content": "                os.path.join(self.result_root, seq_name, name_label[0])):\n            if not os.path.exists(os.path.join(self.result_root, seq_name)):\n                os.makedirs(os.path.join(self.result_root, seq_name))\n                shutil.copy(\n                    os.path.join(self.db_root_dir, labels[0]),\n                    os.path.join(self.result_root, seq_name, name_label[0]))\n            else:\n                shutil.copy(\n                    os.path.join(self.db_root_dir, labels[0]),\n                    os.path.join(self.result_root, seq_name, name_label[0]))\n        self.first_img = names_img[0]\n        self.first_label = name_label[0]\n        self.img_list = names_img[1:]\n    def __len__(self):\n        return len(self.img_list)\n    def __getitem__(self, idx):\n        img = self.img_list[idx]\n        imgpath = os.path.join(self.db_root_dir, 'JPEGImages/480p/',\n                               str(self.seq_name), img)\n        num_frame = int(img.split('.')[0])\n        ref_img = os.path.join(self.db_root_dir, 'JPEGImages/480p/',",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:136-161"
+    },
+    "1385": {
+        "file_id": 129,
+        "content": "This code creates a data loader for the DAVIS 2017 dataset. It checks if the result directory exists, and if not, it creates it and copies the label file to the new directory. If the directory already exists, it simply copies the label file. The function then sets the first image and its label, as well as the remaining images in the list. Lastly, it defines the length of the dataset and a method for getting items from the dataset at specific indices.",
+        "type": "comment"
+    },
+    "1386": {
+        "file_id": 129,
+        "content": "                               str(self.seq_name), self.first_img)\n        prev_frame = num_frame - 1\n        prev_frame = str(prev_frame)\n        while len(prev_frame) != 5:\n            prev_frame = '0' + prev_frame\n        prev_img = os.path.join(self.db_root_dir, 'JPEGImages/480p/',\n                                str(self.seq_name),\n                                prev_frame + '.' + img.split('.')[-1])\n        current_img = cv2.imread(imgpath)\n        current_img = np.array(current_img, dtype=np.float32)\n        ref_img = cv2.imread(ref_img)\n        ref_img = np.array(ref_img, dtype=np.float32)\n        prev_img = cv2.imread(prev_img)\n        prev_img = np.array(prev_img, dtype=np.float32)\n        ref_label = os.path.join(self.db_root_dir, 'Annotations/480p/',\n                                 str(self.seq_name), self.first_label)\n        ref_label = Image.open(ref_label)\n        ref_label = np.array(ref_label, dtype=np.uint8)\n        prev_label = os.path.join(\n            self.result_root, str(self.seq_name),",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:162-186"
+    },
+    "1387": {
+        "file_id": 129,
+        "content": "The code snippet is responsible for loading images and labels from a specific path. It handles image path formatting, ensures all frames have 5 digits, reads images using cv2, converts them to numpy arrays with float32 dtype, and retrieves reference labels by opening and converting the label file to uint8 dtype.",
+        "type": "comment"
+    },
+    "1388": {
+        "file_id": 129,
+        "content": "            prev_frame + '.' + self.first_label.split('.')[-1])\n        prev_label = Image.open(prev_label)\n        prev_label = np.array(prev_label, dtype=np.uint8)\n        obj_num = self.seq_dict[self.seq_name][-1]\n        sample = {\n            'ref_img': ref_img,\n            'prev_img': prev_img,\n            'current_img': current_img,\n            'ref_label': ref_label,\n            'prev_label': prev_label\n        }\n        sample['meta'] = {\n            'seq_name': self.seq_name,\n            'frame_num': num_frame,\n            'obj_num': obj_num,\n            'current_name': img\n        }\n        if self.transform is not None:\n            sample = self.transform(sample)\n        return sample\n    def _check_preprocess(self):\n        _seq_list_file = self.seq_list_file\n        if not os.path.isfile(_seq_list_file):\n            return False\n        else:\n            self.seq_dict = json.load(open(self.seq_list_file, 'r'))\n            return True\n    def _preprocess(self):\n        self.seq_dict = {}\n        for seq in self.seqs:",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:187-219"
+    },
+    "1389": {
+        "file_id": 129,
+        "content": "This code appears to be part of a data loader for a video object detection task. It loads frames and labels from a specific dataset (DAVIS 2017) and creates samples for each frame. The _check_preprocess function checks if the sequence list file exists, and if so, it loads the dictionary of sequences. The _preprocess function initializes an empty dictionary for the sequence dictionary and iterates over the specified sequences to process them.",
+        "type": "comment"
+    },
+    "1390": {
+        "file_id": 129,
+        "content": "            # Read object masks and get number of objects\n            name_label = np.sort(\n                os.listdir(\n                    os.path.join(self.db_root_dir, 'Annotations/480p/', seq)))\n            label_path = os.path.join(self.db_root_dir, 'Annotations/480p/',\n                                      seq, name_label[0])\n            _mask = np.array(Image.open(label_path))\n            _mask_ids = np.unique(_mask)\n            n_obj = _mask_ids[-1]\n            self.seq_dict[seq] = list(range(1, n_obj + 1))\n        with open(self.seq_list_file, 'w') as outfile:\n            outfile.write('{{\\n\\t\"{:s}\": {:s}'.format(\n                self.seqs[0], json.dumps(self.seq_dict[self.seqs[0]])))\n            for ii in range(1, len(self.seqs)):\n                outfile.write(',\\n\\t\"{:s}\": {:s}'.format(\n                    self.seqs[ii], json.dumps(self.seq_dict[self.seqs[ii]])))\n            outfile.write('\\n}\\n')\n        print('Preprocessing finished')\nclass DAVIS2017_VOS_Train(Dataset):\n    \"\"\"DAVIS2017 dataset for training",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:220-244"
+    },
+    "1391": {
+        "file_id": 129,
+        "content": "This code reads object masks from DAVIS 2017 dataset, obtains the number of objects, and creates a dictionary containing sequence names as keys and their corresponding unique object IDs as values. The dictionary is then saved to a file in JSON format for further use in the DAVIS2017_VOS_Train class, which serves as the training dataset for the DAVIS 2017 dataset.",
+        "type": "comment"
+    },
+    "1392": {
+        "file_id": 129,
+        "content": "    Return: imgs: N*2*3*H*W,label: N*2*1*H*W, seq-name: N, frame_num:N\n    \"\"\"\n    def __init__(self,\n                 split='train',\n                 root=cfg.DATA_ROOT,\n                 transform=None,\n                 rgb=False):\n        self.split = split\n        self.db_root_dir = root\n        self.rgb = rgb\n        self.transform = transform\n        self.seq_list_file = os.path.join(\n            self.db_root_dir, 'ImageSets', '2017',\n            '_'.join(self.split) + '_instances.txt')\n        self.seqs = []\n        for splt in self.split:\n            with open(\n                    os.path.join(self.db_root_dir, 'ImageSets', '2017',\n                                 self.split + '.txt')) as f:\n                seqs_tmp = f.readlines()\n            seqs_tmp = list(map(lambda elem: elem.strip(), seqs_tmp))\n            self.seqs.extend(seqs_tmp)\n        self.imglistdic = {}\n        if not self._check_preprocess():\n            self._preprocess()\n        self.sample_list = []\n        for seq_name in self.seqs:\n            images = np.sort(",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:246-273"
+    },
+    "1393": {
+        "file_id": 129,
+        "content": "This code initializes a class for loading and preprocessing data from the DAVIS 2017 dataset. It takes parameters such as split, root directory, transformation functions, and RGB mode. The code reads sequence lists and checks if pre-processing is necessary before creating a list of samples to be loaded.",
+        "type": "comment"
+    },
+    "1394": {
+        "file_id": 129,
+        "content": "                os.listdir(\n                    os.path.join(self.db_root_dir, 'JPEGImages/480p/',\n                                 seq_name.strip())))\n            images_path = list(\n                map(\n                    lambda x: os.path.join('JPEGImages/480p/', seq_name.strip(),\n                                           x), images))\n            lab = np.sort(\n                os.listdir(\n                    os.path.join(self.db_root_dir, 'Annotations/480p/',\n                                 seq_name.strip())))\n            lab_path = list(\n                map(\n                    lambda x: os.path.join('Annotations/480p/', seq_name.strip(\n                    ), x), lab))\n            self.imglistdic[seq_name] = (images, lab)\n    def __len__(self):\n        return len(self.seqs)\n    def __getitem__(self, idx):\n        seqname = self.seqs[idx]\n        imagelist, lablist = self.imglistdic[seqname]\n        prev_img = np.random.choice(imagelist[:-1], 1)\n        prev_img = prev_img[0]\n        frame_num = int(prev_img.split('.')[0]) + 1",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:274-299"
+    },
+    "1395": {
+        "file_id": 129,
+        "content": "The code defines a class for loading data from the DAVIS 2017 dataset, extracting image and annotation files based on the given sequence name. It also provides methods to get the length of the dataset and retrieve specific items by index. The dataset is organized into 'JPEGImages/480p' and 'Annotations/480p' directories with corresponding sequence names. It selects a random previous image from the list, increments its frame number by 1 to get the next image, and returns both the image and annotation files.",
+        "type": "comment"
+    },
+    "1396": {
+        "file_id": 129,
+        "content": "        next_frame = str(frame_num)\n        while len(next_frame) != 5:\n            next_frame = '0' + next_frame\n        ###############################Processing two adjacent frames and labels\n        img2path = os.path.join('JPEGImages/480p/', seqname,\n                                next_frame + '.' + prev_img.split('.')[-1])\n        img2 = cv2.imread(os.path.join(self.db_root_dir, img2path))\n        img2 = np.array(img2, dtype=np.float32)\n        imgpath = os.path.join('JPEGImages/480p/', seqname, prev_img)\n        img1 = cv2.imread(os.path.join(self.db_root_dir, imgpath))\n        img1 = np.array(img1, dtype=np.float32)\n        ###############\n        labelpath = os.path.join(\n            'Annotations/480p/', seqname,\n            prev_img.split('.')[0] + '.' + lablist[0].split('.')[-1])\n        label1 = Image.open(os.path.join(self.db_root_dir, labelpath))\n        label2path = os.path.join('Annotations/480p/', seqname,\n                                  next_frame + '.' + lablist[0].split('.')[-1])\n        label2 = Image.open(os.path.join(self.db_root_dir, label2path))",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:300-320"
+    },
+    "1397": {
+        "file_id": 129,
+        "content": "Processing two adjacent frames and labels: Reads next image, prepares previous image and their corresponding labels from file paths.",
+        "type": "comment"
+    },
+    "1398": {
+        "file_id": 129,
+        "content": "        label1 = np.array(label1, dtype=np.uint8)\n        label2 = np.array(label2, dtype=np.uint8)\n        ###################\n        ref_img = np.random.choice(imagelist, 1)\n        ref_img = ref_img[0]\n        ref_img_name = ref_img\n        ref_scribble_label = Image.open(\n            os.path.join(\n                self.db_root_dir, 'Annotations/480p/', seqname,\n                ref_img_name.split('.')[0] + '.' + lablist[0].split('.')[-1]))\n        ref_scribble_label = np.array(ref_scribble_label, dtype=np.uint8)\n        while len(np.unique(ref_scribble_label)) < self.seq_dict[seqname][\n                -1] + 1 or ref_img == prev_img or ref_img == (\n                    next_frame + '.' + prev_img.split('.')[-1]):\n            ref_img = np.random.choice(imagelist, 1)\n            ref_img = ref_img[0]\n            ref_img_name = ref_img\n            ref_scribble_label = Image.open(\n                os.path.join(\n                    self.db_root_dir, 'Annotations/480p/', seqname,\n                    ref_img_name.split('.')[0] + '.' +",
+        "type": "code",
+        "location": "/applications/Ma-Net/dataloaders/davis_2017_f.py:322-344"
+    },
+    "1399": {
+        "file_id": 129,
+        "content": "This code randomly selects a reference image and associated scribble label for each video frame, ensuring the labels are unique and not from the same or consecutive frames. It also ensures that the selected images have corresponding annotations in the 480p folder.",
+        "type": "comment"
+    }
+}

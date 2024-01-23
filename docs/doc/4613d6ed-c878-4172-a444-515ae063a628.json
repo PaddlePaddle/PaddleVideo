@@ -1,0 +1,10 @@
+{
+    "summary": "This code provides a list of useful action recognition datasets along with their respective links for further reference. These datasets are essential for training and evaluating action recognition models, each serving its specific purpose in the field of computer vision.",
+    "details": [
+        {
+            "comment": "This code provides a list of useful action recognition datasets along with their respective links for further reference. These datasets are essential for training and evaluating action recognition models, each serving its specific purpose in the field of computer vision.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/english_documents/tutorials/Action Recognition Datasets\":0-11",
+            "content": "Usefull Action Recognition Datasets.\n    AVA,  https://arxiv.org/abs/1705.08421\n    Kinetics, https://arxiv.org/abs/1705.06950\n    YouTube-8M, https://arxiv.org/abs/1609.08675\n    ActivityNet, http://www.cv-foundation.org/openaccess/content_cvpr_2015/html/Heilbron_ActivityNet_A_Large-Scale_2015_CVPR_paper.html\n    Moments in Time, https://arxiv.org/pdf/1801.03150.pdf\n    Charades, https://arxiv.org/abs/1604.01753\n    EPIC-Kitchens, https://arxiv.org/abs/1804.02748\n    THUMOS, https://arxiv.org/abs/1604.06182\n    UCF-101, http://crcv.ucf.edu/papers/UCF101_CRCV-TR-12-01.pdf\n    HMDB51, http://serre-lab.clps.brown.edu/wp-content/uploads/2012/08/Kuehne_etal_iccv11.pdf"
+        }
+    ]
+}

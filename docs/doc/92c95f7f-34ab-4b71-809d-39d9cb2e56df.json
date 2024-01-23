@@ -1,0 +1,10 @@
+{
+    "summary": "This code snippet contains copyright and license information, imports necessary modules from the PaddlePaddle framework, and defines two classes 'BaseSegment' and 'Manet'. It also specifies that these are the components included in the current module.",
+    "details": [
+        {
+            "comment": "This code snippet contains copyright and license information, imports necessary modules from the PaddlePaddle framework, and defines two classes 'BaseSegment' and 'Manet'. It also specifies that these are the components included in the current module.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/EIVideo/EIVideo/paddlevideo/modeling/framework/segment/__init__.py\":0-18",
+            "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom .base import BaseSegment\nfrom .manet_stage1 import Manet\n__all__ = [\n    'BaseSegment',\n    'Manet',\n]"
+        }
+    ]
+}

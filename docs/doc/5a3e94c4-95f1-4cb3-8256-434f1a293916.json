@@ -1,0 +1,10 @@
+{
+    "summary": "This code snippet provides instructions for downloading the DAVIS2017 dataset and organizing its folder structure within the PaddleVideo project directory. It also provides a link to access the file \"DAVIS2017/ImageSets/2017/v_a_l_instances.txt\" if needed.",
+    "details": [
+        {
+            "comment": "This code snippet provides instructions for downloading the DAVIS2017 dataset and organizing its folder structure within the PaddleVideo project directory. It also provides a link to access the file \"DAVIS2017/ImageSets/2017/v_a_l_instances.txt\" if needed.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/Ma-Net/dataloaders/DAVIS2017.md\":0-26",
+            "content": "[\u7b80\u4f53\u4e2d\u6587](../../zh-CN/dataset/DAVIS2017.md) | English\n# DAVIS2017 Data Preparation\n## 1.Data Download\nDownload [DAVIS2017](https://data.vision.ee.ethz.ch/csergi/share/davis/DAVIS-2017-trainval-480p.zip) and [scribbles](https://data.vision.ee.ethz.ch/csergi/share/DAVIS-Interactive/DAVIS-2017-scribbles-trainval.zip) into one folder. Please refer to [DAVIS](https://davischallenge.org/davis2017/code.html).\nIf you need the file \"DAVIS2017/ImageSets/2017/v_a_l_instances.txt\", please refer to the link [google]( https://drive.google.com/file/d/1aLPaQ_5lyAi3Lk3d2fOc_xewSrfcrQlc/view?usp=sharing)\n## 2.Folder Structure\nIn the context of the whole project (for Ma-Net only), the folder structure will look like:\n```shell\nPaddleVideo\n\u251c\u2500\u2500 configs\n\u251c\u2500\u2500 paddlevideo\n\u251c\u2500\u2500 docs\n\u251c\u2500\u2500 tools\n\u251c\u2500\u2500 data\n\u2502 \t\u2514\u2500\u2500 DAVIS2017\n\u2502   \u2502 \t\u251c\u2500\u2500 Annotations\n\u2502   \u2502 \t\u251c\u2500\u2500 ImageSets\n\u2502   \u2502 \t\u251c\u2500\u2500 JPEGImages\n\u2502   \u2502 \t\u2514\u2500\u2500 Scribbles\n```"
+        }
+    ]
+}

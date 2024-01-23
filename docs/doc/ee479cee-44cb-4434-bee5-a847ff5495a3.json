@@ -1,0 +1,20 @@
+{
+    "summary": "The AGCN2sHead class is a head for the AGCN2s model in PaddleVideo, with input arguments defining channels, classes, people, and dropout ratio. It registers under HEADS registry, inherits from BaseHead class, initializes base class, sets instance variables, creates a linear layer, and reshapes input for forward pass. The code takes the input tensor x, averages along axes, passes through a fully connected layer (self.fc) to produce output.",
+    "details": [
+        {
+            "comment": "The code defines the AGCN2sHead class, a head for the AGCN2s model in PaddleVideo. It has input feature channels, number of classes, number of people, and dropout ratio as arguments. This head is registered under HEADS registry and inherits from BaseHead class.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/heads/agcn2s_head.py\":0-31",
+            "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport math\nimport paddle\nimport paddle.nn as nn\nfrom .base import BaseHead\nfrom ..registry import HEADS\nfrom ..weight_init import weight_init_\n@HEADS.register()\nclass AGCN2sHead(BaseHead):\n    \"\"\"\n    Head for AGCN2s model.\n    Args:\n        in_channels: int, input feature channels. Default: 64.\n        num_classes: int, output the number of classes.\n        M: int, number of people.\n        drop_out: float, dropout ratio of layer. Default: 0."
+        },
+        {
+            "comment": "Class constructor takes in_channels, num_classes, and M as parameters, initializes base class, sets instance variables, creates a linear layer with specified weights using paddle's Normal initializer, and reshapes input for forward pass.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/heads/agcn2s_head.py\":32-55",
+            "content": "    \"\"\"\n    def __init__(self, in_channels=64, num_classes=10, M=2, **kwargs):\n        super().__init__(num_classes, in_channels, **kwargs)\n        self.in_channels = in_channels\n        self.M = M\n        weight_attr = paddle.ParamAttr(\n            name=\"linear_weight\",\n            initializer=paddle.nn.initializer.Normal(mean=0.0,\n                                                     std=math.sqrt(\n                                                         2. / num_classes)))\n        self.fc = nn.Linear(self.in_channels * 4,\n                            self.num_classes,\n                            weight_attr=weight_attr)\n    def forward(self, x):\n        \"\"\"Define how the head is going to run.\n        \"\"\"\n        assert x.shape[\n            0] % self.M == 0, f'The first dimension of the output must be an integer multiple of the number of people M, but recieved shape[0]={x.shape[0]}, M={self.M}'\n        # N*M,C,T,V\n        N = x.shape[0] // self.M\n        c_new = x.shape[1]\n        x = x.reshape([N, self.M, c_new, -1])"
+        },
+        {
+            "comment": "This code takes the input tensor x, averages it along the third and first axes respectively, then passes it through a fully connected layer (self.fc) to produce an output.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/heads/agcn2s_head.py\":56-58",
+            "content": "        x = x.mean(3).mean(1)\n        return self.fc(x)"
+        }
+    ]
+}

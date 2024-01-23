@@ -1,0 +1,15 @@
+{
+    "summary": "The code defines global parameters for the VGGish model, including architectural constants, hyperparameters, and optimizer settings. It extracts audio features from spectrogram patches using PCA quantization and embedding processing, with options to adjust STFT window and hop lengths, mel frequency bins, and learning rate.",
+    "details": [
+        {
+            "comment": "This code sets global parameters for the VGGish model. It defines architectural constants, hyperparameters for feature and example generation, embedding postprocessing, and training. The VGGish model is used to extract audio features from spectrogram patches, with options for PCA-based quantization and embedding processing. Hyperparameters control the STFT window and hop lengths, mel frequency bins, and learning rate for Adam optimizer.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/BasketballAction/predict/action_detect/mfcc/vgg_params.py\":0-28",
+            "content": "\"\"\"Global parameters for the VGGish model.\nSee vggish_slim.py for more information.\n\"\"\"\n# Architectural constants.\nNUM_FRAMES = 50  # Frames in input mel-spectrogram patch.\nNUM_BANDS = 64  # Frequency bands in input mel-spectrogram patch.\nEMBEDDING_SIZE = 128  # Size of embedding layer.\n# Hyperparameters used in feature and example generation.\nSAMPLE_RATE = 16000\nSTFT_WINDOW_LENGTH_SECONDS = 0.040\nSTFT_HOP_LENGTH_SECONDS = 0.020\nNUM_MEL_BINS = NUM_BANDS\nMEL_MIN_HZ = 125\nMEL_MAX_HZ = 7500\nLOG_OFFSET = 0.01  # Offset used for stabilized log of input mel-spectrogram.\nEXAMPLE_WINDOW_SECONDS = 1.00  # Each example contains 96 10ms frames\nEXAMPLE_HOP_SECONDS = 1.00  # with zero overlap.\n# Parameters used for embedding postprocessing.\nPCA_EIGEN_VECTORS_NAME = 'pca_eigen_vectors'\nPCA_MEANS_NAME = 'pca_means'\nQUANTIZE_MIN_VAL = -2.0\nQUANTIZE_MAX_VAL = +2.0\n# Hyperparameters used in training.\nINIT_STDDEV = 0.01  # Standard deviation used to initialize weights.\nLEARNING_RATE = 1e-4  # Learning rate for the Adam optimizer."
+        },
+        {
+            "comment": "This code sets the Adam optimizer's epsilon value to 1e-8, defines names for input and output operations, tensors, and features. It also assigns the name \"audio_embedding\" to a feature.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/BasketballAction/predict/action_detect/mfcc/vgg_params.py\":29-36",
+            "content": "ADAM_EPSILON = 1e-8  # Epsilon for the Adam optimizer.\n# Names of ops, tensors, and features.\nINPUT_OP_NAME = 'vggish/input_features'\nINPUT_TENSOR_NAME = INPUT_OP_NAME + ':0'\nOUTPUT_OP_NAME = 'vggish/embedding'\nOUTPUT_TENSOR_NAME = OUTPUT_OP_NAME + ':0'\nAUDIO_EMBEDDING_FEATURE_NAME = 'audio_embedding'"
+        }
+    ]
+}

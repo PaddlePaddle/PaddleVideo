@@ -1,0 +1,15 @@
+{
+    "summary": "This code defines a base class for metrics in the PaddleVideo library, initializing with data size, batch size, world size, and log interval. It includes all-gather and concatenation methods, along with abstract update and accumulate functions to be implemented by subclasses.",
+    "details": [
+        {
+            "comment": "This code is part of the PaddleVideo library and defines a base class for metrics. It initializes the metric with data size, batch size, world size, and log interval. The gather_from_gpu method gathers Tensors from all GPUs into a list and concatenates them on a specified axis.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/metrics/base.py\":0-30",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom abc import abstractmethod\nimport paddle\nfrom paddlevideo.utils import get_dist_info\nfrom .registry import METRIC\nclass BaseMetric(object):\n    def __init__(self, data_size, batch_size, log_interval=1, **kwargs):\n        self.data_size = data_size\n        self.batch_size = batch_size\n        _, self.world_size = get_dist_info()\n        self.log_interval = log_interval\n    def gather_from_gpu(self,\n                        gather_object: paddle.Tensor,\n                        concat_axis=0) -> paddle.Tensor:\n        \"\"\"gather Tensor from all gpus into a list and concatenate them on `concat_axis`."
+        },
+        {
+            "comment": "Function that performs all-gather and concatenation on the gather object Tensor. Abstract methods for update and accumulate that must be implemented in subclasses.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/metrics/base.py\":32-51",
+            "content": "        Args:\n            gather_object (paddle.Tensor): gather object Tensor\n            concat_axis (int, optional): axis for concatenation. Defaults to 0.\n        Returns:\n            paddle.Tensor: gatherd & concatenated Tensor\n        \"\"\"\n        gather_object_list = []\n        paddle.distributed.all_gather(gather_object_list, gather_object.cuda())\n        return paddle.concat(gather_object_list, axis=concat_axis)\n    @abstractmethod\n    def update(self):\n        raise NotImplementedError(\n            \"'update' method must be implemented in subclass\")\n    @abstractmethod\n    def accumulate(self):\n        raise NotImplementedError(\n            \"'accumulate' method must be implemented in subclass\")"
+        }
+    ]
+}

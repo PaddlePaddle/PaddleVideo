@@ -1,0 +1,10 @@
+{
+    "summary": "This code is part of the PaddleVideo library and defines a segmenter module. It includes three classes: BaseSegmenter, MSTCN, and ASRF. These classes are used for video frame-level feature extraction, semantic segmentation, and audio source separation respectively. The __all__ variable lists all exported names in this package.",
+    "details": [
+        {
+            "comment": "This code is part of the PaddleVideo library and defines a segmenter module. It includes three classes: BaseSegmenter, MSTCN, and ASRF. These classes are used for video frame-level feature extraction, semantic segmentation, and audio source separation respectively. The __all__ variable lists all exported names in this package.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/framework/segmenters/__init__.py\":0-16",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nfrom .base import BaseSegmenter\nfrom .ms_tcn import MSTCN\nfrom .asrf import ASRF\n__all__ = ['BaseSegmenter', 'MSTCN', 'ASRF']"
+        }
+    ]
+}

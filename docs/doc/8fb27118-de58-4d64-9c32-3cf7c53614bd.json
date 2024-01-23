@@ -1,0 +1,10 @@
+{
+    "summary": "The function `is_eval_epoch` determines whether the model should be evaluated at a given epoch based on the provided configs, current epoch, and multigrid training schedule. If the current epoch is equal to the total number of epochs or if there's a non-null multigrid schedule, it checks if the current epoch is a time for evaluation based on the schedule intervals. The function returns True when an evaluation should occur and False otherwise.",
+    "details": [
+        {
+            "comment": "The function `is_eval_epoch` determines whether the model should be evaluated at a given epoch based on the provided configs, current epoch, and multigrid training schedule. If the current epoch is equal to the total number of epochs or if there's a non-null multigrid schedule, it checks if the current epoch is a time for evaluation based on the schedule intervals. The function returns True when an evaluation should occur and False otherwise.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/utils/multigrid/interval_helper.py\":0-18",
+            "content": "def is_eval_epoch(cfg, cur_epoch, total_epochs, multigrid_schedule):\n    \"\"\"\n    Determine if the model should be evaluated at the current epoch.\n    Args:\n        cfg (CfgNode): configs. Details can be found in\n            slowfast/config/defaults.py\n        cur_epoch (int): current epoch.\n        multigrid_schedule (List): schedule for multigrid training.\n    \"\"\"\n    if cur_epoch + 1 == total_epochs:\n        return True\n    if multigrid_schedule is not None:\n        prev_epoch = 0\n        for s in multigrid_schedule:\n            if cur_epoch < s[-1]:\n                period = max(\n                    (s[-1] - prev_epoch) // cfg.MULTIGRID.EVAL_FREQ + 1, 1)\n                return (s[-1] - 1 - cur_epoch) % period == 0\n            prev_epoch = s[-1]"
+        }
+    ]
+}

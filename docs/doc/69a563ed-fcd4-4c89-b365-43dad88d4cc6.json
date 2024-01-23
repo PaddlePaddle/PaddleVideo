@@ -1,0 +1,10 @@
+{
+    "summary": "Code file \"preprocess.py\" contains four functions: \n1. ffmpeg_frames extracts frames from a video using ffmpeg and saves them as jpg files in a specified folder, at the specified frame rate.\n2. ffmpeg_pcm extracts audio from a video and saves it as a PCM file.\n3. ffmpeg_mp4 downloads a video file from a URL to the local machine.\n4. get_images retrieves all image files in a directory, sorts them, and stores their paths in a list.",
+    "details": [
+        {
+            "comment": "Code file \"preprocess.py\" contains four functions: \n1. ffmpeg_frames extracts frames from a video using ffmpeg and saves them as jpg files in a specified folder, at the specified frame rate.\n2. ffmpeg_pcm extracts audio from a video and saves it as a PCM file.\n3. ffmpeg_mp4 downloads a video file from a URL to the local machine.\n4. get_images retrieves all image files in a directory, sorts them, and stores their paths in a list.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/TableTennis/predict/action_detect/utils/preprocess.py\":0-35",
+            "content": "\"\"\" extract frames and pcm\"\"\"\nimport os\nimport sys\nimport shutil\ndef ffmpeg_frames(mp4_addr, frame_out_folder, fps=5):\n    \"\"\"ffmpeg_frames\"\"\"\n    if os.path.exists(frame_out_folder):\n        shutil.rmtree(frame_out_folder)\n    os.makedirs(frame_out_folder)\n    cmd = './src/utils/ffmpeg -v 0 -i %s -r %d -q 0 %s/%s.jpg' % (\n        mp4_addr, fps, frame_out_folder, '%08d')\n    os.system(cmd)\ndef ffmpeg_pcm(mp4_addr, save_file_name):\n    \"\"\"ffmpeg_pcm\"\"\"\n    cmd = './src/utils/ffmpeg -y  -i %s  -acodec pcm_s16le -f s16le -ac 1 -ar 16000 %s -v 0' \\\n        % (mp4_addr, save_file_name)\n    os.system(cmd)\ndef ffmpeg_mp4(mp4_url, mp4_addr):\n    \"\"\"ffmpeg_mp4\"\"\"\n    cmd = \"wget %s -O %s -q\" % (mp4_url, mp4_addr)\n    print(\"cmd = \", cmd)\n    os.system(cmd)\ndef get_images(image_path):\n    \"\"\"get_images\"\"\"\n    images = sorted(os.listdir(image_path))\n    images = images\n    images_path_list = [image_path + '/' + im for im in images]\n    return images_path_list"
+        }
+    ]
+}

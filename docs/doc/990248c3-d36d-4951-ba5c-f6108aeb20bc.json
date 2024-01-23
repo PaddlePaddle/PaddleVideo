@@ -1,0 +1,15 @@
+{
+    "summary": "The code imports modules, registers them in the registry, and exports a list of model-building modules with functions to build these models and specific classes like ResNet and TSNHead.",
+    "details": [
+        {
+            "comment": "This code is importing various modules from different sub-directories and registers them in the registry. It also includes a license notice and a function for weight initialization.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/modeling/__init__.py\":0-23",
+            "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom .backbones import ResNet\nfrom .builder import (build_backbone, build_head, build_recognizer,\n                      build_localizer, build_loss)\nfrom .heads import BaseHead, TSNHead, TSMRecHead\nfrom .losses import SmoothL1Loss, L1Loss\nfrom .framework.recognizers import BaseRecognizer, recognizer2d\nfrom .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS\nfrom .weight_init import weight_init_"
+        },
+        {
+            "comment": "This code exports a list of modules for model building, including backbones, heads, recognizers, localizers, and losses. It also includes functions to build these models and specific model classes like ResNet and TSNHead.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/modeling/__init__.py\":25-44",
+            "content": "__all__ = [\n    'BACKBONES',\n    'HEADS',\n    'RECOGNIZERS',\n    'LOCALIZERS',\n    'LOSSES',\n    'build_recognizer',\n    'build_localizer',\n    'build_head',\n    'build_backbone',\n    'build_loss',\n    'ResNet',\n    'TSNHead',\n    'BaseHead',\n    'TSMRecHead',\n    'BaseRecognizer',\n    'Recognizer2d',\n    'SmoothL1Loss',\n    'L1Loss',\n]"
+        }
+    ]
+}

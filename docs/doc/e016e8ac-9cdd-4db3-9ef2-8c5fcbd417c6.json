@@ -1,0 +1,10 @@
+{
+    "summary": "This line imports all functions and classes from the \"trainer\" module in the same package.",
+    "details": [
+        {
+            "comment": "This line imports all functions and classes from the \"trainer\" module in the same package.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/T2VLAD/trainer/__init__.py\":0-0",
+            "content": "from .trainer import *"
+        }
+    ]
+}

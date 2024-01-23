@@ -1,0 +1,5 @@
+.*
+LICENSE
+*.{png,gif,mp4,pkl,avi,json,yaml,yml,txt}
+
+docs

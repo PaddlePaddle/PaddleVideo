@@ -1,0 +1,20 @@
+{
+    "summary": "This Python package, \"paddlevideo\", utilizes PaddlePaddle toolkits for video understanding and supports multiple Python versions. It is set up using setuptools and includes dependencies and documentation.",
+    "details": [
+        {
+            "comment": "This code is setting up a Python package using setuptools for the PaddleVideo library, specifying its name as \"paddlevideo\". It includes the necessary dependencies listed in the \"requirements.txt\" file and provides a README file located at 'docs/en/whl_en.md' for documentation purposes.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/setup.py\":0-33",
+            "content": "\"\"\"\n# Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom setuptools import setup\nfrom io import open\nwith open('requirements.txt', encoding=\"utf-8-sig\") as f:\n    requirements = f.readlines()\ndef readme():\n    \"\"\"readme\"\"\"\n    with open('docs/en/whl_en.md', encoding=\"utf-8-sig\") as f:\n        README = f.read()\n    return README\nsetup(\n    name='paddlevideo', #name of .whl file\n    packages=['ppvideo'], #install package name\n    package_dir={'ppvideo': ''},\n    include_package_data=True, #Accept all data files and directories matched by MANIFEST.in"
+        },
+        {
+            "comment": "This code is a setup file for a Python package named \"ppvideo\" that utilizes PaddlePaddle toolkits for video understanding. It specifies installation requirements, entry points, version, license, description, URL, download link, keywords, and classifiers. The package supports multiple versions of Python and is categorized under the Utilities topic.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/setup.py\":34-55",
+            "content": "    install_requires=requirements,\n    entry_points={\"console_scripts\": [\"ppvideo= ppvideo.tools.paddlevideo_clas:main\"]},\n    version='0.0.1',\n    license='Apache License 2.0',\n    description='Awesome Video toolkits based on PaddlePaddle ',\n    long_description=readme(),\n    long_description_content_type='text/markdown',\n    url='https://github.com/PaddlePaddle/PaddleVideo',\n    download_url='https://github.com/PaddlePaddle/PaddleVideo.git',\n    keywords=[\n    'A treasure chest for video understanding powered by PaddlePaddle.'\n    ],\n    classifiers=[\n        'Intended Audience :: Developers', 'Operating System :: OS Independent',\n        'Natural Language :: Chinese (Simplified)',\n        'Programming Language :: Python :: 3',\n        'Programming Language :: Python :: 3.2',\n        'Programming Language :: Python :: 3.3',\n        'Programming Language :: Python :: 3.4',\n        'Programming Language :: Python :: 3.5',\n        'Programming Language :: Python :: 3.6',\n        'Programming Language :: Python :: 3.7', 'Topic :: Utilities'"
+        },
+        {
+            "comment": "This code is creating a tuple with empty elements. The specific purpose or usage of this tuple in the context of the setup.py file might require more information to provide an accurate and relevant comment.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/setup.py\":56-56",
+            "content": "    ],)"
+        }
+    ]
+}

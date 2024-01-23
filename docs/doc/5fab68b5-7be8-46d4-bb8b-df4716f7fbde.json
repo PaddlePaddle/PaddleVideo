@@ -1,0 +1,10 @@
+{
+    "summary": "This line imports all functions, classes, and variables from the \"util\" module located in the same directory as this file. It allows easy access to all utility functions defined in the \"util\" module without explicitly specifying each function or variable.",
+    "details": [
+        {
+            "comment": "This line imports all functions, classes, and variables from the \"util\" module located in the same directory as this file. It allows easy access to all utility functions defined in the \"util\" module without explicitly specifying each function or variable.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/T2VLAD/utils/__init__.py\":0-0",
+            "content": "from .util import *"
+        }
+    ]
+}

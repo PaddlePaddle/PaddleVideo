@@ -1,0 +1,542 @@
+{
+    "3000": {
+        "file_id": 245,
+        "content": "                                 stride=stride,\n                                 act=\"relu\",\n                                 name=name + \"_branch2a\")\n        self.conv1 = ConvBNLayer(in_channels=out_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=3,\n                                 act=None,\n                                 name=name + \"_branch2b\")\n        if not shortcut:\n            self.short = ConvBNLayer(in_channels=in_channels,\n                                     out_channels=out_channels,\n                                     kernel_size=1,\n                                     stride=stride,\n                                     name=name + \"_branch1\")\n        self.shortcut = shortcut\n    def forward(self, inputs):\n        \"\"\"forward\"\"\"\n        y = self.conv0(inputs)\n        conv1 = self.conv1(y)\n        if self.shortcut:\n            short = inputs\n        else:\n            short = self.short(inputs)\n        y = paddle.add(short, conv1)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet.py:147-174"
+    },
+    "3001": {
+        "file_id": 245,
+        "content": "This code defines a class with forward function. It initializes layers such as ConvBNLayer, and the shortcut connection depends on the provided 'shortcut'. The forward function performs the computations by passing inputs through the conv0 layer, then the conv1 layer, and finally adds the results of the two operations to generate the output.",
+        "type": "comment"
+    },
+    "3002": {
+        "file_id": 245,
+        "content": "        y = F.relu(y)\n        return y\n@BACKBONES.register()\nclass ResNet(nn.Layer):\n    \"\"\"ResNet backbone.\n    Args:\n        depth (int): Depth of resnet model.\n        pretrained (str): pretrained model. Default: None.\n    \"\"\"\n    def __init__(self, depth, pretrained=None):\n        super(ResNet, self).__init__()\n        self.pretrained = pretrained\n        self.layers = depth\n        supported_layers = [18, 34, 50, 101, 152]\n        assert self.layers in supported_layers, \\\n            \"supported layers are {} but input layer is {}\".format(\n                supported_layers, self.layers)\n        if self.layers == 18:\n            depth = [2, 2, 2, 2]\n        elif self.layers == 34 or self.layers == 50:\n            depth = [3, 4, 6, 3]\n        elif self.layers == 101:\n            depth = [3, 4, 23, 3]\n        elif self.layers == 152:\n            depth = [3, 8, 36, 3]\n        in_channels = [64, 256, 512, 1024]\n        out_channels = [64, 128, 256, 512]\n        self.conv = ConvBNLayer(in_channels=3,\n                                out_channels=64,",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet.py:175-210"
+    },
+    "3003": {
+        "file_id": 245,
+        "content": "ResNet is a backbone class for creating ResNet models with different depths. It initializes the layers based on the input depth and supports pretrained models. The code defines supported layer sizes, sets up the block size and number of output channels. It creates an instance of ConvBNLayer for the input channel size 3 and output channel size 64.",
+        "type": "comment"
+    },
+    "3004": {
+        "file_id": 245,
+        "content": "                                kernel_size=7,\n                                stride=2,\n                                act=\"relu\",\n                                name=\"conv1\")\n        self.pool2D_max = MaxPool2D(kernel_size=3, stride=2, padding=1)\n        self.block_list = []\n        if self.layers >= 50:\n            for block in range(len(depth)):\n                shortcut = False\n                for i in range(depth[block]):\n                    if self.layers in [101, 152] and block == 2:\n                        if i == 0:\n                            conv_name = \"res\" + str(block + 2) + \"a\"\n                        else:\n                            conv_name = \"res\" + str(block + 2) + \"b\" + str(i)\n                    else:\n                        conv_name = \"res\" + str(block + 2) + chr(97 + i)\n                    bottleneck_block = self.add_sublayer(\n                        conv_name,\n                        BottleneckBlock(\n                            # NOTE: Be careful! Here is different from TSM model.",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet.py:211-232"
+    },
+    "3005": {
+        "file_id": 245,
+        "content": "This code snippet defines a ResNet model. It includes a convolutional layer with specified parameters, a MaxPool2D layer, and dynamically generates BottleneckBlock layers based on the desired depth. The code also checks for specific layer counts (101 or 152) in certain blocks and sets the corresponding layer names accordingly to differentiate them from other blocks.",
+        "type": "comment"
+    },
+    "3006": {
+        "file_id": 245,
+        "content": "                            in_channels=in_channels[block]\n                            if i == 0 else out_channels[block] * 4,\n                            out_channels=out_channels[block],\n                            stride=2 if i == 0 and block != 0 else 1,\n                            shortcut=shortcut,\n                            name=conv_name))\n                    self.block_list.append(bottleneck_block)\n                    shortcut = True\n        else:\n            for block in range(len(depth)):\n                shortcut = False\n                for i in range(depth[block]):\n                    conv_name = \"res\" + str(block + 2) + chr(97 + i)\n                    basic_block = self.add_sublayer(\n                        conv_name,\n                        BasicBlock(in_channels=in_channels[block]\n                                   if i == 0 else out_channels[block],\n                                   out_channels=out_channels[block],\n                                   stride=2 if i == 0 and block != 0 else 1,",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet.py:233-252"
+    },
+    "3007": {
+        "file_id": 245,
+        "content": "This code defines a ResNet model architecture with Bottleneck and Basic blocks. It dynamically creates the layers based on the input channels, output channels, depth, and stride values defined in the respective lists. The shortcut connection is used to skip layers or not, depending on the block number. Each block is added as a sublayer to the model's layer list.",
+        "type": "comment"
+    },
+    "3008": {
+        "file_id": 245,
+        "content": "                                   shortcut=shortcut,\n                                   name=conv_name))\n                    self.block_list.append(basic_block)\n                    shortcut = True\n    def init_weights(self):\n        \"\"\"Initiate the parameters.\n        Note:\n            1. when indicate pretrained loading path, will load it to initiate backbone.\n            2. when not indicating pretrained loading path, will follow specific initialization initiate backbone. Always, Conv2D layer will be initiated by KaimingNormal function, and BatchNorm2d will be initiated by Constant function.\n            Please refer to https://www.paddlepaddle.org.cn/documentation/docs/en/develop/api/paddle/nn/initializer/kaiming/KaimingNormal_en.html\n        \"\"\"\n        #XXX: check bias!!! check pretrained!!!\n        if isinstance(self.pretrained, str) and self.pretrained.strip() != \"\":\n            load_ckpt(self, self.pretrained)\n        elif self.pretrained is None or self.pretrained.strip() == \"\":\n            for layer in self.sublayers():",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet.py:253-270"
+    },
+    "3009": {
+        "file_id": 245,
+        "content": "The code defines a function for initializing the weights of a backbone model. If pretrained weights are specified, it loads them. Otherwise, it uses specific initialization methods for Conv2D and BatchNorm2d layers. It checks if pretrained weights are provided or not and acts accordingly.",
+        "type": "comment"
+    },
+    "3010": {
+        "file_id": 245,
+        "content": "                if isinstance(layer, nn.Conv2D):\n                    #XXX: no bias\n                    weight_init_(layer, 'KaimingNormal')\n                elif isinstance(layer, nn.BatchNorm2D):\n                    weight_init_(layer, 'Constant', value=1)\n    def forward(self, inputs):\n        \"\"\"Define how the backbone is going to run.\n        \"\"\"\n        #NOTE: Already merge axis 0(batches) and axis 1(channels) before extracting feature phase,\n        # please refer to paddlevideo/modeling/framework/recognizers/recognizer2d.py#L27\n        #y = paddle.reshape(\n        #    inputs, [-1, inputs.shape[2], inputs.shape[3], inputs.shape[4]])\n        y = self.conv(inputs)\n        y = self.pool2D_max(y)\n        for block in self.block_list:\n            y = block(y)\n        return y",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet.py:271-290"
+    },
+    "3011": {
+        "file_id": 245,
+        "content": "The code is defining a forward pass function for the backbone, which performs convolution and pooling operations. It also initializes layer weights based on their type (Conv2D or BatchNorm2D). The comments indicate that the input shape has been merged beforehand and reshaping is not necessary.",
+        "type": "comment"
+    },
+    "3012": {
+        "file_id": 246,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py",
+        "type": "filepath"
+    },
+    "3013": {
+        "file_id": 246,
+        "content": "This code defines a ResNet model with TSM backbone, implementing the ResNet-C architecture, consisting of multiple blocks and configurable layer numbers. It initializes weights based on pretrained values and returns output after processing through all blocks.",
+        "type": "summary"
+    },
+    "3014": {
+        "file_id": 246,
+        "content": "\"\"\"\n# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport numpy as np\nimport math\nimport sys\nimport paddle\nimport paddle.nn as nn\nfrom paddle.nn import (Conv2D, BatchNorm2D, Linear, Dropout, MaxPool2D,\n                       AvgPool2D)\nfrom paddle import ParamAttr\nimport paddle.nn.functional as F\nfrom ..registry import BACKBONES\nfrom ..weight_init import weight_init_\nfrom ...utils.save_load import load_ckpt\nclass ConvBNLayer(nn.Layer):\n    \"\"\"Conv2D and BatchNorm2D layer.",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:1-34"
+    },
+    "3015": {
+        "file_id": 246,
+        "content": "This code defines a class called ConvBNLayer which is a layer consisting of Conv2D (convolutional) and BatchNorm2D layers. It appears to be part of a larger neural network model, likely used for feature extraction or classification tasks. The class also imports other useful modules such as Linear, Dropout, MaxPool2D, AvgPool2D from paddle.nn, and uses weight_init_ function from utils.save_load module to initialize layer weights.",
+        "type": "comment"
+    },
+    "3016": {
+        "file_id": 246,
+        "content": "    Args:\n        in_channels (int): Number of channels for the input.\n        out_channels (int): Number of channels for the output.\n        kernel_size (int): Kernel size.\n        stride (int): Stride in the Conv2D layer. Default: 1.\n        groups (int): Groups in the Conv2D, Default: 1.\n        is_tweaks_mode (bool): switch for tweaks. Default: False.\n        act (str): Indicate activation after BatchNorm2D layer.\n        name (str): the name of an instance of ConvBNLayer.\n    Note: weight and bias initialization include initialize values and name the restored parameters, values initialization are explicit declared in the ```init_weights``` method.\n    \"\"\"\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 kernel_size,\n                 stride=1,\n                 groups=1,\n                 is_tweaks_mode=False,\n                 act=None,\n                 name=None):\n        super(ConvBNLayer, self).__init__()\n        self.is_tweaks_mode = is_tweaks_mode\n        self._pool2d_avg = AvgPool2D(kernel_size=2,",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:36-60"
+    },
+    "3017": {
+        "file_id": 246,
+        "content": "This code defines a class for a ConvBNLayer, which includes a convolution layer followed by batch normalization and activation. It has optional parameters for tweaks mode, activation function, and name. Weight and bias initialization are handled in the init_weights method.",
+        "type": "comment"
+    },
+    "3018": {
+        "file_id": 246,
+        "content": "                                     stride=2,\n                                     padding=0,\n                                     ceil_mode=True)\n        self._conv = Conv2D(in_channels=in_channels,\n                            out_channels=out_channels,\n                            kernel_size=kernel_size,\n                            stride=stride,\n                            padding=(kernel_size - 1) // 2,\n                            groups=groups,\n                            weight_attr=ParamAttr(name=name + \"_weights\"),\n                            bias_attr=False)\n        if name == \"conv1\":\n            bn_name = \"bn_\" + name\n        else:\n            bn_name = \"bn\" + name[3:]\n        self._act = act\n        self._batch_norm = BatchNorm2D(out_channels,\n                                       weight_attr=ParamAttr(name=bn_name +\n                                                             \"_scale\"),\n                                       bias_attr=ParamAttr(bn_name + \"_offset\"))\n    def forward(self, inputs):",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:61-85"
+    },
+    "3019": {
+        "file_id": 246,
+        "content": "This code defines a ResNet TSM backbone with stride, padding, and ceil_mode. It also includes a convolution layer, batch normalization, and activation function. The forward function takes inputs and processes them through the defined layers.",
+        "type": "comment"
+    },
+    "3020": {
+        "file_id": 246,
+        "content": "        \"\"\"forward\"\"\"\n        if self.is_tweaks_mode:\n            inputs = self._pool2d_avg(inputs)\n        y = self._conv(inputs)\n        y = self._batch_norm(y)\n        if self._act:\n            y = getattr(paddle.nn.functional, self._act)(y)\n        return y\nclass BottleneckBlock(nn.Layer):\n    \"\"\"BottleneckBlock\"\"\"\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 stride,\n                 shortcut=True,\n                 if_first=False,\n                 num_seg=8,\n                 name=None):\n        super(BottleneckBlock, self).__init__()\n        self.conv0 = ConvBNLayer(in_channels=in_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=1,\n                                 act=\"relu\",\n                                 name=name + \"_branch2a\")\n        self.conv1 = ConvBNLayer(in_channels=out_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=3,",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:86-114"
+    },
+    "3021": {
+        "file_id": 246,
+        "content": "The code defines a BottleneckBlock class which is a layer in the ResNet model. This block consists of two 3x3 convolutional layers, each followed by batch normalization and ReLU activation. The input channels, output channels, stride, and other parameters are defined for this block. This structure helps in reducing the number of parameters while preserving or even improving accuracy in deep neural networks like ResNet.",
+        "type": "comment"
+    },
+    "3022": {
+        "file_id": 246,
+        "content": "                                 stride=stride,\n                                 act=\"relu\",\n                                 name=name + \"_branch2b\")\n        self.conv2 = ConvBNLayer(in_channels=out_channels,\n                                 out_channels=out_channels * 4,\n                                 kernel_size=1,\n                                 act=None,\n                                 name=name + \"_branch2c\")\n        if not shortcut:\n            self.short = ConvBNLayer(\n                in_channels=in_channels,\n                out_channels=out_channels * 4,\n                kernel_size=1,\n                stride=\n                1,  #ResNet-D 2/2:add a 2×2 average pooling layer with a stride of 2 before the convolution,\n                #             whose stride is changed to 1, works well in practice.\n                is_tweaks_mode=False if if_first else True,\n                name=name + \"_branch1\")\n        self.shortcut = shortcut\n        self.num_seg = num_seg\n    def forward(self, inputs):\n        \"\"\"forward\"\"\"",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:115-140"
+    },
+    "3023": {
+        "file_id": 246,
+        "content": "This code defines a custom layer in the ResNet-D model, with optional 2x2 pooling before convolution. The layer includes several ConvBNLayer components and a shortcut connection. If `short` is True, it adds a 2x2 average pooling layer before the convolution, whose stride is changed to 1. This works well in practice for ResNet-D 2/2.",
+        "type": "comment"
+    },
+    "3024": {
+        "file_id": 246,
+        "content": "        shifts = F.temporal_shift(inputs, self.num_seg, 1.0 / self.num_seg)\n        y = self.conv0(shifts)\n        conv1 = self.conv1(y)\n        conv2 = self.conv2(conv1)\n        if self.shortcut:\n            short = inputs\n        else:\n            short = self.short(inputs)\n        y = paddle.add(x=short, y=conv2)\n        return F.relu(y)\nclass BasicBlock(nn.Layer):\n    \"\"\"BasicBlock\"\"\"\n    def __init__(self,\n                 in_channels,\n                 out_channels,\n                 stride,\n                 shortcut=True,\n                 name=None):\n        super(BasicBlock, self).__init__()\n        self.stride = stride\n        self.conv0 = ConvBNLayer(in_channels=in_channels,\n                                 out_channels=out_channels,\n                                 kernel_size=3,\n                                 stride=stride,\n                                 act=\"relu\",\n                                 name=name + \"_branch2a\")\n        self.conv1 = ConvBNLayer(in_channels=out_channels,\n                                 out_channels=out_channels,",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:141-170"
+    },
+    "3025": {
+        "file_id": 246,
+        "content": "This code defines a BasicBlock class with convolutional layers, Batch Normalization, and ReLU activation functions. It also includes an optional shortcut connection. The method within the class performs temporal shifting on inputs before passing through convolutional layers and adding to the shortcut connection if applicable. Finally, it applies ReLU activation.",
+        "type": "comment"
+    },
+    "3026": {
+        "file_id": 246,
+        "content": "                                 kernel_size=3,\n                                 act=None,\n                                 name=name + \"_branch2b\")\n        if not shortcut:\n            self.short = ConvBNLayer(in_channels=in_channels,\n                                     out_channels=out_channels,\n                                     kernel_size=1,\n                                     stride=stride,\n                                     name=name + \"_branch1\")\n        self.shortcut = shortcut\n    def forward(self, inputs):\n        \"\"\"forward\"\"\"\n        y = self.conv0(inputs)\n        conv1 = self.conv1(y)\n        if self.shortcut:\n            short = inputs\n        else:\n            short = self.short(inputs)\n        y = paddle.add(short, conv1)\n        y = F.relu(y)\n        return y\n@BACKBONES.register()\nclass ResNetTweaksTSM(nn.Layer):\n    \"\"\"ResNet TSM backbone.\n    Args:\n        depth (int): Depth of resnet model.\n        pretrained (str): pretrained model. Default: None.\n    \"\"\"\n    def __init__(self, depth, num_seg=8, pretrained=None):",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:171-206"
+    },
+    "3027": {
+        "file_id": 246,
+        "content": "This code defines a ResNet TSM backbone model with optional shortcut connections. It includes convolutional layers, batch normalization, and a forward function for computation. The depth of the resnet model is specified as an argument, along with optional pretrained weights.",
+        "type": "comment"
+    },
+    "3028": {
+        "file_id": 246,
+        "content": "        super(ResNetTweaksTSM, self).__init__()\n        self.pretrained = pretrained\n        self.layers = depth\n        self.num_seg = num_seg\n        supported_layers = [18, 34, 50, 101, 152]\n        assert self.layers in supported_layers, \\\n            \"supported layers are {} but input layer is {}\".format(\n                supported_layers, self.layers)\n        if self.layers == 18:\n            depth = [2, 2, 2, 2]\n        elif self.layers == 34 or self.layers == 50:\n            depth = [3, 4, 6, 3]\n        elif self.layers == 101:\n            depth = [3, 4, 23, 3]\n        elif self.layers == 152:\n            depth = [3, 8, 36, 3]\n        in_channels = 64\n        out_channels = [64, 128, 256, 512]\n        #ResNet-C: use three 3x3 conv, replace, one 7x7 conv\n        self.conv1_1 = ConvBNLayer(in_channels=3,\n                                   out_channels=32,\n                                   kernel_size=3,\n                                   stride=2,\n                                   act='relu',\n                                   name=\"conv1_1\")",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:207-235"
+    },
+    "3029": {
+        "file_id": 246,
+        "content": "This code initializes an instance of ResNetTweaksTSM and sets its parameters, including the layer depth and number of segments. It also checks if the input layer is supported and assigns the corresponding depth based on the specified layer type. The code defines a ConvBNLayer for the first convolutional layer with 3x3 kernel and relu activation.",
+        "type": "comment"
+    },
+    "3030": {
+        "file_id": 246,
+        "content": "        self.conv1_2 = ConvBNLayer(in_channels=32,\n                                   out_channels=32,\n                                   kernel_size=3,\n                                   stride=1,\n                                   act='relu',\n                                   name=\"conv1_2\")\n        self.conv1_3 = ConvBNLayer(in_channels=32,\n                                   out_channels=64,\n                                   kernel_size=3,\n                                   stride=1,\n                                   act='relu',\n                                   name=\"conv1_3\")\n        self.pool2D_max = MaxPool2D(kernel_size=3, stride=2, padding=1)\n        self.block_list = []\n        if self.layers >= 50:\n            for block in range(len(depth)):\n                shortcut = False\n                for i in range(depth[block]):\n                    if self.layers in [101, 152] and block == 2:\n                        if i == 0:\n                            conv_name = \"res\" + str(block + 2) + \"a\"\n                        else:",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:236-258"
+    },
+    "3031": {
+        "file_id": 246,
+        "content": "This code defines a ResNet model with Temporal Segment Network (TSM) backbone. It includes convolutional layers, batch normalization, ReLU activation, max pooling, and multiple blocks for the ResNet structure. The number of layers can be configured as 50, 101, or 152, affecting the block's properties.",
+        "type": "comment"
+    },
+    "3032": {
+        "file_id": 246,
+        "content": "                            conv_name = \"res\" + str(block + 2) + \"b\" + str(i)\n                    else:\n                        conv_name = \"res\" + str(block + 2) + chr(97 + i)\n                    bottleneck_block = self.add_sublayer(\n                        'bb_%d_%d' %\n                        (block, i),  #same with PaddleClas, for loading pretrain\n                        BottleneckBlock(\n                            in_channels=in_channels\n                            if i == 0 else out_channels[block] * 4,\n                            out_channels=out_channels[block],\n                            stride=2 if i == 0 and block != 0 else 1,\n                            num_seg=self.num_seg,\n                            shortcut=shortcut,\n                            if_first=block == i == 0,\n                            name=conv_name))\n                    in_channels = out_channels[block] * 4\n                    self.block_list.append(bottleneck_block)\n                    shortcut = True\n        else:\n            for block in range(len(depth)):",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:259-278"
+    },
+    "3033": {
+        "file_id": 246,
+        "content": "This code defines a ResNet model with Temporal Segment Network (TSM) backbone. It creates blocks of BottleneckBlock layers and appends them to the block list based on input and output channel numbers, stride values, and other parameters. The code handles both bottleneck and standard blocks and keeps track of shortcut connections for each block.",
+        "type": "comment"
+    },
+    "3034": {
+        "file_id": 246,
+        "content": "                shortcut = False\n                for i in range(depth[block]):\n                    conv_name = \"res\" + str(block + 2) + chr(97 + i)\n                    basic_block = self.add_sublayer(\n                        conv_name,\n                        BasicBlock(in_channels=in_channels[block]\n                                   if i == 0 else out_channels[block],\n                                   out_channels=out_channels[block],\n                                   stride=2 if i == 0 and block != 0 else 1,\n                                   shortcut=shortcut,\n                                   name=conv_name))\n                    self.block_list.append(basic_block)\n                    shortcut = True\n    def init_weights(self):\n        \"\"\"Initiate the parameters.\n        Note:\n            1. when indicate pretrained loading path, will load it to initiate backbone.\n            2. when not indicating pretrained loading path, will follow specific initialization initiate backbone. Always, Conv2D lay",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:279-297"
+    },
+    "3035": {
+        "file_id": 246,
+        "content": "The code defines a function to initialize the weights of the ResNet backbone. If a pretrained loading path is provided, it loads the weights from that path; otherwise, it follows specific weight initialization methods for Conv2D layers in the backbone.",
+        "type": "comment"
+    },
+    "3036": {
+        "file_id": 246,
+        "content": "er will be initiated by KaimingNormal function, and BatchNorm2d will be initiated by Constant function.\n            Please refer to https://www.paddlepaddle.org.cn/documentation/docs/en/develop/api/paddle/nn/initializer/kaiming/KaimingNormal_en.html\n        \"\"\"\n        #XXX: check bias!!! check pretrained!!!\n        if isinstance(self.pretrained, str) and self.pretrained.strip() != \"\":\n            load_ckpt(self, self.pretrained)\n        elif self.pretrained is None or self.pretrained.strip() == \"\":\n            for layer in self.sublayers():\n                if isinstance(layer, nn.Conv2D):\n                    #XXX: no bias\n                    weight_init_(layer, 'KaimingNormal')\n                elif isinstance(layer, nn.BatchNorm2D):\n                    weight_init_(layer, 'Constant', value=1)\n    def forward(self, inputs):\n        \"\"\"Define how the backbone is going to run.\n        \"\"\"\n        #NOTE: Already merge axis 0(batches) and axis 1(channels) before extracting feature phase,\n        # please refer to paddlevideo/modeling/framework/recognizers/recognizer2d.py#L27",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:297-317"
+    },
+    "3037": {
+        "file_id": 246,
+        "content": "This code initializes the backbone network for a video quality assessment model. It checks if pretrained weights are provided and loads them if available, or initializes the layers using Kaiming Normal for convolutional layers and constant value of 1 for batch normalization layers. The forward function defines how the backbone is executed on inputs.",
+        "type": "comment"
+    },
+    "3038": {
+        "file_id": 246,
+        "content": "        #y = paddle.reshape(\n        #    inputs, [-1, inputs.shape[2], inputs.shape[3], inputs.shape[4]])\n        ####ResNet-C: use three 3x3 conv, replace, one 7x7 conv\n        y = self.conv1_1(inputs)\n        y = self.conv1_2(y)\n        y = self.conv1_3(y)\n        y = self.pool2D_max(y)\n        for block in self.block_list:\n            y = block(y)\n        return y",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/backbones/resnet_tweaks_tsm.py:318-328"
+    },
+    "3039": {
+        "file_id": 246,
+        "content": "This code implements the ResNet-C architecture, which uses three 3x3 convolutions and one 7x7 convolution in the first layer, followed by max pooling and multiple blocks. The output is returned after processing through all the blocks.",
+        "type": "comment"
+    },
+    "3040": {
+        "file_id": 247,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/modeling/builder.py",
+        "type": "filepath"
+    },
+    "3041": {
+        "file_id": 247,
+        "content": "This code defines functions to build components of a computer vision model, including backbone, head, loss, recognizer, and a model builder that selects the appropriate builder based on framework type.",
+        "type": "summary"
+    },
+    "3042": {
+        "file_id": 247,
+        "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS\nfrom ..utils import build\ndef build_backbone(cfg):\n    \"\"\"Build backbone.\"\"\"\n    return build(cfg, BACKBONES)\ndef build_head(cfg):\n    \"\"\"Build head.\"\"\"\n    return build(cfg, HEADS)\ndef build_loss(cfg):\n    \"\"\"Build loss.\"\"\"\n    return build(cfg, LOSSES)\ndef build_recognizer(cfg):\n    \"\"\"Build recognizer.\"\"\"\n    return build(cfg, RECOGNIZERS, key='framework')",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/builder.py:1-36"
+    },
+    "3043": {
+        "file_id": 247,
+        "content": "The code is defining functions to build different components of a computer vision model. The `build_backbone`, `build_head`, and `build_loss` functions are used to build the backbone, head, and loss for the model respectively using the `build` function from the `utils` module. The `build_recognizer` function is used to build a recognizer component for the model using the specified framework key.",
+        "type": "comment"
+    },
+    "3044": {
+        "file_id": 247,
+        "content": "def build_localizer(cfg):\n    \"\"\"Build localizer.\"\"\"\n    return build(cfg, LOCALIZERS, key='framework')\ndef build_model(cfg):\n    cfg_copy = cfg.copy()\n    framework_type = cfg_copy.get('framework')\n    if framework_type in RECOGNIZERS:\n        return build_recognizer(cfg)\n    elif framework_type in LOCALIZERS:\n        return build_localizer(cfg)\n    else:\n        raise NotImplementedError",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/builder.py:39-52"
+    },
+    "3045": {
+        "file_id": 247,
+        "content": "This code defines functions for building localizer and model, and a build_model function that selects the appropriate builder based on the framework type specified in the configuration.",
+        "type": "comment"
+    },
+    "3046": {
+        "file_id": 248,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/modeling/framework/__init__.py",
+        "type": "filepath"
+    },
+    "3047": {
+        "file_id": 248,
+        "content": "This code is importing the recognizers module from the paddlevideo.modeling.framework package, and defining the BaseRecognizer and Recognizer2D classes as part of its API. The __all__ variable lists these two classes as the public API elements of this package.",
+        "type": "summary"
+    },
+    "3048": {
+        "file_id": 248,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom .recognizers import BaseRecognizer, Recognizer2D\n__all__ = [\n    'BaseRecognizer',\n    'Recognizer2D',\n]",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/framework/__init__.py:1-22"
+    },
+    "3049": {
+        "file_id": 248,
+        "content": "This code is importing the recognizers module from the paddlevideo.modeling.framework package, and defining the BaseRecognizer and Recognizer2D classes as part of its API. The __all__ variable lists these two classes as the public API elements of this package.",
+        "type": "comment"
+    },
+    "3050": {
+        "file_id": 249,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/modeling/framework/recognizers/__init__.py",
+        "type": "filepath"
+    },
+    "3051": {
+        "file_id": 249,
+        "content": "This code imports base and recognizer2d classes from the same directory and adds them to the __all__ list for access. It also includes a copyright notice, license information, and disclaimer.",
+        "type": "summary"
+    },
+    "3052": {
+        "file_id": 249,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n\"\"\"\nfrom .base import BaseRecognizer\nfrom .recognizer2d import Recognizer2D\n__all__ = ['BaseRecognizer', 'Recognizer2D']",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/framework/recognizers/__init__.py:1-19"
+    },
+    "3053": {
+        "file_id": 249,
+        "content": "This code imports base and recognizer2d classes from the same directory and adds them to the __all__ list for access. It also includes a copyright notice, license information, and disclaimer.",
+        "type": "comment"
+    },
+    "3054": {
+        "file_id": 250,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/modeling/framework/recognizers/base.py",
+        "type": "filepath"
+    },
+    "3055": {
+        "file_id": 250,
+        "content": "The code creates a base class for model recognizers in PaddleVideo. It initializes the backbone and head modules' weights, extracts features using the backbone, and performs optional classification. The class provides abstract methods for training, validating, and testing steps to be implemented by subclasses.",
+        "type": "summary"
+    },
+    "3056": {
+        "file_id": 250,
+        "content": "\"\"\"\nstart\n\"\"\"\nfrom abc import abstractmethod\nfrom ... import builder\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nclass BaseRecognizer(nn.Layer):\n    \"\"\"Base class for recognizers.\n    All recognizers should subclass it.\n    All subclass should overwrite:\n    - Methods:``train_step``, supporting to forward when training.\n    - Methods:``valid_step``, supporting to forward when validating.\n    - Methods:``test_step``, supporting to forward when testing.\n    Args:\n        backbone (dict): Backbone modules to extract feature.\n        head (dict): Classification head to process feature.\n    \"\"\"\n    def __init__(self, backbone=None, head=None):\n        super().__init__()\n        if backbone is not None:\n            self.backbone = builder.build_backbone(backbone)\n            self.backbone.init_weights()\n        else:\n            self.backbone = None\n        if head is not None:\n            self.head_name = head.name\n            self.head = builder.build_head(head)\n            self.head.init_weights()",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/framework/recognizers/base.py:1-38"
+    },
+    "3057": {
+        "file_id": 250,
+        "content": "Base class for recognizers, subclass for train_step, valid_step, test_step. Initializes backbone and head modules with weights.",
+        "type": "comment"
+    },
+    "3058": {
+        "file_id": 250,
+        "content": "        else:\n           self.head = None\n    def init_weights(self):\n        \"\"\"Initialize the model network weights. \"\"\"\n        self.backbone.init_weights(\n        )  #TODO: required? while backbone without base class\n        self.head.init_weights()\n    def extract_feature(self, imgs):\n        \"\"\"Extract features through a backbone.\n    Args:\n        imgs (paddle.Tensor) : The input images.\n        Returns:\n            feature (paddle.Tensor) : The extracted features.\n        \"\"\"\n        feature = self.backbone(imgs)\n        return feature\n    def forward(self, imgs, **kwargs):\n        \"\"\"Define how the model is going to run, from input to output.\n        \"\"\"\n        batches = imgs.shape[0]\n        num_segs = imgs.shape[1]\n        imgs = paddle.reshape(imgs, [-1] + list(imgs.shape[2:]))\n        if self.backbone is not None:\n            feature = self.extract_feature(imgs)\n        else:\n            feature = imgs\n        if self.head is not None:\n            cls_score = self.head(feature, num_segs)\n        else:",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/framework/recognizers/base.py:39-75"
+    },
+    "3059": {
+        "file_id": 250,
+        "content": "The code defines a base class for model recognizers. It initializes the weights of both backbone and head, extracts features using the backbone, and optionally performs classification using the head if it exists. The method also handles reshaping inputs when necessary.",
+        "type": "comment"
+    },
+    "3060": {
+        "file_id": 250,
+        "content": "            cls_score = None\n        return cls_score\n    @abstractmethod\n    def train_step(self, data_batch, **kwargs):\n        \"\"\"Training step.\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def val_step(self, data_batch, **kwargs):\n        \"\"\"Validating step.\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def test_step(self, data_batch, **kwargs):\n        \"\"\"Test step.\n        \"\"\"\n        raise NotImplementedError",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/framework/recognizers/base.py:76-97"
+    },
+    "3061": {
+        "file_id": 250,
+        "content": "This code defines a base class for recognizer models in PaddleVideo. It provides abstract methods for training, validating, and testing steps, which must be implemented by any subclasses that inherit from this base class.",
+        "type": "comment"
+    },
+    "3062": {
+        "file_id": 251,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/modeling/framework/recognizers/recognizer2d.py",
+        "type": "filepath"
+    },
+    "3063": {
+        "file_id": 251,
+        "content": "This code defines the PaddleVideo framework's \"Recognizer2D\" class for 2D model training, with methods train_step(), recognizer2d.py, val_step, and test_step handling loss metrics calculation in different modes.",
+        "type": "summary"
+    },
+    "3064": {
+        "file_id": 251,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n\"\"\"\nfrom ...registry import RECOGNIZERS\nfrom .base import BaseRecognizer\nimport paddle\nfrom paddlevideo.utils import get_logger\nlogger = get_logger(\"paddlevideo\")\n@RECOGNIZERS.register()\nclass Recognizer2D(BaseRecognizer):\n    \"\"\"2D recognizer model framework.\"\"\"\n    def train_step(self, data_batch):\n        \"\"\"Define how the model is going to train, from input to output.\n        \"\"\"\n        #NOTE: As the num_segs is an attribute of dataset phase, and didn't pass to build_head phase, should obtain it from imgs(paddle.Tensor) now, then call self.head method.",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/framework/recognizers/recognizer2d.py:1-29"
+    },
+    "3065": {
+        "file_id": 251,
+        "content": "This code snippet is part of the PaddleVideo framework and defines a class called \"Recognizer2D\" which is a 2D recognizer model for training. It inherits from \"BaseRecognizer\" and has a method \"train_step()\" that handles how the model trains, taking input data batch as argument and returning output. The \"recognizers\" registry is used to register this class.",
+        "type": "comment"
+    },
+    "3066": {
+        "file_id": 251,
+        "content": "        #labels = labels.squeeze()\n        #XXX: unsqueeze label to [label] ?\n        imgs = data_batch[0]\n        labels = data_batch[1:]\n        cls_score = self(imgs)\n        loss_metrics = self.head.loss(cls_score, labels)\n        return loss_metrics\n    def val_step(self, data_batch):\n        imgs = data_batch[0]\n        labels = data_batch[1:]\n        cls_score = self(imgs)\n        loss_metrics = self.head.loss(cls_score, labels, valid_mode=True)\n        return loss_metrics\n    def test_step(self, data_batch):\n        \"\"\"Define how the model is going to test, from input to output.\"\"\"\n        #NOTE: (shipping) when testing, the net won't call head.loss, we deal with the test processing in /paddlevideo/metrics\n        imgs = data_batch[0]\n        cls_score = self(imgs)\n        return cls_score",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/framework/recognizers/recognizer2d.py:31-52"
+    },
+    "3067": {
+        "file_id": 251,
+        "content": "These code snippets define three different methods: recognizer2d.py, val_step, and test_step. The first method appears to be a base for the other two and is used to calculate loss metrics from input images and labels using the head's loss function. The val_step also calculates loss metrics, but in valid mode only. Lastly, the test_step does not call the head's loss function and instead returns the class scores directly.",
+        "type": "comment"
+    },
+    "3068": {
+        "file_id": 252,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/modeling/heads/__init__.py",
+        "type": "filepath"
+    },
+    "3069": {
+        "file_id": 252,
+        "content": "This code file is a part of the PaddleVideo library and contains definitions for different head models (BaseHead, TSNHead, TSMRecHead) used in Video Quality Assessment. It imports these classes from other files within the modeling/heads directory and provides them to be used by other parts of the library.",
+        "type": "summary"
+    },
+    "3070": {
+        "file_id": 252,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nfrom .base import BaseHead\nfrom .tsn_head import TSNHead\nfrom .tsm_rec_head import TSMRecHead\n__all__ = ['BaseHead', 'TSNHead', 'TSMRecHead']",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/heads/__init__.py:1-21"
+    },
+    "3071": {
+        "file_id": 252,
+        "content": "This code file is a part of the PaddleVideo library and contains definitions for different head models (BaseHead, TSNHead, TSMRecHead) used in Video Quality Assessment. It imports these classes from other files within the modeling/heads directory and provides them to be used by other parts of the library.",
+        "type": "comment"
+    },
+    "3072": {
+        "file_id": 253,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/modeling/heads/base.py",
+        "type": "filepath"
+    },
+    "3073": {
+        "file_id": 253,
+        "content": "The code defines a BaseHead abstract class for PaddleVideo, introduces a VideoQualityAssessment model with forward function, loss calculation, and accuracy metrics. It also contains functions for label smooth loss and top1/top5 accuracy calculations. An unimplemented function needs to be added based on the comments in the codebase.",
+        "type": "summary"
+    },
+    "3074": {
+        "file_id": 253,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport numpy as np\nfrom abc import abstractmethod\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nfrom ..builder import build_loss\nfrom paddlevideo.utils import get_logger, get_dist_info\nlogger = get_logger(\"paddlevideo\")\nclass BaseHead(nn.Layer):\n    \"\"\"Base class for head part.\n    All head should subclass it.\n    All subclass should overwrite:\n    - Methods: ```init_weights```, initializing weights.",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/heads/base.py:1-36"
+    },
+    "3075": {
+        "file_id": 253,
+        "content": "This code snippet is a part of PaddleVideo library. It imports necessary libraries and defines an abstract base class \"BaseHead\" for video head parts. This class should be subclassed by all heads, which must override the \"init_weights\" method for initializing weights. The class also utilizes logger from paddlevideo to log information.",
+        "type": "comment"
+    },
+    "3076": {
+        "file_id": 253,
+        "content": "    - Methods: ```forward```, forward function.\n    Args:\n        num_classes (int): The number of classes to be classified.\n        in_channels (int): The number of channels in input feature.\n        loss_cfg (dict): Config for building loss. Default: dict(type='CrossEntropyLoss').\n        ls_eps (float): label smoothing epsilon. Default: 0. .\n    \"\"\"\n    def __init__(\n        self,\n        num_classes,\n        in_channels,\n        loss_cfg=dict(\n            name=\"CrossEntropyLoss\"\n        ),  #TODO(shipping): only pass a name or standard build cfg format.\n        #multi_class=False, NOTE(shipping): not supported now.\n        ls_eps=0.):\n        super().__init__()\n        self.num_classes = num_classes\n        self.in_channels = in_channels\n        self.loss_func = build_loss(loss_cfg)\n        #self.multi_class = multi_class NOTE(shipping): not supported now\n        self.ls_eps = ls_eps\n    @abstractmethod\n    def init_weights(self):\n        \"\"\"Initiate the parameters.\n        \"\"\"\n        raise NotImplementedError",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/heads/base.py:37-67"
+    },
+    "3077": {
+        "file_id": 253,
+        "content": "This code is defining a base class for a head network in PaddleVideo. It has an initializer that takes the number of classes, input channels, loss configuration, and label smoothing epsilon as arguments. The loss function and other parameters are initialized inside the constructor. It also requires the implementation of an abstract method \"init_weights\" for parameter initialization.",
+        "type": "comment"
+    },
+    "3078": {
+        "file_id": 253,
+        "content": "    @abstractmethod\n    def forward(self, x):\n        \"\"\"Define how the head is going to run.\n        \"\"\"\n        raise NotImplementedError\n    def loss(self, scores, labels, valid_mode=False, **kwargs):\n        \"\"\"Calculate the loss accroding to the model output ```scores```,\n           and the target ```labels```.\n        Args:\n            scores (paddle.Tensor): The output of the model.\n            labels (paddle.Tensor): The target output of the model.\n        Returns:\n            losses (dict): A dict containing field 'loss'(mandatory) and 'top1_acc', 'top5_acc'(optional).\n        \"\"\"\n        if len(labels) == 1:  #commonly case\n            labels = labels[0]\n            losses = dict()\n            if self.ls_eps != 0. and not valid_mode:  # label_smooth\n                loss = self.label_smooth_loss(scores, labels, **kwargs)\n            else:\n                loss = self.loss_func(scores, labels, **kwargs)\n            top1, top5 = self.get_acc(scores, labels, valid_mode)\n            losses['top1'] = top1",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/heads/base.py:69-96"
+    },
+    "3079": {
+        "file_id": 253,
+        "content": "This code defines a base head for the VideoQualityAssessment model. It includes a forward function that is expected to be overridden by subclasses, and a loss function that calculates the loss based on model output (scores) and target (labels). The loss function also returns top1 and top5 accuracy if not in validation mode.",
+        "type": "comment"
+    },
+    "3080": {
+        "file_id": 253,
+        "content": "            losses['top5'] = top5\n            losses['loss'] = loss\n            return losses\n        elif len(labels) == 3:  # mix_up\n            labels_a, labels_b, lam = labels\n            lam = lam[0]  # get lam value\n            losses = dict()\n            if self.ls_eps != 0:\n                loss_a = self.label_smooth_loss(scores, labels_a, **kwargs)\n                loss_b = self.label_smooth_loss(scores, labels_b, **kwargs)\n            else:\n                loss_a = self.loss_func(scores, labels_a, **kwargs)\n                loss_b = self.loss_func(scores, labels_a, **kwargs)\n            loss = lam * loss_a + (1 - lam) * loss_b\n            top1a, top5a = self.get_acc(scores, labels_a, valid_mode)\n            top1b, top5b = self.get_acc(scores, labels_b, valid_mode)\n            top1 = lam * top1a + (1 - lam) * top1b\n            top5 = lam * top5a + (1 - lam) * top5b\n            losses['top1'] = top1\n            losses['top5'] = top5\n            losses['loss'] = loss\n            return losses\n        else:",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/heads/base.py:97-120"
+    },
+    "3081": {
+        "file_id": 253,
+        "content": "This code segment handles mixed-up labels where there are 3 labels (labels_a, labels_b, and lam). It calculates the loss and accuracy for both label sets with or without label smoothing. The final result is stored in a dictionary including top1, top5, and total loss.",
+        "type": "comment"
+    },
+    "3082": {
+        "file_id": 253,
+        "content": "            raise NotImplementedError\n    def label_smooth_loss(self, scores, labels, **kwargs):\n        \"\"\"label smooth loss\"\"\"\n        labels = F.one_hot(labels, self.num_classes)\n        labels = F.label_smooth(labels, epsilon=self.ls_eps)\n        labels = paddle.squeeze(labels, axis=1)\n        loss = self.loss_func(scores, labels, soft_label=True, **kwargs)\n        return loss\n    def get_acc(self, scores, labels, valid_mode):\n        \"\"\"get acc\"\"\"\n        top1 = paddle.metric.accuracy(input=scores, label=labels, k=1)\n        top5 = paddle.metric.accuracy(input=scores, label=labels, k=5)\n        _, world_size = get_dist_info()\n        #NOTE(shipping): deal with multi cards validate\n        if world_size > 1 and valid_mode:  #reduce sum when valid\n            top1 = paddle.distributed.all_reduce(\n                top1, op=paddle.distributed.ReduceOp.SUM) / world_size\n            top5 = paddle.distributed.all_reduce(\n                top5, op=paddle.distributed.ReduceOp.SUM) / world_size\n        return top1, top5",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/heads/base.py:121-143"
+    },
+    "3083": {
+        "file_id": 253,
+        "content": "This code contains three functions: \"label_smooth_loss\", \"get_acc\", and an unimplemented function. The \"label_smooth_loss\" calculates the label smooth loss using one-hot encoding, label smoothing, and applies a soft loss function with a specified epsilon value. It also handles the loss calculation for cases where soft labels are needed. The \"get_acc\" function calculates both top1 and top5 accuracy values from input scores and labels. It can handle multi-card validation by performing all-reduce when validating on multiple cards. Finally, there is an unimplemented function that should be implemented based on the comments in the codebase.",
+        "type": "comment"
+    },
+    "3084": {
+        "file_id": 254,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/modeling/heads/tsm_rec_head.py",
+        "type": "filepath"
+    },
+    "3085": {
+        "file_id": 254,
+        "content": "TSMRecHead is a TSNHead-based classifier head for Temporal Segment Networks, performing average pooling, optional dropout, reshaping, mean operation, and applying a fully connected layer. It uses defined loss function to compare with labels, and calculates loss based on provided labels using label smoothing and weighted average.",
+        "type": "summary"
+    },
+    "3086": {
+        "file_id": 254,
+        "content": "\"\"\"\n# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n\"\"\"\nimport math\nimport paddle\nimport paddle.nn.functional as F\nfrom paddle.nn import AdaptiveAvgPool2D, Linear, Dropout\nfrom .base import BaseHead\nfrom .tsn_head import TSNHead\nfrom ..registry import HEADS\nfrom ..weight_init import weight_init_\n@HEADS.register()\nclass TSMRecHead(TSNHead):\n    \"\"\" TSM Rec Head\n    Args:\n        num_classes (int): The number of classes to be classified.\n        in_channels (int): The number of channles in input feature.",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/heads/tsm_rec_head.py:1-33"
+    },
+    "3087": {
+        "file_id": 254,
+        "content": "TSMRecHead is a TSNHead-based classifier head for Temporal Segment Networks (TSMs) with specified number of classes, input channels and registered under PaddlePaddle's HEADS registry.",
+        "type": "comment"
+    },
+    "3088": {
+        "file_id": 254,
+        "content": "        loss_cfg (dict): Config for building config. Default: dict(name='CrossEntropyLoss').\n        drop_ratio(float): drop ratio. Default: 0.8.\n        std(float): Std(Scale) value in normal initilizar. Default: 0.001.\n        kwargs (dict, optional): Any keyword argument to initialize.\n    \"\"\"\n    def __init__(self,\n                 num_classes,\n                 in_channels,\n                 loss_cfg=dict(name='L1Loss'),\n                 drop_ratio=0.8,\n                 std=0.01,\n                 data_format=\"NCHW\",\n                 **kwargs):\n        super().__init__(num_classes,\n                         in_channels,\n                         loss_cfg,\n                         drop_ratio=drop_ratio,\n                         std=std,\n                         data_format=data_format,\n                         **kwargs)\n        self.stdv = 1.0 / math.sqrt(self.in_channels * 1.0)\n    def init_weights(self):\n        \"\"\"Initiate the FC layer parameters\"\"\"\n        weight_init_(self.fc,\n                     'Uniform',",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/heads/tsm_rec_head.py:34-62"
+    },
+    "3089": {
+        "file_id": 254,
+        "content": "This function initializes the weights of the FC layer using a uniform distribution, and sets the standard deviation for normal initialization. The loss_cfg argument determines the type of loss function to use, and drop_ratio is the probability of dropping connections between layers during training. The stdv value is set based on the number of input channels.",
+        "type": "comment"
+    },
+    "3090": {
+        "file_id": 254,
+        "content": "                     'fc_0.w_0',\n                     'fc_0.b_0',\n                     low=-self.stdv,\n                     high=self.stdv)\n        self.fc.bias.learning_rate = 2.0\n        self.fc.bias.regularizer = paddle.regularizer.L2Decay(0.)\n    def forward(self, x, num_seg):\n        \"\"\"Define how the head is going to run.\n        Args:\n            x (paddle.Tensor): The input data.\n            num_segs (int): Number of segments.\n        Returns:\n            score: (paddle.Tensor) The classification scores for input samples.\n        \"\"\"\n        # [N * num_segs, in_channels, 7, 7]\n        x = self.avgpool2d(x)\n        # [N * num_segs, in_channels, 1, 1]\n        if self.dropout is not None:\n            x = self.dropout(x)\n        # [N * num_seg, in_channels, 1, 1]\n        x = paddle.reshape(x, [-1, num_seg, x.shape[1]])\n        # [N, num_seg, in_channels]\n        x = paddle.mean(x, axis=1)\n        # [N, 1, in_channels]\n        x = paddle.reshape(x, shape=[-1, self.in_channels])\n        # [N, in_channels]\n        score = self.fc(x)",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/heads/tsm_rec_head.py:63-91"
+    },
+    "3091": {
+        "file_id": 254,
+        "content": "This code defines a head for TSM (Temporal Shift Module) Recognition task. It includes initialization of weights, setting learning rate, and applying L2 decay regularizer. The forward method performs average pooling, optional dropout, reshaping, mean operation, and finally passes the result through fully connected layer to obtain classification scores.",
+        "type": "comment"
+    },
+    "3092": {
+        "file_id": 254,
+        "content": "        # [N, num_class]\n        #m = paddle.nn.Sigmoid()\n        #score = m(score)\n        return score\n    def loss(self, scores, labels, valid_mode=False, **kwargs):\n        \"\"\"Calculate the loss accroding to the model output ```scores```,\n           and the target ```labels```.\n        Args:\n            scores (paddle.Tensor): The output of the model.\n            labels (paddle.Tensor): The target output of the model.\n        Returns:\n            losses (dict): A dict containing field 'loss'(mandatory).\n        \"\"\"\n        if len(labels) == 1:  #commonly case\n            output = []\n            label = []\n            labels = labels[0]\n            losses = dict()\n            loss = self.loss_func(scores, labels, **kwargs)\n            score_list = paddle.tolist(scores)\n            label_list = paddle.tolist(labels)\n            score_list_len = len(score_list)\n            for i in range(score_list_len):\n                output.append(score_list[i][0])\n                label.append(label_list[i][0])\n            losses['loss'] = loss",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/heads/tsm_rec_head.py:92-122"
+    },
+    "3093": {
+        "file_id": 254,
+        "content": "The code defines a loss function for a model that predicts scores and compares them with the given labels. It calculates the loss between the predicted scores and the target labels, considering cases where there is only one label. The losses are returned in a dictionary format with 'loss' as the mandatory field.",
+        "type": "comment"
+    },
+    "3094": {
+        "file_id": 254,
+        "content": "            losses['output'] = output\n            losses['label'] = label\n            return losses\n        elif len(labels) == 3:\n            labels_a, labels_b, lam = labels\n            labels_a = paddle.cast(labels_a, dtype='float32')\n            labels_b = paddle.cast(labels_b, dtype='float32')\n            lam = lam[0]  # get lam value\n            losses = dict()\n            if self.ls_eps != 0:\n                loss_a = self.label_smooth_loss(scores, labels_a, **kwargs)\n                loss_b = self.label_smooth_loss(scores, labels_b, **kwargs)\n            else:\n                loss_a = self.loss_func(scores, labels_a, **kwargs)\n                loss_b = self.loss_func(scores, labels_a, **kwargs)\n            loss = lam * loss_a + (1 - lam) * loss_b\n            losses['loss'] = loss\n            losses['output'] = output\n            losses['label'] = label\n            return losses\n        else:\n            raise NotImplementedError\n    def label_smooth_loss(self, scores, labels, **kwargs):\n        \"\"\"label smooth loss\"\"\"",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/heads/tsm_rec_head.py:123-149"
+    },
+    "3095": {
+        "file_id": 254,
+        "content": "This function calculates the loss based on the number of labels provided. If one label is given, it returns the output and label as losses. If three labels are given (a, b, lam), it casts the labels to float32, applies label smoothing or standard loss depending on epsilon, then calculates the weighted average loss for a and b. It returns the loss, output, and label in a dictionary.",
+        "type": "comment"
+    },
+    "3096": {
+        "file_id": 254,
+        "content": "        labels = F.label_smooth(labels, epsilon=self.ls_eps)\n        labels = paddle.squeeze(labels, axis=1)\n        loss = self.loss_func(scores, labels, **kwargs)\n        return loss",
+        "type": "code",
+        "location": "/applications/VideoQualityAssessment/paddlevideo/modeling/heads/tsm_rec_head.py:150-153"
+    },
+    "3097": {
+        "file_id": 254,
+        "content": "Applies label smoothing to the input labels, squeezes the labels along a specified axis, and calculates the loss using a provided loss function.",
+        "type": "comment"
+    },
+    "3098": {
+        "file_id": 255,
+        "content": "/applications/VideoQualityAssessment/paddlevideo/modeling/heads/tsn_head.py",
+        "type": "filepath"
+    },
+    "3099": {
+        "file_id": 255,
+        "content": "A PaddlePaddle TSN head class for video quality assessment tasks is defined, implementing adaptive average pooling, linear transformation, dropout, and taking input number of classes and feature channels as arguments. The forward pass function applies these operations and produces classification scores, operating on tensors of dimensions N, num_seg, and num_class, with softmax activation.",
+        "type": "summary"
+    }
+}

@@ -1,0 +1,10 @@
+{
+    "summary": "The code imports the ANETproposal class from the \"anet_prop\" module and adds it to the __all__ list, making it a public API in the package. This allows other modules to import and use this class directly.",
+    "details": [
+        {
+            "comment": "The code imports the ANETproposal class from the \"anet_prop\" module and adds it to the __all__ list, making it a public API in the package. This allows other modules to import and use this class directly.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/metrics/ActivityNet/__init__.py\":0-2",
+            "content": "from .anet_prop import ANETproposal\n__all__ = ['ANETproposal']"
+        }
+    ]
+}

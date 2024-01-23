@@ -1,0 +1,10 @@
+{
+    "summary": "This function takes a label input, converts it into an array and uses bitwise operations to create a color map representing the label values in RGB format.",
+    "details": [
+        {
+            "comment": "This function takes a label input, converts it into an array and uses bitwise operations to create a color map representing the label values in RGB format.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/Ma-Net/utils/utils.py\":0-11",
+            "content": "import numpy as np\ndef label2colormap(label):\n    m = label.astype(np.uint8)\n    r, c = m.shape\n    cmap = np.zeros((r, c, 3), dtype=np.uint8)\n    cmap[:, :, 0] = (m & 1) << 7 | (m & 8) << 3 | (m & 64) >> 1\n    cmap[:, :, 1] = (m & 2) << 6 | (m & 16) << 2 | (m & 128) >> 2\n    cmap[:, :, 2] = (m & 4) << 5 | (m & 32) << 1\n    return cmap"
+        }
+    ]
+}

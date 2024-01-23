@@ -1,0 +1,544 @@
+{
+    "3600": {
+        "file_id": 307,
+        "content": "                        default=1,\n                        help='mini-batch interval to log.')\n    parser.add_argument('--fix_random_seed',\n                        type=ast.literal_eval,\n                        default=False,\n                        help='If set True, enable continuous evaluation job.')\n    args = parser.parse_args()\n    return args\ndef train(args):\n    # parse config\n    config = parse_config(args.config)\n    train_config = merge_configs(config, 'train', vars(args))\n    valid_config = merge_configs(config, 'valid', vars(args))\n    print_configs(train_config, 'Train')\n    train_model = models.get_model(args.model_name, train_config, mode='train')\n    valid_model = models.get_model(args.model_name, valid_config, mode='valid')\n    # build model\n    startup = static.Program()\n    train_prog = static.Program()\n    if args.fix_random_seed:\n        startup.random_seed = 1000\n        train_prog.random_seed = 1000\n    with static.program_guard(train_prog, startup):\n        with paddle.utils.unique_name.guard():",
+        "type": "code",
+        "location": "/applications/VideoTag/train.py:83-109"
+    },
+    "3601": {
+        "file_id": 307,
+        "content": "This code is parsing command line arguments, loading and merging configuration files, initializing models in training and validation modes, and setting up a static program guard for building the model. It also allows the option to fix random seeds for reproducibility.",
+        "type": "comment"
+    },
+    "3602": {
+        "file_id": 307,
+        "content": "            train_model.build_input(use_dataloader=True)\n            train_model.build_model()\n            # for the input, has the form [data1, data2,..., label], so train_feeds[-1] is label\n            train_feeds = train_model.feeds()\n            train_fetch_list = train_model.fetches()\n            train_loss = train_fetch_list[0]\n            optimizer = train_model.optimizer()\n            optimizer.minimize(train_loss)\n            train_dataloader = train_model.dataloader()\n    valid_prog = static.Program()\n    with static.program_guard(valid_prog, startup):\n        with paddle.utils.unique_name.guard():\n            valid_model.build_input(use_dataloader=True)\n            valid_model.build_model()\n            valid_feeds = valid_model.feeds()\n            valid_fetch_list = valid_model.fetches()\n            valid_dataloader = valid_model.dataloader()\n    place = paddle.CUDAPlace(0) if args.use_gpu else paddle.CPUPlace()\n    exe = static.Executor(place)\n    exe.run(startup)\n    if args.pretrain:\n        train_model.load_pretrain_params(exe, args.pretrain, train_prog)",
+        "type": "code",
+        "location": "/applications/VideoTag/train.py:110-134"
+    },
+    "3603": {
+        "file_id": 307,
+        "content": "This code initializes the training and validation models, builds their inputs, models, and feeds. It also sets up the dataloaders, optimizer, and executor for the training phase. If pre-trained parameters are specified, they will be loaded before training starts.",
+        "type": "comment"
+    },
+    "3604": {
+        "file_id": 307,
+        "content": "    build_strategy = static.BuildStrategy()\n    build_strategy.enable_inplace = True\n    exec_strategy = static.ExecutionStrategy()\n    compiled_train_prog = static.CompiledProgram(\n        train_prog).with_data_parallel(loss_name=train_loss.name,\n                                       build_strategy=build_strategy,\n                                       exec_strategy=exec_strategy)\n    compiled_valid_prog = static.CompiledProgram(\n        valid_prog).with_data_parallel(share_vars_from=compiled_train_prog,\n                                       build_strategy=build_strategy,\n                                       exec_strategy=exec_strategy)\n    # get reader\n    bs_denominator = 1\n    if args.use_gpu:\n        # check number of GPUs\n        gpus = os.getenv(\"CUDA_VISIBLE_DEVICES\", \"\")\n        if gpus == \"\":\n            pass\n        else:\n            gpus = gpus.split(\",\")\n            num_gpus = len(gpus)\n            assert num_gpus == train_config.TRAIN.num_gpus, \\\n                   \"num_gpus({}) set by CUDA_VISIBLE_DEVICES \" \\",
+        "type": "code",
+        "location": "/applications/VideoTag/train.py:136-161"
+    },
+    "3605": {
+        "file_id": 307,
+        "content": "This code initializes a BuildStrategy and an ExecutionStrategy. It then creates two CompiledPrograms, one for training and one for validation, with data parallelism enabled. The number of GPUs is checked using CUDA_VISIBLE_DEVICES environment variable, and the number of GPUs must match what was set in the train configuration file.",
+        "type": "comment"
+    },
+    "3606": {
+        "file_id": 307,
+        "content": "                   \"shoud be the same as that \" \\\n                   \"set in {}({})\".format(\n                   num_gpus, args.config, train_config.TRAIN.num_gpus)\n        bs_denominator = train_config.TRAIN.num_gpus\n    train_config.TRAIN.batch_size = int(train_config.TRAIN.batch_size /\n                                        bs_denominator)\n    valid_config.VALID.batch_size = int(valid_config.VALID.batch_size /\n                                        bs_denominator)\n    train_reader = get_reader(args.model_name.upper(), 'train', train_config)\n    valid_reader = get_reader(args.model_name.upper(), 'valid', valid_config)\n    # get metrics\n    train_metrics = get_metrics(args.model_name.upper(), 'train', train_config)\n    valid_metrics = get_metrics(args.model_name.upper(), 'valid', valid_config)\n    epochs = args.epoch or train_model.epoch_num()\n    exe_places = static.cuda_places() if args.use_gpu else static.cpu_places()\n    train_dataloader.set_sample_list_generator(train_reader, places=exe_places)",
+        "type": "code",
+        "location": "/applications/VideoTag/train.py:162-181"
+    },
+    "3607": {
+        "file_id": 307,
+        "content": "Sets batch size based on number of GPUs, initializes train and valid readers, gets metrics for training and validation, sets the sample list generator for dataloader.",
+        "type": "comment"
+    },
+    "3608": {
+        "file_id": 307,
+        "content": "    valid_dataloader.set_sample_list_generator(valid_reader, places=exe_places)\n    train_with_dataloader(exe,\n                          train_prog,\n                          compiled_train_prog,\n                          train_dataloader,\n                          train_fetch_list,\n                          train_metrics,\n                          epochs=epochs,\n                          log_interval=args.log_interval,\n                          valid_interval=args.valid_interval,\n                          save_dir=args.save_dir,\n                          save_model_name=args.model_name,\n                          fix_random_seed=args.fix_random_seed,\n                          compiled_test_prog=compiled_valid_prog,\n                          test_dataloader=valid_dataloader,\n                          test_fetch_list=valid_fetch_list,\n                          test_metrics=valid_metrics)\nif __name__ == \"__main__\":\n    args = parse_args()\n    # check whether the installed paddle is compiled with GPU\n    check_cuda(args.use_gpu)",
+        "type": "code",
+        "location": "/applications/VideoTag/train.py:182-205"
+    },
+    "3609": {
+        "file_id": 307,
+        "content": "The code trains a video tagging model using PaddlePaddle framework. It sets the sample list generator for valid data and then calls the train_with_dataloader function with various parameters such as number of epochs, log and validation intervals, and data loaders for training and testing. The function trains and tests the model, saving it if necessary. The code also checks whether the installed PaddlePaddle is compiled with GPU support based on the argument provided.",
+        "type": "comment"
+    },
+    "3610": {
+        "file_id": 307,
+        "content": "    check_version()\n    logger.info(args)\n    if not os.path.exists(args.save_dir):\n        os.makedirs(args.save_dir)\n    train(args)",
+        "type": "code",
+        "location": "/applications/VideoTag/train.py:206-212"
+    },
+    "3611": {
+        "file_id": 307,
+        "content": "This code snippet checks the version, logs the arguments, creates a directory if it doesn't exist, and then proceeds to train using those arguments.",
+        "type": "comment"
+    },
+    "3612": {
+        "file_id": 308,
+        "content": "/applications/VideoTag/tsn_extractor.py",
+        "type": "filepath"
+    },
+    "3613": {
+        "file_id": 308,
+        "content": "This script sets up a model environment, downloads weights if needed, initializes the Infer model, and runs inference on input videos while saving results and features.",
+        "type": "summary"
+    },
+    "3614": {
+        "file_id": 308,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nimport os\nimport sys\nimport time\nimport logging\nimport argparse\nimport ast\nimport numpy as np\nimport paddle\nimport paddle.static as static\ntry:\n    import cPickle as pickle\nexcept:\n    import pickle\nfrom utils.config_utils import *\nimport models\nfrom reader import get_reader\nfrom metrics import get_metrics\nfrom utils.utility import check_cuda\nfrom utils.utility import check_version\nlogging.root.handlers = []\nFORMAT = '[%(levelname)s: %(filename)s: %(lineno)4d]: %(message)s'",
+        "type": "code",
+        "location": "/applications/VideoTag/tsn_extractor.py:1-37"
+    },
+    "3615": {
+        "file_id": 308,
+        "content": "This code is a Python script with licensing information and import statements. It imports necessary libraries like numpy, paddle, and others for data processing, model training, and evaluation. The code also sets up the logging format, and checks for CUDA availability and PaddlePaddle version.",
+        "type": "comment"
+    },
+    "3616": {
+        "file_id": 308,
+        "content": "logging.basicConfig(level=logging.DEBUG, format=FORMAT, stream=sys.stdout)\nlogger = logging.getLogger(__name__)\ndef parse_args():\n    parser = argparse.ArgumentParser()\n    parser.add_argument('--model_name',\n                        type=str,\n                        default='AttentionCluster',\n                        help='name of model to train.')\n    parser.add_argument('--config',\n                        type=str,\n                        default='configs/attention_cluster.txt',\n                        help='path to config file of model')\n    parser.add_argument('--use_gpu',\n                        type=ast.literal_eval,\n                        default=True,\n                        help='default use gpu.')\n    parser.add_argument(\n        '--weights',\n        type=str,\n        default=None,\n        help=\n        'weight path, None to automatically download weights provided by Paddle.'\n    )\n    parser.add_argument('--batch_size',\n                        type=int,\n                        default=1,\n                        help='sample number in a batch for inference.')",
+        "type": "code",
+        "location": "/applications/VideoTag/tsn_extractor.py:38-66"
+    },
+    "3617": {
+        "file_id": 308,
+        "content": "This code defines a function `parse_args()` to parse command-line arguments for training a model. The arguments include model name, config file path, whether to use GPU, weight path, and batch size. It uses argparse module for easy argument handling. By default, it sets the model name to 'AttentionCluster', config file path to 'configs/attention_cluster.txt', uses GPU if not specified otherwise, automatically downloads weights from Paddle if no specific path is provided, and sets batch size to 1.",
+        "type": "comment"
+    },
+    "3618": {
+        "file_id": 308,
+        "content": "    parser.add_argument('--filelist',\n                        type=str,\n                        default='./data/TsnExtractor.list',\n                        help='path to inferenece data file lists file.')\n    parser.add_argument('--log_interval',\n                        type=int,\n                        default=1,\n                        help='mini-batch interval to log.')\n    parser.add_argument('--infer_topk',\n                        type=int,\n                        default=20,\n                        help='topk predictions to restore.')\n    parser.add_argument('--save_dir',\n                        type=str,\n                        default=os.path.join('data', 'tsn_features'),\n                        help='directory to store tsn feature results')\n    parser.add_argument('--video_path',\n                        type=str,\n                        default=None,\n                        help='directory to store results')\n    args = parser.parse_args()\n    return args\ndef infer(args):\n    # parse config\n    config = parse_config(args.config)",
+        "type": "code",
+        "location": "/applications/VideoTag/tsn_extractor.py:67-93"
+    },
+    "3619": {
+        "file_id": 308,
+        "content": "The code defines command line arguments for the TsnExtractor. It sets default values and provides help messages for each argument. The function then parses these arguments to create an 'args' object, which can be used throughout the program. Additionally, the 'infer' function is defined but not implemented.",
+        "type": "comment"
+    },
+    "3620": {
+        "file_id": 308,
+        "content": "    infer_config = merge_configs(config, 'infer', vars(args))\n    print_configs(infer_config, \"Infer\")\n    infer_model = models.get_model(args.model_name,\n                                   infer_config,\n                                   mode='infer',\n                                   is_videotag=True)\n    infer_model.build_input(use_dataloader=False)\n    infer_model.build_model()\n    infer_feeds = infer_model.feeds()\n    infer_outputs = infer_model.outputs()\n    place = paddle.CUDAPlace(0) if args.use_gpu else paddle.CPUPlace()\n    exe = static.Executor(place)\n    exe.run(static.default_startup_program())\n    filelist = args.filelist or infer_config.INFER.filelist\n    filepath = args.video_path or infer_config.INFER.get('filepath', '')\n    if filepath != '':\n        assert os.path.exists(filepath), \"{} not exist.\".format(filepath)\n    else:\n        assert os.path.exists(filelist), \"{} not exist.\".format(filelist)\n    # get infer reader\n    infer_reader = get_reader(args.model_name.upper(), 'infer', infer_config)",
+        "type": "code",
+        "location": "/applications/VideoTag/tsn_extractor.py:94-118"
+    },
+    "3621": {
+        "file_id": 308,
+        "content": "The code initializes the Infer model with provided configurations and merges them to create the infer_config. It then builds the input, model, and gets feeds and outputs for inference. The place and executor are set based on whether or not GPU is used. The filelist and video path are checked for existence before initializing the infer reader with the model name, mode (infer), and configurations.",
+        "type": "comment"
+    },
+    "3622": {
+        "file_id": 308,
+        "content": "    if args.weights:\n        assert os.path.exists(\n            args.weights), \"Given weight dir {} not exist.\".format(args.weights)\n    # if no weight files specified, download weights from paddle\n    weights = args.weights or infer_model.get_weights()\n    infer_model.load_test_weights(exe, weights, static.default_main_program())\n    infer_feeder = paddle.fluid.DataFeeder(place=place, feed_list=infer_feeds)\n    fetch_list = infer_model.fetches()\n    infer_metrics = get_metrics(args.model_name.upper(), 'infer', infer_config)\n    infer_metrics.reset()\n    if not os.path.isdir(args.save_dir):\n        os.makedirs(args.save_dir)\n    for infer_iter, data in enumerate(infer_reader()):\n        data_feed_in = [items[:-1] for items in data]\n        video_id = [items[-1] for items in data]\n        bs = len(video_id)\n        feature_outs = exe.run(fetch_list=fetch_list,\n                               feed=infer_feeder.feed(data_feed_in))\n        for i in range(bs):\n            filename = video_id[i].split('/')[-1][:-4]",
+        "type": "code",
+        "location": "/applications/VideoTag/tsn_extractor.py:120-144"
+    },
+    "3623": {
+        "file_id": 308,
+        "content": "This code snippet checks if the weights (model parameters) are provided as an argument. If not, it downloads them from Paddle's servers. Then, it loads the weights into the model and creates a DataFeeder for feeding data during inference. It also initializes metrics to measure inference performance. The code then iterates over each input video, running inference with the loaded model, and saving the results for each frame.",
+        "type": "comment"
+    },
+    "3624": {
+        "file_id": 308,
+        "content": "            np.save(os.path.join(args.save_dir, filename + '.npy'),\n                    feature_outs[0][i])  #shape: seg_num*feature_dim\n    logger.info(\"Feature extraction End~\")\nif __name__ == \"__main__\":\n    args = parse_args()\n    # check whether the installed paddle is compiled with GPU\n    check_cuda(args.use_gpu)\n    check_version()\n    logger.info(args)\n    infer(args)",
+        "type": "code",
+        "location": "/applications/VideoTag/tsn_extractor.py:145-158"
+    },
+    "3625": {
+        "file_id": 308,
+        "content": "Saves extracted features from the PaddleVideo/applications/VideoTag/tsn_extractor.py module using numpy's save function, then logs the end of feature extraction and calls infer function with argument args.",
+        "type": "comment"
+    },
+    "3626": {
+        "file_id": 309,
+        "content": "/applications/VideoTag/utils/config_utils.py",
+        "type": "filepath"
+    },
+    "3627": {
+        "file_id": 309,
+        "content": "The code is part of the PaddleVideo framework's VideoTag application, which imports libraries, sets up a logger, and handles YAML configuration. It logs each key-value pair in the config file, separated by dashed lines.",
+        "type": "summary"
+    },
+    "3628": {
+        "file_id": 309,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nimport yaml\nfrom .utility import AttrDict\nimport logging\nlogger = logging.getLogger(__name__)\nCONFIG_SECS = [\n    'train',\n    'valid',\n    'test',\n    'infer',\n]\ndef parse_config(cfg_file):\n    \"\"\"Load a config file into AttrDict\"\"\"\n    import yaml\n    with open(cfg_file, 'r') as fopen:\n        yaml_config = AttrDict(yaml.load(fopen, Loader=yaml.Loader))\n    create_attr_dict(yaml_config)\n    return yaml_config\ndef create_attr_dict(yaml_config):",
+        "type": "code",
+        "location": "/applications/VideoTag/utils/config_utils.py:1-37"
+    },
+    "3629": {
+        "file_id": 309,
+        "content": "This code snippet is part of the PaddleVideo framework's VideoTag application. It imports yaml and AttrDict from utility, sets up a logger for logging messages, defines four configuration section strings, and provides two functions: parse_config() to load config files into an AttrDict object and create_attr_dict() to create an AttrDict object with the specified attributes.",
+        "type": "comment"
+    },
+    "3630": {
+        "file_id": 309,
+        "content": "    from ast import literal_eval\n    for key, value in yaml_config.items():\n        if type(value) is dict:\n            yaml_config[key] = value = AttrDict(value)\n        if isinstance(value, str):\n            try:\n                value = literal_eval(value)\n            except BaseException:\n                pass\n        if isinstance(value, AttrDict):\n            create_attr_dict(yaml_config[key])\n        else:\n            yaml_config[key] = value\n    return\ndef merge_configs(cfg, sec, args_dict):\n    assert sec in CONFIG_SECS, \"invalid config section {}\".format(sec)\n    sec_dict = getattr(cfg, sec.upper())\n    for k, v in args_dict.items():\n        if v is None:\n            continue\n        try:\n            if hasattr(sec_dict, k):\n                setattr(sec_dict, k, v)\n        except:\n            pass\n    return cfg\ndef print_configs(cfg, mode):\n    logger.info(\n        \"---------------- {:>5} Arguments ----------------\".format(mode))\n    for sec, sec_items in cfg.items():\n        logger.info(\"{}:\".format(sec))\n        for k, v in sec_items.items():",
+        "type": "code",
+        "location": "/applications/VideoTag/utils/config_utils.py:38-73"
+    },
+    "3631": {
+        "file_id": 309,
+        "content": "This code includes three functions. The first function, `config_utils.py`, is for processing the yaml configuration by converting certain types into AttrDicts and evaluating string values. The second function, `merge_configs()`, merges argument dictionaries with pre-existing config section dictionaries. It skips None values and attempts to set new attributes. Finally, the third function, `print_configs()`, prints configuration arguments in a formatted manner.",
+        "type": "comment"
+    },
+    "3632": {
+        "file_id": 309,
+        "content": "            logger.info(\"    {}:{}\".format(k, v))\n    logger.info(\"-------------------------------------------------\")",
+        "type": "code",
+        "location": "/applications/VideoTag/utils/config_utils.py:74-75"
+    },
+    "3633": {
+        "file_id": 309,
+        "content": "The code is logging information for each key-value pair in the configuration file, and then separating each set of logs with a dashed line.",
+        "type": "comment"
+    },
+    "3634": {
+        "file_id": 310,
+        "content": "/applications/VideoTag/utils/train_utils.py",
+        "type": "filepath"
+    },
+    "3635": {
+        "file_id": 310,
+        "content": "This code uses PaddlePaddle for training, imports modules, defines logging functions, and trains with a dataloader, iterating over batches to track progress, log metrics, profile performance, handle errors, and save model progress.",
+        "type": "summary"
+    },
+    "3636": {
+        "file_id": 310,
+        "content": "#   Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport os\nimport sys\nimport time\nimport numpy as np\nimport paddle\nimport paddle.static as static\nimport paddle.profiler as profiler\nimport logging\nimport shutil\nlogger = logging.getLogger(__name__)\ndef log_lr_and_step():\n    try:\n        # In optimizers, if learning_rate is set as constant, lr_var\n        # name is 'learning_rate_0', and iteration counter is not\n        # recorded. If learning_rate is set as decayed values from",
+        "type": "code",
+        "location": "/applications/VideoTag/utils/train_utils.py:1-32"
+    },
+    "3637": {
+        "file_id": 310,
+        "content": "This code snippet is likely part of a larger program that uses the PaddlePaddle framework. It imports several modules, defines a function called `log_lr_and_step()`, and sets up a logger object. The purpose of this particular block may be to handle logging learning rate values and tracking the training step during the model's optimization process.",
+        "type": "comment"
+    },
+    "3638": {
+        "file_id": 310,
+        "content": "        # learning_rate_scheduler, lr_var name is 'learning_rate',\n        # and iteration counter is recorded with name '@LR_DECAY_COUNTER@',\n        # better impliment is required here\n        lr_var = static.global_scope().find_var(\"learning_rate\")\n        if not lr_var:\n            lr_var = static.global_scope().find_var(\"learning_rate_0\")\n        lr = np.array(lr_var.get_tensor())\n        lr_count = '[-]'\n        lr_count_var = static.global_scope().find_var(\"@LR_DECAY_COUNTER@\")\n        if lr_count_var:\n            lr_count = np.array(lr_count_var.get_tensor())\n        logger.info(\n            \"------- learning rate {}, learning rate counter {} -----\".format(\n                np.array(lr), np.array(lr_count)))\n    except:\n        logger.warn(\"Unable to get learning_rate and LR_DECAY_COUNTER.\")\ndef test_with_dataloader(exe,\n                         compiled_test_prog,\n                         test_dataloader,\n                         test_fetch_list,\n                         test_metrics,\n                         log_interval=0,",
+        "type": "code",
+        "location": "/applications/VideoTag/utils/train_utils.py:33-57"
+    },
+    "3639": {
+        "file_id": 310,
+        "content": "This code retrieves the learning rate and learning rate counter from the global scope. It prints their values, but handles potential exceptions if they cannot be found or accessed.",
+        "type": "comment"
+    },
+    "3640": {
+        "file_id": 310,
+        "content": "                         save_model_name=''):\n    if not test_dataloader:\n        logger.error(\"[TEST] get dataloader failed.\")\n    test_metrics.reset()\n    test_iter = 0\n    for data in test_dataloader():\n        test_outs = exe.run(compiled_test_prog,\n                            fetch_list=test_fetch_list,\n                            feed=data)\n        test_metrics.accumulate(test_outs)\n        if log_interval > 0 and test_iter % log_interval == 0:\n            test_metrics.calculate_and_log_out(test_outs, \\\n               info = '[TEST] test_iter {} '.format(test_iter))\n        test_iter += 1\n    test_metrics.finalize_and_log_out(\"[TEST] Finish\")\ndef train_with_dataloader(exe, train_prog, compiled_train_prog, train_dataloader, \\\n                        train_fetch_list, train_metrics, epochs = 10, \\\n                        log_interval = 0, valid_interval = 0, save_dir = './', \\\n                        num_trainers = 1, trainer_id = 0, \\\n                        save_model_name = 'model', fix_random_seed = False, \\",
+        "type": "code",
+        "location": "/applications/VideoTag/utils/train_utils.py:58-80"
+    },
+    "3641": {
+        "file_id": 310,
+        "content": "This code defines a function to train a model with a dataloader. It takes an executor, training program, compiled training program, train dataloader, train fetch list, and train metrics as inputs. The function iterates over the dataloader, runs the training program for each data batch, accumulates metrics, logs intermediate results if specified, and finalizes and logs out when finished.",
+        "type": "comment"
+    },
+    "3642": {
+        "file_id": 310,
+        "content": "                        compiled_test_prog = None, test_dataloader = None, \\\n                        test_fetch_list = None, test_metrics = None, \\\n                        is_profiler = None, profiler_path = None):\n    if not train_dataloader:\n        logger.error(\"[TRAIN] get dataloader failed.\")\n    epoch_periods = []\n    train_loss = 0\n    # NOTE: profiler tools, used for benchmark\n    if is_profiler:\n        prof = profiler.Profiler()\n    for epoch in range(epochs):\n        log_lr_and_step()\n        train_iter = 0\n        epoch_periods = []\n        cur_time = time.time()\n        for data in train_dataloader():\n            if is_profiler and train_iter == log_interval:\n                prof.start()\n            train_outs = exe.run(compiled_train_prog,\n                                 fetch_list=train_fetch_list,\n                                 feed=data)\n            period = time.time() - cur_time\n            epoch_periods.append(period)\n            timeStamp = time.time()\n            localTime = time.localtime(timeStamp)",
+        "type": "code",
+        "location": "/applications/VideoTag/utils/train_utils.py:81-109"
+    },
+    "3643": {
+        "file_id": 310,
+        "content": "This code initializes variables and starts a loop over epochs. Inside the loop, it logs the learning rate and step, iterates through the training dataloader, runs the compiled program with fetched data, records the time taken for each iteration, and optionally uses profiler tools for benchmarking.",
+        "type": "comment"
+    },
+    "3644": {
+        "file_id": 310,
+        "content": "            strTime = time.strftime(\"%Y-%m-%d %H:%M:%S\", localTime)\n            if log_interval > 0 and (train_iter % log_interval == 0):\n                train_metrics.calculate_and_log_out(train_outs, \\\n                        info = '[TRAIN {}] Epoch {}, iter {}, time {}, '.format(strTime, epoch, train_iter, period))\n            train_iter += 1\n            cur_time = time.time()\n            if is_profiler:\n                prof.step()\n                if train_iter == log_interval + 5:\n                    prof.stop()\n                    prof.export(path=profiler_path, format=\"json\")\n                    return\n        if len(epoch_periods) < 1:\n            logger.info(\n                'No iteration was executed, please check the data reader')\n            sys.exit(1)\n        logger.info(\n            '[TRAIN] Epoch {} training finished, average time: {}'.format(\n                epoch, np.mean(epoch_periods[1:])))\n        if trainer_id == 0:\n            save_model(exe, train_prog, save_dir, save_model_name,\n                       \"_epoch{}\".format(epoch))",
+        "type": "code",
+        "location": "/applications/VideoTag/utils/train_utils.py:110-135"
+    },
+    "3645": {
+        "file_id": 310,
+        "content": "This code segment tracks the training progress of a video analysis algorithm. It logs and calculates metrics at specified intervals, profiles performance if desired, and saves model progress after each epoch. If no iterations are executed, it alerts and exits with an error message to check data reader.",
+        "type": "comment"
+    },
+    "3646": {
+        "file_id": 310,
+        "content": "        if compiled_test_prog and valid_interval > 0 and (\n                epoch + 1) % valid_interval == 0:\n            test_with_dataloader(exe, compiled_test_prog, test_dataloader,\n                                 test_fetch_list, test_metrics, log_interval,\n                                 save_model_name)\n    if trainer_id == 0:\n        save_model(exe, train_prog, save_dir, save_model_name)\n    #when fix_random seed for debug\n    if fix_random_seed:\n        cards = os.environ.get('CUDA_VISIBLE_DEVICES')\n        gpu_num = len(cards.split(\",\"))\n        print(\"kpis\\ttrain_cost_card{}\\t{}\".format(gpu_num, train_loss))\n        print(\"kpis\\ttrain_speed_card{}\\t{}\".format(gpu_num,\n                                                    np.mean(epoch_periods)))\ndef save_model(exe, program, save_dir, model_name, postfix=''):\n    \"\"\"save paramters and optimizer related varaibles\"\"\"\n    if not os.path.isdir(save_dir):\n        os.makedirs(save_dir)\n    saved_model_name = model_name + postfix\n    paddle.static.save(program, os.path.join(save_dir, saved_model_name))",
+        "type": "code",
+        "location": "/applications/VideoTag/utils/train_utils.py:136-159"
+    },
+    "3647": {
+        "file_id": 310,
+        "content": "The code is checking if it's time to test the program, saving the model if it's trainer 0, and fixing the random seed for debugging. It also saves the model with a specified name in the given directory. The code appears to be part of a larger deep learning training process.",
+        "type": "comment"
+    },
+    "3648": {
+        "file_id": 310,
+        "content": "    return",
+        "type": "code",
+        "location": "/applications/VideoTag/utils/train_utils.py:161-161"
+    },
+    "3649": {
+        "file_id": 310,
+        "content": "The code snippet seems to be incomplete as it only contains a single line, which is the return statement. Without seeing the context or surrounding code, it's difficult to provide an accurate comment. Can you please provide more information or additional lines of code?",
+        "type": "comment"
+    },
+    "3650": {
+        "file_id": 311,
+        "content": "/applications/VideoTag/utils/utility.py",
+        "type": "filepath"
+    },
+    "3651": {
+        "file_id": 311,
+        "content": "This Python file imports necessary modules, defines AttrDict class, checks PaddlePaddle version compatibility, and handles GPU usage based on CUDA availability. It uses paddle.utils.require_version to ensure required version '1.6.0' is installed, logging errors and exiting with status code 1 if not.",
+        "type": "summary"
+    },
+    "3652": {
+        "file_id": 311,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nimport os\nimport sys\nimport signal\nimport logging\nimport paddle\n__all__ = ['AttrDict']\nlogger = logging.getLogger(__name__)\ndef _term(sig_num, addition):\n    print('current pid is %s, group id is %s' % (os.getpid(), os.getpgrp()))\n    os.killpg(os.getpgid(os.getpid()), signal.SIGKILL)\nsignal.signal(signal.SIGTERM, _term)\nsignal.signal(signal.SIGINT, _term)\nclass AttrDict(dict):\n    def __getattr__(self, key):\n        return self[key]",
+        "type": "code",
+        "location": "/applications/VideoTag/utils/utility.py:1-37"
+    },
+    "3653": {
+        "file_id": 311,
+        "content": "Code is a Python file with license information, importing necessary modules such as os, sys, signal and logging. It defines the AttrDict class which extends the dictionary functionality and includes signals for handling SIGTERM and SIGINT for process termination.",
+        "type": "comment"
+    },
+    "3654": {
+        "file_id": 311,
+        "content": "    def __setattr__(self, key, value):\n        if key in self.__dict__:\n            self.__dict__[key] = value\n        else:\n            self[key] = value\ndef check_cuda(use_cuda, err = \\\n    \"\\nYou can not set use_gpu = True in the model because you are using paddlepaddle-cpu.\\n \\\n    Please: 1. Install paddlepaddle-gpu to run your models on GPU or 2. Set use_gpu = False to run models on CPU.\\n\"\n                                                                                                                     ):\n    try:\n        if use_cuda == True and paddle.is_compiled_with_cuda() == False:\n            print(err)\n            sys.exit(1)\n    except Exception as e:\n        pass\ndef check_version():\n    \"\"\"\n     Log error and exit when the installed version of paddlepaddle is\n     not satisfied.\n     \"\"\"\n    err = \"PaddlePaddle version 1.6 or higher is required, \" \\\n          \"or a suitable develop version is satisfied as well. \\n\" \\\n          \"Please make sure the version is good with your code.\" \\\n    try:",
+        "type": "code",
+        "location": "/applications/VideoTag/utils/utility.py:39-66"
+    },
+    "3655": {
+        "file_id": 311,
+        "content": "This code checks if the installed PaddlePaddle version is 1.6 or higher and ensures that the user's code is compatible with the installed version. It also handles GPU usage by checking if the code should run on GPU or CPU based on the availability of CUDA in the system.",
+        "type": "comment"
+    },
+    "3656": {
+        "file_id": 311,
+        "content": "        paddle.utils.require_version('1.6.0')\n    except Exception as e:\n        logger.error(err)\n        sys.exit(1)",
+        "type": "code",
+        "location": "/applications/VideoTag/utils/utility.py:67-70"
+    },
+    "3657": {
+        "file_id": 311,
+        "content": "This code is using the paddle.utils.require_version function to check if the required version '1.6.0' is installed. If there is an exception, it logs the error and exits the program with a status code of 1.",
+        "type": "comment"
+    },
+    "3658": {
+        "file_id": 312,
+        "content": "/applications/VideoTag/videotag_test.py",
+        "type": "filepath"
+    },
+    "3659": {
+        "file_id": 312,
+        "content": "The code configures logging, imports libraries, initializes a video tagging model using PaddlePaddle and PaddleVideo. It sets up input data with efficient execution on GPU/CPU resources, measures predictor model's execution time for performance analysis or optimization within the main script function.",
+        "type": "summary"
+    },
+    "3660": {
+        "file_id": 312,
+        "content": "#  Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n#Licensed under the Apache License, Version 2.0 (the \"License\");\n#you may not use this file except in compliance with the License.\n#You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n#Unless required by applicable law or agreed to in writing, software\n#distributed under the License is distributed on an \"AS IS\" BASIS,\n#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n#See the License for the specific language governing permissions and\n#limitations under the License.\nimport os\nimport sys\nimport time\nimport logging\nimport argparse\nimport ast\nimport numpy as np\nimport paddle\nimport paddle.static as static\nfrom utils.config_utils import *\nimport models\nfrom reader import get_reader\nfrom metrics import get_metrics\nfrom utils.utility import check_cuda\nfrom utils.utility import check_version\nlogging.root.handlers = []\nFORMAT = '[%(levelname)s: %(filename)s: %(lineno)4d]: %(message)s'\nlogging.basicConfig(level=logging.INFO, format=FORMAT, stream=sys.stdout)",
+        "type": "code",
+        "location": "/applications/VideoTag/videotag_test.py:1-34"
+    },
+    "3661": {
+        "file_id": 312,
+        "content": "Code sets the logging configuration for INFO level, defines the log format, and redirects the logs to stdout. It also imports necessary libraries and modules, and configures logging handlers.",
+        "type": "comment"
+    },
+    "3662": {
+        "file_id": 312,
+        "content": "logger = logging.getLogger(__name__)\ndef parse_args():\n    parser = argparse.ArgumentParser()\n    parser.add_argument('--extractor_config',\n                        type=str,\n                        default='configs/tsn.yaml',\n                        help='path to config file of model')\n    parser.add_argument('--extractor_name',\n                        type=str,\n                        default='TSN',\n                        help='extractor model name, default TSN')\n    parser.add_argument('--predictor_config',\n                        '--pconfig',\n                        type=str,\n                        default='configs/attention_lstm.yaml',\n                        help='path to config file of model')\n    parser.add_argument(\n        '--predictor_name',\n        '--pname',\n        type=str,\n        default='AttentionLSTM',\n        help='predictor model name, as AttentionLSTM, AttentionCluster, NEXTVLAD'\n    )\n    parser.add_argument('--use_gpu',\n                        type=ast.literal_eval,\n                        default=True,",
+        "type": "code",
+        "location": "/applications/VideoTag/videotag_test.py:35-62"
+    },
+    "3663": {
+        "file_id": 312,
+        "content": "This code snippet defines a function \"parse_args()\" which uses the argparse module to parse command-line arguments. It sets default values for extractor and predictor model configurations, names, and enables GPU usage by default.",
+        "type": "comment"
+    },
+    "3664": {
+        "file_id": 312,
+        "content": "                        help='default use gpu.')\n    parser.add_argument('--extractor_weights',\n                        type=str,\n                        default='weights/tsn',\n                        help='extractor weight path')\n    parser.add_argument('--predictor_weights',\n                        '--pweights',\n                        type=str,\n                        default='weights/attention_lstm',\n                        help='predictor weight path')\n    parser.add_argument('--filelist',\n                        type=str,\n                        default='./data/VideoTag_test.list',\n                        help='path of video data, multiple video')\n    parser.add_argument('--save_dir',\n                        type=str,\n                        default='data/VideoTag_results',\n                        help='output file path')\n    parser.add_argument('--label_file',\n                        type=str,\n                        default='label_3396.txt',\n                        help='chinese label file path')\n    args = parser.parse_args()",
+        "type": "code",
+        "location": "/applications/VideoTag/videotag_test.py:63-86"
+    },
+    "3665": {
+        "file_id": 312,
+        "content": "This code snippet uses the argparse module to define command-line arguments for a video tagging application. These arguments include GPU usage, extractor and predictor weight paths, input file list, output directory, and Chinese label file path. The function `parser.parse_args()` is called at the end to return these arguments.",
+        "type": "comment"
+    },
+    "3666": {
+        "file_id": 312,
+        "content": "    return args\ndef main():\n    \"\"\"\n    Video classification model of 3000 Chinese tags.\n    videotag_extractor_prdictor (as videotag_TSN_AttentionLSTM)\n    two stages in our model:\n        1. extract feature from input video(mp4 format) using extractor\n        2. predict classification results from extracted feature  using predictor\n    we implement this using two name scopes, ie. extractor_scope and predictor_scope.\n    \"\"\"\n    if not os.path.isdir(args.save_dir):\n        os.makedirs(args.save_dir)\n    extractor_config = parse_config(args.extractor_config)\n    extractor_infer_config = merge_configs(extractor_config, 'infer',\n                                           vars(args))\n    extractor_start_time = time.time()\n    extractor_scope = paddle.static.Scope()\n    with static.scope_guard(extractor_scope):\n        extractor_startup_prog = static.Program()\n        extractor_main_prog = static.Program()\n        with static.program_guard(extractor_main_prog, extractor_startup_prog):\n            paddle.disable_static()",
+        "type": "code",
+        "location": "/applications/VideoTag/videotag_test.py:87-111"
+    },
+    "3667": {
+        "file_id": 312,
+        "content": "This code defines a video classification model with two stages: extracting features from the input video using an extractor and predicting the classification results based on those extracted features. It uses PaddlePaddle's static graph mode for performance improvement and organizes the code within name scopes \"extractor_scope\" and \"predictor_scope\". The code also checks if the save directory exists, creates it if not, and measures time taken by the extractor stage.",
+        "type": "comment"
+    },
+    "3668": {
+        "file_id": 312,
+        "content": "                # build model\n            extractor_model = models.get_model(args.extractor_name,\n                                               extractor_infer_config,\n                                               mode='infer',\n                                               is_videotag=True)\n            extractor_model.build_input(use_dataloader=False)\n            extractor_model.build_model()\n            extractor_feeds = extractor_model.feeds()\n            extractor_fetch_list = extractor_model.fetches()\n            place = paddle.CUDAPlace(0) if args.use_gpu else paddle.CPUPlace()\n            exe = static.Executor(place)\n            exe.run(extractor_startup_prog)\n            logger.info('load extractor weights from {}'.format(\n                args.extractor_weights))\n            extractor_model.load_pretrain_params(exe,\n                                                 args.extractor_weights,\n                                                 extractor_main_prog)\n                # get reader and metrics",
+        "type": "code",
+        "location": "/applications/VideoTag/videotag_test.py:112-134"
+    },
+    "3669": {
+        "file_id": 312,
+        "content": "This code builds a model, sets up the necessary parameters for execution, and loads pre-trained weights from a specified location. The model is built in inferencing mode for video tagging tasks, and it utilizes GPU or CPU resources based on the provided arguments.",
+        "type": "comment"
+    },
+    "3670": {
+        "file_id": 312,
+        "content": "            extractor_reader = get_reader(args.extractor_name, 'infer',\n                                          extractor_infer_config)\n            extractor_feeder = paddle.fluid.DataFeeder(place=place,\n                                                feed_list=extractor_feeds)\n            feature_list = []\n            file_list = []\n            for idx, data in enumerate(extractor_reader()):\n                file_id = [item[-1] for item in data]\n                feed_data = [item[:-1] for item in data]\n                feature_out = exe.run(fetch_list=extractor_fetch_list,\n                                      feed=extractor_feeder.feed(feed_data))\n                feature_list.append(feature_out[0])  #get out from list\n                file_list.append(file_id)\n                logger.info(\n                    '========[Stage 1 Sample {} ] Extractor finished======'.\n                    format(idx))\n            paddle.enable_static()\n        extractor_end_time = time.time()\n        print('extractor_time', extractor_end_time - extractor_start_time)",
+        "type": "code",
+        "location": "/applications/VideoTag/videotag_test.py:135-154"
+    },
+    "3671": {
+        "file_id": 312,
+        "content": "The code is setting up a reader and feeder for an extractor in PaddleVideo, iterating through data from the reader, running the extractor using static mode, and logging progress. It also measures and prints the time taken for extraction.",
+        "type": "comment"
+    },
+    "3672": {
+        "file_id": 312,
+        "content": "    predictor_config = parse_config(args.predictor_config)\n    predictor_infer_config = merge_configs(predictor_config, 'infer',\n                                           vars(args))\n    # get Predictor input from Extractor output\n    predictor_feed_list = []\n    for i in range(len(feature_list)):\n        feature_out = feature_list[i]\n        if args.predictor_name == \"AttentionCluster\":\n            extractor_seg_num = extractor_infer_config.INFER.seg_num\n            predictor_seg_num = predictor_infer_config.MODEL.seg_num\n            idxs = []\n            stride = float(extractor_seg_num) / predictor_seg_num\n            for j in range(predictor_seg_num):\n                pos = (j + np.random.random()) * stride\n                idxs.append(min(extractor_seg_num - 1, int(pos)))\n            extractor_feature = feature_out[:, idxs, :].astype(\n                float)  # get from bs dim\n        else:\n            extractor_feature = feature_out.astype(float)\n        predictor_feed_data = [extractor_feature]\n        predictor_feed_list.append((predictor_feed_data, file_list[i]))",
+        "type": "code",
+        "location": "/applications/VideoTag/videotag_test.py:156-177"
+    },
+    "3673": {
+        "file_id": 312,
+        "content": "This code configures and prepares input data for a predictor model. It first parses the predictor configuration file, then merges it with command line arguments to create an inferencing configuration. Depending on the specified predictor model, it either extracts relevant segments from feature lists or uses the entire feature list. The resulting data is added to a list of inputs for the predictor model.",
+        "type": "comment"
+    },
+    "3674": {
+        "file_id": 312,
+        "content": "    predictor_start_time = time.time()\n    predictor_scope = paddle.static.Scope()\n    with static.scope_guard(predictor_scope):\n        predictor_startup_prog = static.Program()\n        predictor_main_prog = static.Program()\n        with static.program_guard(predictor_main_prog, predictor_startup_prog):\n            paddle.disable_static()\n                # parse config\n            predictor_model = models.get_model(args.predictor_name,\n                                               predictor_infer_config,\n                                               mode='infer')\n            predictor_model.build_input(use_dataloader=False)\n            predictor_model.build_model()\n            predictor_feeds = predictor_model.feeds()\n            exe.run(predictor_startup_prog)\n            logger.info('load predictor weights from {}'.format(\n                args.predictor_weights))\n            predictor_model.load_test_weights(exe, args.predictor_weights,\n                                              predictor_main_prog)",
+        "type": "code",
+        "location": "/applications/VideoTag/videotag_test.py:179-199"
+    },
+    "3675": {
+        "file_id": 312,
+        "content": "This code sets up a predictor model, builds its inputs, builds the model itself, initializes feeds, runs a startup program, loads test weights from a specified location, and performs these actions within scopes and programs for efficient execution.",
+        "type": "comment"
+    },
+    "3676": {
+        "file_id": 312,
+        "content": "            predictor_feeder = paddle.fluid.DataFeeder(place=place,\n                                                feed_list=predictor_feeds)\n            predictor_fetch_list = predictor_model.fetches()\n            predictor_metrics = get_metrics(args.predictor_name.upper(),\n                                            'infer', predictor_infer_config)\n            predictor_metrics.reset()\n            for idx, data in enumerate(predictor_feed_list):\n                file_id = data[1]\n                predictor_feed_data = data[0]\n                final_outs = exe.run(\n                    fetch_list=predictor_fetch_list,\n                    feed=predictor_feeder.feed(predictor_feed_data))\n                logger.info(\n                    '=======[Stage 2 Sample {} ] Predictor finished========'\n                    .format(idx))\n                final_result_list = [item\n                                     for item in final_outs] + [file_id]\n                predictor_metrics.accumulate(final_result_list)\n            predictor_metrics.finalize_and_log_out(",
+        "type": "code",
+        "location": "/applications/VideoTag/videotag_test.py:201-221"
+    },
+    "3677": {
+        "file_id": 312,
+        "content": "This code snippet is initializing a DataFeeder for predictor model, fetching the list of metrics for predictor model and resetting them. It then iterates over the feed data, runs the model with each data instance, accumulates the final results in the metrics object, and finally logs the output.",
+        "type": "comment"
+    },
+    "3678": {
+        "file_id": 312,
+        "content": "                savedir=args.save_dir, label_file=args.label_file)\n            paddle.enable_static()\n    predictor_end_time = time.time()\n    print('predictor_time', predictor_end_time - predictor_start_time)\nif __name__ == '__main__':\n    start_time = time.time()\n    args = parse_args()\n    print(args)\n    check_cuda(args.use_gpu)\n    check_version()\n    logger.info(args)\n    main()\n    end_time = time.time()\n    period = end_time - start_time\n    print('[INFER] infer finished. cost time: {}'.format(period))",
+        "type": "code",
+        "location": "/applications/VideoTag/videotag_test.py:222-238"
+    },
+    "3679": {
+        "file_id": 312,
+        "content": "The code measures the time taken for a predictor to run and outputs it. It also records the total time taken for inferencing and displays the result, indicating when the inference is finished. This code snippet appears within the main function of the script, suggesting that this timing information is used for performance analysis or optimization purposes.",
+        "type": "comment"
+    },
+    "3680": {
+        "file_id": 313,
+        "content": "/benchmark/TimeSformer/README.md",
+        "type": "filepath"
+    },
+    "3681": {
+        "file_id": 313,
+        "content": "This code provides instructions to run a script that executes a series of benchmark tests for the TimeSformer model in PaddleVideo. The provided script, \"run_all.sh\", performs several steps including switching to a specific branch (benchmark_dev), installing dependencies, downloading and uncompressing data, and then running various benchmarks with different parameters using another script named \"run_benchmark.sh\".",
+        "type": "summary"
+    },
+    "3682": {
+        "file_id": 313,
+        "content": "执行\n```bash\nbash ./run_all.sh down_data\n```\n即可运行.\nrun_all.sh内部的执行步骤：\n1. cd 到 ../../ (也就是 PaddleVideo 目录)\n2. 切换到benchmark_dev分支\n3. 安装 PaddleVideo 所需依赖\n4. cd 回PaddleVideo/data/ucf101\n5. wget下载数据集并解压缩，并下载预训练权重放到data目录下\n6. 再次cd 回到 ../../ (也就是 PaddleVideo 目录)\n8. 按照不同的参数执行 run_benchmark.sh 脚本",
+        "type": "code",
+        "location": "/benchmark/TimeSformer/README.md:1-14"
+    },
+    "3683": {
+        "file_id": 313,
+        "content": "This code provides instructions to run a script that executes a series of benchmark tests for the TimeSformer model in PaddleVideo. The provided script, \"run_all.sh\", performs several steps including switching to a specific branch (benchmark_dev), installing dependencies, downloading and uncompressing data, and then running various benchmarks with different parameters using another script named \"run_benchmark.sh\".",
+        "type": "comment"
+    },
+    "3684": {
+        "file_id": 314,
+        "content": "/benchmark/TimeSformer/run_all.sh",
+        "type": "filepath"
+    },
+    "3685": {
+        "file_id": 314,
+        "content": "The script prepares PaddleVideo for TimeSformer benchmarking, downloads UCF101 dataset, and performs batch experiments with various configurations on one or eight GPUs.",
+        "type": "summary"
+    },
+    "3686": {
+        "file_id": 314,
+        "content": "# 提供可稳定复现性能的脚本，默认在标准docker环境内py37执行： paddlepaddle/paddle:latest-gpu-cuda10.2-cudnn7  paddle=2.1.2  py=37\n# 执行目录：需说明\nsed -i '/set\\ -xe/d' run_benchmark.sh\ncd ../../ # cd到PaddleVideo项目根目录下\ngit checkout benchmark_dev\nlog_path=${LOG_PATH_INDEX_DIR:-$(pwd)}  #  benchmark系统指定该参数,不需要跑profile时,log_path指向存speed的目录\n# 1 安装该模型需要的依赖 (如需开启优化策略请注明)\npython -m pip install -r requirements.txt\n# 2 拷贝该模型需要数据、预训练模型\nunalias cp\ncp -f benchmark/TimeSformer/timesformer_ucf101_videos_benchmark_bs1.yaml configs/recognition/timesformer/\ncp -f benchmark/TimeSformer/timesformer_ucf101_videos_benchmark_bs1_mp.yaml configs/recognition/timesformer/\ncp -f benchmark/TimeSformer/timesformer_ucf101_videos_benchmark_bs14.yaml configs/recognition/timesformer/\ncp -f benchmark/TimeSformer/timesformer_ucf101_videos_benchmark_bs14_mp.yaml configs/recognition/timesformer/\nif [ ! -f \"data/ucf101/trainlist_benchmark_mp.txt\" ]; then\n    wget -P data/ucf101/ https://videotag.bj.bcebos.com/PaddleVideo-release2.2/trainlist_benchmark_mp.txt\nfi\nwget -P ",
+        "type": "code",
+        "location": "/benchmark/TimeSformer/run_all.sh:1-20"
+    },
+    "3687": {
+        "file_id": 314,
+        "content": "This code snippet is part of a script for running the TimeSformer model benchmark in PaddleVideo. It sets up the environment, installs required dependencies, and copies necessary configuration files and data to ensure stable performance.",
+        "type": "comment"
+    },
+    "3688": {
+        "file_id": 314,
+        "content": "data/ https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/ViT_base_patch16_224_pretrained.pdparams\nalias cp='cp -i'\ncd data/ucf101 # 进入PaddleVideo/data/ucf101\nif [ $1 = \"down_data\" ];then\n    wget --no-check-certificate \"https://www.crcv.ucf.edu/data/UCF101/UCF101.rar\" # 下载训练数据\n    unrar x UCF101.rar # 解压\n    mv ./UCF-101 ./videos # 重命名文件夹为./videos\n    rm -rf ./UCF101.rar\nelse    # 使用本地数据\n    rm -rf videos\n    ln -s ${data_path}/dygraph_data/TSM/ucf101/videos ./videos\nfi\ncd ../../ # 返回PaddleVideo\n# 3 批量运行（如不方便批量，1，2需放到单个模型中）\nmodel_mode_list=(TimeSformer)\nfp_item_list=(fp32 fp16)\nbs_item_list=(1)    #  14\nfor model_mode in ${model_mode_list[@]}; do\n      for fp_item in ${fp_item_list[@]}; do\n          for bs_item in ${bs_item_list[@]}\n            do\n            run_mode=sp\n            log_name=video_${model_mode}_${run_mode}_bs${bs_item}_${fp_item}   # 如:clas_MobileNetv1_mp_bs32_fp32_8\n            echo \"index is speed, 1gpus, begin, ${log_name}\"\n            CUDA_VISIBLE_DEVICES=0 bash benchmark/${model_m",
+        "type": "code",
+        "location": "/benchmark/TimeSformer/run_all.sh:20-47"
+    },
+    "3689": {
+        "file_id": 314,
+        "content": "This script downloads and prepares the UCF101 dataset for the TimeSformer model in PaddleVideo. It checks if the user wants to download data or use local data, then proceeds accordingly. The script also sets up a loop to run batch experiments with different model modes (TimeSformer), floating point items (fp32, fp16), and batch sizes (1). The log name is based on the model mode, run mode (speed), batch size, and floating point item. It uses CUDA_VISIBLE_DEVICES=0 to specify the GPU for execution.",
+        "type": "comment"
+    },
+    "3690": {
+        "file_id": 314,
+        "content": "ode}/run_benchmark.sh ${run_mode} ${bs_item} ${fp_item} ${model_mode} | tee ${log_path}/${log_name}_speed_1gpus 2>&1\n            sleep 60\n            run_mode=mp\n            log_name=video_${model_mode}_${run_mode}_bs${bs_item}_${fp_item}   # 如:clas_MobileNetv1_mp_bs32_fp32_8\n            echo \"index is speed, 8gpus, run_mode is multi_process, begin, ${log_name}\"\n            CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 bash benchmark/${model_mode}/run_benchmark.sh ${run_mode} ${bs_item} ${fp_item} ${model_mode} | tee ${log_path}/${log_name}_speed_8gpus8p 2>&1\n            sleep 60\n            done\n      done\ndone",
+        "type": "code",
+        "location": "/benchmark/TimeSformer/run_all.sh:47-57"
+    },
+    "3691": {
+        "file_id": 314,
+        "content": "The script iterates over different model modes, batch sizes, and floating-point types. It first runs a benchmark with one GPU and logs the results, then sleeps for 60 seconds. Next, it repeats the process but uses eight GPUs in parallel. The script aims to test various configurations and collect performance data.",
+        "type": "comment"
+    },
+    "3692": {
+        "file_id": 315,
+        "content": "/benchmark/TimeSformer/run_benchmark.sh",
+        "type": "filepath"
+    },
+    "3693": {
+        "file_id": 315,
+        "content": "This code sets up benchmark tests for TimeSformer video classification models in PaddleVideo, allowing users to customize parameters and analyze logs. The train() function is used for model training with specified parameters.",
+        "type": "summary"
+    },
+    "3694": {
+        "file_id": 315,
+        "content": "#!/usr/bin/env bash\nset -xe\n# 运行示例：CUDA_VISIBLE_DEVICES=0 bash run_benchmark.sh ${run_mode} ${bs_item} ${fp_item} 500 ${model_mode}\n# 参数说明\nfunction _set_params(){\n    run_mode=${1:-\"sp\"}          # 单卡sp|多卡mp\n    batch_size=${2:-\"1\"}\n    fp_item=${3:-\"fp32\"}        # fp32|fp16\n    model_item=${4:-\"model_item\"}\n    run_log_path=${TRAIN_LOG_DIR:-$(pwd)}  # TRAIN_LOG_DIR 后续QA设置该参数\n# 添加benchmark日志解析所需参数\n    base_batch_size=${batch_size}\n    mission_name=\"视频分类\"\n    direction_id=\"0\"\n    ips_unit=\"instance/sec\"\n    skip_steps=10                     # 解析日志，有些模型前几个step耗时长，需要跳过                                    (必填)\n    keyword=\"ips:\"                 # 解析日志，筛选出数据所在行的关键字                                             (必填)\n    index=\"1\"\n    model_name=${model_item}_bs${batch_size}_${fp_item}\n#   以下不用修改   \n    device=${CUDA_VISIBLE_DEVICES//,/ }\n    arr=(${device})\n    num_gpu_devices=${#arr[*]}\n    log_file=${run_log_path}/${model_item}_${run_mode}_bs${batch_size}_${fp_item}_${num_gpu_devices}\n}\nfunction _train(){\n    echo \"Train on ${num_gpu_devices} GPUs\"",
+        "type": "code",
+        "location": "/benchmark/TimeSformer/run_benchmark.sh:1-28"
+    },
+    "3695": {
+        "file_id": 315,
+        "content": "This script is a bash file for running benchmark tests on TimeSformer video classification models. It sets parameters such as single or multi-GPU mode, batch size, floating point precision, and model item. The function _train() will be used to train the model with specified parameters.",
+        "type": "comment"
+    },
+    "3696": {
+        "file_id": 315,
+        "content": "    echo \"current CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES, gpus=$num_gpu_devices, batch_size=$batch_size\"\n    case ${run_mode} in\n    sp) \n        if [ ${fp_item} == 'fp32' ]; then\n            train_cmd=\"python -u main.py -c configs/recognition/timesformer/timesformer_ucf101_videos_benchmark_bs${batch_size}.yaml\"\n        elif [ ${fp_item} == 'fp16' ]; then\n            train_cmd=\"python -u main.py --amp -c configs/recognition/timesformer/timesformer_ucf101_videos_benchmark_bs${batch_size}.yaml\"\n        else\n            echo \"choose fp_item(fp32 or fp16)\"\n            exit 1\n        fi;;\n    mp)\n        rm -rf ./mylog\n        if [ ${fp_item} == 'fp32' ]; then\n            train_cmd=\"python -u -B -m paddle.distributed.launch --gpus=$CUDA_VISIBLE_DEVICES --log_dir=./mylog main.py \\\n            -c configs/recognition/timesformer/timesformer_ucf101_videos_benchmark_bs${batch_size}_mp.yaml\"\n            log_parse_file=\"mylog/workerlog.0\"\n        elif [ ${fp_item} == 'fp16' ]; then\n            train_cmd=\"python -u -B -m paddle.distributed.launch --gpus=$CUDA_VISIBLE_DEVICES --log_dir=./mylog main.py --amp \\",
+        "type": "code",
+        "location": "/benchmark/TimeSformer/run_benchmark.sh:29-48"
+    },
+    "3697": {
+        "file_id": 315,
+        "content": "This code is running a benchmark for the TimeSformer model in PaddleVideo. It checks if fp_item is either 'fp32' or 'fp16', and then calls the main script with the appropriate configuration file, based on the mode (sp or mp) and the chosen precision. The output logs are directed to a specified directory for analysis.",
+        "type": "comment"
+    },
+    "3698": {
+        "file_id": 315,
+        "content": "            -c configs/recognition/timesformer/timesformer_ucf101_videos_benchmark_bs${batch_size}_mp.yaml\"\n            log_parse_file=\"mylog/workerlog.0\"\n        else\n            echo \"choose fp_item(fp32 or fp16)\"\n            exit 1\n        fi;;\n    *) echo \"choose run_mode(sp or mp)\"; exit 1;\n    esac\n# 以下不用修改\n    timeout 15m ${train_cmd} > ${log_file} 2>&1\n    if [ $? -ne 0 ];then\n        echo -e \"${model_name}, FAIL\"\n        export job_fail_flag=1\n    else\n        echo -e \"${model_name}, SUCCESS\"\n        export job_fail_flag=0\n    fi\n    kill -9 `ps -ef|grep 'python'|awk '{print $2}'`\n    if [ $run_mode = \"mp\" -a -d mylog ]; then\n        rm ${log_file}\n        cp mylog/workerlog.0 ${log_file}\n    fi\n}\nsource ${BENCHMARK_ROOT}/scripts/run_model.sh   # 在该脚本中会对符合benchmark规范的log使用analysis.py 脚本进行性能数据解析;该脚本在连调时可从benchmark repo中下载https://github.com/PaddlePaddle/benchmark/blob/master/scripts/run_model.sh;如果不联调只想要产出训练log可以注掉本行,提交时需打开\n_set_params $@\n# _train       # 如果只想产出训练log,不解析,可取消注释\n_run     # 该函数在run_model.sh中,执行时会调用_train; 如果不联调只想要产出训练log可以注掉本行,提交时需打开",
+        "type": "code",
+        "location": "/benchmark/TimeSformer/run_benchmark.sh:49-77"
+    },
+    "3699": {
+        "file_id": 315,
+        "content": "This code is part of a shell script for benchmarking the TimeSformer model. It sets up the command to run the training and checks for specific parameters like batch size and precision. It then executes the command with timeout, logs the result as success or failure, and removes intermediate log files if running in multi-process mode. The script also sources a separate file for further analysis of the log data.",
+        "type": "comment"
+    }
+}

@@ -1,0 +1,10 @@
+{
+    "summary": "This code imports all modules and functions from the \"tsn\" subdirectory within the current package, allowing easy access to those components in other parts of the code. This is commonly used for modularity and organization in larger projects.",
+    "details": [
+        {
+            "comment": "This code imports all modules and functions from the \"tsn\" subdirectory within the current package, allowing easy access to those components in other parts of the code. This is commonly used for modularity and organization in larger projects.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoTag/models/tsn/__init__.py\":0-0",
+            "content": "from .tsn import *"
+        }
+    ]
+}

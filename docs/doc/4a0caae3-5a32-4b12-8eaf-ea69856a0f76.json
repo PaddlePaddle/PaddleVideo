@@ -1,0 +1,10 @@
+{
+    "summary": "This code snippet is providing two links to tutorials, one in English and the other in Simplified Chinese (\u7b80\u4f53\u4e2d\u6587). The English tutorial can be accessed at \"../../zh-CN/tutorials/accelerate.md\" and the Chinese one at the current location \"PaddleVideo/english_documents/tutorials/accelerate.md\".",
+    "details": [
+        {
+            "comment": "This code snippet is providing two links to tutorials, one in English and the other in Simplified Chinese (\u7b80\u4f53\u4e2d\u6587). The English tutorial can be accessed at \"../../zh-CN/tutorials/accelerate.md\" and the Chinese one at the current location \"PaddleVideo/english_documents/tutorials/accelerate.md\".",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/english_documents/tutorials/accelerate.md\":0-0",
+            "content": "[\u7b80\u4f53\u4e2d\u6587](../../zh-CN/tutorials/accelerate.md) | English"
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "summary": "This code is a part of the PaddleVideo library and contains localizers, which are responsible for handling different types of video localization tasks. The base class \"BaseLocalizer\" serves as a parent class, while specific classes like \"BMNLocalizer\" and \"YOWOLocalizer\" extend it to handle various localization techniques. These localizers may be used in a wide range of applications depending on the required localization approach.",
+    "details": [
+        {
+            "comment": "This code is a part of the PaddleVideo library and contains localizers, which are responsible for handling different types of video localization tasks. The base class \"BaseLocalizer\" serves as a parent class, while specific classes like \"BMNLocalizer\" and \"YOWOLocalizer\" extend it to handle various localization techniques. These localizers may be used in a wide range of applications depending on the required localization approach.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/paddlevideo/modeling/framework/localizers/__init__.py\":0-18",
+            "content": "# copyright (c) 2020  paddlepaddle authors. all rights reserved.\n#\n# licensed under the apache license, version 2.0 (the \"license\"\n# you may not use this file except in compliance with the license.\n# you may obtain a copy of the license at\n#\n#     http://www.apache.org/licenses/license-2.0\n#\n# unless required by applicable law or agreed to in writing, software\n# distributed under the license is distributed on an \"as is\" basis,\n# without warranties or conditions of any kind, either express or implied.\n# see the license for the specific language governing permissions and\n# limitations under the license.\nfrom .base import BaseLocalizer\nfrom .bmn_localizer import BMNLocalizer\nfrom .yowo_localizer import YOWOLocalizer\n__all__ = ['BaseLocalizer', 'BMNLocalizer', 'YOWOLocalizer']"
+        }
+    ]
+}

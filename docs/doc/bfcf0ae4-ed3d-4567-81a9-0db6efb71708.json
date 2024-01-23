@@ -1,0 +1,10 @@
+{
+    "summary": "This code loads a JSON file, splits the ground truth sequences (gts) into training and validation sets, and saves them as separate JSON files. It uses the json module for reading and writing JSON data. The original file is labeled 'label_cls14_train.json' and has gts from index 0 to 4 in the validation set, and gts from index 5 onwards in the training set. The code also writes a new validation set in '/home/aistudio/data/label_cls14_val.json' with the same fps (25).",
+    "details": [
+        {
+            "comment": "This code loads a JSON file, splits the ground truth sequences (gts) into training and validation sets, and saves them as separate JSON files. It uses the json module for reading and writing JSON data. The original file is labeled 'label_cls14_train.json' and has gts from index 0 to 4 in the validation set, and gts from index 5 onwards in the training set. The code also writes a new validation set in '/home/aistudio/data/label_cls14_val.json' with the same fps (25).",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/TableTennis/val_split.py\":0-18",
+            "content": "import json\nwith open('/home/aistudio/data/label_cls14_train.json') as f:\n    data = json.load(f)\nf.close()\nval = {'gts': data['gts'][0:5], 'fps': 25}\njsonString = json.dumps(val, indent=4, ensure_ascii=False)\njsonFile = open('/home/aistudio/data/label_cls14_val.json', 'w')\njsonFile.write(jsonString)\njsonFile.close()\ntrain = {'gts': data['gts'][5:], 'fps': 25}\njsonString = json.dumps(train, indent=4, ensure_ascii=False)\njsonFile = open('/home/aistudio/data/label_cls14_train.json', 'w')\njsonFile.write(jsonString)\njsonFile.close()"
+        }
+    ]
+}

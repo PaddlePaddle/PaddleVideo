@@ -1,0 +1,15 @@
+{
+    "summary": "The code defines an abstract base class for all PaddleVideo models, requiring implementation of forward method and including a trainable parameter count in __str__ output. It also imports libraries, checks stop_gradient flag, and calculates parameter shapes.",
+    "details": [
+        {
+            "comment": "This code defines an abstract base class for all models in the PaddleVideo application. It requires derived classes to implement the `forward` method and includes a `__str__` method that prints the model with the number of trainable parameters. The code also imports necessary libraries, checks for stop_gradient flag on parameters, and calculates product of shape for each parameter.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/T2VLAD/base/base_model.py\":0-35",
+            "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport numpy as np\nimport paddle.nn as nn\nfrom abc import abstractmethod\nclass BaseModel(nn.Layer):\n    \"\"\"\n    Base class for all models\n    \"\"\"\n    @abstractmethod\n    def forward(self, *inputs):\n        \"\"\"\n        Forward pass logic\n        :return: Model output\n        \"\"\"\n        raise NotImplementedError\n    def __str__(self):\n        \"\"\"\n        Model prints with number of trainable parameters\n        \"\"\"\n        model_parameters = filter(lambda p: p.stop_gradient==False, self.parameters())\n        params = sum([np.prod(p.shape) for p in model_parameters])"
+        },
+        {
+            "comment": "The code returns a string containing the superclass's __str__ method, followed by the number of trainable parameters in the current instance.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/T2VLAD/base/base_model.py\":36-36",
+            "content": "        return super().__str__() + f\"\\nTrainable parameters: {params}\""
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "summary": "The code introduces a video action segmentation dataset that utilizes breakfast, 50salads, and gtea datasets. The pre-training model's extracted features are used for the dataset. The dataset tree and data tree structure are provided, along with details of their folder contents.",
+    "details": [
+        {
+            "comment": "The code introduces a video action segmentation dataset that utilizes breakfast, 50salads, and gtea datasets. The pre-training model's extracted features are used for the dataset. The dataset tree and data tree structure are provided, along with details of their folder contents.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/english_documents/dataset/SegmentationDataset.md\":0-34",
+            "content": "English | [\u7b80\u4f53\u4e2d\u6587](../../zh-CN/dataset/SegmentationDataset.md)\n# Video Action Segmentation Dataset\nThe video motion segmentation model uses breakfast, 50salads and gtea data sets. The use method is to use the features extracted by the pre training model, which can be obtained from the ms-tcn official code base.[feat](https://zenodo.org/record/3625992#.Xiv9jGhKhPY)\n- Dataset tree\n```txt\n\u2500\u2500\u2500 gtea\n    \u251c\u2500\u2500 features\n    \u2502   \u251c\u2500\u2500 S1_Cheese_C1.npy\n    \u2502   \u251c\u2500\u2500 S1_Coffee_C1.npy\n    \u2502   \u251c\u2500\u2500 S1_CofHoney_C1.npy\n    \u2502   \u2514\u2500\u2500 ...\n    \u251c\u2500\u2500 groundTruth\n    \u2502   \u251c\u2500\u2500 S1_Cheese_C1.txt\n    \u2502   \u251c\u2500\u2500 S1_Coffee_C1.txt\n    \u2502   \u251c\u2500\u2500 S1_CofHoney_C1.txt\n    \u2502   \u2514\u2500\u2500 ...\n    \u251c\u2500\u2500 splits\n    \u2502   \u251c\u2500\u2500 test.split1.bundle\n    \u2502   \u251c\u2500\u2500 test.split2.bundle\n    \u2502   \u251c\u2500\u2500 test.split3.bundle\n    \u2502   \u2514\u2500\u2500 ...\n    \u2514\u2500\u2500 mapping.txt\n```\n- data tree\n```txt\n\u2500\u2500\u2500 data\n    \u251c\u2500\u2500 50salads\n    \u251c\u2500\u2500 breakfast\n    \u251c\u2500\u2500 gtea\n    \u2514\u2500\u2500 ...\n```"
+        }
+    ]
+}

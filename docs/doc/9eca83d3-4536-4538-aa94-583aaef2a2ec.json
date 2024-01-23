@@ -1,0 +1,15 @@
+{
+    "summary": "This code reads data from a JSON file, converts timestamps to 25 fps, and formats it according to the table tennis analysis submission format. The formatted data is written back to a new JSON file for further use or analysis.",
+    "details": [
+        {
+            "comment": "This code reads data from a JSON file, converts the segment timestamps to a specific frame rate (25 fps), and organizes it into the target submission format. It then writes the formatted data back to a new JSON file for further use or analysis.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/TableTennis/datasets/script/submission_format_transfer.py\":0-48",
+            "content": "import json\nimport math\nwith open('/workspace/bianjiang03/DATA/Output_for_bmn/prop.json') as f:\n    data = json.load(f)\nf.close()\ntransferred = dict()\n# 25 fps for all videos\nfps = 25\nfor item in data:\n    temp = []\n    for seg in item['bmn_results']:\n        temp_dict = {\n            'score': seg['score'],\n            'segment':\n            [round(seg['start'] / fps, 2),\n             round(seg['end'] / fps, 2)]\n        }\n        temp.append(temp_dict)\n    transferred[item['video_name']] = temp\ntarget_format = {\n    'version': 'A-test',\n    'results': transferred,\n    'external_data': {}\n}\njsonString = json.dumps(target_format, indent=4, ensure_ascii=False)\njsonFile = open('/workspace/bianjiang03/DATA/Output_for_bmn/submission.json',\n                'w')\njsonFile.write(jsonString)\njsonFile.close()\n# target format\n# {\n#   \"version\": NA,\n#   \"results\": {\n#     \"name_of_clip_1\": [\n#       {\n#         \"score\": 0.64,\n#         \"segment\": [2.33,3.15]\n#       },\n#       {\n#         \"score\": 0.77,\n#         \"segment\": [7.64, 7.84]\n#       }"
+        },
+        {
+            "comment": "This code defines a dictionary structure representing a submission format for table tennis analysis, with \"name_of_clip\" keys holding lists of segments and scores. The \"external_data\" field is empty.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/TableTennis/datasets/script/submission_format_transfer.py\":49-63",
+            "content": "#     ],\n# \t\"name_of_clip_2\": [\n#       {\n#         \"score\": 0.84,\n#         \"segment\": [9.73,10.15]\n#       },\n#       {\n#         \"score\": 0.87,\n#         \"segment\": [17.11, 17.84]\n#       }\n#     ],\n# \t...\n#   }\n#   \"external_data\": {}\n# }"
+        }
+    ]
+}

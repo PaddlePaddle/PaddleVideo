@@ -1,0 +1,10 @@
+{
+    "summary": "This script runs PaddleVideo server using either PP-TSM or PP-TSN models on different ports. It uses the paddle_serving_server module and is executed as a background process with nohup command.",
+    "details": [
+        {
+            "comment": "This script runs PaddleVideo server using either PP-TSM or PP-TSN models on different ports. It uses the paddle_serving_server module and is executed as a background process with nohup command.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/deploy/cpp_serving/run_cpp_serving.sh\":0-9",
+            "content": "## sample script\n# run paddlevideo server with PP-TSM:\nnohup python3.7 -m paddle_serving_server.serve \\\n--model ./ppTSM_serving_server \\\n--port 9993 &\n## run paddlevideo server with PP-TSN:\n# nohup python3.7 -m paddle_serving_server.serve \\\n# --model ./ppTSN_serving_server \\\n# --port 9993 &"
+        }
+    ]
+}

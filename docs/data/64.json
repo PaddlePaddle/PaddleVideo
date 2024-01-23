@@ -1,0 +1,549 @@
+{
+    "6400": {
+        "file_id": 496,
+        "content": "                 planes,\n                 stride=1,\n                 dilation=1,\n                 downsample=None,\n                 BatchNorm=None):\n        super(Bottleneck, self).__init__()\n        self.conv1 = nn.Conv2D(inplanes, planes, kernel_size=1, bias_attr=False)\n        self.bn1 = BatchNorm(planes)\n        self.conv2 = nn.Conv2D(planes,\n                               planes,\n                               kernel_size=3,\n                               stride=stride,\n                               dilation=dilation,\n                               padding=dilation,\n                               bias_attr=False)\n        self.bn2 = BatchNorm(planes)\n        self.conv3 = nn.Conv2D(planes,\n                               planes * 4,\n                               kernel_size=1,\n                               bias_attr=False)\n        self.bn3 = BatchNorm(planes * 4)\n        self.relu = nn.ReLU()\n        self.downsample = downsample\n        self.stride = stride\n        self.dilation = dilation\n    def forward(self, x):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/deeplab.py:60-86"
+    },
+    "6401": {
+        "file_id": 496,
+        "content": "Bottleneck class is a convolution neural network layer with batch normalization, designed for DeepLab model. It consists of 3 consecutive convolutions with varying kernel sizes and stride. BatchNorm layers are used after each convolution to normalize the activations, followed by ReLU activation function. The output channels are scaled by 4 in the final convolution.",
+        "type": "comment"
+    },
+    "6402": {
+        "file_id": 496,
+        "content": "        residual = x\n        out = self.conv1(x)\n        out = self.bn1(out)\n        out = self.relu(out)\n        out = self.conv2(out)\n        out = self.bn2(out)\n        out = self.relu(out)\n        out = self.conv3(out)\n        out = self.bn3(out)\n        if self.downsample is not None:\n            residual = self.downsample(x)\n        out += residual\n        out = self.relu(out)\n        return out\nclass ResNet(nn.Layer):\n    def __init__(self,\n                 block,\n                 layers,\n                 output_stride,\n                 BatchNorm,\n                 pretrained=False):\n        self.inplanes = 64\n        super(ResNet, self).__init__()\n        blocks = [1, 2, 4]\n        if output_stride == 16:\n            strides = [1, 2, 2, 1]\n            dilations = [1, 1, 1, 2]\n        elif output_stride == 8:\n            strides = [1, 2, 1, 1]\n            dilations = [1, 1, 2, 4]\n        else:\n            raise NotImplementedError\n        # Modules\n        self.conv1 = nn.Conv2D(3,\n                               64,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/deeplab.py:87-130"
+    },
+    "6403": {
+        "file_id": 496,
+        "content": "Code snippet performs residual block operations using convolutional layers and batch normalization with ReLU activation. It also includes downsampling if specified, and returns the output after applying final ReLU. The class ResNet initializes a ResNet network with given number of blocks, output stride, BatchNorm type, and pretrained option.",
+        "type": "comment"
+    },
+    "6404": {
+        "file_id": 496,
+        "content": "                               kernel_size=7,\n                               stride=2,\n                               padding=3,\n                               bias_attr=False)\n        self.bn1 = BatchNorm(64)\n        self.relu = nn.ReLU()\n        self.maxpool = nn.MaxPool2D(kernel_size=3, stride=2, padding=1)\n        self.layer1 = self._make_layer(block,\n                                       64,\n                                       layers[0],\n                                       stride=strides[0],\n                                       dilation=dilations[0],\n                                       BatchNorm=BatchNorm)\n        self.layer2 = self._make_layer(block,\n                                       128,\n                                       layers[1],\n                                       stride=strides[1],\n                                       dilation=dilations[1],\n                                       BatchNorm=BatchNorm)\n        self.layer3 = self._make_layer(block,\n                                       256,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/deeplab.py:131-152"
+    },
+    "6405": {
+        "file_id": 496,
+        "content": "This code is defining a deep learning model with convolutional layers, batch normalization, and activation functions. It uses the DeepLab backbone architecture and specifies parameters such as kernel sizes, strides, padding, and dilation rates for each layer. The BatchNorm parameter allows for optional batch normalization between layers, improving model performance by reducing internal covariate shift.",
+        "type": "comment"
+    },
+    "6406": {
+        "file_id": 496,
+        "content": "                                       layers[2],\n                                       stride=strides[2],\n                                       dilation=dilations[2],\n                                       BatchNorm=BatchNorm)\n        self.layer4 = self._make_MG_unit(block,\n                                         512,\n                                         blocks=blocks,\n                                         stride=strides[3],\n                                         dilation=dilations[3],\n                                         BatchNorm=BatchNorm)\n        self._init_weight()\n    def _make_layer(self,\n                    block,\n                    planes,\n                    blocks,\n                    stride=1,\n                    dilation=1,\n                    BatchNorm=None):\n        downsample = None\n        if stride != 1 or self.inplanes != planes * block.expansion:\n            downsample = nn.Sequential(\n                nn.Conv2D(self.inplanes,\n                          planes * block.expansion,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/deeplab.py:153-176"
+    },
+    "6407": {
+        "file_id": 496,
+        "content": "This code defines a class with two layers, layer3 and layer4. Layer3 is created using the _make_MG_unit function with specific parameters like block, planes, blocks, stride, dilation, and BatchNorm. Layer4 is also created by calling _make_layer function. Downsampling is done if stride is not 1 or inplanes are not equal to planes*block.expansion.",
+        "type": "comment"
+    },
+    "6408": {
+        "file_id": 496,
+        "content": "                          kernel_size=1,\n                          stride=stride,\n                          bias_attr=False),\n                BatchNorm(planes * block.expansion),\n            )\n        layers = []\n        layers.append(\n            block(self.inplanes, planes, stride, dilation, downsample,\n                  BatchNorm))\n        self.inplanes = planes * block.expansion\n        for i in range(1, blocks):\n            layers.append(\n                block(self.inplanes,\n                      planes,\n                      dilation=dilation,\n                      BatchNorm=BatchNorm))\n        return nn.Sequential(*layers)\n    def _make_MG_unit(self,\n                      block,\n                      planes,\n                      blocks,\n                      stride=1,\n                      dilation=1,\n                      BatchNorm=None):\n        downsample = None\n        if stride != 1 or self.inplanes != planes * block.expansion:\n            downsample = nn.Sequential(\n                nn.Conv2D(self.inplanes,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/deeplab.py:177-207"
+    },
+    "6409": {
+        "file_id": 496,
+        "content": "This code defines a function _make_MG_unit that creates a module for the DeepLab model, which includes multiple layers of a specified block. It takes in parameters such as block, planes, blocks, stride, dilation, and BatchNorm (optional). The function first checks if downsampling is needed based on stride and inplanes. If so, it creates a Conv2D layer for downsampling. Then, it appends the initial layer with the specified parameters and expands the number of layers as required. Finally, it returns the created sequence of layers as a nn.Sequential module.",
+        "type": "comment"
+    },
+    "6410": {
+        "file_id": 496,
+        "content": "                          planes * block.expansion,\n                          kernel_size=1,\n                          stride=stride,\n                          bias_attr=False),\n                BatchNorm(planes * block.expansion),\n            )\n        layers = []\n        layers.append(\n            block(self.inplanes,\n                  planes,\n                  stride,\n                  dilation=blocks[0] * dilation,\n                  downsample=downsample,\n                  BatchNorm=BatchNorm))\n        self.inplanes = planes * block.expansion\n        for i in range(1, len(blocks)):\n            layers.append(\n                block(self.inplanes,\n                      planes,\n                      stride=1,\n                      dilation=blocks[i] * dilation,\n                      BatchNorm=BatchNorm))\n        return nn.Sequential(*layers)\n    def forward(self, input, return_mid_level=False):\n        x = self.conv1(input)\n        x = self.bn1(x)\n        x = self.relu(x)\n        x = self.maxpool(x)\n        x = self.layer1(x)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/deeplab.py:208-240"
+    },
+    "6411": {
+        "file_id": 496,
+        "content": "This code defines a function that creates a convolutional neural network for the DeepLab model. It takes input, creates layers with specified parameters, and returns a Sequential object representing the model.",
+        "type": "comment"
+    },
+    "6412": {
+        "file_id": 496,
+        "content": "        low_level_feat = x\n        x = self.layer2(x)\n        mid_level_feat = x\n        x = self.layer3(x)\n        x = self.layer4(x)\n        if return_mid_level:\n            return x, low_level_feat, mid_level_feat\n        else:\n            return x, low_level_feat\n    def _init_weight(self):\n        for m in self.sublayers():\n            if isinstance(m, nn.Conv2D):\n                nn.initializer.KaimingNormal()\n            elif isinstance(m, nn.GroupNorm):\n                m.weight.data = nn.initializer.Constant(1)\n                m.bias.data = nn.initializer.Constant(0)\nclass _ASPPModule(nn.Layer):\n    def __init__(self, inplanes, planes, kernel_size, padding, dilation,\n                 BatchNorm):\n        super(_ASPPModule, self).__init__()\n        self.atrous_conv = nn.Conv2D(inplanes,\n                                     planes,\n                                     kernel_size=kernel_size,\n                                     stride=1,\n                                     padding=padding,\n                                     dilation=dilation,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/deeplab.py:241-269"
+    },
+    "6413": {
+        "file_id": 496,
+        "content": "This code defines a DeepLab model that utilizes an ASPP module. It extracts low and mid-level features from the input, has multiple layers of convolutions, and initializes weights using specific initializers. The ASPP module applies atrous convolutions with different dilation rates for feature extraction.",
+        "type": "comment"
+    },
+    "6414": {
+        "file_id": 496,
+        "content": "                                     bias_attr=False)\n        self.bn = BatchNorm(planes)\n        self.relu = nn.ReLU()\n        self._init_weight()\n    def forward(self, x):\n        x = self.atrous_conv(x)\n        x = self.bn(x)\n        return self.relu(x)\n    def _init_weight(self):\n        for m in self.sublayers():\n            if isinstance(m, nn.Conv2D):\n                m.weight_attr = nn.initializer.KaimingNormal()\n            elif isinstance(m, nn.BatchNorm2D):\n                m.weight.data.fill_(1)\n                m.bias.data.zero_()\nclass ASPP(nn.Layer):\n    def __init__(self, backbone, output_stride, BatchNorm):\n        super(ASPP, self).__init__()\n        if backbone == 'drn':\n            inplanes = 512\n        elif backbone == 'mobilenet':\n            inplanes = 320\n        else:\n            inplanes = 2048\n        if output_stride == 16:\n            dilations = [1, 6, 12, 18]\n        elif output_stride == 8:\n            dilations = [1, 12, 24, 36]\n        else:\n            raise NotImplementedError\n        self.aspp1 = _ASPPModule(inplanes,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/deeplab.py:270-307"
+    },
+    "6415": {
+        "file_id": 496,
+        "content": "The code defines a DeepLab class with an ASPP module for feature extraction. It initializes the layers and sets their weights using Kaiming normal initialization or fills BatchNorm2D weight with 1 and biases with 0. The ASPP class accepts backbone and output_stride as parameters to determine dilations for the ASPP modules.",
+        "type": "comment"
+    },
+    "6416": {
+        "file_id": 496,
+        "content": "                                 256,\n                                 1,\n                                 padding=0,\n                                 dilation=dilations[0],\n                                 BatchNorm=BatchNorm)\n        self.aspp2 = _ASPPModule(inplanes,\n                                 256,\n                                 3,\n                                 padding=dilations[1],\n                                 dilation=dilations[1],\n                                 BatchNorm=BatchNorm)\n        self.aspp3 = _ASPPModule(inplanes,\n                                 256,\n                                 3,\n                                 padding=dilations[2],\n                                 dilation=dilations[2],\n                                 BatchNorm=BatchNorm)\n        self.aspp4 = _ASPPModule(inplanes,\n                                 256,\n                                 3,\n                                 padding=dilations[3],\n                                 dilation=dilations[3],\n                                 BatchNorm=BatchNorm)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/deeplab.py:308-330"
+    },
+    "6417": {
+        "file_id": 496,
+        "content": "This code initializes four instances of the _ASPPModule class, each with different dilation rates and padding values for the DeepLab model's ASPP feature extraction module. The inplanes parameter is consistent across all four modules, indicating the number of input feature planes. BatchNorm specifies whether to apply batch normalization or not.",
+        "type": "comment"
+    },
+    "6418": {
+        "file_id": 496,
+        "content": "        self.global_avg_pool = nn.Sequential(\n            nn.AdaptiveAvgPool2D((1, 1)),\n            nn.Conv2D(inplanes, 256, 1, stride=1, bias_attr=False),\n            BatchNorm(256), nn.ReLU())\n        self.conv1 = nn.Conv2D(1280, 256, 1, bias_attr=False)\n        self.bn1 = BatchNorm(256)\n        self.relu = nn.ReLU()\n        self.dropout = nn.Dropout(0.1)\n        self._init_weight()\n    def forward(self, x):\n        x1 = self.aspp1(x)\n        x2 = self.aspp2(x)\n        x3 = self.aspp3(x)\n        x4 = self.aspp4(x)\n        x5 = self.global_avg_pool(x)\n        x5 = F.interpolate(x5,\n                           size=x4.shape[2:],\n                           mode='bilinear',\n                           align_corners=True)\n        x = paddle.concat(x=[x1, x2, x3, x4, x5], axis=1)\n        x = self.conv1(x)\n        x = self.bn1(x)\n        x = self.relu(x)\n        return self.dropout(x)\n    def _init_weight(self):\n        for m in self.sublayers():\n            if isinstance(m, nn.Conv2D):\n                nn.initializer.KaimingNormal()",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/deeplab.py:332-363"
+    },
+    "6419": {
+        "file_id": 496,
+        "content": "This code defines a DeepLab backbone model for image segmentation. It has adaptive global average pooling, multiple ASPP modules, and convolutional layers with batch normalization, ReLU activation, and dropout regularization. The constructor initializes the model's sublayers with Kaiming Normal initialization.",
+        "type": "comment"
+    },
+    "6420": {
+        "file_id": 496,
+        "content": "            elif isinstance(m, nn.GroupNorm):\n                m.weight.data = nn.initializer.Constant(1)\n                m.bias.data = nn.initializer.Constant(0)\nclass Decoder(nn.Layer):\n    def __init__(self, backbone, BatchNorm):\n        super(Decoder, self).__init__()\n        if backbone == 'resnet':\n            low_level_inplanes = 256\n        elif backbone == 'mobilenet':\n            raise NotImplementedError\n        else:\n            raise NotImplementedError\n        self.conv1 = nn.Conv2D(low_level_inplanes, 48, 1, bias_attr=False)\n        self.bn1 = BatchNorm(48)\n        self.relu = nn.ReLU()\n        self.last_conv = nn.Sequential(\n            nn.Conv2D(304,\n                      256,\n                      kernel_size=3,\n                      stride=1,\n                      padding=1,\n                      bias_attr=False), BatchNorm(256), nn.ReLU(),\n            nn.Sequential(),\n            nn.Conv2D(256,\n                      256,\n                      kernel_size=3,\n                      stride=1,\n                      padding=1,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/deeplab.py:364-395"
+    },
+    "6421": {
+        "file_id": 496,
+        "content": "This code is defining a Decoder class that takes in a backbone and BatchNorm as arguments. It initializes a convolution layer, batch normalization layer, and ReLU activation function. The last convolution sequence includes two convolutional layers with BatchNorm between them, followed by an optional second sequence of layers.",
+        "type": "comment"
+    },
+    "6422": {
+        "file_id": 496,
+        "content": "                      bias_attr=False), BatchNorm(256), nn.ReLU(),\n            nn.Sequential())\n        self._init_weight()\n    def forward(self, x, low_level_feat):\n        low_level_feat = self.conv1(low_level_feat)\n        low_level_feat = self.bn1(low_level_feat)\n        low_level_feat = self.relu(low_level_feat)\n        x = F.interpolate(x,\n                          size=low_level_feat.shape[2:],\n                          mode='bilinear',\n                          align_corners=True)\n        x = paddle.concat(x=[x, low_level_feat], axis=1)\n        x = self.last_conv(x)\n        return x\n    def _init_weight(self):\n        for m in self.sublayers():\n            if isinstance(m, nn.Conv2D):\n                nn.initializer.KaimingNormal()\n            elif isinstance(m, nn.GroupNorm):\n                m.weight.data = nn.initializer.Constant(1)\n                m.bias.data = nn.initializer.Constant(0)\nclass DeepLab(nn.Layer):\n    \"\"\"DeepLab model for segmentation\"\"\"\n    def __init__(self, backbone='resnet', output_stride=16, freeze_bn=True):",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/deeplab.py:396-426"
+    },
+    "6423": {
+        "file_id": 496,
+        "content": "The provided code defines a DeepLab model for segmentation. It includes a convolution layer, batch normalization, ReLU activation function, and interpolation operation. The forward method processes input features and returns output features. The _init_weight method initializes the weight of each sublayer. The DeepLab class takes parameters like backbone type, output stride, and freeze batch normalization flag for model initialization.",
+        "type": "comment"
+    },
+    "6424": {
+        "file_id": 496,
+        "content": "        super(DeepLab, self).__init__()\n        if freeze_bn == True:\n            print(\"Use frozen BN in DeepLab!\")\n            BatchNorm = FrozenBatchNorm2D\n        else:\n            BatchNorm = nn.BatchNorm2D\n        self.backbone = ResNet(Bottleneck, [3, 4, 23, 3],\n                               output_stride,\n                               BatchNorm,\n                               pretrained=True)\n        self.aspp = ASPP(backbone, output_stride, BatchNorm)\n        self.decoder = Decoder(backbone, BatchNorm)\n    def forward(self, input, return_aspp=False):\n        \"\"\"forward function\"\"\"\n        if return_aspp:\n            x, low_level_feat, mid_level_feat = self.backbone(input, True)\n        else:\n            x, low_level_feat = self.backbone(input)\n        aspp_x = self.aspp(x)\n        x = self.decoder(aspp_x, low_level_feat)\n        if return_aspp:\n            return x, aspp_x, low_level_feat, mid_level_feat\n        else:\n            return x, low_level_feat",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/deeplab.py:427-454"
+    },
+    "6425": {
+        "file_id": 496,
+        "content": "The code defines a DeepLab class with an optional frozen Batch Normalization layer. It initializes the backbone network (ResNet) and adds ASPP and Decoder modules. The forward function performs inference, returning either the final output or additional intermediate features depending on the return_aspp flag.",
+        "type": "comment"
+    },
+    "6426": {
+        "file_id": 497,
+        "content": "/paddlevideo/modeling/backbones/movinet.py",
+        "type": "filepath"
+    },
+    "6427": {
+        "file_id": 497,
+        "content": "The code defines a MoViNet model configuration with MobileNetV2 layers and parameters, constructing CNN layers and a MoViNet backbone class for video analysis. The model is configurable and can be causal or non-causal based on the 'causal' parameter.",
+        "type": "summary"
+    },
+    "6428": {
+        "file_id": 497,
+        "content": "import collections.abc\nfrom itertools import repeat\nfrom typing import Any, Callable, Optional, Tuple, Union\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nfrom paddle.nn.layer import Identity\nfrom ..registry import BACKBONES\nfrom collections import OrderedDict\ncontainer_abcs = collections.abc\n\"\"\"Model Config\n\"\"\"\nA0 = {'block_num': [0, 1, 3, 3, 4, 4]}\nA0['conv1'] = [3, 8, (1, 3, 3), (1, 2, 2), (0, 1, 1)]\nA0['b2_l0'] = [8, 8, 24, (1, 5, 5), (1, 2, 2), (0, 2, 2), (0, 1, 1)]\nA0['b3_l0'] = [8, 32, 80, (3, 3, 3), (1, 2, 2), (1, 0, 0), (0, 0, 0)]\nA0['b3_l1'] = [32, 32, 80, (3, 3, 3), (1, 1, 1), (1, 1, 1), (0, 1, 1)]\nA0['b3_l2'] = [32, 32, 80, (3, 3, 3), (1, 1, 1), (1, 1, 1), (0, 1, 1)]\nA0['b4_l0'] = [32, 56, 184, (5, 3, 3), (1, 2, 2), (2, 0, 0), (0, 0, 0)]\nA0['b4_l1'] = [56, 56, 112, (3, 3, 3), (1, 1, 1), (1, 1, 1), (0, 1, 1)]\nA0['b4_l2'] = [56, 56, 184, (3, 3, 3), (1, 1, 1), (1, 1, 1), (0, 1, 1)]\nA0['b5_l0'] = [56, 56, 184, (5, 3, 3), (1, 1, 1), (2, 1, 1), (0, 1, 1)]\nA0['b5_l1'] = [56, 56, 184, (3, 3, 3), (1, 1, 1), (1, 1, 1), (0, 1, 1)]",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:1-27"
+    },
+    "6429": {
+        "file_id": 497,
+        "content": "This code contains the configuration for a MOViNet model. It specifies the number of blocks, convolutional layers, and filter sizes for each stage of the network. The configuration is stored in a dictionary format with keys like 'A0', 'b2_l0', and so on, representing different parts of the model architecture.",
+        "type": "comment"
+    },
+    "6430": {
+        "file_id": 497,
+        "content": "A0['b5_l2'] = [56, 56, 184, (3, 3, 3), (1, 1, 1), (1, 1, 1), (0, 1, 1)]\nA0['b5_l3'] = [56, 56, 184, (3, 3, 3), (1, 1, 1), (1, 1, 1), (0, 1, 1)]\nA0['b6_l0'] = [56, 104, 384, (5, 3, 3), (1, 2, 2), (2, 1, 1), (0, 1, 1)]\nA0['b6_l1'] = [104, 104, 280, (1, 5, 5), (1, 1, 1), (0, 2, 2), (0, 1, 1)]\nA0['b6_l2'] = [104, 104, 280, (1, 5, 5), (1, 1, 1), (0, 2, 2), (0, 1, 1)]\nA0['b6_l3'] = [104, 104, 344, (1, 5, 5), (1, 1, 1), (0, 2, 2), (0, 1, 1)]\nA0['conv7'] = [104, 480, (1, 1, 1), (1, 1, 1), (0, 0, 0)]\nMODEL_CONFIG = {'A0': A0}\ndef _ntuple(n):\n    def parse(x):\n        if isinstance(x, container_abcs.Iterable):\n            return x\n        return tuple(repeat(x, n))\n    return parse\ndef _make_divisible(v: float,\n                    divisor: int,\n                    min_value: Optional[int] = None) -> int:\n    \"\"\"\n    This function is taken from the original tf repo.\n    It ensures that all layers have a channel number that is divisible by 8.\n    It can be seen here:\n    https://github.com/tensorflow/models/blob/master/research/slim/nets/mobilenet/mobilenet.py",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:28-55"
+    },
+    "6431": {
+        "file_id": 497,
+        "content": "This code defines a model architecture for the MobileNetV2 network, specifying the number of filters, kernel sizes, and stride values at each layer. The `_ntuple` function parses layer configurations, and `_make_divisible` ensures all layers have a divisible channel number. The dictionary `MODEL_CONFIG` stores these configuration parameters for the model.",
+        "type": "comment"
+    },
+    "6432": {
+        "file_id": 497,
+        "content": "    \"\"\"\n    if min_value is None:\n        min_value = divisor\n    new_v = max(min_value, int(v + divisor / 2) // divisor * divisor)\n    # Make sure that round down does not go down by more than 10%.\n    if new_v < 0.9 * v:\n        new_v += divisor\n    return new_v\n_single = _ntuple(1)\n_pair = _ntuple(2)\n_triple = _ntuple(3)\n_quadruple = _ntuple(4)\nclass CausalModule(nn.Layer):\n    def __init__(self) -> None:\n        super().__init__()\n        self.activation = None\n    def reset_activation(self) -> None:\n        self.activation = None\nclass Conv2dBNActivation(nn.Sequential):\n    def __init__(\n        self,\n        in_planes: int,\n        out_planes: int,\n        kernel_size: Union[int, Tuple[int, int]],\n        padding: Union[int, Tuple[int, int]],\n        stride: Union[int, Tuple[int, int]] = 1,\n        groups: int = 1,\n        norm_layer: Optional[Callable[..., nn.Layer]] = None,\n        activation_layer: Optional[Callable[..., nn.Layer]] = None,\n        **kwargs: Any,\n    ) -> None:\n        kernel_size = _pair(kernel_size)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:56-94"
+    },
+    "6433": {
+        "file_id": 497,
+        "content": "The code defines a CausalModule class that contains an activation layer and resets it when needed. Conv2dBNActivation is a Sequential module with optional normalization and activation layers, used in the construction of the MoviNet backbone model.",
+        "type": "comment"
+    },
+    "6434": {
+        "file_id": 497,
+        "content": "        stride = _pair(stride)\n        padding = _pair(padding)\n        if norm_layer is None:\n            norm_layer = Identity\n        if activation_layer is None:\n            activation_layer = Identity\n        self.kernel_size = kernel_size\n        self.stride = stride\n        dict_layers = (nn.Conv2D(in_planes,\n                                 out_planes,\n                                 kernel_size=kernel_size,\n                                 stride=stride,\n                                 padding=padding,\n                                 groups=groups,\n                                 **kwargs), norm_layer(out_planes,\n                                                       momentum=0.1),\n                       activation_layer())\n        self.out_channels = out_planes\n        super(Conv2dBNActivation, self).__init__(dict_layers[0], dict_layers[1],\n                                                 dict_layers[2])\nclass Conv3DBNActivation(nn.Sequential):\n    def __init__(\n        self,\n        in_planes: int,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:95-121"
+    },
+    "6435": {
+        "file_id": 497,
+        "content": "This code defines two classes, `Conv2dBNActivation` and `Conv3DBNActivation`, which are convolutional neural network layers with batch normalization and activation functions. The layers have adjustable input (in_planes), output (out_planes), kernel size, stride, padding, and groups parameters. The batch normalization layer uses a momentum of 0.1, and the activation function is an Identity function by default but can be overridden with another specified activation function.",
+        "type": "comment"
+    },
+    "6436": {
+        "file_id": 497,
+        "content": "        out_planes: int,\n        kernel_size: Union[int, Tuple[int, int, int]],\n        padding: Union[int, Tuple[int, int, int]],\n        stride: Union[int, Tuple[int, int, int]] = 1,\n        groups: int = 1,\n        norm_layer: Optional[Callable[..., nn.Layer]] = None,\n        activation_layer: Optional[Callable[..., nn.Layer]] = None,\n        **kwargs: Any,\n    ) -> None:\n        kernel_size = _triple(kernel_size)\n        stride = _triple(stride)\n        padding = _triple(padding)\n        if norm_layer is None:\n            norm_layer = Identity\n        if activation_layer is None:\n            activation_layer = Identity\n        self.kernel_size = kernel_size\n        self.stride = stride\n        dict_layers = (nn.Conv3D(in_planes,\n                                 out_planes,\n                                 kernel_size=kernel_size,\n                                 stride=stride,\n                                 padding=padding,\n                                 groups=groups,\n                                 **kwargs), norm_layer(out_planes,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:122-147"
+    },
+    "6437": {
+        "file_id": 497,
+        "content": "This function is creating a Conv3D layer with specified parameters, including the number of input and output planes, kernel size, padding, stride, groups, and optional norm and activation layers. The function also ensures that the input values for kernel_size, stride, and padding are correctly formatted as triples.",
+        "type": "comment"
+    },
+    "6438": {
+        "file_id": 497,
+        "content": "                                                       momentum=0.1),\n                       activation_layer())\n        self.out_channels = out_planes\n        super(Conv3DBNActivation, self).__init__(dict_layers[0], dict_layers[1],\n                                                 dict_layers[2])\nclass ConvBlock3D(CausalModule):\n    def __init__(\n        self,\n        in_planes: int,\n        out_planes: int,\n        kernel_size: Union[int, Tuple[int, int, int]],\n        causal: bool,\n        conv_type: str,\n        padding: Union[int, Tuple[int, int, int]] = 0,\n        stride: Union[int, Tuple[int, int, int]] = 1,\n        norm_layer: Optional[Callable[..., nn.Layer]] = None,\n        activation_layer: Optional[Callable[..., nn.Layer]] = None,\n        bias_attr: bool = False,\n        **kwargs: Any,\n    ) -> None:\n        super().__init__()\n        kernel_size = _triple(kernel_size)\n        stride = _triple(stride)\n        padding = _triple(padding)\n        self.conv_2 = None\n        if causal is True:\n            padding = (0, padding[1], padding[2])",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:148-177"
+    },
+    "6439": {
+        "file_id": 497,
+        "content": "The code defines a class named `ConvBlock3D` as a subclass of `CausalModule`. It takes inputs such as the number of input and output planes, kernel size, causality status, convolution type, padding, stride, normalization layer, activation layer, bias attribute, and optional keyword arguments. It initializes the class variables and creates an instance of the `Conv3DBNActivation` class.",
+        "type": "comment"
+    },
+    "6440": {
+        "file_id": 497,
+        "content": "        if conv_type != \"2plus1d\" and conv_type != \"3d\":\n            raise ValueError(\"only 2plus2d or 3d are \" +\n                             \"allowed as 3d convolutions\")\n        if conv_type == \"2plus1d\":\n            self.conv_1 = Conv2dBNActivation(in_planes,\n                                             out_planes,\n                                             kernel_size=(kernel_size[1],\n                                                          kernel_size[2]),\n                                             padding=(padding[1], padding[2]),\n                                             stride=(stride[1], stride[2]),\n                                             activation_layer=activation_layer,\n                                             norm_layer=norm_layer,\n                                             bias_attr=bias_attr,\n                                             **kwargs)\n            if kernel_size[0] > 1:\n                self.conv_2 = Conv2dBNActivation(\n                    in_planes,\n                    out_planes,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:178-196"
+    },
+    "6441": {
+        "file_id": 497,
+        "content": "This code is checking the convolution type and raising a ValueError if it's neither \"2plus1d\" nor \"3d\". If the type is \"2plus1d\", it initializes two Conv2dBNActivation layers with appropriate parameters.",
+        "type": "comment"
+    },
+    "6442": {
+        "file_id": 497,
+        "content": "                    kernel_size=(kernel_size[0], 1),\n                    padding=(padding[0], 0),\n                    stride=(stride[0], 1),\n                    activation_layer=activation_layer,\n                    norm_layer=norm_layer,\n                    bias_attr=bias_attr,\n                    **kwargs)\n        elif conv_type == \"3d\":\n            self.conv_1 = Conv3DBNActivation(in_planes,\n                                             out_planes,\n                                             kernel_size=kernel_size,\n                                             padding=padding,\n                                             activation_layer=activation_layer,\n                                             norm_layer=norm_layer,\n                                             stride=stride,\n                                             bias_attr=bias_attr,\n                                             **kwargs)\n        self.padding = padding\n        self.kernel_size = kernel_size\n        self.dim_pad = self.kernel_size[0] - 1",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:197-216"
+    },
+    "6443": {
+        "file_id": 497,
+        "content": "The code defines a layer with different convolution types (\"2d\" or \"3d\") and initializes the corresponding Conv2D or Conv3D layers with specified parameters such as input/output planes, kernel size, padding, activation layer, norm layer, stride, bias attribute and other keyword arguments. It also stores the padding and kernel size for future use.",
+        "type": "comment"
+    },
+    "6444": {
+        "file_id": 497,
+        "content": "        self.stride = stride\n        self.causal = causal\n        self.conv_type = conv_type\n    def _forward(self, x: paddle.Tensor) -> paddle.Tensor:\n        if self.dim_pad > 0 and self.conv_2 is None and self.causal is True:\n            x = self._cat_stream_buffer(x)\n        b, c, t, h, w = x.shape\n        if self.conv_type == \"2plus1d\":\n            x = paddle.transpose(x, (0, 2, 1, 3, 4))  # bcthw --> btchw\n            x = paddle.reshape_(x, (-1, c, h, w))  # btchw --> bt,c,h,w\n        x = self.conv_1(x)\n        if self.conv_type == \"2plus1d\":\n            b, c, h, w = x.shape\n            x = paddle.reshape_(x, (-1, t, c, h, w))  # bt,c,h,w --> b,t,c,h,w\n            x = paddle.transpose(x, (0, 2, 1, 3, 4))  # b,t,c,h,w --> b,c,t,h,w\n            if self.conv_2 is not None:\n                if self.dim_pad > 0 and self.causal is True:\n                    x = self._cat_stream_buffer(x)\n                b, c, t, h, w = x.shape\n                x = paddle.reshape_(x, (b, c, t, h * w))\n                x = self.conv_2(x)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:217-238"
+    },
+    "6445": {
+        "file_id": 497,
+        "content": "This code defines a class with an attribute `_forward` method. The constructor takes stride, causal, and conv_type as parameters. If causal is True, stream buffer is concatenated to the input tensor. Depending on conv_type, the tensor shape may be reshaped for proper processing. Finally, if conv_2 is not None, it applies a convolution operation to the tensor.",
+        "type": "comment"
+    },
+    "6446": {
+        "file_id": 497,
+        "content": "                b, c, t, _ = x.shape\n                x = paddle.reshape_(x, (b, c, t, h, w))\n        return x\n    def forward(self, x: paddle.Tensor) -> paddle.Tensor:\n        x = self._forward(x)\n        return x\n    def _cat_stream_buffer(self, x: paddle.Tensor) -> paddle.Tensor:\n        if self.activation is None:\n            self._setup_activation(x.shape)\n        x = paddle.concat((self.activation, x), 2)\n        self._save_in_activation(x)\n        return x\n    def _save_in_activation(self, x: paddle.Tensor) -> None:\n        assert self.dim_pad > 0\n        self.activation = paddle.to_tensor(x.numpy()[:, :, -self.dim_pad:,\n                                                     ...]).clone().detach()\n    def _setup_activation(self, input_shape: Tuple[float, ...]) -> None:\n        assert self.dim_pad > 0\n        self.activation = paddle.zeros(shape=[\n            *input_shape[:2],  # type: ignore\n            self.dim_pad,\n            *input_shape[3:]\n        ])\nclass TemporalCGAvgPool3D(CausalModule):\n    def __init__(self, ) -> None:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:239-269"
+    },
+    "6447": {
+        "file_id": 497,
+        "content": "1. Reshapes input tensor to (b, c, t, h, w).\n2. Defines a forward function that applies the _forward function and returns the result.\n3. Concatenates the activation tensor with the input along dimension 2.\n4. Saves the last self.dim_pad rows of the input in the activation tensor.\n5. Sets up the activation tensor with zeros and self.dim_pad rows for future use.\n6. TemporalCGAvgPool3D is a CausalModule class.",
+        "type": "comment"
+    },
+    "6448": {
+        "file_id": 497,
+        "content": "        super().__init__()\n        self.n_cumulated_values = 0\n        self.register_forward_post_hook(self._detach_activation)\n    def forward(self, x: paddle.Tensor) -> paddle.Tensor:\n        input_shape = x.shape\n        cumulative_sum = paddle.cumsum(x, axis=2)\n        if self.activation is None:\n            self.activation = cumulative_sum[:, :, -1:].clone()\n        else:\n            cumulative_sum += self.activation\n            self.activation = cumulative_sum[:, :, -1:].clone()\n        noe = paddle.arange(1, input_shape[2] + 1)\n        axis = paddle.to_tensor([0, 1, 3, 4])\n        noe = paddle.unsqueeze(noe, axis=axis)\n        divisor = noe.expand(x.shape)\n        x = cumulative_sum / (self.n_cumulated_values + divisor)\n        self.n_cumulated_values += input_shape[2]\n        return x\n    @staticmethod\n    def _detach_activation(module: CausalModule, inputs: paddle.Tensor,\n                           output: paddle.Tensor) -> None:\n        module.activation.detach()\n    def reset_activation(self) -> None:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:270-296"
+    },
+    "6449": {
+        "file_id": 497,
+        "content": "The code defines a forward function for a CausalModule that performs cumulative sum operation on input tensor. It also includes methods to detach and reset the activation tensor.",
+        "type": "comment"
+    },
+    "6450": {
+        "file_id": 497,
+        "content": "        super().reset_activation()\n        self.n_cumulated_values = 0\nclass SqueezeExcitation(nn.Layer):\n    def __init__(self,\n                 input_channels: int,\n                 activation_2: nn.Layer,\n                 activation_1: nn.Layer,\n                 conv_type: str,\n                 causal: bool,\n                 squeeze_factor: int = 4,\n                 bias_attr: bool = True) -> None:\n        super().__init__()\n        self.causal = causal\n        se_multiplier = 2 if causal else 1\n        squeeze_channels = _make_divisible(\n            input_channels // squeeze_factor * se_multiplier, 8)\n        self.temporal_cumualtive_GAvg3D = TemporalCGAvgPool3D()\n        self.fc1 = ConvBlock3D(input_channels * se_multiplier,\n                               squeeze_channels,\n                               kernel_size=(1, 1, 1),\n                               padding=0,\n                               causal=causal,\n                               conv_type=conv_type,\n                               bias_attr=bias_attr)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:297-322"
+    },
+    "6451": {
+        "file_id": 497,
+        "content": "This code defines a SqueezeExcitation layer class with input channels, activation functions, convolution type, causality flag, and squeeze factor as parameters. It initializes the layer by setting the causal flag's multiplier, dividing the input channel count by the squeeze factor, rounding up to 8 using make_divisible function, and adding temporal cumulative average pooling and convolution blocks with specified parameters.",
+        "type": "comment"
+    },
+    "6452": {
+        "file_id": 497,
+        "content": "        self.activation_1 = activation_1()\n        self.activation_2 = activation_2()\n        self.fc2 = ConvBlock3D(squeeze_channels,\n                               input_channels,\n                               kernel_size=(1, 1, 1),\n                               padding=0,\n                               causal=causal,\n                               conv_type=conv_type,\n                               bias_attr=bias_attr)\n    def _scale(self, inputs: paddle.Tensor) -> paddle.Tensor:\n        if self.causal:\n            x_space = paddle.mean(inputs, axis=[3, 4], keepdim=True)\n            scale = self.temporal_cumualtive_GAvg3D(x_space)\n            scale = paddle.concat((scale, x_space), axis=1)\n        else:\n            scale = F.adaptive_avg_pool3d(inputs, 1)\n        scale = self.fc1(scale)\n        scale = self.activation_1(scale)\n        scale = self.fc2(scale)\n        return self.activation_2(scale)\n    def forward(self, inputs: paddle.Tensor) -> paddle.Tensor:\n        scale = self._scale(inputs)\n        return scale * inputs",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:323-347"
+    },
+    "6453": {
+        "file_id": 497,
+        "content": "The code defines a class with two activation functions, and a _scale method that scales the input tensor based on temporal average or average pooling. The forward method applies the scale to the input for spatial pyramid pooling.",
+        "type": "comment"
+    },
+    "6454": {
+        "file_id": 497,
+        "content": "class BasicBneck(nn.Layer):\n    def __init__(\n        self,\n        input_channels,\n        out_channels,\n        expanded_channels,\n        kernel_size,\n        stride,\n        padding,\n        padding_avg,\n        causal: bool,\n        conv_type: str,\n        norm_layer: Optional[Callable[..., nn.Layer]] = None,\n        activation_layer: Optional[Callable[..., nn.Layer]] = None,\n    ) -> None:\n        super().__init__()\n        assert type(stride) is tuple\n        if (not stride[0] == 1 or not (1 <= stride[1] <= 2)\n                or not (1 <= stride[2] <= 2)):\n            raise ValueError('illegal stride value')\n        self.res = None\n        layers = []\n        if expanded_channels != out_channels:\n            # expand\n            self.expand = ConvBlock3D(in_planes=input_channels,\n                                      out_planes=expanded_channels,\n                                      kernel_size=(1, 1, 1),\n                                      padding=(0, 0, 0),\n                                      causal=causal,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:350-382"
+    },
+    "6455": {
+        "file_id": 497,
+        "content": "This code defines the BasicBneck class which is a neural network layer. It has multiple parameters such as input_channels, out_channels, expanded_channels, kernel_size, stride, padding, padding_avg, causal, conv_type, norm_layer, and activation_layer. If expanded_channels is not equal to out_channels, it will first expand the channels using ConvBlock3D. The class also checks for illegal stride values to prevent unexpected behavior.",
+        "type": "comment"
+    },
+    "6456": {
+        "file_id": 497,
+        "content": "                                      conv_type=conv_type,\n                                      norm_layer=norm_layer,\n                                      activation_layer=activation_layer)\n        # deepwise\n        self.deep = ConvBlock3D(in_planes=expanded_channels,\n                                out_planes=expanded_channels,\n                                kernel_size=kernel_size,\n                                padding=padding,\n                                stride=stride,\n                                groups=expanded_channels,\n                                causal=causal,\n                                conv_type=conv_type,\n                                norm_layer=norm_layer,\n                                activation_layer=activation_layer)\n        # SE\n        self.se = SqueezeExcitation(\n            expanded_channels,\n            causal=causal,\n            activation_1=activation_layer,\n            activation_2=(nn.Sigmoid if conv_type == \"3d\" else nn.Hardsigmoid),\n            conv_type=conv_type)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:383-404"
+    },
+    "6457": {
+        "file_id": 497,
+        "content": "This code defines a ConvBlock3D for MoviNet backbone, includes deepwise convolution and SE (Squeeze Excitation) layers. These components process 3D feature maps with various configurations depending on the input planes, kernel size, stride, padding, etc., applying different activation functions based on the conv_type.",
+        "type": "comment"
+    },
+    "6458": {
+        "file_id": 497,
+        "content": "        # project\n        self.project = ConvBlock3D(expanded_channels,\n                                   out_channels,\n                                   kernel_size=(1, 1, 1),\n                                   padding=(0, 0, 0),\n                                   causal=causal,\n                                   conv_type=conv_type,\n                                   norm_layer=norm_layer,\n                                   activation_layer=Identity)\n        if not (stride == (1, 1, 1) and input_channels == out_channels):\n            if stride != (1, 1, 1):\n                layers.append(\n                    nn.AvgPool3D((1, 3, 3), stride=stride, padding=padding_avg))\n            layers.append(\n                ConvBlock3D(\n                    in_planes=input_channels,\n                    out_planes=out_channels,\n                    kernel_size=(1, 1, 1),\n                    padding=(0, 0, 0),\n                    norm_layer=norm_layer,\n                    activation_layer=Identity,\n                    causal=causal,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:405-427"
+    },
+    "6459": {
+        "file_id": 497,
+        "content": "This code defines a ConvBlock3D for projecting the input channels to the desired output channels. If the stride is not (1, 1, 1) or input and output channels are different, it adds an average pooling layer and another ConvBlock3D with appropriate parameters. The causal parameter determines if causal convolution should be used, and Identity activation layer is applied without any transformation.",
+        "type": "comment"
+    },
+    "6460": {
+        "file_id": 497,
+        "content": "                    conv_type=conv_type,\n                ))\n            self.res = nn.Sequential(*layers)\n        self.alpha = self.create_parameter(shape=[1], dtype=\"float32\")\n    def forward(self, inputs: paddle.Tensor) -> paddle.Tensor:\n        if self.res is not None:\n            residual = self.res(inputs)\n        else:\n            residual = inputs\n        if self.expand is not None:\n            x = self.expand(inputs)\n        else:\n            x = inputs\n        x = self.deep(x)\n        x = self.se(x)\n        x = self.project(x)\n        result = residual + self.alpha * x\n        return result\n@BACKBONES.register()\nclass MoViNet(nn.Layer):\n    def __init__(\n        self,\n        model_type: str = 'A0',\n        hidden_dim: int = 2048,\n        causal: bool = True,\n        num_classes: int = 400,\n        conv_type: str = \"3d\",\n    ) -> None:\n        super().__init__()\n        \"\"\"\n        causal: causal mode\n        num_classes: number of classes for classifcation\n        conv_type: type of convolution either 3d or 2plus1d",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:428-464"
+    },
+    "6461": {
+        "file_id": 497,
+        "content": "The code defines the MoViNet class, which is a backbone model for video analysis. It initializes layers based on input parameters and then performs feature extraction using the defined layers. The forward method applies residual connections and a scale factor to combine the extracted features with the input.",
+        "type": "comment"
+    },
+    "6462": {
+        "file_id": 497,
+        "content": "        \"\"\"\n        blocks_dic = OrderedDict()\n        cfg = MODEL_CONFIG[model_type]\n        norm_layer = nn.BatchNorm3D if conv_type == \"3d\" else nn.BatchNorm2D\n        activation_layer = nn.Swish if conv_type == \"3d\" else nn.Hardswish\n        # conv1\n        self.conv1 = ConvBlock3D(in_planes=cfg['conv1'][0],\n                                 out_planes=cfg['conv1'][1],\n                                 kernel_size=cfg['conv1'][2],\n                                 stride=cfg['conv1'][3],\n                                 padding=cfg['conv1'][4],\n                                 causal=causal,\n                                 conv_type=conv_type,\n                                 norm_layer=norm_layer,\n                                 activation_layer=activation_layer)\n        # blocks\n        for i in range(2, len(cfg['block_num']) + 1):\n            for j in range(cfg['block_num'][i - 1]):\n                blocks_dic[f'b{i}_l{j}'] = BasicBneck(\n                    cfg[f'b{i}_l{j}'][0],\n                    cfg[f'b{i}_l{j}'][1],",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:465-487"
+    },
+    "6463": {
+        "file_id": 497,
+        "content": "The code defines a MOViNet model, which consists of a ConvBlock3D (conv1) and multiple BasicBneck blocks. It takes in parameters such as the number of input and output planes, kernel size, stride, padding, causal flag, conv type, norm layer, and activation layer. These parameters are extracted from the MODEL_CONFIG dictionary based on the model type. The blocks are organized in an OrderedDict called blocks_dic for future reference.",
+        "type": "comment"
+    },
+    "6464": {
+        "file_id": 497,
+        "content": "                    cfg[f'b{i}_l{j}'][2],\n                    cfg[f'b{i}_l{j}'][3],\n                    cfg[f'b{i}_l{j}'][4],\n                    cfg[f'b{i}_l{j}'][5],\n                    cfg[f'b{i}_l{j}'][6],\n                    causal=causal,\n                    conv_type=conv_type,\n                    norm_layer=norm_layer,\n                    activation_layer=activation_layer)\n        self.blocks = nn.Sequential(*(blocks_dic.values()))\n        # conv7\n        self.conv7 = ConvBlock3D(in_planes=cfg['conv7'][0],\n                                 out_planes=cfg['conv7'][1],\n                                 kernel_size=cfg['conv7'][2],\n                                 stride=cfg['conv7'][3],\n                                 padding=cfg['conv7'][4],\n                                 causal=causal,\n                                 conv_type=conv_type,\n                                 norm_layer=norm_layer,\n                                 activation_layer=activation_layer)\n        # pool\n        self.classifier = nn.Sequential(",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:488-510"
+    },
+    "6465": {
+        "file_id": 497,
+        "content": "This code is defining a MOViNet model with specific configurations for blocks, convolutional layers, and pooling operations. It initializes the blocks as sequential layers and adds an additional 3D ConvBlock layer ('conv7') followed by a classifier.",
+        "type": "comment"
+    },
+    "6466": {
+        "file_id": 497,
+        "content": "            # dense9\n            ConvBlock3D(in_planes=cfg['conv7'][1],\n                        out_planes=hidden_dim,\n                        kernel_size=(1, 1, 1),\n                        causal=causal,\n                        conv_type=conv_type,\n                        bias_attr=True),\n            nn.Swish(),\n            nn.Dropout(p=0.2),\n            # dense10d\n            ConvBlock3D(in_planes=hidden_dim,\n                        out_planes=num_classes,\n                        kernel_size=(1, 1, 1),\n                        causal=causal,\n                        conv_type=conv_type,\n                        bias_attr=True),\n        )\n        if causal:\n            self.cgap = TemporalCGAvgPool3D()\n        self.apply(self._weight_init)\n        self.causal = causal\n    def avg(self, x: paddle.Tensor) -> paddle.Tensor:\n        if self.causal:\n            avg = F.adaptive_avg_pool3d(x, (x.shape[2], 1, 1))\n            avg = self.cgap(avg)[:, :, -1:]\n        else:\n            avg = F.adaptive_avg_pool3d(x, 1)\n        return avg",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:511-539"
+    },
+    "6467": {
+        "file_id": 497,
+        "content": "This code defines a 3D Convolutional Neural Network (CNN) backbone for MoviNet. It includes dense layers, convolution blocks, and optional temporal pooling. The model architecture can be causal or non-causal depending on the `causal` parameter.",
+        "type": "comment"
+    },
+    "6468": {
+        "file_id": 497,
+        "content": "    @staticmethod\n    def _weight_init(m):\n        if isinstance(m, nn.Conv3D):\n            nn.initializer.KaimingNormal(m.weight)\n            if m.bias is not None:\n                nn.initializer.Constant(0.0)(m.bias)\n        elif isinstance(m, (nn.BatchNorm3D, nn.BatchNorm2D, nn.GroupNorm)):\n            nn.initializer.Constant(1.0)(m.weight)\n            nn.initializer.Constant(0.0)(m.bias)\n        elif isinstance(m, nn.Linear):\n            nn.initializer.Normal(m.weight, 0, 0.01)\n            nn.initializer.Constant(0.0)(m.bias)\n    def forward(self, x: paddle.Tensor) -> paddle.Tensor:\n        x = self.conv1(x)\n        x = self.blocks(x)\n        x = self.conv7(x)\n        x = self.avg(x)\n        x = self.classifier(x)\n        x = x.flatten(1)\n        return x\n    @staticmethod\n    def _clean_activation_buffers(m):\n        if issubclass(type(m), CausalModule):\n            m.reset_activation()\n    def clean_activation_buffers(self) -> None:\n        self.apply(self._clean_activation_buffers)\nif __name__ == '__main__':",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:541-572"
+    },
+    "6469": {
+        "file_id": 497,
+        "content": "The code defines a class for a MoviNet backbone, which performs convolutions and has block layers. The forward function passes the input through these layers and then flattens the result before returning it. A static method initializes the network weights based on the layer type. Another static method cleans activation buffers in CausalModule subclasses.",
+        "type": "comment"
+    },
+    "6470": {
+        "file_id": 497,
+        "content": "    net = MoViNet(causal=False, conv_type='3d')\n    paddle.summary(net, input_size=(1, 3, 8, 224, 224))",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/movinet.py:573-574"
+    },
+    "6471": {
+        "file_id": 497,
+        "content": "Creating a MoViNet network instance with causal set to False and 3D convolution type, then generating summary using Paddle's summary function with input size (1, 3, 8, 224, 224).",
+        "type": "comment"
+    },
+    "6472": {
+        "file_id": 498,
+        "content": "/paddlevideo/modeling/backbones/ms_tcn.py",
+        "type": "filepath"
+    },
+    "6473": {
+        "file_id": 498,
+        "content": "The code imports modules, defines Kaiming uniform initialization and SingleStageModel class. It initializes MSTCN backbone with DilatedResidualLayer stages and applies softmax to previous outputs, concatenating them together while initializing weights for convolutional layers with KaimingUniform_like_torch.",
+        "type": "summary"
+    },
+    "6474": {
+        "file_id": 498,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport paddle\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nimport numpy as np\nimport copy\nimport random\nimport math\nfrom paddle import ParamAttr\nfrom ..registry import BACKBONES\nfrom ..weight_init import weight_init_\ndef _calculate_fan_in_and_fan_out(tensor):\n    dimensions = len(tensor.shape)\n    if dimensions < 2:\n        raise ValueError(\"Fan in and fan out can not be computed \\\n        for tensor with fewer than 2 dimensions\")",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ms_tcn.py:1-32"
+    },
+    "6475": {
+        "file_id": 498,
+        "content": "This code snippet appears to be part of a larger file and sets up some initial definitions, imports, and checks for necessary conditions. It includes license information, imports various modules, and defines a function to calculate fan-in and fan-out for tensor dimensions.",
+        "type": "comment"
+    },
+    "6476": {
+        "file_id": 498,
+        "content": "    if dimensions == 2:  # Linear\n        fan_in = tensor.shape[1]\n        fan_out = tensor.shape[0]\n    else:\n        num_input_fmaps = tensor.shape[1]\n        num_output_fmaps = tensor.shape[0]\n        receptive_field_size = 1\n        if tensor.dim() > 2:\n            receptive_field_size = tensor[0][0].numel()\n        fan_in = num_input_fmaps * receptive_field_size\n        fan_out = num_output_fmaps * receptive_field_size\n    return fan_in, fan_out\ndef calculate_gain(nonlinearity=None, a=None):\n    if nonlinearity == 'tanh':\n        return 5.0 / 3\n    elif nonlinearity == 'relu':\n        return math.sqrt(2.0)\n    elif nonlinearity == 'leaky_relu':\n        if a != None:\n            return math.sqrt(2.0 / (1 + a**2))\n        else:\n            return math.sqrt(2.0 / (1 + 0.01**2))\n    elif nonlinearity == 'selu':\n        return 3.0 / 4\n    else:\n        return 1\ndef KaimingUniform_like_torch(weight_npy,\n                              mode='fan_in',\n                              nonlinearity='leaky_relu'):\n    fan_in, fan_out = _calculate_fan_in_and_fan_out(weight_npy)",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ms_tcn.py:34-68"
+    },
+    "6477": {
+        "file_id": 498,
+        "content": "This code defines three functions: `_calculate_fan_in_and_fan_out`, `calculate_gain`, and `KaimingUniform_like_torch`. The first function calculates the fan-in and fan-out values based on the input tensor's dimensions. The second function determines the gain value depending on the nonlinearity used. The third function applies the Kaiming uniform initialization to the weight_npy parameter, utilizing the previous two functions.",
+        "type": "comment"
+    },
+    "6478": {
+        "file_id": 498,
+        "content": "    if mode == 'fan_in':\n        fan_mode = fan_in\n    else:\n        fan_mode = fan_out\n    a = math.sqrt(5.0)\n    gain = calculate_gain(nonlinearity=nonlinearity, a=a)\n    std = gain / math.sqrt(fan_mode)\n    bound = math.sqrt(3.0) * std\n    return np.random.uniform(-bound, bound, weight_npy.shape)\ndef init_bias(weight_npy, bias_npy):\n    # attention this weight is not bias\n    fan_in, fan_out = _calculate_fan_in_and_fan_out(weight_npy)\n    bound = 1.0 / math.sqrt(fan_in)\n    return np.random.uniform(-bound, bound, bias_npy.shape)\nclass SingleStageModel(nn.Layer):\n    def __init__(self, num_layers, num_f_maps, dim, num_classes):\n        super(SingleStageModel, self).__init__()\n        self.conv_in = nn.Conv1D(dim, num_f_maps, 1)\n        self.layers = nn.LayerList([\n            copy.deepcopy(DilatedResidualLayer(2**i, num_f_maps, num_f_maps))\n            for i in range(num_layers)\n        ])\n        self.conv_out = nn.Conv1D(num_f_maps, num_classes, 1)\n    def forward(self, x):\n        out = self.conv_in(x)\n        for layer in self.layers:",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ms_tcn.py:69-100"
+    },
+    "6479": {
+        "file_id": 498,
+        "content": "This code defines a SingleStageModel class that inherits from nn.Layer and consists of a convolutional layer, multiple DilatedResidualLayers, and another convolutional layer. The model is initialized with specified parameters: number of layers, number of feature maps, input dimension, and number of output classes.",
+        "type": "comment"
+    },
+    "6480": {
+        "file_id": 498,
+        "content": "            out = layer(out)\n        out = self.conv_out(out)\n        return out\nclass DilatedResidualLayer(nn.Layer):\n    def __init__(self, dilation, in_channels, out_channels):\n        super(DilatedResidualLayer, self).__init__()\n        self.conv_dilated = nn.Conv1D(in_channels,\n                                      out_channels,\n                                      3,\n                                      padding=dilation,\n                                      dilation=dilation)\n        self.conv_in = nn.Conv1D(out_channels, out_channels, 1)\n        self.dropout = nn.Dropout()\n    def forward(self, x):\n        out = F.relu(self.conv_dilated(x))\n        out = self.conv_in(out)\n        out = self.dropout(out)\n        return (x + out)\n@BACKBONES.register()\nclass MSTCN(nn.Layer):\n    def __init__(self, num_stages, num_layers, num_f_maps, dim, num_classes):\n        super().__init__()\n        self.stage1 = SingleStageModel(num_layers, num_f_maps, dim, num_classes)\n        self.stages = nn.LayerList([\n            copy.deepcopy(",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ms_tcn.py:101-132"
+    },
+    "6481": {
+        "file_id": 498,
+        "content": "The code defines a DilatedResidualLayer, which is a type of residual layer used in the MSTCN backbone. The MSTCN class initializes a SingleStageModel and a list of stages using the provided parameters. Each stage within the model is an instance of the DilatedResidualLayer.",
+        "type": "comment"
+    },
+    "6482": {
+        "file_id": 498,
+        "content": "                SingleStageModel(num_layers, num_f_maps, num_classes,\n                                 num_classes)) for s in range(num_stages - 1)\n        ])\n    def forward(self, x):\n        \"\"\" MSTCN forward\n        \"\"\"\n        out = self.stage1(x)\n        outputs = out.unsqueeze(0)\n        for s in self.stages:\n            out = s(F.softmax(out, axis=1))\n            outputs = paddle.concat((outputs, out.unsqueeze(0)), axis=0)\n        return outputs\n    def init_weights(self):\n        for layer in self.sublayers():\n            if isinstance(layer, nn.Conv1D):\n                layer.weight.set_value(\n                    KaimingUniform_like_torch(layer.weight).astype('float32'))\n                if layer.bias is not None:\n                    layer.bias.set_value(\n                        init_bias(layer.weight, layer.bias).astype('float32'))",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/ms_tcn.py:133-154"
+    },
+    "6483": {
+        "file_id": 498,
+        "content": "The code defines a forward function for MSTCN model and initializes the weights for convolutional layers. It iterates over stages, applying softmax to previous output and concatenating it to previous outputs. Weights are initialized with KaimingUniform_like_torch for conv1D layers and bias is set according to the layer's weight.",
+        "type": "comment"
+    },
+    "6484": {
+        "file_id": 499,
+        "content": "/paddlevideo/modeling/backbones/pptsm_mv2.py",
+        "type": "filepath"
+    },
+    "6485": {
+        "file_id": 499,
+        "content": "The ConvBNLayer class introduces PaddlePaddle's MobileNetV2 backbone model for image/video processing with pretrained weights and inverted residual units. It initializes and returns three models (PPTSM_MobileNetV2_x0_75, PPTSM_MobileNetV2_x1_5, PPTSM_MobileNetV2_x2_0).",
+        "type": "summary"
+    },
+    "6486": {
+        "file_id": 499,
+        "content": "# copyright (c) 2020 PaddlePaddle Authors. All Rights Reserve.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#    http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nimport numpy as np\nimport paddle\nfrom paddle import ParamAttr\nimport paddle.nn as nn\nimport paddle.nn.functional as F\nfrom paddle.nn import Conv2D, BatchNorm, Linear, Dropout\nfrom paddle.nn import AdaptiveAvgPool2D, MaxPool2D, AvgPool2D\nfrom ..registry import BACKBONES\nfrom ..weight_init import weight_init_\nfrom ...utils import load_ckpt\n# Download URL of pretrained model\n# {\n# \"MobileNetV2\":\n# \"https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/MobileNetV2_ssld_pretrained.pdparams\",",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/pptsm_mv2.py:1-30"
+    },
+    "6487": {
+        "file_id": 499,
+        "content": "This code is part of the PaddlePaddle deep learning framework, specifically for the MobileNetV2 backbone model. It imports necessary libraries and defines functions for the architecture, weight initialization, and pre-trained model downloading. The commented sections provide licensing information and download URLs for pretrained models.",
+        "type": "comment"
+    },
+    "6488": {
+        "file_id": 499,
+        "content": "# \"MobileNetV2_x0_25\":\n# \"https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/MobileNetV2_x0_25_pretrained.pdparams\",\n# \"MobileNetV2_x0_5\":\n# \"https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/MobileNetV2_x0_5_pretrained.pdparams\",\n# \"MobileNetV2_x0_75\":\n# \"https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/MobileNetV2_x0_75_pretrained.pdparams\",\n# \"MobileNetV2_x1_5\":\n# \"https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/MobileNetV2_x1_5_pretrained.pdparams\",\n# \"MobileNetV2_x2_0\":\n# \"https://paddle-imagenet-models-name.bj.bcebos.com/dygraph/MobileNetV2_x2_0_pretrained.pdparams\"\n# }\nclass ConvBNLayer(nn.Layer):\n    def __init__(self,\n                 num_channels,\n                 filter_size,\n                 num_filters,\n                 stride,\n                 padding,\n                 channels=None,\n                 num_groups=1,\n                 name=None,\n                 use_cudnn=True):\n        super(ConvBNLayer, self).__init__()\n        self._conv = Conv2D(in_channels=num_channels,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/pptsm_mv2.py:32-58"
+    },
+    "6489": {
+        "file_id": 499,
+        "content": "This code defines the ConvBNLayer class, which inherits from nn.Layer and contains a convolutional layer followed by a batch normalization layer. The constructor takes several parameters such as number of channels, filter size, etc., to define the specifics of the convolutional layer. The URLs provided indicate that pretrained models are available for MobileNetV2 with various scaling factors.",
+        "type": "comment"
+    },
+    "6490": {
+        "file_id": 499,
+        "content": "                            out_channels=num_filters,\n                            kernel_size=filter_size,\n                            stride=stride,\n                            padding=padding,\n                            groups=num_groups,\n                            weight_attr=ParamAttr(name=name + \"_weights\"),\n                            bias_attr=False)\n        self._batch_norm = BatchNorm(\n            num_filters,\n            param_attr=ParamAttr(name=name + \"_bn_scale\"),\n            bias_attr=ParamAttr(name=name + \"_bn_offset\"),\n            moving_mean_name=name + \"_bn_mean\",\n            moving_variance_name=name + \"_bn_variance\")\n    def forward(self, inputs, if_act=True):\n        y = self._conv(inputs)\n        y = self._batch_norm(y)\n        if if_act:\n            y = F.relu6(y)\n        return y\nclass InvertedResidualUnit(nn.Layer):\n    def __init__(self, num_channels, num_in_filter, num_filters, stride,\n                 filter_size, padding, expansion_factor, name, num_seg):\n        super(InvertedResidualUnit, self).__init__()",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/pptsm_mv2.py:59-85"
+    },
+    "6491": {
+        "file_id": 499,
+        "content": "The code defines a class for an inverted residual unit with batch normalization. The unit takes input, performs convolution, applies batch normalization, and optionally applies activation if specified.",
+        "type": "comment"
+    },
+    "6492": {
+        "file_id": 499,
+        "content": "        self.num_seg = num_seg\n        num_expfilter = int(round(num_in_filter * expansion_factor))\n        self._expand_conv = ConvBNLayer(num_channels=num_channels,\n                                        num_filters=num_expfilter,\n                                        filter_size=1,\n                                        stride=1,\n                                        padding=0,\n                                        num_groups=1,\n                                        name=name + \"_expand\")\n        self._bottleneck_conv = ConvBNLayer(num_channels=num_expfilter,\n                                            num_filters=num_expfilter,\n                                            filter_size=filter_size,\n                                            stride=stride,\n                                            padding=padding,\n                                            num_groups=num_expfilter,\n                                            use_cudnn=False,\n                                            name=name + \"_dwise\")",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/pptsm_mv2.py:86-103"
+    },
+    "6493": {
+        "file_id": 499,
+        "content": "This code initializes and assigns class attributes for a backbone model. It defines two convolutional layers, one for expansion (num_channels to num_expfilter) and another for bottleneck (num_expfilter to num_expfilter), both followed by BN operations. The layers are named with the prefix \"name\" for future reference or identification.",
+        "type": "comment"
+    },
+    "6494": {
+        "file_id": 499,
+        "content": "        self._linear_conv = ConvBNLayer(num_channels=num_expfilter,\n                                        num_filters=num_filters,\n                                        filter_size=1,\n                                        stride=1,\n                                        padding=0,\n                                        num_groups=1,\n                                        name=name + \"_linear\")\n    def forward(self, inputs, ifshortcut):\n        # add temporal shift module\n        y = inputs\n        if ifshortcut:\n            y = F.temporal_shift(y, self.num_seg, 1.0 / self.num_seg)\n        y = self._expand_conv(y, if_act=True)\n        y = self._bottleneck_conv(y, if_act=True)\n        y = self._linear_conv(y, if_act=False)\n        if ifshortcut:\n            y = paddle.add(inputs, y)\n        return y\nclass InvresiBlocks(nn.Layer):\n    def __init__(self, in_c, t, c, n, s, name, num_seg):\n        super(InvresiBlocks, self).__init__()\n        self._first_block = InvertedResidualUnit(num_channels=in_c,\n                                                 num_in_filter=in_c,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/pptsm_mv2.py:105-132"
+    },
+    "6495": {
+        "file_id": 499,
+        "content": "This code defines a neural network layer, likely for image or video processing. It contains a series of convolutional layers and activation functions. The \"forward\" function applies temporal shift to the input based on the number of segments and performs convolutions in different stages. The \"InvresiBlocks\" class defines an Inverted Residual block with initial parameters.",
+        "type": "comment"
+    },
+    "6496": {
+        "file_id": 499,
+        "content": "                                                 num_filters=c,\n                                                 stride=s,\n                                                 filter_size=3,\n                                                 padding=1,\n                                                 expansion_factor=t,\n                                                 name=name + \"_1\",\n                                                 num_seg=num_seg)\n        self._block_list = []\n        for i in range(1, n):\n            block = self.add_sublayer(name + \"_\" + str(i + 1),\n                                      sublayer=InvertedResidualUnit(\n                                          num_channels=c,\n                                          num_in_filter=c,\n                                          num_filters=c,\n                                          stride=1,\n                                          filter_size=3,\n                                          padding=1,\n                                          expansion_factor=t,",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/pptsm_mv2.py:133-151"
+    },
+    "6497": {
+        "file_id": 499,
+        "content": "The code defines a function for the PPTSM_MV2 model, creating an InvertedResidualUnit with specified parameters and adding it to a list. The loop iterates from 1 to n-1, building multiple residual units with increasing indexes.",
+        "type": "comment"
+    },
+    "6498": {
+        "file_id": 499,
+        "content": "                                          name=name + \"_\" + str(i + 1),\n                                          num_seg=num_seg))\n            self._block_list.append(block)\n    def forward(self, inputs):\n        y = self._first_block(inputs, ifshortcut=False)\n        for block in self._block_list:\n            y = block(y, ifshortcut=True)\n        return y\nclass MobileNet(nn.Layer):\n    def __init__(self,\n                 class_num=400,\n                 scale=1.0,\n                 pretrained=None,\n                 prefix_name=\"\",\n                 num_seg=8):\n        super(MobileNet, self).__init__()\n        self.scale = scale\n        self.class_num = class_num\n        self.pretrained = pretrained\n        self.num_seg = num_seg\n        bottleneck_params_list = [\n            (1, 16, 1, 1),\n            (6, 24, 2, 2),\n            (6, 32, 3, 2),\n            (6, 64, 4, 2),\n            (6, 96, 3, 1),\n            (6, 160, 3, 2),\n            (6, 320, 1, 1),\n        ]\n        self.conv1 = ConvBNLayer(num_channels=3,\n                                 num_filters=int(32 * scale),",
+        "type": "code",
+        "location": "/paddlevideo/modeling/backbones/pptsm_mv2.py:152-187"
+    },
+    "6499": {
+        "file_id": 499,
+        "content": "This code defines a PPTSM-MV2 backbone and MobileNet model for image processing. The `__init__` function initializes the model with class number, scaling factor, pretrained weights, prefix name, and number of segments. The `forward` function passes inputs through each block in sequence. The `MobileNet` class defines a convolutional neural network (CNN) architecture with specific parameters for each stage, including the number of filters and stride sizes.",
+        "type": "comment"
+    }
+}

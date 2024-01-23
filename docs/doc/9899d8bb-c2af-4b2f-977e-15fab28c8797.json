@@ -1,0 +1,15 @@
+{
+    "summary": "The ModelAudio class extracts audio features using wav_to_example and slices the data into parts, calculating features for each part. The predict method appends these features to a list and returns the audio feature list after dividing by sample rate.",
+    "details": [
+        {
+            "comment": "The code defines a ModelAudio class which takes in audio-related configurations and performs audio feature extraction using the feature_extractor module's wav_to_example function. The class also predicts audio by converting PCM data to numpy array and handles audio file reading exceptions.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/BasketballAction/predict/action_detect/mfcc/model_config.py\":0-41",
+            "content": "\"\"\"\naudio model config\n\"\"\"\nimport numpy as np\nimport mfcc.feature_extractor as feature_extractor\nclass ModelAudio(object):\n    \"\"\"\n    modelAudio\n    \"\"\"\n    def __init__(self, configs, use_gpu=1):\n        self.use_gpu = use_gpu\n        self.audio_fps = configs.COMMON.fps\n        self.audio_feat_scale = configs.TSN.audio_scale\n        self.sample_rate = 16000\n    def predict_slice(self, wav_data, sample_rate):\n        \"\"\"\n        audio predict\n        \"\"\"\n        examples_batch = feature_extractor.wav_to_example(\n            wav_data, sample_rate)[0]\n        return examples_batch\n    def predict_audio(self, audio_file):\n        \"\"\"\n        predict_audio\n        \"\"\"\n        audio_feature_list = []\n        # read pcm\n        sample_rate = self.sample_rate\n        try:\n            with open(audio_file, \"rb\") as f:\n                pcm_data = f.read()\n            audio_data = np.fromstring(pcm_data, dtype=np.int16)\n            audio_status = \"audio load success\"\n        except Exception as e:\n            audio_data = []\n            audio_status = \"audio load failed\""
+        },
+        {
+            "comment": "The code slices the audio data into parts of size 'step' and calculates features for each part using a predict method, then appends the features to a list. The length of the entire audio data is divided by the sample rate to determine how many steps can fit in it. This function returns the audio feature list.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/BasketballAction/predict/action_detect/mfcc/model_config.py\":42-50",
+            "content": "        step = 1\n        len_video = int(len(audio_data) / sample_rate)\n        print(len_video)\n        for i in range(0, len_video, step):\n            audio_data_part = audio_data[i * sample_rate:(i + step) *\n                                         sample_rate]\n            feature_audio = self.predict_slice(audio_data_part, sample_rate)\n            audio_feature_list.append(feature_audio)\n        return audio_feature_list"
+        }
+    ]
+}

@@ -1,0 +1,15 @@
+{
+    "summary": "This code defines functions to build components of a computer vision model, including backbone, head, loss, recognizer, and a model builder that selects the appropriate builder based on framework type.",
+    "details": [
+        {
+            "comment": "The code is defining functions to build different components of a computer vision model. The `build_backbone`, `build_head`, and `build_loss` functions are used to build the backbone, head, and loss for the model respectively using the `build` function from the `utils` module. The `build_recognizer` function is used to build a recognizer component for the model using the specified framework key.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/modeling/builder.py\":0-35",
+            "content": "# Copyright (c) 2020  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\nfrom .registry import BACKBONES, HEADS, LOSSES, RECOGNIZERS, LOCALIZERS\nfrom ..utils import build\ndef build_backbone(cfg):\n    \"\"\"Build backbone.\"\"\"\n    return build(cfg, BACKBONES)\ndef build_head(cfg):\n    \"\"\"Build head.\"\"\"\n    return build(cfg, HEADS)\ndef build_loss(cfg):\n    \"\"\"Build loss.\"\"\"\n    return build(cfg, LOSSES)\ndef build_recognizer(cfg):\n    \"\"\"Build recognizer.\"\"\"\n    return build(cfg, RECOGNIZERS, key='framework')"
+        },
+        {
+            "comment": "This code defines functions for building localizer and model, and a build_model function that selects the appropriate builder based on the framework type specified in the configuration.",
+            "location": "\"/media/root/Prima/works/PaddleVideo/docs/src/applications/VideoQualityAssessment/paddlevideo/modeling/builder.py\":38-51",
+            "content": "def build_localizer(cfg):\n    \"\"\"Build localizer.\"\"\"\n    return build(cfg, LOCALIZERS, key='framework')\ndef build_model(cfg):\n    cfg_copy = cfg.copy()\n    framework_type = cfg_copy.get('framework')\n    if framework_type in RECOGNIZERS:\n        return build_recognizer(cfg)\n    elif framework_type in LOCALIZERS:\n        return build_localizer(cfg)\n    else:\n        raise NotImplementedError"
+        }
+    ]
+}

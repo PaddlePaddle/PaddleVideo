@@ -1,0 +1,544 @@
+{
+    "2200": {
+        "file_id": 170,
+        "content": "```\n### 导出模型推理\n- 在PaddleVideo中，通过以下命令实现模型的导出，得到模型结构文件`STGCN.pdmodel`和模型权重文件`STGCN.pdiparams`，并增加配置文件：\n```bash\n# current path is under root of PaddleVideo\npython tools/export_model.py -c applications/PPHuman/configs/stgcn_pphuman.yaml \\\n                                -p output/STGCN/STGCN_best.pdparams \\\n                                -o output_inference/STGCN\ncp applications/PPHuman/configs/infer_cfg.yml output_inference/STGCN\n# 重命名模型文件，适配PP-Human的调用\ncd output_inference/STGCN\nmv STGCN.pdiparams model.pdiparams\nmv STGCN.pdiparams.info model.pdiparams.info\nmv STGCN.pdmodel model.pdmodel\n```\n完成后的导出模型目录结构如下：\n```\nSTGCN\n├── infer_cfg.yml\n├── model.pdiparams\n├── model.pdiparams.info\n├── model.pdmodel\n```\n至此，就可以使用[PP-Human](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.4/deploy/pphuman)进行行为识别的推理了。",
+        "type": "code",
+        "location": "/applications/PPHuman/README.md:115-143"
+    },
+    "2201": {
+        "file_id": 170,
+        "content": "The provided code demonstrates the process of exporting a model in PaddleVideo for use in PP-Human. It creates the necessary files and renames them according to PP-Human's requirements, resulting in a structured directory that can be used for behavior recognition inference.",
+        "type": "comment"
+    },
+    "2202": {
+        "file_id": 171,
+        "content": "/applications/PPHuman/datasets/prepare_dataset.py",
+        "type": "filepath"
+    },
+    "2203": {
+        "file_id": 171,
+        "content": "The script prepares PaddleVideo's UR FALL dataset keypoints, normalizing them and handling inconsistencies for training. It also prepares a dataset for PPHuman, reading annotations, extracting data, and saving for training.",
+        "type": "summary"
+    },
+    "2204": {
+        "file_id": 171,
+        "content": "import os\nimport json\nimport numpy as np\nimport pickle\n\"\"\"\n This python script is used to convert keypoint results of UR FALL dataset\n   for training by PaddleVideo\n\"\"\"\ndef self_norm(kpt, bbox):\n    # kpt: (2, T, 17, 1),  bbox: (T, 4)\n    tl = bbox[:, 0:2]\n    wh = bbox[:, 2:]\n    tl = np.expand_dims(np.transpose(tl, (1, 0)), (2, 3))\n    wh = np.expand_dims(np.transpose(wh, (1, 0)), (2, 3))\n    res = (kpt - tl) / wh\n    res *= np.expand_dims(np.array([[384.], [512.]]), (2, 3))\n    return res\ndef convert_to_ppvideo(all_kpts, all_scores, all_bbox):\n    # shape of all_kpts is (T, 17, 2)\n    keypoint = np.expand_dims(np.transpose(all_kpts, [2, 0, 1]),\n                              -1)  #(2, T, 17, 1)\n    keypoint = self_norm(keypoint, all_bbox)\n    scores = all_scores\n    if keypoint.shape[1] > 100:\n        frame_start = (keypoint.shape[1] - 100) // 2\n        keypoint = keypoint[:, frame_start:frame_start + 100:2, :, :]\n        scores = all_scores[frame_start:frame_start + 100:2, :, :]\n    elif keypoint.shape[1] < 100:",
+        "type": "code",
+        "location": "/applications/PPHuman/datasets/prepare_dataset.py:1-34"
+    },
+    "2205": {
+        "file_id": 171,
+        "content": "This script converts keypoint results of UR FALL dataset into a format suitable for training by PaddleVideo. It normalizes keypoints using bounding boxes and adjusts the shape to be compatible with the PaddleVideo framework. The function also handles cases where the number of frames is more or less than 100.",
+        "type": "comment"
+    },
+    "2206": {
+        "file_id": 171,
+        "content": "        keypoint = np.concatenate([\n            keypoint,\n            np.zeros((2, 100 - keypoint.shape[1], 17, 1), dtype=keypoint.dtype)\n        ], 1)[:, ::2, :, :]\n        scores = np.concatenate([\n            all_scores,\n            np.zeros((100 - all_scores.shape[0], 17, 1), dtype=keypoint.dtype)\n        ], 0)[::2, :, :]\n    else:\n        keypoint = keypoint[:, ::2, :, :]\n        scores = scores[::2, :, :]\n    return keypoint, scores\ndef decode_json_path(json_path):\n    content = json.load(open(json_path))\n    content = sorted(content, key=lambda x: x[0])\n    all_kpts = []\n    all_score = []\n    all_bbox = []\n    for annos in content:\n        bboxes = annos[1]\n        kpts = annos[2][0]\n        frame_id = annos[0]\n        if len(bboxes) != 1:\n            continue\n        kpt_res = []\n        kpt_score = []\n        for kpt in kpts[0]:\n            x, y, score = kpt\n            kpt_res.append([x, y])\n            kpt_score.append([score])\n        all_kpts.append(np.array(kpt_res))\n        all_score.append(np.array(kpt_score))",
+        "type": "code",
+        "location": "/applications/PPHuman/datasets/prepare_dataset.py:35-69"
+    },
+    "2207": {
+        "file_id": 171,
+        "content": "The function `prepare_dataset` receives keypoint and scores as inputs. If the length of either is not divisible by 2, it pads them with zeros to maintain consistency. The else block simply takes every other value in both arrays. The `decode_json_path` function loads a JSON file, sorts its contents, extracts bounding boxes, keypoints, and scores from each entry, ignoring cases where there is more than one bounding box, and appends the processed data to separate lists for further processing.",
+        "type": "comment"
+    },
+    "2208": {
+        "file_id": 171,
+        "content": "        all_bbox.append([\n            bboxes[0][0], bboxes[0][1], bboxes[0][2] - bboxes[0][0],\n            bboxes[0][3] - bboxes[0][1]\n        ])\n    all_kpts_np = np.array(all_kpts)\n    all_score_np = np.array(all_score)\n    all_bbox_np = np.array(all_bbox)\n    video_anno, scores = convert_to_ppvideo(all_kpts_np, all_score_np,\n                                            all_bbox_np)\n    return video_anno, scores\nif __name__ == '__main__':\n    all_keypoints = []\n    all_labels = [[], []]\n    all_scores = []\n    for i, path in enumerate(os.listdir(\"annotations\")):\n        video_anno, score = decode_json_path(os.path.join(\"annotations\", path))\n        all_keypoints.append(video_anno)\n        all_labels[0].append(str(i))\n        all_labels[1].append(0)  #label 0 means falling\n        all_scores.append(score)\n    all_data = np.stack(all_keypoints, 0)\n    all_score_data = np.stack(all_scores, 0)\n    np.save(f\"train_data.npy\", all_data)\n    pickle.dump(all_labels, open(f\"train_label.pkl\", \"wb\"))\n    np.save(\"kptscore_data.npy\", all_score_data)",
+        "type": "code",
+        "location": "/applications/PPHuman/datasets/prepare_dataset.py:70-98"
+    },
+    "2209": {
+        "file_id": 171,
+        "content": "This code prepares a dataset for PaddleVideo's PPHuman application. It reads annotations from \"annotations\" folder, extracts keypoints, labels, and scores, then saves them into numpy arrays and pickle file for training.",
+        "type": "comment"
+    },
+    "2210": {
+        "file_id": 172,
+        "content": "/applications/README.md",
+        "type": "filepath"
+    },
+    "2211": {
+        "file_id": 172,
+        "content": "This code lists various application cases in PaddleVideo, including football action detection, basketball action detection, table tennis action recognition, figure skating action identification, video tagging, multimodal video classification, video quality assessment, 3DMRI medical image recognition, video interactive segmentation tool, UAV detection, abnormal behavior detection, and human analysis scenario action recognition.",
+        "type": "summary"
+    },
+    "2212": {
+        "file_id": 172,
+        "content": "# 应用案例\n## 1. 概览\n| Applications | Descriptions |\n| :--------------- | :-------- |\n| [FootballAction](./FootballAction) | 足球动作检测方案|\n| [BasketballAction](./BasketballAction) | 篮球动作检测方案 |\n| [TableTennis](./TableTennis) | 乒乓球动作识别方案|\n| [FigureSkating](./FigureSkating) | 花样滑冰动作识别方案|\n| [VideoTag](./VideoTag) | 3000类大规模视频分类方案 |\n| [MultimodalVideoTag](./MultimodalVideoTag) | 多模态视频分类方案|\n| [VideoQualityAssessment](.s/VideoQualityAssessment) | 视频质量评估方案|\n| [PP-Care](./PP-Care) | 3DMRI医疗图像识别方案 |\n| [EIVideo](./EIVideo) | 视频交互式分割工具|\n| [Anti-UAV](./Anti-UAV) |无人机检测方案|\n| [AbnormalActionDetection](./AbnormalActionDetection) |异常行为检测方案|\n| [PP-Human](./PPHuman) | 行人分析场景动作识别方案 |",
+        "type": "code",
+        "location": "/applications/README.md:1-18"
+    },
+    "2213": {
+        "file_id": 172,
+        "content": "This code lists various application cases in PaddleVideo, including football action detection, basketball action detection, table tennis action recognition, figure skating action identification, video tagging, multimodal video classification, video quality assessment, 3DMRI medical image recognition, video interactive segmentation tool, UAV detection, abnormal behavior detection, and human analysis scenario action recognition.",
+        "type": "comment"
+    },
+    "2214": {
+        "file_id": 173,
+        "content": "/applications/T2VLAD/README.md",
+        "type": "filepath"
+    },
+    "2215": {
+        "file_id": 173,
+        "content": "This code introduces T2VLAD, a text video retrieval model by Baidu. It provides data preparation, training, and testing steps on MSR-VTT dataset, along with performance metrics and checkpoint information in PaddleVideo.",
+        "type": "summary"
+    },
+    "2216": {
+        "file_id": 173,
+        "content": "[English](./README_en.md) | 简体中文\n# T2VLAD: 基于局部全局对齐的文本视频检索\n---\n## 内容\n- [模型简介](#模型简介)\n- [数据准备](#数据准备)\n- [模型训练](#模型训练)\n- [模型测试](#模型测试)\n- [参考论文](#参考论文)\n在开始使用之前，您需要按照以下命令安装额外的依赖包：\n```bash\npython -m pip install paddlenlp\n```\n同时确保paddle版本为2.2.2。\n## 模型简介\nT2VLAD是百度在CVPR2021提出的文本视频检索模型。文本视频检索是一项具有挑战的任务，旨在基于自然语言处理描述搜索相关视频内容。这个问题的关键是在联合嵌入空间中测量文本-视频的相似性。T2VLAD设计了一种有效的全局-局部对齐方法，在三个标准的文本视频检索基准上取得了一致的改进，并以明显的优势超越了最先进的技术。\n<div align=\"center\">\n<img src=\"./imgs/t2vlad.png\" height=400 width=700 hspace='10'/> <br />\n</div>\n## 数据准备\nMSR-VTT数据下载及准备请参考 [MSR-VTT数据准备](../../docs/zh-CN/dataset/msrvtt.md)\n## 模型训练\n### MSR-VTT数据集训练\n下载数据并添加到 `data/MSRVTT` 文件夹下。\n#### 开始训练\n- 训练启动命令如下:\n```bash\nexport CUDA_VISIBLE_DEVICES=0\npython3.7 train.py --config ./configs/msrvtt_transformers.json\n```\nT2VLAD在训练时使用了Ranger优化器，这里我们暂时没有支持Ranger优化器到的实现，目前可以使用AdamW优化器来完成训练。\n## 模型测试\n- 对下游任务：文本-视频检索，在MSR-VTT数据集上评估性能，评估脚本启动方式如下：\n```bash\nexport CUDA_VISIBLE_DEVICES=0\npython3.7 test.py --config ./configs/msrvtt_transformers.json --resume ./T2VLAD_msrvtt.pdparams\n```\nMSR-VTT数据集测试精度:",
+        "type": "code",
+        "location": "/applications/T2VLAD/README.md:1-60"
+    },
+    "2217": {
+        "file_id": 173,
+        "content": "This code provides an introduction to the T2VLAD model, a text video retrieval model proposed by Baidu at CVPR 2021. It explains how to prepare data, train the model, and test it on the MSR-VTT dataset. The code also includes instructions for installing dependencies and running the necessary commands.",
+        "type": "comment"
+    },
+    "2218": {
+        "file_id": 173,
+        "content": "Text $\\rightarrow$ Video\n| R@1  | R@5  | R@10 | Median R |                         checkpoints                          |\n| :--: | :--: | :--: | :------: | :----------------------------------------------------------: |\n| 29.5 | 59.0 | 70.1 |   4      | [T2VLAD.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/T2VLAD_msrvtt.pdparams) |\nVideo $\\rightarrow$ Text\n| R@1  | R@5  | R@10 | Median R |\n| :--: | :--: | :--: | :------: |\n| 26.1 | 54.7 | 68.1 |   4      |\n## 参考论文\n- [T2VLAD: Global-Local Sequence Alignment for Text-Video Retrieval\n](https://arxiv.org/pdf/2104.10054.pdf), Xiaohan Wang, Linchao Zhu, Yi Yang",
+        "type": "code",
+        "location": "/applications/T2VLAD/README.md:61-75"
+    },
+    "2219": {
+        "file_id": 173,
+        "content": "This code provides performance metrics and checkpoint information for a T2VLAD model in PaddleVideo. The Text-to-Video R@1, R@5, R@10, and Median R values are shown, along with the corresponding checkpoints' links. Video-to-Text R@1, R@5, R@10, and Median R values are also given. The reference paper for T2VLAD is provided.",
+        "type": "comment"
+    },
+    "2220": {
+        "file_id": 174,
+        "content": "/applications/T2VLAD/README_en.md",
+        "type": "filepath"
+    },
+    "2221": {
+        "file_id": 174,
+        "content": "The code installs PaddleNLP, trains T2VLAD on MSRVTT dataset, and demonstrates retrieval performance with metrics R@1, R@5, R@10, and median rank at 26.1, 54.7, 68.1, and 4 respectively. Based on the paper \"T2VLAD: Global-Local Sequence Alignment for Text-Video Retrieval\" by Xiaohan Wang et al.",
+        "type": "summary"
+    },
+    "2222": {
+        "file_id": 174,
+        "content": "[简体中文](./README.md) | English\n# T2VLAD\n---\n## Contents\n- [Introduction](#Introduction)\n- [Data](#Data)\n- [Train](#Train)\n- [Test](#Test)\n- [Reference](#Reference)\nBefore getting started, you need to install additional dependencies as follows:\n```bash\npython -m pip install paddlenlp\n```\n## Introduction\nT2VLAD is proposed by Baidu in CVPR2021 for text-video retrieval. Text-video retrieval is a challenging task that aims to search relevant video contents based on natural language descriptions. The key to this problem is to measure text- video similarities in a joint embedding space. T2VLAD designs an efficient global-local alignment method. This model achieves consistent improvements on three standard text-video retrieval benchmarks and outperform the state- of-the-art by a clear margin.\n<div align=\"center\">\n<img src=\"./imgs/t2vlad.png\" height=400 width=700 hspace='10'/> <br />\n</div>\n## Data\nPlease refer to MSR-VTT data download and preparation doc [MSR-VTT data](../../docs/en/dataset/msrvtt.md)\n## Train\n### Train on MSR-VTT",
+        "type": "code",
+        "location": "/applications/T2VLAD/README_en.md:1-31"
+    },
+    "2223": {
+        "file_id": 174,
+        "content": "Code snippet for installing additional dependencies:\n```bash\npython -m pip install paddlenlp\n```\nThis code is for installing Paddlepaddle Natural Language Processing (NLP) library, which is a required dependency for running T2VLAD application.",
+        "type": "comment"
+    },
+    "2224": {
+        "file_id": 174,
+        "content": "Download data then move to `data/MSRVTT` folder.\n#### Start training\n- Train T2VLAD on MSRVTT scripts:\n```bash\nexport CUDA_VISIBLE_DEVICES=0\npython3.7 train.py --config ./configs/msrvtt_transformers.json\n```\nT2VLAD uses the Ranger optimizer during training. We haven't supported the implementation of Ranger optimizer, for now, the AdamW optimizer can be used to complete the training.\n## Test\n- Evaluation performs on downstream task, i.e. text-video clip retrieval on MSR-VTT dataset, test accuracy can be obtained using scripts:\n```bash\nexport CUDA_VISIBLE_DEVICES=0\npython3.7 test.py --config ./configs/msrvtt_transformers.json --resume ./T2VLAD_msrvtt.pdparams\n```\nAccuracy on MSR-VTT:\nText $\\rightarrow$ Video\n| R@1  | R@5  | R@10 | Median R |                         checkpoints                          |\n| :--: | :--: | :--: | :------: | :----------------------------------------------------------: |\n| 29.5 | 59.0 | 70.1 |   4      | [T2VLAD.pdparams](https://videotag.bj.bcebos.com/PaddleVideo-release2.2/T2VLAD_msrvtt.pdparams) |",
+        "type": "code",
+        "location": "/applications/T2VLAD/README_en.md:32-59"
+    },
+    "2225": {
+        "file_id": 174,
+        "content": "This code outlines the steps to train and test T2VLAD on the MSRVTT dataset. It requires downloading data, moving it to a specified folder, and executing training and testing scripts with appropriate configuration files. The Ranger optimizer is not currently supported, so AdamW should be used instead. Test accuracy results are provided for text-to-video clip retrieval on the MSRVTT dataset.",
+        "type": "comment"
+    },
+    "2226": {
+        "file_id": 174,
+        "content": "Video $\\rightarrow$ Text\n| R@1  | R@5  | R@10 | Median R |\n| :--: | :--: | :--: | :------: |\n| 26.1 | 54.7 | 68.1 |   4      |\n## Reference\n- [T2VLAD: Global-Local Sequence Alignment for Text-Video Retrieval\n](https://arxiv.org/pdf/2104.10054.pdf), Xiaohan Wang, Linchao Zhu, Yi Yang",
+        "type": "code",
+        "location": "/applications/T2VLAD/README_en.md:61-69"
+    },
+    "2227": {
+        "file_id": 174,
+        "content": "This code shows the retrieval performance of a Text-Video Retrieval model, with metrics R@1, R@5, R@10, and median rank at 26.1, 54.7, 68.1, and 4 respectively. The reference is the paper \"T2VLAD: Global-Local Sequence Alignment for Text-Video Retrieval\" by Xiaohan Wang et al.",
+        "type": "comment"
+    },
+    "2228": {
+        "file_id": 175,
+        "content": "/applications/T2VLAD/base/__init__.py",
+        "type": "filepath"
+    },
+    "2229": {
+        "file_id": 175,
+        "content": "This code is importing two modules, 'base_model' and 'base_trainer', from the current package's subfolders. These modules likely contain the base model and trainer classes for further use in the application.",
+        "type": "summary"
+    },
+    "2230": {
+        "file_id": 175,
+        "content": "from .base_model import *\nfrom .base_trainer import *",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/__init__.py:1-2"
+    },
+    "2231": {
+        "file_id": 175,
+        "content": "This code is importing two modules, 'base_model' and 'base_trainer', from the current package's subfolders. These modules likely contain the base model and trainer classes for further use in the application.",
+        "type": "comment"
+    },
+    "2232": {
+        "file_id": 176,
+        "content": "/applications/T2VLAD/base/base_dataset.py",
+        "type": "filepath"
+    },
+    "2233": {
+        "file_id": 176,
+        "content": "The `BaseDataset` class serves as a base for creating video feature datasets, handling missing values and encoding text while supporting efficient dataset partitioning.",
+        "type": "summary"
+    },
+    "2234": {
+        "file_id": 176,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport time\nimport json\nimport random\nimport paddle\nimport inspect\nimport logging\nimport functools\nimport data_loader\nimport numpy as np\nimport pickle as pkl\nfrom pathlib import Path\nfrom abc import abstractmethod\nfrom typing import Dict, Union\nfrom numpy.random import randint\nfrom typeguard import typechecked\nfrom collections import OrderedDict\nfrom zsvision.zs_utils import memcache\ntry:\n    from paddlenlp.transformers import BertTokenizer\nexcept ImportError as e:\n    print(\n        f\"{e}, [paddlenlp] package and it's dependencies is required for T2VLAD.\"",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:1-36"
+    },
+    "2235": {
+        "file_id": 176,
+        "content": "Copyright and license information, importing necessary libraries, and type guarding.",
+        "type": "comment"
+    },
+    "2236": {
+        "file_id": 176,
+        "content": "    )\nfrom utils import ensure_tensor, expert_tensor_storage\n# For SLURM usage, buffering makes it difficult to see events as they happen, so we set\n# the global print statement to enforce flushing\nprint = functools.partial(print, flush=True)\nclass BaseDataset(paddle.io.Dataset):\n    @staticmethod\n    @abstractmethod\n    @typechecked\n    def dataset_paths() -> Dict[str, Union[Path, str]]:\n        \"\"\"Generates a datastructure containing all the paths required to load features\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def sanity_checks(self):\n        \"\"\"Run sanity checks on loaded data\n        \"\"\"\n        raise NotImplementedError\n    @abstractmethod\n    def load_features(self):\n        \"\"\"Load features from disk\n        \"\"\"\n        raise NotImplementedError\n    @typechecked\n    def __init__(\n        self,\n        data_dir: Path,\n        eval_only: bool,\n        use_zeros_for_missing: bool,\n        text_agg: str,\n        text_feat: str,\n        split_name: str,\n        cls_partition: str,\n        root_feat_folder: str,",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:37-76"
+    },
+    "2237": {
+        "file_id": 176,
+        "content": "This code defines a base class `BaseDataset` for creating and loading video features dataset. It contains methods for generating required paths, performing sanity checks on loaded data, and loading features from disk. The class is abstract and requires subclass implementation of these methods. It also includes utility functions and settings like `dataset_paths`, `sanity_checks`, and `load_features`.",
+        "type": "comment"
+    },
+    "2238": {
+        "file_id": 176,
+        "content": "        text_dim: int,\n        num_test_captions: int,\n        restrict_train_captions: int,\n        max_tokens: Dict[str, int],\n        logger: logging.Logger,\n        raw_input_dims: Dict[str, int],\n        feat_aggregation: Dict[str, Dict],\n    ):\n        self.eval_only = eval_only\n        self.logger = logger\n        self.text_feat = text_feat\n        self.data_dir = data_dir\n        self.text_dim = text_dim\n        self.restrict_train_captions = restrict_train_captions\n        self.max_tokens = max_tokens\n        self.cls_partition = cls_partition\n        self.num_test_captions = num_test_captions\n        self.feat_aggregation = feat_aggregation\n        self.root_feat = data_dir / root_feat_folder\n        self.experts = set(raw_input_dims.keys())\n        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')\n        # This attributes can be overloaded by different datasets, so it must be set\n        # before the `load_features() method call`\n        self.restrict_test_captions = None\n        self.text_features = None",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:77-101"
+    },
+    "2239": {
+        "file_id": 176,
+        "content": "The code above defines a class for a dataset, with various parameters such as text_dim, num_test_captions, and max_tokens. It sets the necessary attributes including logger, text_feat, data_dir, and experts. The class also initializes the tokenizer and sets the restrict_test_captions and text_features attributes before calling load_features() method.",
+        "type": "comment"
+    },
+    "2240": {
+        "file_id": 176,
+        "content": "        self.label_features = None\n        self.video_labels = None\n        self.raw_captions = None\n        self.features = None\n        self.word2int = json.load(open('word2int.json'))\n        # Use a single caption per video when forming training minibatches (different\n        # captions from the same video may still be used across different minibatches)\n        self.captions_per_video = 1\n        self.ordered_experts = list(raw_input_dims.keys())\n        # Training and test lists are set by dataset-specific subclasses\n        self.partition_lists = {}\n        self.configure_train_test_splits(split_name=split_name)\n        # All retrieval-based tasks use a single dataloader (and handle the retrieval\n        # data separately), whereas for classification we use one dataloader for\n        # training and one for validation.\n        self.logger.info(\"The current task is retrieval\")\n        self.sample_list = self.partition_lists[\"train\"]\n        self.num_samples = len(self.sample_list)\n        num_val = len(self.partition_lists[\"val\"])",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:102-125"
+    },
+    "2241": {
+        "file_id": 176,
+        "content": "This code initializes class variables for a dataset object. It sets the label features, video labels, raw captions, and features to None. It loads the word2int mapping from a JSON file. The code allows for one caption per video in training minibatches. It creates an ordered list of experts based on input dimensions. The training and test lists are set by dataset-specific subclasses. The code is for retrieval tasks and uses a single dataloader, handling retrieval data separately. It sets the sample list to the training partition and calculates the total number of samples.",
+        "type": "comment"
+    },
+    "2242": {
+        "file_id": 176,
+        "content": "        self.raw_input_dims = raw_input_dims\n        # we store default paths to enable visualisations (this can be overloaded by\n        # dataset-specific classes)\n        self.video_path_retrieval = [\n            f\"videos/{x}.mp4\" for x in self.partition_lists[\"val\"]\n        ]\n        # NOTE: We use nans rather than zeros to indicate missing faces, unless we wish\n        # to test single modality strength, which requires passing zeroed features for\n        # missing videos\n        if use_zeros_for_missing:\n            self.MISSING_VAL = 0\n        else:\n            self.MISSING_VAL = np.nan\n        # load the dataset-specific features into memory\n        self.load_features()\n        if text_agg == \"avg\":\n            self.logger.info(\"averaging the text features...\")\n            for key, val in self.text_features.items():\n                self.text_features[key] = [\n                    np.mean(x, 0, keepdims=1) for x in val\n                ]\n            self.logger.info(\"finished averaging the text features\")",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:127-152"
+    },
+    "2243": {
+        "file_id": 176,
+        "content": "The code sets default paths for video retrieval, defines missing value strategy based on use_zeros_for_missing argument, loads dataset-specific features into memory and averages text features when text_agg is set to \"avg\".",
+        "type": "comment"
+    },
+    "2244": {
+        "file_id": 176,
+        "content": "        self.trn_config = {}\n        self.raw_config = {}\n        self.tensor_storage = expert_tensor_storage(self.experts,\n                                                    self.feat_aggregation)\n        for static_expert in self.tensor_storage[\"fixed\"]:\n            if static_expert in self.feat_aggregation:\n                if \"trn_seg\" in self.feat_aggregation[static_expert].keys():\n                    self.trn_config[static_expert] = \\\n                        self.feat_aggregation[static_expert][\"trn_seg\"]\n                if \"raw\" in self.feat_aggregation[static_expert][\"temporal\"]:\n                    self.raw_config[static_expert] = 1\n        retrieval = {\n            expert: np.zeros(\n                (num_val, self.max_tokens[expert], raw_input_dims[expert]))\n            for expert in self.tensor_storage[\"variable\"]\n        }\n        retrieval.update({\n            expert: np.zeros((num_val, raw_input_dims[expert]))\n            for expert in self.tensor_storage[\"fixed\"]\n        })\n        self.retrieval = retrieval",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:154-175"
+    },
+    "2245": {
+        "file_id": 176,
+        "content": "This code initializes training and raw configuration dictionaries, creates a tensor storage object, iterates through static experts, adds their relevant configurations to the dictionaries, and then builds a retrieval dictionary for both fixed and variable experts.",
+        "type": "comment"
+    },
+    "2246": {
+        "file_id": 176,
+        "content": "        self.test_ind = {\n            expert: paddle.ones([num_val])\n            for expert in self.experts\n        }\n        self.raw_captions_retrieval = [None] * num_val\n        # avoid evaluation on missing queries\n        self.query_masks = np.zeros((num_val, num_test_captions))\n        self.text_token_mask = np.zeros((num_val, num_test_captions))\n        self.text_retrieval = np.zeros((num_val, self.num_test_captions,\n                                        self.max_tokens[\"text\"], self.text_dim))\n        self.cap_retrieval = paddle.zeros(\n            [num_val, self.num_test_captions, self.max_tokens[\"text\"]],\n            dtype='int64'\n        )  #self.cap_retrieval = th.zeros((num_val, self.num_test_captions, self.max_tokens[\"text\"]))\n        self.att_retrieval = paddle.zeros(\n            [num_val, self.num_test_captions, self.max_tokens[\"text\"]],\n            dtype='int64'\n        )  #self.att_retrieval = th.zeros((num_val, self.num_test_captions, self.max_tokens[\"text\"]))\n        save_cap = []\n        for ii, video_name in enumerate(self.partition_lists[\"val\"]):",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:176-197"
+    },
+    "2247": {
+        "file_id": 176,
+        "content": "The code is initializing various arrays and tensors for evaluating the model on validation data. It sets up masks, retrieval tensors for text, captions, and attention, and prepares an empty list for saving the validation captions. This code is part of a larger function that appears to be setting up a dataset for video captioning or related task.",
+        "type": "comment"
+    },
+    "2248": {
+        "file_id": 176,
+        "content": "            self.raw_captions_retrieval[ii] = self.raw_captions[video_name]\n            for expert in self.tensor_storage[\"fixed\"].intersection(\n                    self.experts):\n                feats = self.features[expert][video_name]\n                drop = self.has_missing_values(feats)\n                self.test_ind[expert][ii] = not drop\n                self.retrieval[expert][ii] = feats\n                if drop:\n                    self.retrieval[expert][ii][:] = self.MISSING_VAL\n                if self.feat_aggregation[expert].get(\"binarise\", False):\n                    keep = np.logical_not(\n                        np.isnan(self.retrieval[expert][:, 0, 0]))\n                    marker = np.ones_like(self.retrieval[expert][keep])\n                    self.retrieval[expert][keep] = marker\n            for expert in self.tensor_storage[\"variable\"].intersection(\n                    self.experts):\n                feats = self.features[expert][video_name]\n                drop = self.has_missing_values(feats)",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:199-217"
+    },
+    "2249": {
+        "file_id": 176,
+        "content": "This code initializes the retrieval and test indices for each expert in both fixed and variable tensor storage. It handles missing values by replacing them with 'MISSING_VAL' and binarizing non-missing features using marker values if requested.",
+        "type": "comment"
+    },
+    "2250": {
+        "file_id": 176,
+        "content": "                self.test_ind[expert][ii] = not drop\n                if drop:\n                    self.retrieval[expert][ii][:] = self.MISSING_VAL\n                if self.feat_aggregation[expert].get(\"binarise\", False):\n                    keep = np.logical_not(\n                        np.isnan(self.retrieval[expert][:, 0, 0]))\n                    marker = np.ones_like(self.retrieval[expert][keep])\n                    self.retrieval[expert][keep] = marker\n                if self.test_ind[expert][ii]:\n                    keep = min(self.max_tokens[expert], len(feats))\n                    self.retrieval[expert][ii, :keep, :] = feats[:keep]\n            candidates_sentences = self.text_features[video_name]\n            if self.restrict_test_captions is not None:\n                keep_sent_idx = self.restrict_test_captions[video_name]\n                candidates_sentences = [candidates_sentences[keep_sent_idx]]\n            self.query_masks[ii, :len(candidates_sentences)] = 1\n            for test_caption_idx in range(self.num_test_captions):",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:218-237"
+    },
+    "2251": {
+        "file_id": 176,
+        "content": "The code is handling the process of selecting video features and test captions for a specific expert. It drops certain entries, sets missing values where needed, applies binarization if required, and limits the number of tokens based on maximum token limit. It also restricts test captions if specified by the user. Finally, it sets query masks to prepare for further processing.",
+        "type": "comment"
+    },
+    "2252": {
+        "file_id": 176,
+        "content": "                if len(candidates_sentences) <= test_caption_idx:\n                    break\n                keep = min(len(candidates_sentences[test_caption_idx]),\n                           self.max_tokens[\"text\"])\n                self.text_token_mask[ii, test_caption_idx] = keep\n                sent = self.raw_captions_retrieval[ii][test_caption_idx]\n                sent = \" \".join(sent)\n                sent = sent.strip()\n                encoded_dict = self.tokenizer.__call__(\n                    sent,\n                    max_seq_len=self.max_tokens[\"text\"],\n                    pad_to_max_seq_len=True,\n                    return_attention_mask=True,\n                    truncation_strategy='longest_first')\n                cap_ids = paddle.to_tensor(encoded_dict['input_ids'])\n                attention_mask = paddle.to_tensor(\n                    encoded_dict['attention_mask'])\n                save_cap.append(sent)\n                self.cap_retrieval[ii, test_caption_idx, :] = cap_ids\n                self.att_retrieval[ii, test_caption_idx, :] = attention_mask",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:238-257"
+    },
+    "2253": {
+        "file_id": 176,
+        "content": "This code is iterating over a list of candidate sentences, breaking when the index exceeds the list length. For each sentence, it sets the number of tokens to keep based on the maximum allowed and masks the corresponding tokens. It then encodes the sentence into tokenized input IDs and attention mask for PaddlePaddle's model, appending the original sentence to a save list, storing the tokenized inputs in 'cap_retrieval', and the attention masks in 'att_retrieval'.",
+        "type": "comment"
+    },
+    "2254": {
+        "file_id": 176,
+        "content": "                if ii % 500 == 0 and test_caption_idx == 0:\n                    msg = (\n                        f\"{ii}/{len(self.partition_lists['val'])} will evaluate \"\n                        f\"sentence {test_caption_idx} out of \"\n                        f\"{len(candidates_sentences)} (has {keep} words) \"\n                        f\"{video_name}\")\n                    self.logger.info(msg)\n                text_feats = candidates_sentences[test_caption_idx][:keep]\n                if text_feats.shape[0] == 0:\n                    text_feats = 0\n                    raise ValueError(\"empty text features!\")\n                self.text_retrieval[ii, test_caption_idx, :keep, :] = text_feats\n        with open('run_cap.pkl', 'wb') as f:\n            pkl.dump(save_cap, f)\n        self.sanity_checks()\n    def configure_train_test_splits(self, split_name):\n        \"\"\"Partition the datset into train/val/test splits.\n        Args:\n            split_name (str): the name of the split\n        \"\"\"\n        self.paths = type(self).dataset_paths()",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:258-280"
+    },
+    "2255": {
+        "file_id": 176,
+        "content": "The code is checking the progress of a dataset evaluation, creating text features for each sentence in the list, storing them in an array and then dumping the saved captions into a file called 'run_cap.pkl'. It also includes a function to configure train/test splits of the dataset.",
+        "type": "comment"
+    },
+    "2256": {
+        "file_id": 176,
+        "content": "        print(\"loading training/val splits....\")\n        tic = time.time()\n        for subset, path in self.paths[\"subset_list_paths\"][split_name].items():\n            root_feat = Path(self.root_feat)\n            subset_list_path = root_feat / path\n            if subset == \"train\" and self.eval_only:\n                rows = []\n            else:\n                with open(subset_list_path) as f:\n                    rows = f.read().splitlines()\n            self.partition_lists[subset] = rows\n        print(\"done in {:.3f}s\".format(time.time() - tic))\n        self.split_name = split_name\n    def collate_data(self, data):\n        batch_size = len(data)\n        tensors = {}\n        for expert in self.tensor_storage[\"fixed\"]:\n            if expert in self.trn_config.keys():\n                tensors[expert] = paddle.to_tensor(\n                    np.zeros((batch_size, self.trn_config[expert],\n                              self.raw_input_dims[expert])))\n            else:\n                tensors[expert] = paddle.to_tensor(",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:281-304"
+    },
+    "2257": {
+        "file_id": 176,
+        "content": "The code loads training/validation splits, reads and stores them in partition lists for later use, and initializes tensor storage for the PaddleVideo application.",
+        "type": "comment"
+    },
+    "2258": {
+        "file_id": 176,
+        "content": "                    np.zeros((batch_size, self.raw_input_dims[expert])))\n        # Track which indices of each modality are available in the present batch\n        ind = {\n            expert: paddle.to_tensor(np.zeros(batch_size))\n            for expert in self.experts\n        }\n        tensors.update({\n            expert: paddle.to_tensor(\n                np.zeros((batch_size, self.max_tokens[expert],\n                          self.raw_input_dims[expert])))\n            for expert in self.tensor_storage[\"variable\"]\n        })\n        text_tensor = paddle.to_tensor(\n            np.zeros((batch_size, self.captions_per_video,\n                      self.max_tokens[\"text\"], self.text_dim)))\n        text_token_mask = paddle.to_tensor(\n            np.zeros((batch_size, self.captions_per_video)))\n        text_cap_id = paddle.zeros([batch_size, self.max_tokens[\"text\"]],\n                                   dtype='int64')\n        text_att_mask = paddle.zeros([batch_size, self.max_tokens[\"text\"]],\n                                     dtype='int64')",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:305-327"
+    },
+    "2259": {
+        "file_id": 176,
+        "content": "This code initializes tensors for a batch of data in a dataset. It creates zero-initialized tensors for each expert (modality), and separate tensors for text data including token masks, cap IDs, and attention mask. These will be filled with actual data as the batch is processed.",
+        "type": "comment"
+    },
+    "2260": {
+        "file_id": 176,
+        "content": "        for ii, _ in enumerate(data):\n            datum = data[ii]\n            for expert in self.experts:\n                ind[expert][ii] = datum[f\"{expert}_ind\"]\n            for expert in self.tensor_storage[\"fixed\"]:\n                tensors[expert][ii] = datum[expert]\n            for expert in self.tensor_storage[\"variable\"]:\n                if ind[expert][ii]:\n                    keep = min(len(datum[expert]), self.max_tokens[expert])\n                    if keep:\n                        tensors[expert][ii, :keep, :] = datum[expert][:keep]\n                else:\n                    tensors[expert][ii, :, :] = self.MISSING_VAL\n            text = datum[\"text\"]\n            cap_id = datum[\"cap_id\"]\n            att_mask = datum[\"att_mask\"]\n            text_cap_id[ii, :] = paddle.to_tensor(cap_id)\n            text_att_mask[ii, :] = paddle.to_tensor(att_mask)\n            for jj in range(self.captions_per_video):\n                keep = min(len(text[jj]), self.max_tokens[\"text\"])\n                text_tensor[ii, jj, :keep, :] = text[jj][:keep]",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:329-350"
+    },
+    "2261": {
+        "file_id": 176,
+        "content": "This code iterates through a dataset, extracting data for various experts and creating tensors from it. It handles missing values and stores text and mask information in separate tensors.",
+        "type": "comment"
+    },
+    "2262": {
+        "file_id": 176,
+        "content": "                text_token_mask[ii, jj] = keep\n        ind = {key: ensure_tensor(val) for key, val in ind.items()}\n        experts = OrderedDict(\n            (expert, paddle.to_tensor(tensors[expert], dtype='float32'))\n            for expert in self.ordered_experts)\n        for expert in self.experts:\n            if self.feat_aggregation[expert].get(\"binarise\", False):\n                replace = np.logical_not(paddle.isnan(experts[expert][:, 0, 0]))\n                experts[expert][replace] = paddle.ones_like(\n                    experts[expert][replace])\n        minibatch = {\"experts\": experts, \"ind\": ind}\n        minibatch[\"text\"] = paddle.to_tensor(text_tensor, dtype='float32')\n        minibatch[\"cap_id\"] = paddle.to_tensor(text_cap_id, dtype='int64')\n        minibatch[\"att_mask\"] = paddle.to_tensor(text_att_mask, dtype='int64')\n        minibatch[\"text_token_mask\"] = paddle.to_tensor(text_token_mask)\n        return minibatch\n    def process_sent(self, sent, max_words, EOS: int = 1, UNK: int = 2):\n        # set EOS=1, UNK=2 by default, consistent with file 'word2int.json'.",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:351-372"
+    },
+    "2263": {
+        "file_id": 176,
+        "content": "This code creates a minibatch for video features and text data. It applies binarization to some features, converts tensors, and prepares inputs for machine learning models. The process_sent function sets default values for EOS and UNK consistent with the word2int.json file.",
+        "type": "comment"
+    },
+    "2264": {
+        "file_id": 176,
+        "content": "        tokens = [self.word2int.get(w, UNK) for w in sent]\n        tokens = tokens[:max_words]\n        tokens_len = len(tokens)\n        tokens = np.array(tokens + [EOS] * (max_words - tokens_len))\n        return tokens, tokens_len\n    def __len__(self):\n        return self.num_samples\n    def __getitem__(self, idx):\n        if idx < self.num_samples:\n            vid = self.sample_list[idx]\n            features = {}\n            for expert in self.experts:\n                if expert not in self.trn_config.keys():\n                    if expert in self.raw_config.keys():\n                        features[expert] = np.mean(self.features[expert][vid],\n                                                   axis=0)\n                    else:\n                        features[expert] = self.features[expert][vid]\n                else:\n                    raw_frame_feats = self.features[expert][vid]\n                    new_length = 1\n                    num_frames = raw_frame_feats.shape[0]\n                    avg_duration = ((num_frames - new_length + 1) //",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:373-397"
+    },
+    "2265": {
+        "file_id": 176,
+        "content": "This code defines a dataset class that loads and processes video features for text-to-video retrieval. It takes a list of videos, extracts expert features, and pads them to a fixed length. The class also supports indexing and has methods for getting the number of samples in the dataset.",
+        "type": "comment"
+    },
+    "2266": {
+        "file_id": 176,
+        "content": "                                    self.trn_config[expert])\n                    assert avg_duration > 0, \"average duration must be positive\"\n                    if avg_duration > 0:\n                        # maybe we could change to use average for each tiny segment\n                        # seems like use everything per iter\n                        offsets = np.multiply(\n                            list(range(self.trn_config[expert])), avg_duration)\n                        offsets += randint(avg_duration,\n                                           size=self.trn_config[expert])\n                        new_frame_feats = np.zeros(\n                            (self.trn_config[expert], raw_frame_feats.shape[1]))\n                        for idx, xx in enumerate(offsets):\n                            new_frame_feats[idx, :] = raw_frame_feats[xx, :]\n                        msg = \"returning a wrong feature != segment num\"\n                        assert new_frame_feats.shape[0] == self.trn_config[\n                            expert], msg",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:398-413"
+    },
+    "2267": {
+        "file_id": 176,
+        "content": "The code segments video frame features into smaller segments with a specified average duration, accounts for the last segment if the duration is not divisible by the specified interval, and ensures the number of new feature segments matches the expected number.",
+        "type": "comment"
+    },
+    "2268": {
+        "file_id": 176,
+        "content": "                        features[expert] = new_frame_feats\n            ind = {}\n            for expert in self.ordered_experts:\n                if expert in self.tensor_storage[\"flaky\"]:\n                    ind[expert] = not self.has_missing_values(features[expert])\n                else:\n                    ind[expert] = 1\n            # Handle some inconsistencies between how the text features are stored\n            text = self.text_features[vid]\n            if isinstance(text, list):\n                pick = np.random.choice(len(text), size=self.captions_per_video)\n                sent = self.raw_captions[vid][pick[0]]\n                sent = \" \".join(sent)\n                sent = sent.strip()\n                text = np.array(text)[pick]\n                encoded_dict = self.tokenizer.__call__(\n                    sent,\n                    max_seq_len=self.max_tokens[\"text\"],\n                    pad_to_max_seq_len=True,\n                    return_attention_mask=True,\n                    truncation_strategy='longest_first')",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:414-437"
+    },
+    "2269": {
+        "file_id": 176,
+        "content": "This code is responsible for handling inconsistencies in text features storage. It randomly selects a caption from a list of captions for a given video, applies tokenization, and ensures that the sequence length does not exceed a maximum threshold. The result is stored in the encoded_dict variable.",
+        "type": "comment"
+    },
+    "2270": {
+        "file_id": 176,
+        "content": "                cap_id = encoded_dict['input_ids']\n                token_type_ids = encoded_dict['token_type_ids']\n                attention_mask = encoded_dict['attention_mask']\n            else:\n                pick = None\n                text = np.random.choice(text, size=self.captions_per_video)\n        # Return both the missing indices as well as the tensors\n        sample = {\"text\": text}\n        sample.update({\"cap_id\": cap_id})\n        sample.update({\"att_mask\": attention_mask})\n        sample.update({f\"{key}_ind\": val for key, val in ind.items()})\n        sample.update(features)\n        return sample\n    def get_retrieval_data(self):\n        experts = OrderedDict(\n            (expert, paddle.to_tensor(self.retrieval[expert], dtype='float32'))\n            for expert in self.ordered_experts)\n        retrieval_data = {\n            \"text\":\n            paddle.to_tensor(ensure_tensor(self.text_retrieval),\n                             dtype='float32'),\n            \"experts\":\n            experts,\n            \"cap_id\":",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:438-463"
+    },
+    "2271": {
+        "file_id": 176,
+        "content": "This code is initializing a sample for video dataset, using either given or randomly chosen text. It creates a dictionary with cap_id, attention mask, and other tensors as key-value pairs, and returns the sample. The get_retrieval_data function converts retrieval data to tensors and adds them to a dictionary containing text and experts keys before returning it.",
+        "type": "comment"
+    },
+    "2272": {
+        "file_id": 176,
+        "content": "            paddle.to_tensor(self.cap_retrieval, dtype='int64'),\n            \"att_mask\":\n            paddle.to_tensor(self.att_retrieval, dtype='int64'),\n            \"ind\":\n            self.test_ind,\n            \"text_token_mask\":\n            paddle.to_tensor(self.text_token_mask)\n        }\n        meta = {\n            \"query_masks\": self.query_masks,\n            \"raw_captions\": self.raw_captions_retrieval,\n            \"paths\": self.video_path_retrieval,\n        }\n        return retrieval_data, meta\n    def has_missing_values(self, x):\n        return isinstance(x, float) and np.isnan(x)\n    def visual_feat_paths(self, model_spec, tag=None):\n        \"\"\"Canonical path lookup for visual features\n        \"\"\"\n        if model_spec not in self.ordered_experts:\n            self.logger.info(\n                f\"Skipping load for {model_spec} (feature not requested)\")\n            return f\"SKIPPED-{model_spec}\"\n        feat_type, model_name, _ = model_spec.split(\".\")\n        aggs = self.feat_aggregation[model_spec]\n        base = f\"aggregated_{feat_type.replace('-', '_')}\"",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:464-492"
+    },
+    "2273": {
+        "file_id": 176,
+        "content": "The function defines a dictionary 'retrieval_data' containing cap_retrieval, att_mask, test_ind, and text_token_mask. It also defines the 'meta' dictionary containing query_masks, raw_captions, and paths. The function returns both 'retrieval_data' and 'meta'. The code provides a path lookup for visual features and skips loading if the feature is not requested.",
+        "type": "comment"
+    },
+    "2274": {
+        "file_id": 176,
+        "content": "        required = (\"fps\", \"pixel_dim\", \"stride\")\n        fps, pixel_dim, stride = [aggs.get(x, None) for x in required]\n        if feat_type in {\"facecrops\", \"faceboxes\"}:\n            base = f\"{base}_{fps}fps_{pixel_dim}px_stride{stride}\"\n        elif feat_type not in {\"ocr\", \"speech\", \"audio\"}:\n            base = f\"{base}_{fps}fps_{pixel_dim}px_stride{stride}\"\n        for option in \"offset\", \"inner_stride\":\n            if aggs.get(option, None) is not None:\n                base += f\"_{option}{aggs[option]}\"\n        feat_paths = []\n        for agg in aggs[\"temporal\"].split(\"-\"):\n            fname = f\"{model_name}-{agg}\"\n            if aggs[\"type\"] == \"logits\":\n                fname = f\"{fname}-logits\"\n            if tag is not None:\n                fname += f\"-{tag}\"\n            feat_paths.append(Path(base) / f\"{fname}.pickle\")\n        return feat_paths\n    def log_assert(self, bool_, msg=\"\", verbose=True):\n        \"\"\"Use assertions that will be written to the logs. This is a recipe from:\n        http://code.activestate.com/recipes/577074-logging-asserts/",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:493-516"
+    },
+    "2275": {
+        "file_id": 176,
+        "content": "The code defines a function that generates feature paths based on the provided arguments. It assembles a base string with parameters like fps, pixel_dim, and stride. If the feature type is \"facecrops\" or \"faceboxes\", it includes those parameters in the base string. For other types except for \"ocr\", \"speech\", and \"audio\", it also includes those parameters in the base string. It then adds optional parameters like offset and inner_stride if present. Finally, it generates a feature path list with file names and appends the tag if provided. The function also defines a logging assertion function that writes assertions to logs using a recipe from an external link.",
+        "type": "comment"
+    },
+    "2276": {
+        "file_id": 176,
+        "content": "        \"\"\"\n        try:\n            assert bool_, msg\n        except AssertionError:\n            # construct an exception message from the code of the calling frame\n            last_stackframe = inspect.stack()[-2]\n            source_file, line_no, func = last_stackframe[1:4]\n            source = f\"Traceback (most recent call last):\\n\" + \\\n                     f\" File {source_file}, line {line_no}, in {func}\\n\"\n            if verbose:\n                # include more lines than that where the statement was made\n                source_code = open(source_file).readlines()\n                source += \"\".join(source_code[line_no - 3:line_no + 1])\n            else:\n                source += last_stackframe[-2][0].strip()\n            self.logger.debug(f\"{msg}\\n{source}\")\n            raise AssertionError(f\"{msg}\\n{source}\")\n    def summary_stats(self):\n        \"\"\"Report basic statistics about feature availability and variable lengths\n        across the different subsets of the data.\n        \"\"\"\n        self.logger.info(\"Computing feature stats...\")",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:517-539"
+    },
+    "2277": {
+        "file_id": 176,
+        "content": "The code snippet is a function that checks an assertion. If the assertion fails, it constructs an exception message containing the traceback from the calling frame and raises an AssertionError with this message. Another function called \"summary_stats\" reports basic statistics about feature availability and variable lengths across different data subsets.",
+        "type": "comment"
+    },
+    "2278": {
+        "file_id": 176,
+        "content": "        queries = self.ordered_experts + [\"text\"]\n        for subset, keep in self.partition_lists.items():\n            keep = set(keep)\n            print(f\"Summary for {subset}\")\n            for expert in queries:\n                if expert in self.features:\n                    feats = self.features[expert]\n                else:\n                    feats = self.text_features\n                vals = [feats[key] for key in keep]\n                missing = 0\n                sizes = []\n                for val in vals:\n                    if self.has_missing_values(val):\n                        missing += 1\n                    else:\n                        sizes.append(len(val))\n                if sizes:\n                    stat_str = (f\"min: {np.min(sizes):4}, \"\n                                f\"max: {np.max(sizes):4}, \"\n                                f\"mean: {np.mean(sizes):.1f}\")\n                    print(\n                        f\"{subset}: missing: {missing:4}, {stat_str} {expert}\")",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_dataset.py:540-562"
+    },
+    "2279": {
+        "file_id": 176,
+        "content": "This code partitions datasets based on predefined subsets and checks the sizes of the features. It prints a summary for each subset, counting missing values and displaying the minimum, maximum, and mean sizes of features. This ensures that the dataset is properly partitioned and allows for efficient analysis.",
+        "type": "comment"
+    },
+    "2280": {
+        "file_id": 177,
+        "content": "/applications/T2VLAD/base/base_model.py",
+        "type": "filepath"
+    },
+    "2281": {
+        "file_id": 177,
+        "content": "The code defines an abstract base class for all PaddleVideo models, requiring implementation of forward method and including a trainable parameter count in __str__ output. It also imports libraries, checks stop_gradient flag, and calculates parameter shapes.",
+        "type": "summary"
+    },
+    "2282": {
+        "file_id": 177,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport numpy as np\nimport paddle.nn as nn\nfrom abc import abstractmethod\nclass BaseModel(nn.Layer):\n    \"\"\"\n    Base class for all models\n    \"\"\"\n    @abstractmethod\n    def forward(self, *inputs):\n        \"\"\"\n        Forward pass logic\n        :return: Model output\n        \"\"\"\n        raise NotImplementedError\n    def __str__(self):\n        \"\"\"\n        Model prints with number of trainable parameters\n        \"\"\"\n        model_parameters = filter(lambda p: p.stop_gradient==False, self.parameters())\n        params = sum([np.prod(p.shape) for p in model_parameters])",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_model.py:1-36"
+    },
+    "2283": {
+        "file_id": 177,
+        "content": "This code defines an abstract base class for all models in the PaddleVideo application. It requires derived classes to implement the `forward` method and includes a `__str__` method that prints the model with the number of trainable parameters. The code also imports necessary libraries, checks for stop_gradient flag on parameters, and calculates product of shape for each parameter.",
+        "type": "comment"
+    },
+    "2284": {
+        "file_id": 177,
+        "content": "        return super().__str__() + f\"\\nTrainable parameters: {params}\"",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_model.py:37-37"
+    },
+    "2285": {
+        "file_id": 177,
+        "content": "The code returns a string containing the superclass's __str__ method, followed by the number of trainable parameters in the current instance.",
+        "type": "comment"
+    },
+    "2286": {
+        "file_id": 178,
+        "content": "/applications/T2VLAD/base/base_trainer.py",
+        "type": "filepath"
+    },
+    "2287": {
+        "file_id": 178,
+        "content": "The code introduces a trainer class for PaddleVideo's T2VLAD application, managing features like multi-epoch training, monitoring performance metrics and model saving during training. It also manages model checkpoints to prevent storage overload.",
+        "type": "summary"
+    },
+    "2288": {
+        "file_id": 178,
+        "content": "# Copyright (c) 2021  PaddlePaddle Authors. All Rights Reserved.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\"\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#     http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nimport re\nimport copy\nimport time\nimport paddle\nimport pickle\nimport numpy as np\nfrom pathlib import Path\nfrom abc import abstractmethod\nclass BaseTrainer:\n    \"\"\" Base class for all trainers\n    \"\"\"\n    def __init__(self, model, loss, metrics, optimizer, config, mini_train,\n                 num_keep_ckpts, skip_tboard):\n        self.config = config\n        self.logger = config.get_logger(\n            'trainer', config['trainer']['verbosity'])\n        self.model = model\n        self.loss = loss\n        self.metrics = metrics",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_trainer.py:1-33"
+    },
+    "2289": {
+        "file_id": 178,
+        "content": "This code defines a base class for all trainers. It takes in parameters such as model, loss function, metrics to track, optimizer, and configuration. It also initializes the logger and sets up the necessary components for training.",
+        "type": "comment"
+    },
+    "2290": {
+        "file_id": 178,
+        "content": "        self.optimizer = optimizer\n        self.num_keep_ckpts = num_keep_ckpts\n        self.skip_tboard = skip_tboard or mini_train\n        # This property can be overriden in the subclass\n        self.skip_first_n_saves = 0\n        cfg_trainer = config['trainer']\n        self.epochs = cfg_trainer['epochs']\n        self.save_period = cfg_trainer['save_period']\n        self.monitor = cfg_trainer.get('monitor', 'off')\n        self.save_only_best = cfg_trainer.get(\"save_only_best\", True)\n        self.val_freq = cfg_trainer['val_freq']\n        # configuration to monitor model performance and save best\n        if self.monitor == 'off':\n            self.mnt_mode = 'off'\n            self.mnt_best = 0\n        else:\n            self.mnt_mode, self.mnt_metric = self.monitor.split()\n            assert self.mnt_mode in ['min', 'max']\n            self.mnt_best = np.inf if self.mnt_mode == 'min' else -np.inf\n            self.early_stop = cfg_trainer.get('early_stop', np.inf)\n        self.start_epoch = 1\n        self.model_dir = config.save_dir",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_trainer.py:34-60"
+    },
+    "2291": {
+        "file_id": 178,
+        "content": "This code is initializing the base trainer object with parameters from a configuration file. It sets optimizer, number of checkpoints to keep, whether to skip TensorBoard logging or not, and overridable properties like skipping the first N saves. It also assigns epochs, save period, monitor mode for model performance evaluation, best score to compare against, starts training from epoch 1, and sets the model directory.",
+        "type": "comment"
+    },
+    "2292": {
+        "file_id": 178,
+        "content": "        self.include_optim_in_save_model = config[\"trainer\"].get(\"include_optim_in_save_model\", 1)\n        if config.resume is not None:\n            self._resume_model(config.resume)\n    @abstractmethod\n    def _train_epoch(self, epoch):\n        \"\"\"Training logic for an epoch\n        :param epoch: Current epoch number\n        \"\"\"\n        raise NotImplementedError\n    def train(self):\n        \"\"\"Full training logic.  Responsible for iterating over epochs, early stopping,\n        modeling and logging metrics.\n        \"\"\"\n        for epoch in range(self.start_epoch, self.epochs + 1):\n            result, cached_preds = self._train_epoch(epoch)\n            if epoch % self.val_freq != 0:\n                continue\n            # save logged informations into log dict\n            log = {'epoch': epoch}\n            for key, value in result.items():\n                if key == 'metrics':\n                    log.update({mtr.__name__: value[i]\n                                for i, mtr in enumerate(self.metrics)})\n                elif key == 'val_metrics':",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_trainer.py:62-89"
+    },
+    "2293": {
+        "file_id": 178,
+        "content": "This code defines a base trainer class for PaddleVideo's T2VLAD application. It includes methods to train for multiple epochs, handle resume from a saved state, and log training metrics. The trainer iterates over each epoch and calls the _train_epoch method to perform training logic. If validation frequency is set, it logs results at specified epochs.",
+        "type": "comment"
+    },
+    "2294": {
+        "file_id": 178,
+        "content": "                    log.update({'val_' + mtr.__name__: value[i]\n                                for i, mtr in enumerate(self.metrics)})\n                elif key == 'nested_val_metrics':\n                    # NOTE: currently only supports two layers of nesting\n                    for subkey, subval in value.items():\n                        for subsubkey, subsubval in subval.items():\n                            log[f\"val_{subkey}_{subsubkey}\"] = subsubval\n                else:\n                    log[key] = value\n            # print logged informations to the screen\n            for key, value in log.items():\n                self.logger.info('    {:15s}: {}'.format(str(key), value))\n            # eval model according to configured metric, save best # ckpt as trained_model\n            not_improved_count = 0\n            best = False\n            if self.mnt_mode != 'off':\n                try:\n                    # check whether specified metric improved or not, according to\n                    # specified metric(mnt_metric)",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_trainer.py:90-110"
+    },
+    "2295": {
+        "file_id": 178,
+        "content": "The code updates the log with metrics values, handles nested metrics, prints logged information to the screen, and checks if the metric improved for monitoring mode.",
+        "type": "comment"
+    },
+    "2296": {
+        "file_id": 178,
+        "content": "                    lower = log[self.mnt_metric] <= self.mnt_best\n                    higher = log[self.mnt_metric] >= self.mnt_best\n                    improved = (self.mnt_mode == 'min' and lower) or \\\n                               (self.mnt_mode == 'max' and higher)\n                except KeyError:\n                    msg = \"Warning: Metric '{}' not found, perf monitoring is disabled.\"\n                    self.logger.warning(msg.format(self.mnt_metric))\n                    self.mnt_mode = 'off'\n                    improved = False\n                    not_improved_count = 0\n                    raise ValueError(\"Pick a metric that will save models!!!!!!!!\")\n                if improved:\n                    self.mnt_best = log[self.mnt_metric]\n                    # TODO(Samuel): refactor the code so that we don't move the model\n                    # off the GPU or duplicate on the GPU (we should be able to safely\n                    # copy the state dict directly to CPU)\n                    copy_model = copy.deepcopy(self.model)",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_trainer.py:111-128"
+    },
+    "2297": {
+        "file_id": 178,
+        "content": "This code checks if the performance metric (mnt_metric) has improved and updates the best value accordingly. If the metric is not found, it disables performance monitoring and sets improved to False. It also raises a ValueError asking the user to choose a relevant metric.",
+        "type": "comment"
+    },
+    "2298": {
+        "file_id": 178,
+        "content": "                    self.best_model = {\"epoch\": epoch, \"model\": copy_model}\n                    not_improved_count = 0\n                    best = True\n                else:\n                    not_improved_count += 1\n                if not_improved_count > self.early_stop:\n                    self.logger.info(\"Val performance didn\\'t improve for {} epochs. \"\n                                     \"Training stops.\".format(self.early_stop))\n                    break\n            if self.save_only_best:\n                if epoch == self.epochs:\n                    best_model = self.best_model\n                    self.model = best_model[\"model\"]\n                    print(f\"saving the best model to disk (epoch {epoch})\")\n                    self._save_model(best_model[\"epoch\"], save_best=True)\n                continue\n            # If modeling is done intermittently, still save models that outperform\n            # the best metric\n            # save_best = best and not self.mnt_metric == \"epoch\"\n            save_best = True",
+        "type": "code",
+        "location": "/applications/T2VLAD/base/base_trainer.py:129-151"
+    },
+    "2299": {
+        "file_id": 178,
+        "content": "This code snippet is responsible for early stopping and saving the best model. If validation performance does not improve after a certain number of epochs (early_stop), training stops. The best model is saved if save_only_best is True and only at the end of the epochs. Otherwise, any model that outperforms the current best metric will be saved intermittently.",
+        "type": "comment"
+    }
+}
