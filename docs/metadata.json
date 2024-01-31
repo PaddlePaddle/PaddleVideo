@@ -27,7 +27,7 @@
         "4": {
             "filepath": "/applications/AbnormalActionDetection/README.md",
             "entry_id": 24,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "5": {
             "filepath": "/applications/Anti-UAV/README.md",
@@ -147,7 +147,7 @@
         "28": {
             "filepath": "/applications/EIVideo/EIVideo/README.MD",
             "entry_id": 282,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "29": {
             "filepath": "/applications/EIVideo/EIVideo/__init__.py",
@@ -437,7 +437,7 @@
         "86": {
             "filepath": "/applications/EIVideo/README.md",
             "entry_id": 926,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "87": {
             "filepath": "/applications/EIVideo/resources/QT/demo.ui",
@@ -457,12 +457,12 @@
         "90": {
             "filepath": "/applications/FigureSkating/README.md",
             "entry_id": 974,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "91": {
             "filepath": "/applications/FootballAction/README.md",
             "entry_id": 980,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "92": {
             "filepath": "/applications/FootballAction/checkpoints/download.sh",
@@ -622,7 +622,7 @@
         "123": {
             "filepath": "/applications/Ma-Net/README.md",
             "entry_id": 1314,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "124": {
             "filepath": "/applications/Ma-Net/README_cn.md",
@@ -757,7 +757,7 @@
         "150": {
             "filepath": "/applications/MultimodalVideoTag/README.md",
             "entry_id": 1900,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "151": {
             "filepath": "/applications/MultimodalVideoTag/download.sh",
@@ -992,7 +992,7 @@
         "197": {
             "filepath": "/applications/TableTennis/ActionRecognition/README.md",
             "entry_id": 2570,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "198": {
             "filepath": "/applications/TableTennis/datasets/script/submission_format_transfer.py",
@@ -1422,7 +1422,7 @@
         "283": {
             "filepath": "/applications/VideoTag/README.md",
             "entry_id": 3326,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "284": {
             "filepath": "/applications/VideoTag/Run.md",
@@ -1572,7 +1572,7 @@
         "313": {
             "filepath": "/benchmark/TimeSformer/README.md",
             "entry_id": 3680,
-            "language_id": "markdown"
+            "language_id": "plain-text"
         },
         "314": {
             "filepath": "/benchmark/TimeSformer/run_all.sh",
@@ -1622,12 +1622,12 @@
         "323": {
             "filepath": "/deploy/cpp_infer/include/postprocess_op.h",
             "entry_id": 3808,
-            "language_id": "c++"
+            "language_id": "c"
         },
         "324": {
             "filepath": "/deploy/cpp_infer/include/preprocess_op.h",
             "entry_id": 3814,
-            "language_id": "c++"
+            "language_id": "header"
         },
         "325": {
             "filepath": "/deploy/cpp_infer/include/utility.h",
@@ -1637,7 +1637,7 @@
         "326": {
             "filepath": "/deploy/cpp_infer/include/video_rec.h",
             "entry_id": 3826,
-            "language_id": "header"
+            "language_id": "c"
         },
         "327": {
             "filepath": "/deploy/cpp_infer/readme.md",
@@ -1792,7 +1792,7 @@
         "357": {
             "filepath": "/english_documents/dataset/README.md",
             "entry_id": 4216,
-            "language_id": "plain-text"
+            "language_id": "markdown"
         },
         "358": {
             "filepath": "/english_documents/dataset/SegmentationDataset.md",
