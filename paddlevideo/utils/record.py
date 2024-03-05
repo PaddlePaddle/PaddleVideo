@@ -74,6 +74,7 @@ class AverageMeter(object):
     """
     Computes and stores the average and current value
     """
+
     def __init__(self, name='', fmt='f', need_avg=True):
         self.name = name
         self.fmt = fmt
@@ -121,7 +122,8 @@ def log_batch(metric_list,
               total_epoch,
               mode,
               ips,
-              eta_sec: int = None):
+              eta_sec: int = None,
+              print_mem_info: bool = False):
     batch_cost = str(metric_list['batch_time'].value) + ' sec,'
     reader_cost = str(metric_list['reader_time'].value) + ' sec,'
 
@@ -139,10 +141,11 @@ def log_batch(metric_list,
         eta_str = ''
     max_mem_reserved_str = ""
     max_mem_allocated_str = ""
-    if paddle.device.is_compiled_with_cuda():
-        max_mem_reserved_str = f"max_mem_reserved: {format(paddle.device.cuda.max_memory_reserved() / (1024 ** 2), '.2f')} MB"
-        max_mem_allocated_str = f"max_mem_allocated: {format(paddle.device.cuda.max_memory_allocated() / (1024 ** 2), '.2f')} MB"
-    logger.info("{:s} {:s} {:s} {:s} {:s} {} {:s}, {} {}".format(
+    if print_mem_info:
+        if paddle.device.is_compiled_with_cuda():
+            max_mem_reserved_str = f", max_mem_reserved: {format(paddle.device.cuda.max_memory_reserved() / (1024 ** 2), '.2f')} MB "
+            max_mem_allocated_str = f"max_mem_allocated: {format(paddle.device.cuda.max_memory_allocated() / (1024 ** 2), '.2f')} MB"
+    logger.info("{:s} {:s} {:s} {:s} {:s} {} {:s}{}{}".format(
         coloring(epoch_str, "HEADER") if batch_id == 0 else epoch_str,
         coloring(step_str, "PURPLE"), coloring(metric_str, 'OKGREEN'),
         coloring(batch_cost, "OKGREEN"), coloring(reader_cost, 'OKGREEN'), ips,

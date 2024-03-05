@@ -58,6 +58,7 @@ def train_model(cfg,
     logger = get_logger("paddlevideo")
     batch_size = cfg.DATASET.get('batch_size', 8)
     valid_batch_size = cfg.DATASET.get('valid_batch_size', batch_size)
+    print_mem_info = cfg.get('print_mem_info', False)
 
     # gradient accumulation settings
     use_gradient_accumulation = cfg.get('GRADIENT_ACCUMULATION', None)
@@ -271,8 +272,15 @@ def train_model(cfg,
                     len(train_loader) * cfg.epochs)
                 eta = int(record_list["batch_time"].sum *
                           (1 - cur_progress) / cur_progress + 0.5)
-                log_batch(record_list, i, epoch + 1, cfg.epochs, "train", ips,
-                          eta)
+                log_batch(
+                    record_list,
+                    i,
+                    epoch + 1,
+                    cfg.epochs,
+                    "train",
+                    ips,
+                    eta,
+                    print_mem_info=print_mem_info)
 
             # learning rate iter step
             if cfg.OPTIMIZER.learning_rate.get("iter_step"):
@@ -325,7 +333,14 @@ def train_model(cfg,
                 if i % cfg.get("log_interval", 10) == 0:
                     ips = "ips: {:.5f} instance/sec.".format(
                         valid_batch_size / record_list["batch_time"].val)
-                    log_batch(record_list, i, epoch + 1, cfg.epochs, "val", ips)
+                    log_batch(
+                        record_list,
+                        i,
+                        epoch + 1,
+                        cfg.epochs,
+                        "val",
+                        ips,
+                        print_mem_info=print_mem_info)
 
             if cfg.MODEL.framework == "FastRCNN":
                 if parallel:
@@ -349,7 +364,8 @@ def train_model(cfg,
                 return best, best_flag
 
             if cfg.MODEL.framework == "YOWOLocalizer" and (not parallel or
-                                                           (parallel and rank == 0)):
+                                                           (parallel
+                                                            and rank == 0)):
                 if record_list["fscore"].avg > best:
                     best = record_list["fscore"].avg
                     best_flag = True
@@ -372,9 +388,10 @@ def train_model(cfg,
         if cfg.get("PRECISEBN") and (
                 epoch % cfg.PRECISEBN.preciseBN_interval == 0
                 or epoch == cfg.epochs - 1):
-            do_preciseBN(model, train_loader, parallel,
-                         min(cfg.PRECISEBN.num_iters_preciseBN,
-                             len(train_loader)), use_amp, amp_level)
+            do_preciseBN(
+                model, train_loader, parallel,
+                min(cfg.PRECISEBN.num_iters_preciseBN, len(train_loader)),
+                use_amp, amp_level)
 
         # 9. Validation
         if validate and (epoch % cfg.get("val_interval", 1) == 0
@@ -416,11 +433,13 @@ def train_model(cfg,
 
         # 10. Save model and optimizer
         if epoch % cfg.get("save_interval", 1) == 0 or epoch == cfg.epochs - 1:
-            save(optimizer.state_dict(),
-                 osp.join(output_dir,
-                          model_name + f"_epoch_{epoch + 1:05d}.pdopt"))
-            save(model.state_dict(),
-                 osp.join(output_dir,
-                          model_name + f"_epoch_{epoch + 1:05d}.pdparams"))
+            save(
+                optimizer.state_dict(),
+                osp.join(output_dir,
+                         model_name + f"_epoch_{epoch + 1:05d}.pdopt"))
+            save(
+                model.state_dict(),
+                osp.join(output_dir,
+                         model_name + f"_epoch_{epoch + 1:05d}.pdparams"))
 
     logger.info(f'training {model_name} finished')
