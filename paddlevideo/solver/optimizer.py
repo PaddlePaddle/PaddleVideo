@@ -13,10 +13,6 @@
 # limitations under the License.
 
 import inspect
-# for python3.11
-if not hasattr(inspect, 'getargspec'):
-    inspect.getargspec = inspect.getfullargspec
-
 from typing import Dict
 
 import paddle
@@ -124,7 +120,7 @@ def build_optimizer(cfg: Dict,
         'parameters': model.parameters(),
         **cfg_copy
     }
-    optimizer_init_args = inspect.getargspec(
+    optimizer_init_args = inspect.getfullargspec(
         getattr(paddle.optimizer, opt_name).__init__).args
     if use_amp and amp_level == "O2" and "multi_precision" in optimizer_init_args:
         # support "multi_precision" arg in optimizer's __init__ function.
