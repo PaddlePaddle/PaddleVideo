@@ -38,7 +38,7 @@ class BaseDataset(Dataset, ABC):
         test_mode (bool): whether to build test dataset. Default: False.
 
     """
-    def __init__(self, file_path, pipeline, data_prefix=None, test_mode=False):
+    def __init__(self, file_path, pipeline, data_prefix=None, test_mode=False, **kwargs):
         super().__init__()
         self.file_path = file_path
         self.data_prefix = osp.realpath(data_prefix) if \

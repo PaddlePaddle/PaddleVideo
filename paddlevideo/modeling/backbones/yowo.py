@@ -76,11 +76,12 @@ class CFAMBlock(nn.Layer):
 
 @BACKBONES.register()
 class YOWO(nn.Layer):
-    def __init__(self, num_class, pretrained_2d=None, pretrained_3d=None):
+    def __init__(self, num_class, pretrained_2d=None, pretrained_3d=None, pretrained=None):
         super(YOWO, self).__init__()
 
         self.pretrained_2d = pretrained_2d
         self.pretrained_3d = pretrained_3d
+        self.pretrained = pretrained
         self.backbone_2d = Darknet()
         self.backbone_3d = ResNext101()
         self.num_ch_2d = 425
@@ -98,6 +99,8 @@ class YOWO(nn.Layer):
         if self.pretrained_3d is not None:
             self.backbone_3d = self.load_pretrain_weight(
                 self.backbone_3d, self.pretrained_3d)
+        if self.pretrained is not None:
+            self.load_pretrain_weight(self, self.pretrained)
 
     def load_pretrain_weight(self, model, weights_path):
         model_dict = model.state_dict()

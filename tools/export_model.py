@@ -466,28 +466,29 @@ def dump_infer_config(inference_config, path, infer_shape, logger):
         ]
     }
     if config.get("Infer"):
-        postprocess_dict = copy.deepcopy(dict(config["Infer"]["PostProcess"]))
-        with open(postprocess_dict["class_id_map_file"], "r", encoding="utf-8") as f:
-            label_id_maps = f.readlines()
-        label_names = []
-        for line in label_id_maps:
-            line = line.strip().split(" ", 1)
-            label_names.append(line[1:][0])
+        if config["Infer"].get("PostProcess"):
+            postprocess_dict = copy.deepcopy(dict(config["Infer"]["PostProcess"]))
+            with open(postprocess_dict["class_id_map_file"], "r", encoding="utf-8") as f:
+                label_id_maps = f.readlines()
+            label_names = []
+            for line in label_id_maps:
+                line = line.strip().split(" ", 1)
+                label_names.append(line[1:][0])
 
-        postprocess_name = postprocess_dict.get("name", None)
-        postprocess_dict.pop("class_id_map_file")
-        postprocess_dict.pop("name")
-        dic = OrderedDict()
-        for item in postprocess_dict.items():
-            dic[item[0]] = item[1]
-        dic["label_list"] = label_names
+            postprocess_name = postprocess_dict.get("name", None)
+            postprocess_dict.pop("class_id_map_file")
+            postprocess_dict.pop("name")
+            dic = OrderedDict()
+            for item in postprocess_dict.items():
+                dic[item[0]] = item[1]
+            dic["label_list"] = label_names
 
-        if postprocess_name:
-            infer_cfg["PostProcess"] = {postprocess_name: dic}
+            if postprocess_name:
+                infer_cfg["PostProcess"] = {postprocess_name: dic}
+            else:
+                raise ValueError("PostProcess name is not specified")
         else:
-            raise ValueError("PostProcess name is not specified")
-    else:
-        infer_cfg["PostProcess"] = {"NormalizeFeatures": None}
+            infer_cfg["PostProcess"] = {"NormalizeFeatures": None}
     with open(path, "w") as f:
         yaml.dump(infer_cfg, f)
     logger.info("Export inference config file to {}".format(os.path.join(path)))

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import copy
 import numpy as np
 
@@ -39,6 +40,7 @@ class UCF24Dataset(BaseDataset):
 
     def __init__(self, file_path, pipeline, num_retries=5, **kwargs):
         self.num_retries = num_retries
+        self.image_dir = kwargs.get('image_dir', None)
         super().__init__(file_path, pipeline, **kwargs)
 
     def load_file(self):
@@ -50,7 +52,8 @@ class UCF24Dataset(BaseDataset):
             line = line.strip()  # 'data/ucf24/labels/class_name/video_name/key_frame.txt'
             filename = line.replace('txt', 'jpg').replace(
                 'labels', 'rgb-images')  # key frame path
-
+            if self.image_dir is not None:
+                filename = os.path.join(self.image_dir, filename)
             info.append(dict(filename=filename))
         return info
 

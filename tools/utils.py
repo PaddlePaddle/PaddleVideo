@@ -57,7 +57,7 @@ from paddlevideo.metrics.bmn_metric import boundary_choose, soft_nms
 from paddlevideo.utils import Registry, build, get_config
 from paddlevideo.modeling.framework.segmenters.utils import ASRFPostProcessing
 
-from tools.ava_predict import (detection_inference, frame_extraction,
+from ava_predict import (detection_inference, frame_extraction,
                                get_detection_result, get_timestep_result,
                                pack_result, visualize)
 from paddlevideo.modeling.framework.localizers.yowo_utils import nms, get_region_boxes
@@ -1604,7 +1604,6 @@ class YOWO_Inference_helper(Base_Inference_helper):
 
             # Convert image to CHW keeping BGR order.
             imgs = [img.transpose([2, 0, 1]) for img in imgs]
-
             # Image [0, 255] -> [0, 1].
             imgs = [img / 255.0 for img in imgs]
 
@@ -1614,7 +1613,6 @@ class YOWO_Inference_helper(Base_Inference_helper):
                 ).astype(np.float32)
                 for img in imgs
             ]
-
             # Concat list of images to single ndarray.
             imgs = np.concatenate(
                 [np.expand_dims(img, axis=1) for img in imgs], axis=1

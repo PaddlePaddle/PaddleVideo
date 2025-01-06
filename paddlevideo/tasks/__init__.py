@@ -16,5 +16,7 @@ from .train import train_model
 from .test import test_model
 from .train_dali import train_dali
 from .train_multigrid import train_model_multigrid
+from .export import get_input_spec
 
-__all__ = ['train_model', 'test_model', 'train_dali', 'train_model_multigrid']
+
+__all__ = ['train_model', 'test_model', 'train_dali', 'train_model_multigrid', 'get_input_spec']
