@@ -60,9 +60,12 @@ def update_train_results(
         train_results["model_name"] = config["Global"].get("pdx_model_name", None)
         if config.get("Infer", None):
             if config["Infer"].get("PostProcess"):
-                train_results["label_dict"] = config["Infer"]["PostProcess"].get(
-                    "class_id_map_file", ""
-                )
+                if train_results["model_name"] == "YOWO":
+                    infer_cfg["label_dict"] = config.get("label_list")
+                else:
+                    train_results["label_dict"] = config["Infer"]["PostProcess"].get(
+                        "class_id_map_file", ""
+                    )
         else:
             train_results["label_dict"] = ""
         train_results["train_log"] = "train.log"

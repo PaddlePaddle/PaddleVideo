@@ -60,7 +60,7 @@ class YOWOLocalizer(BaseLocalizer):
         target.stop_gradient = True
         # call Model forward
         out = self.forward_net(x_data)
-        all_boxes = get_region_boxes(out)
+        all_boxes = get_region_boxes(out, num_classes=self.backbone.num_class)
         out_boxes = []
 
         for i in range(out.shape[0]):
@@ -115,7 +115,7 @@ class YOWOLocalizer(BaseLocalizer):
         target.stop_gradient = True
         # call Model forward
         out = self.forward_net(x_data)
-        all_boxes = get_region_boxes(out)
+        all_boxes = get_region_boxes(out, num_classes=self.backbone.num_class)
         out_boxes = []
 
         for i in range(out.shape[0]):
