@@ -17,7 +17,7 @@ import os
 from paddlevideo.utils import get_logger
 from .registry import METRIC
 from .base import BaseMetric
-from .ucf24_utils import get_mAP
+from .ucf24_utils import get_mAP, get_mAP_paddlex
 
 logger = get_logger("paddlevideo")
 
@@ -37,7 +37,8 @@ class YOWOMetric(BaseMetric):
                  result_path,
                  threshold=0.5,
                  save_path=None,
-                 log_interval=1):
+                 log_interval=1,
+                 for_paddlex=True):
         """
         Init for BMN metrics.
         Params:
@@ -48,6 +49,8 @@ class YOWOMetric(BaseMetric):
         self.gt_folder = gt_folder
         self.threshold = threshold
         self.save_path = save_path
+        self.redult_dict = {}
+        self.for_paddlex = for_paddlex
 
         if not osp.isdir(self.result_path):
             os.makedirs(self.result_path)
@@ -68,15 +71,26 @@ class YOWOMetric(BaseMetric):
                     for j in range((len(box) - 5) // 2):
                         cls_conf = float(box[5 + 2 * j].item())
                         prob = det_conf * cls_conf
-                        f_detect.write(
-                            str(int(box[6]) + 1) + ' ' + str(prob) + ' ' + str(x1) + ' ' + str(y1) + ' ' + str(
-                                x2) + ' ' + str(y2) + '\n')
+                        if self.for_paddlex:
+                            if frame_idx[j] not in self.redult_dict.keys():
+                                self.redult_dict[frame_idx[j]] = [[int(box[6]) + 1, prob, x1, y1, x2, y2]]
+                            else:
+                                self.redult_dict[frame_idx[j]].append([int(box[6]) + 1, prob, x1, y1, x2, y2])
+                        else:
+                            f_detect.write(
+                                str(int(box[6]) + 1) + ' ' + str(prob) + ' ' + str(x1) + ' ' + str(y1) + ' ' + str(
+                                    x2) + ' ' + str(y2) + '\n')
         if batch_id % self.log_interval == 0:
             logger.info("[TEST] Processing batch {}/{} ...".format(
                 batch_id,
                 self.data_size // (self.batch_size * self.world_size)))
 
     def accumulate(self):
-        metric_list = get_mAP(self.gt_folder, self.result_path, self.threshold, self.save_path)
-        for info in metric_list:
-            logger.info(info)
+        if self.for_paddlex:
+            metric_list = get_mAP_paddlex(self.gt_folder, self.redult_dict, self.threshold, self.save_path)
+            for info in metric_list:
+                logger.info(info)
+        else:
+            metric_list = get_mAP(self.gt_folder, self.redult_dict, self.threshold, self.save_path)
+            for info in metric_list:
+                logger.info(info)

@@ -781,3 +781,137 @@ def get_mAP(gtFolder, detFolder, threshold=0.5, savePath=None):
     mAP_str = "{0:.2f}%".format(mAP * 100)
     AP_res.append('mAP: %s' % mAP_str)
     return AP_res
+
+def getBoundingBoxesfor_paddlex(
+                     label,
+                     isGT,
+                     bbFormat,
+                     coordType,
+                     allBoundingBoxes=None,
+                     allClasses=None,
+                     imgSize=(0, 0)):
+    """Read txt files containing bounding boxes (ground truth and detections)."""
+    if allBoundingBoxes is None:
+        allBoundingBoxes = BoundingBoxes()
+    if allClasses is None:
+        allClasses = []
+    # Read ground truths
+    if isGT:
+        with open(label, 'r') as fp:
+            lines = fp.readlines()
+        fp.close()
+        lines.sort()
+        for f in lines:
+            nameOfImage = '_'.join(f.split('/')[-3:]).replace('.txt', '').replace('\n', '')
+            f = os.path.join(os.path.dirname(label), f.replace('\n', ''))
+            fh1 = open(f, "r")
+            for line in fh1:
+                line = line.replace("\n", "")
+                if line.replace(' ', '') == '':
+                    continue
+                splitLine = line.split(" ")
+                idClass = int(splitLine[0])  # class
+                x = float(splitLine[1])
+                y = float(splitLine[2])
+                w = float(splitLine[3])
+                h = float(splitLine[4])
+                bb = BoundingBox(
+                    nameOfImage,
+                    idClass,
+                    x,
+                    y,
+                    w,
+                    h,
+                    coordType,
+                    imgSize,
+                    BBType.GroundTruth,
+                    format=bbFormat)
+                allBoundingBoxes.addBoundingBox(bb)
+                if idClass not in allClasses:
+                    allClasses.append(idClass)
+            fh1.close()
+        return allBoundingBoxes, allClasses
+    else:
+        labels = dict(sorted(label.items()))
+        for nameOfImage, result in labels.items():
+            nameOfImage = nameOfImage.replace(".txt", "")
+            for res in result:
+                idClass = int(res[0])  # class
+                confidence = float(res[1])
+                x = float(res[2])
+                y = float(res[3])
+                w = float(res[4])
+                h = float(res[5])
+                bb = BoundingBox(
+                    nameOfImage,
+                    idClass,
+                    x,
+                    y,
+                    w,
+                    h,
+                    coordType,
+                    imgSize,
+                    BBType.Detected,
+                    confidence,
+                    format=bbFormat)
+                allBoundingBoxes.addBoundingBox(bb)
+                if idClass not in allClasses:
+                    allClasses.append(idClass)
+    return allBoundingBoxes, allClasses
+
+def get_mAP_paddlex(gt_label_txt, det_result_dict, threshold=0.5, savePath=None, for_paddlex=False):
+    gtFormat = 'xyrb'
+    detFormat = 'xyrb'
+    gtCoordinates = 'abs'
+    detCoordinates = 'abs'
+
+    iouThreshold = threshold
+
+    # Arguments validation
+    errors = []
+    # Validate formats
+    gtFormat = ValidateFormats(gtFormat, 'gtFormat', errors)
+    detFormat = ValidateFormats(detFormat, '-detformat', errors)
+
+    # Coordinates types
+    gtCoordType = ValidateCoordinatesTypes(gtCoordinates, '-gtCoordinates', errors)
+    detCoordType = ValidateCoordinatesTypes(detCoordinates, '-detCoordinates', errors)
+    imgSize = (0, 0)
+
+    # Create directory to save results
+    shutil.rmtree(savePath, ignore_errors=True)  # Clear folder
+    if savePath is not None:
+        os.makedirs(savePath)
+    # Get groundtruth boxes
+    allBoundingBoxes, allClasses = getBoundingBoxesfor_paddlex(
+        gt_label_txt, True, gtFormat, gtCoordType, imgSize=imgSize)
+    # Get detected boxes
+    allBoundingBoxes, allClasses = getBoundingBoxesfor_paddlex(
+        det_result_dict, False, detFormat, detCoordType, allBoundingBoxes, allClasses, imgSize=imgSize)
+    allClasses.sort()
+
+    evaluator = Evaluator()
+    acc_AP = 0
+    validClasses = 0
+
+    # Plot Precision x Recall curve
+    detections = evaluator.GetPascalVOCMetrics(allBoundingBoxes, iouThreshold,
+                                               method=MethodAveragePrecision.EveryPointInterpolation)
+
+    # each detection is a class and store AP and mAP results in AP_res list
+    AP_res = []
+    for metricsPerClass in detections:
+        # Get metric values per each class
+        cl = metricsPerClass['class']
+        ap = metricsPerClass['AP']
+        totalPositives = metricsPerClass['total positives']
+
+        if totalPositives > 0:
+            validClasses = validClasses + 1
+            acc_AP = acc_AP + ap
+            ap_str = "{0:.2f}%".format(ap * 100)
+            AP_res.append('AP: %s (%s)' % (ap_str, cl))
+    mAP = acc_AP / validClasses
+    mAP_str = "{0:.2f}%".format(mAP * 100)
+    AP_res.append('mAP: %s' % mAP_str)
+    return AP_res

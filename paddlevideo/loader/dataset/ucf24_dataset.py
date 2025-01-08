@@ -64,7 +64,7 @@ class UCF24Dataset(BaseDataset):
         im_path = results['filename']
         im_path = im_path.replace('jpg', 'txt')
         im_split = im_path.split('/')
-        frame_index = im_split[3] + '_' + im_split[4] + '_' + im_split[5]
+        frame_index = im_split[-3] + '_' + im_split[-2] + '_' + im_split[-1]
         return results['imgs'], np.array([results['labels']]), frame_index
 
     def prepare_test(self, idx):
@@ -75,5 +75,5 @@ class UCF24Dataset(BaseDataset):
         im_path = results['filename']
         im_path = im_path.replace('jpg', 'txt')
         im_split = im_path.split('/')
-        frame_index = im_split[3] + '_' + im_split[4] + '_' + im_split[5]
+        frame_index = frame_index = im_split[-3] + '_' + im_split[-2] + '_' + im_split[-1]
         return results['imgs'], np.array([results['labels']]), frame_index
