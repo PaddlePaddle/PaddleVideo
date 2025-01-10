@@ -61,7 +61,7 @@ def update_train_results(
         if config.get("Infer", None):
             if config["Infer"].get("PostProcess"):
                 if train_results["model_name"] == "YOWO":
-                    infer_cfg["label_dict"] = config.get("label_list")
+                    train_results["label_dict"] = config.get("label_list")
                 else:
                     train_results["label_dict"] = config["Infer"]["PostProcess"].get(
                         "class_id_map_file", ""
