@@ -38,7 +38,7 @@ class YOWOMetric(BaseMetric):
                  threshold=0.5,
                  save_path=None,
                  log_interval=1,
-                 for_paddlex=True):
+                 for_paddlex=False):
         """
         Init for BMN metrics.
         Params:
@@ -68,8 +68,8 @@ class YOWOMetric(BaseMetric):
                     y2 = round(float(box[1] + box[3] / 2.0) * 240.0)
 
                     det_conf = float(box[4])
-                    for j in range((len(box) - 5) // 2):
-                        cls_conf = float(box[5 + 2 * j].item())
+                    for i in range((len(box) - 5) // 2):
+                        cls_conf = float(box[5 + 2 * i].item())
                         prob = det_conf * cls_conf
                         if self.for_paddlex:
                             if frame_idx[j] not in self.redult_dict.keys():
@@ -91,6 +91,6 @@ class YOWOMetric(BaseMetric):
             for info in metric_list:
                 logger.info(info)
         else:
-            metric_list = get_mAP(self.gt_folder, self.redult_dict, self.threshold, self.save_path)
+            metric_list = get_mAP(self.gt_folder, self.result_path, self.threshold, self.save_path)
             for info in metric_list:
                 logger.info(info)
