@@ -41,15 +41,17 @@ class ConvBNLayer(nn.Layer):
         bn_name = name + ".bn"
         self._bn = nn.BatchNorm(
             num_channels=output_channels,
-            act="leaky_relu",
             param_attr=ParamAttr(name=bn_name + ".scale"),
             bias_attr=ParamAttr(name=bn_name + ".offset"),
             moving_mean_name=bn_name + ".mean",
             moving_variance_name=bn_name + ".var")
 
+        self._act = nn.LeakyReLU()
+
     def forward(self, inputs):
         x = self._conv(inputs)
         x = self._bn(x)
+        x = self._act(x)
         return x
 
 
