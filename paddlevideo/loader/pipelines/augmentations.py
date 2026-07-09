@@ -125,7 +125,9 @@ class RandomCrop(object):
     """
     Random crop images.
     Args:
-        target_size(int): Random crop a square with the target_size from an image.
+        target_size(int | tuple[int, int]): Random crop a region of this size
+            from an image. A single int crops a square; a (w, h) tuple crops
+            a rectangle of that width and height.
     """
     def __init__(self, target_size):
         self.target_size = target_size
@@ -144,11 +146,14 @@ class RandomCrop(object):
             h, w = imgs.shape[2:]
         else:
             w, h = imgs[0].size
-        th, tw = self.target_size, self.target_size
+        if isinstance(self.target_size, (tuple, list)):
+            tw, th = self.target_size
+        else:
+            tw, th = self.target_size, self.target_size
 
-        assert (w >= self.target_size) and (h >= self.target_size), \
-            "image width({}) and height({}) should be larger than crop size".format(
-                w, h, self.target_size)
+        assert (w >= tw) and (h >= th), \
+            "image width({}) and height({}) should be larger than crop size({},{})".format(
+                w, h, tw, th)
 
         crop_images = []
         if 'backend' in results and results['backend'] == 'pyav':
@@ -250,7 +255,9 @@ class CenterCrop(object):
     """
     Center crop images.
     Args:
-        target_size(int): Center crop a square with the target_size from an image.
+        target_size(int | tuple[int, int]): Center crop a region of this
+            size from an image. A single int crops a square; a (w, h) tuple
+            crops a rectangle of that width and height.
         do_round(bool): Whether to round up the coordinates of the upper left corner of the cropping area. default: True
     """
     def __init__(self, target_size, do_round=True, backend='pillow'):
@@ -269,7 +276,10 @@ class CenterCrop(object):
         """
         imgs = results['imgs']
         ccrop_imgs = []
-        th, tw = self.target_size, self.target_size
+        if isinstance(self.target_size, (tuple, list)):
+            tw, th = self.target_size
+        else:
+            tw, th = self.target_size, self.target_size
         if isinstance(imgs, paddle.Tensor):
             h, w = imgs.shape[-2:]
             x1 = int(round((w - tw) / 2.0)) if self.do_round else (w - tw) // 2
@@ -283,9 +293,9 @@ class CenterCrop(object):
                     h, w, _ = img.shape
                 else:
                     raise NotImplementedError
-                assert (w >= self.target_size) and (h >= self.target_size), \
-                    "image width({}) and height({}) should be larger than crop size".format(
-                        w, h, self.target_size)
+                assert (w >= tw) and (h >= th), \
+                    "image width({}) and height({}) should be larger than crop size({},{})".format(
+                        w, h, tw, th)
                 x1 = int(round(
                     (w - tw) / 2.0)) if self.do_round else (w - tw) // 2
                 y1 = int(round(
@@ -299,13 +309,65 @@ class CenterCrop(object):
 
 
 @PIPELINES.register()
+class Letterbox(object):
+    """
+    Resize images to fit entirely inside target_size while preserving their
+    aspect ratio, then pad the leftover space so every output has exactly
+    target_size. Unlike RandomCrop/CenterCrop, this never discards any part
+    of the frame — the whole image is always kept, at the cost of some
+    padding pixels when the source aspect ratio doesn't match target_size.
+    Args:
+        target_size(int | tuple[int, int]): (w, h) of the output canvas. A
+            single int produces a square canvas.
+        fill(int): pixel value used for the padding. Default: 0 (black).
+    """
+    def __init__(self, target_size, fill=0):
+        if isinstance(target_size, (tuple, list)):
+            self.target_w, self.target_h = target_size
+        else:
+            self.target_w, self.target_h = target_size, target_size
+        self.fill = fill
+
+    def __call__(self, results):
+        """
+        Args:
+            imgs: List where each item is a PIL.Image.
+        return:
+            letterboxed_imgs: List where each item is a PIL.Image of exactly
+                (target_w, target_h), letterboxed/pillarboxed as needed.
+        """
+        imgs = results['imgs']
+        w, h = imgs[0].size
+        scale = min(self.target_w / w, self.target_h / h)
+        new_w, new_h = int(round(w * scale)), int(round(h * scale))
+        x_off = (self.target_w - new_w) // 2
+        y_off = (self.target_h - new_h) // 2
+
+        letterboxed_imgs = []
+        for img in imgs:
+            resized = img.resize((new_w, new_h), Image.BILINEAR)
+            canvas = Image.new(img.mode, (self.target_w, self.target_h),
+                              self.fill)
+            canvas.paste(resized, (x_off, y_off))
+            letterboxed_imgs.append(canvas)
+        results['imgs'] = letterboxed_imgs
+        return results
+
+
+@PIPELINES.register()
 class MultiScaleCrop(object):
     """
     Random crop images in with multiscale sizes
     Args:
-        target_size(int): Random crop a square with the target_size from an image.
+        target_size(int | tuple[int, int]): Random crop a region of this
+            size from an image. A single int crops a square (candidate
+            scales for width/height are sampled independently, within
+            max_distort). A (w, h) tuple crops a rectangle that keeps the
+            (w, h) aspect ratio at every candidate scale, so the final
+            resize to (w, h) never distorts the image.
         scales(int): List of candidate cropping scales.
         max_distort(int): Maximum allowable deformation combination distance.
+            Ignored when target_size is a (w, h) tuple.
         fix_crop(int): Whether to fix the cutting start point.
         allow_duplication(int): Whether to allow duplicate candidate crop starting points.
         more_fix_crop(int): Whether to allow more cutting starting points.
@@ -342,7 +404,11 @@ class MultiScaleCrop(object):
         """
         imgs = results['imgs']
 
-        input_size = [self.target_size, self.target_size]
+        is_rect = isinstance(self.target_size, (tuple, list))
+        if is_rect:
+            input_size = [self.target_size[0], self.target_size[1]]
+        else:
+            input_size = [self.target_size, self.target_size]
 
         im_size = imgs[0].size
 
@@ -350,23 +416,44 @@ class MultiScaleCrop(object):
         def _sample_crop_size(im_size):
             image_w, image_h = im_size[0], im_size[1]
 
-            base_size = min(image_w, image_h)
-            crop_sizes = [int(base_size * x) for x in self.scales]
-            crop_h = [
-                input_size[1] if abs(x - input_size[1]) < 3 else x
-                for x in crop_sizes
-            ]
-            crop_w = [
-                input_size[0] if abs(x - input_size[0]) < 3 else x
-                for x in crop_sizes
-            ]
+            if is_rect:
+                target_w, target_h = input_size
+                # largest (target_w:target_h)-shaped rectangle that fits
+                # inside the image, so every scaled-down candidate below
+                # keeps the exact target aspect ratio (no distortion on
+                # the final resize back to (target_w, target_h)).
+                max_w = image_h * target_w / target_h
+                if max_w <= image_w:
+                    max_h = image_h
+                else:
+                    max_w = image_w
+                    max_h = image_w * target_h / target_w
 
-            pairs = []
-            for i, h in enumerate(crop_h):
-                for j, w in enumerate(crop_w):
-                    if abs(i - j) <= self.max_distort:
-                        pairs.append((w, h))
-            crop_pair = random.choice(pairs)
+                crop_pairs = []
+                for s in self.scales:
+                    w, h = int(max_w * s), int(max_h * s)
+                    if abs(w - target_w) < 3 and abs(h - target_h) < 3:
+                        w, h = target_w, target_h
+                    crop_pairs.append((w, h))
+                crop_pair = random.choice(crop_pairs)
+            else:
+                base_size = min(image_w, image_h)
+                crop_sizes = [int(base_size * x) for x in self.scales]
+                crop_h = [
+                    input_size[1] if abs(x - input_size[1]) < 3 else x
+                    for x in crop_sizes
+                ]
+                crop_w = [
+                    input_size[0] if abs(x - input_size[0]) < 3 else x
+                    for x in crop_sizes
+                ]
+
+                pairs = []
+                for i, h in enumerate(crop_h):
+                    for j, w in enumerate(crop_w):
+                        if abs(i - j) <= self.max_distort:
+                            pairs.append((w, h))
+                crop_pair = random.choice(pairs)
             if not self.fix_crop:
                 w_offset = random.randint(0, image_w - crop_pair[0])
                 h_offset = random.randint(0, image_h - crop_pair[1])

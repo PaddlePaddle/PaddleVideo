@@ -46,7 +46,7 @@ from abc import abstractmethod
 from paddlevideo.loader.builder import build_pipeline
 from paddlevideo.loader.pipelines import (
     AutoPadding, CenterCrop, DecodeSampler, FeatureDecoder, FrameDecoder,
-    GroupResize, Image2Array, ImageDecoder, JitterScale, MultiCrop,
+    GroupResize, Image2Array, ImageDecoder, JitterScale, Letterbox, MultiCrop,
     Normalization, PackOutput, Sampler, SamplerPkl, Scale, SkeletonNorm,
     TenCrop, ToArray, UniformCrop, VideoDecoder, SegmentationSampler,
     SketeonCropSample, MultiCenterCrop, SketeonCropSample, UniformSampleFrames,
@@ -148,15 +148,25 @@ class Base_Inference_helper():
             scores = output[i, classes]
             topk_class = classes[:self.top_k]
             topk_scores = scores[:self.top_k]
+            # map indices to class names if a label list was provided
+            label_list = getattr(self, "label_list", None)
+            if label_list is not None:
+                topk_names = [
+                    label_list[c] if c < len(label_list) else str(c)
+                    for c in topk_class
+                ]
+            else:
+                topk_names = topk_class
             result = {
                 "video_id": self.input_file[i],
                 "topk_class": topk_class,
+                "topk_names": topk_names,
                 "topk_scores": topk_scores
             }
             results_list.append(result)
             if print_output:
                 print("Current video file: {0}".format(self.input_file[i]))
-                print("\ttop-{0} class: {1}".format(self.top_k, topk_class))
+                print("\ttop-{0} class: {1}".format(self.top_k, topk_names))
                 print("\ttop-{0} score: {1}".format(self.top_k, topk_scores))
         if return_result:
             return results_list
@@ -169,12 +179,18 @@ class ppTSM_Inference_helper(Base_Inference_helper):
                  seg_len=1,
                  short_size=256,
                  target_size=224,
-                 top_k=1):
+                 top_k=1,
+                 fixed_ratio=True,
+                 keep_ratio=None,
+                 use_letterbox=False):
         self.num_seg = num_seg
         self.seg_len = seg_len
         self.short_size = short_size
         self.target_size = target_size
         self.top_k = top_k
+        self.fixed_ratio = fixed_ratio
+        self.keep_ratio = keep_ratio
+        self.use_letterbox = use_letterbox
 
     def preprocess(self, input_file):
         """
@@ -186,11 +202,22 @@ class ppTSM_Inference_helper(Base_Inference_helper):
         results = {'filename': input_file}
         img_mean = [0.485, 0.456, 0.406]
         img_std = [0.229, 0.224, 0.225]
+        if self.use_letterbox:
+            # Letterbox already resizes-to-fit while preserving aspect
+            # ratio, so a separate Scale beforehand would just be a
+            # redundant extra resize pass (native -> short_size -> target).
+            resize_ops = [Letterbox(self.target_size)]
+        else:
+            resize_ops = [
+                Scale(self.short_size,
+                      fixed_ratio=self.fixed_ratio,
+                      keep_ratio=self.keep_ratio),
+                CenterCrop(self.target_size)
+            ]
         ops = [
             VideoDecoder(backend="decord"),
             Sampler(self.num_seg, self.seg_len, valid_mode=True),
-            Scale(self.short_size),
-            CenterCrop(self.target_size),
+            *resize_ops,
             Image2Array(),
             Normalization(img_mean, img_std)
         ]

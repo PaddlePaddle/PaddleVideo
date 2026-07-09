@@ -3,10 +3,15 @@ from collections import OrderedDict
 
 def get_input_spec(cfg, model_name):
     if model_name in ["ppTSM", "TSM", "MoViNet", "ppTSMv2"]:
+        # target_size(int): square input. target_size([w, h]): rectangular input.
+        if isinstance(cfg.target_size, (list, tuple)):
+            target_w, target_h = cfg.target_size
+        else:
+            target_w, target_h = cfg.target_size, cfg.target_size
         input_spec = [
             [
                 InputSpec(
-                    shape=[None, cfg.num_seg, 3, cfg.target_size, cfg.target_size],
+                    shape=[None, cfg.num_seg, 3, target_h, target_w],
                     dtype="float32",
                 ),
             ]

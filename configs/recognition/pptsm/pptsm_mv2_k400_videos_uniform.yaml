@@ -3,24 +3,46 @@ MODEL: #MODEL field
     backbone:
         name: "PPTSM_MobileNetV2" #Mandatory, The name of backbone.
         pretrained: "data/MobileNetV2_ssld_pretrained.pdparams" #Optional, pretrained model path.
+        class_num: 4 #Optional, the number of classes to be classified. Defaults to 400 (Kinetics-400) if omitted.
+        num_seg: 16 #Must match PIPELINE.*.sample.num_seg exactly: the backbone
+        #reshapes its flattened [N*T,C,H,W] features using this fixed value at
+        #forward() time (see pptsm_mv2.py MobileNet.forward), it does NOT read
+        #num_seg dynamically from the data like ResNetTweaksTSM+ppTSMHead does.
+        #A mismatch silently scales the output batch dim and crashes the loss.
     head:
         name: "MoViNetHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
+        loss_cfg:
+            name: "CrossEntropyLoss"
+            # per-class weight to counter label imbalance (inverse train-set
+            # frequency, normalized to mean 1), order matches label index:
+            # [Arson, Fighting, Normal, RoadAccident]
+            class_weight: [1.7867, 0.6350, 0.2565, 1.3218]
 
 DATASET: #DATASET field
-    batch_size: 16  #Mandatory, bacth size
-    num_workers: 4 #Mandatory, the number of subprocess on each GPU.
+    batch_size: 16  #Mandatory, bacth size. Kept low relative to num_seg AND
+    #input resolution: this backbone flattens batch_size*num_seg frames into
+    #one Conv2D batch (pptsm_mv2.py MobileNet.forward), and cuDNN's int32
+    #output-tensor indexing overflows past a frame-count threshold that
+    #shrinks with resolution (each early Conv2D layer's element count scales
+    #with H*W). Going from 224 to 640 input (~8.16x more pixels/frame) shrinks
+    #that safe threshold by roughly the same factor, so batch_size had to come
+    #down from 64 to 8 to stay under it (8*16=128 frames/step). Tune cautiously
+    #from here — the exact threshold depends on cuDNN's internal algorithm
+    #padding, which isn't precisely predictable, and 640x640 activations will
+    #also cost far more raw GPU memory, so watch for CUDA OOM independently.
+    num_workers: 8 #Mandatory, the number of subprocess on each GPU.
     train:
         format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "data/k400" #Mandatory, train data root path
-        file_path: "data/k400/train.list" #Mandatory, train data index file path
+        data_prefix: "data/merge_030726/Train" #Mandatory, train data root path
+        file_path: "data/merge_030726/Train/train.txt" #Mandatory, train data index file path
     valid:
         format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "data/k400" #Mandatory, valid data root path
-        file_path: "data/k400/val.list" #Mandatory, valid data index file path
+        data_prefix: "data/merge_030726/Valid" #Mandatory, valid data root path
+        file_path: "data/merge_030726/Valid/val.txt" #Mandatory, valid data index file path
     test:
         format: "VideoDataset" #Mandatory, indicate the type of dataset, associate to the 'paddlevidel/loader/dateset'
-        data_prefix: "data/k400" #Mandatory, valid data root path
-        file_path: "data/k400/val.list" #Mandatory, valid data index file path
+        data_prefix: "data/merge_030726/Valid" #Mandatory, valid data root path
+        file_path: "data/merge_030726/Valid/val.txt" #Mandatory, valid data index file path
 
 PIPELINE: #PIPELINE field
     train: #Mandotary, indicate the pipeline to deal with the training data, associate to the 'paddlevideo/loader/pipelines/'
@@ -29,16 +51,12 @@ PIPELINE: #PIPELINE field
             backend: "decord"
         sample:
             name: "Sampler"
-            num_seg: 8
+            num_seg: 16
             seg_len: 1
             valid_mode: False
         transform: #Mandotary, image transfrom operator
-            - Scale:
-                short_size: 256
-            - MultiScaleCrop:
-                target_size: 256
-            - RandomCrop:
-                target_size: 224
+            - Letterbox:
+                target_size: [320, 180]
             - RandomFlip:
             - Image2Array:
             - Normalization:
@@ -50,14 +68,12 @@ PIPELINE: #PIPELINE field
             backend: "decord"
         sample:
             name: "Sampler"
-            num_seg: 8
+            num_seg: 16
             seg_len: 1
             valid_mode: True
         transform:
-            - Scale:
-                short_size: 256
-            - CenterCrop:
-                target_size: 224
+            - Letterbox:
+                target_size: [320, 180]
             - Image2Array:
             - Normalization:
                 mean: [0.485, 0.456, 0.406]
@@ -68,14 +84,12 @@ PIPELINE: #PIPELINE field
             backend: "decord"
         sample:
             name: "Sampler"
-            num_seg: 8
+            num_seg: 16
             seg_len: 1
             valid_mode: True
         transform:
-            - Scale:
-                short_size: 256
-            - CenterCrop:
-                target_size: 224
+            - Letterbox:
+                target_size: [320, 180]
             - Image2Array:
             - Normalization:
                 mean: [0.485, 0.456, 0.406]
@@ -100,11 +114,6 @@ MIX:
     name: "Mixup"
     alpha: 0.2
 
-INFERENCE:
-    name: 'ppTSM_Inference_helper'
-    num_seg: 8
-    target_size: 224
-
 PRECISEBN:
   preciseBN_interval: 5     # epoch interval to do preciseBN, default 1.
   num_iters_preciseBN: 200  # how many batches used to do preciseBN, default 200.
@@ -115,8 +124,9 @@ METRIC:
 
 INFERENCE:
     name: 'ppTSM_Inference_helper'
-    num_seg: 8
-    target_size: 224
+    num_seg: 16
+    target_size: [320, 180]
+    use_letterbox: True
 
 model_name: "ppTSM"
 log_interval: 10 #Optional, the interal of logger, default:10

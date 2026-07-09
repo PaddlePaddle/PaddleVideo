@@ -20,6 +20,7 @@ import yaml
 import errno
 from collections import OrderedDict
 
+import numpy as np
 import paddle
 import paddle.amp as amp
 import paddle.distributed as dist
@@ -28,11 +29,14 @@ from paddle.jit import to_static
 from paddlevideo.utils import (
     add_profiler_step,
     build_record,
+    compute_confusion_matrix,
     get_logger,
     load,
     log_batch,
     log_epoch,
     mkdir,
+    plot_confusion_matrix,
+    plot_curve,
     save,
 )
 
@@ -245,6 +249,15 @@ def train_model(
 
     # 8. Train Model
     best = 0.0
+    # history of per-epoch metrics, used to draw curve.png after training
+    metric_history = {
+        "epoch": [],
+        "train_loss": [],
+        "train_top1": [],
+        "val_epoch": [],
+        "val_loss": [],
+        "val_top1": [],
+    }
     for epoch in range(0, cfg.epochs):
         if epoch < resume_epoch:
             logger.info(
@@ -353,6 +366,12 @@ def train_model(
         )
         log_epoch(record_list, epoch + 1, "train", ips)
 
+        # record per-epoch train metrics for the training curve
+        metric_history["epoch"].append(epoch + 1)
+        metric_history["train_loss"].append(record_list["loss"].avg)
+        if record_list.get("top1") is not None:
+            metric_history["train_top1"].append(record_list["top1"].avg)
+
         def evaluate(best):
             model.eval()
             results = []
@@ -438,6 +457,12 @@ def train_model(
                         best = record_list[top_flag].avg
                         best_flag = True
             acc = record_list["top1"].avg
+            # record per-epoch validation metrics for the training curve
+            metric_history["val_epoch"].append(epoch + 1)
+            if record_list.get("loss") is not None:
+                metric_history["val_loss"].append(record_list["loss"].avg)
+            if record_list.get("top1") is not None:
+                metric_history["val_top1"].append(record_list["top1"].avg)
             return best, best_flag, acc
 
         # use precise bn to improve acc
@@ -595,7 +620,88 @@ def train_model(
                 )
                 save_model_info(metric_info, output_dir, prefix)
 
+    # 11. Plot training curve and confusion matrices (rank 0 only)
+    if not parallel or dist.get_rank() == 0:
+        _plot_training_outputs(
+            cfg,
+            model,
+            metric_history,
+            valid_loader if validate else None,
+            output_dir,
+            use_amp,
+            amp_level,
+            logger,
+        )
+
     logger.info(f"training {model_name} finished")
+
+
+def _plot_training_outputs(
+    cfg,
+    model,
+    metric_history,
+    valid_loader,
+    output_dir,
+    use_amp,
+    amp_level,
+    logger,
+):
+    """Save curve.png and (for classification recognizers) confusion matrices
+    after training. Failures here never interrupt training."""
+    # 11.1 training curve
+    try:
+        plot_curve(metric_history, osp.join(output_dir, "curve.png"))
+    except Exception as e:
+        logger.warning(f"Failed to plot training curve: {e}")
+
+    # 11.2 confusion matrices, only meaningful for classification recognizers
+    framework = cfg.MODEL.get("framework", "")
+    is_classifier = "Recognizer" in framework and "Recognizer1D" not in framework
+    if valid_loader is None or not is_classifier:
+        return
+
+    try:
+        model.eval()
+        all_labels = []
+        all_preds = []
+        with paddle.no_grad():
+            for data in valid_loader:
+                if use_amp:
+                    with amp.auto_cast(
+                        custom_black_list={"reduce_mean", "conv3d"},
+                        level=amp_level,
+                    ):
+                        cls_score = model(data, mode="test")
+                else:
+                    cls_score = model(data, mode="test")
+                preds = paddle.argmax(cls_score, axis=-1)
+                all_preds.append(preds.numpy().reshape(-1))
+                # data[1] holds the labels with shape [N, 1]
+                all_labels.append(np.asarray(data[1]).reshape(-1))
+
+        if not all_labels:
+            logger.warning("No validation data for confusion matrix, skip.")
+            return
+
+        labels = np.concatenate(all_labels)
+        preds = np.concatenate(all_preds)
+        num_classes = cfg.MODEL.get("head", {}).get("num_classes", None)
+        if num_classes is None:
+            num_classes = int(max(labels.max(), preds.max())) + 1
+
+        cm = compute_confusion_matrix(labels, preds, num_classes)
+        plot_confusion_matrix(
+            cm,
+            osp.join(output_dir, "confusion_matrix.png"),
+            normalize=False,
+        )
+        plot_confusion_matrix(
+            cm,
+            osp.join(output_dir, "confusion_matrix_normalized.png"),
+            normalize=True,
+        )
+    except Exception as e:
+        logger.warning(f"Failed to plot confusion matrix: {e}")
 
 
 def export(

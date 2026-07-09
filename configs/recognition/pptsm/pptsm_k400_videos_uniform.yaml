@@ -2,15 +2,21 @@ MODEL: #MODEL field
     framework: "Recognizer2D" #Mandatory, indicate the type of network, associate to the 'paddlevideo/modeling/framework/' .
     backbone: #Mandatory, indicate the type of backbone, associate to the 'paddlevideo/modeling/backbones/' .
         name: "ResNetTweaksTSM" #Mandatory, The name of backbone.
-        pretrained: "data/ResNet50_vd_ssld_v2_pretrained.pdparams" #Optional, pretrained model path.
-        depth: 50 #Optional, the depth of backbone architecture.
+        pretrained: "data/ResNet101_vd_ssld_pretrained.pdparams" #Optional, pretrained model path.
+        depth: 101 #Optional, the depth of backbone architecture.
     head:
         name: "ppTSMHead" #Mandatory, indicate the type of head, associate to the 'paddlevideo/modeling/heads'
-        num_classes: 400 #Optional, the number of classes to be classified.
+        num_classes: 7 #Optional, the number of classes to be classified.
         in_channels: 2048 #input channel of the extracted feature.
         drop_ratio: 0.5 #the ratio of dropout
         std: 0.01 #std value in params initialization
         ls_eps: 0.1 # label smooth factor
+        loss_cfg:
+            name: "CrossEntropyLoss"
+            # per-class weight to counter label imbalance (inverse train-set
+            # frequency, normalized to mean 1), order matches label index:
+            # [Arrest, Arson, Explosion, Fighting, Normal, RoadAccident, Vandalism]
+            class_weight: [2.6353, 0.4362, 2.6353, 0.1550, 0.0626, 0.3227, 0.7529]
 
 DATASET: #DATASET field
     batch_size: 16  #Mandatory, bacth size
@@ -119,6 +125,7 @@ INFERENCE:
     name: 'ppTSM_Inference_helper'
     num_seg: 8
     target_size: 224
+    top_k: 5
 
 model_name: "ppTSM"
 log_interval: 10 #Optional, the interal of logger, default:10

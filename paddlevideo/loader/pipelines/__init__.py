@@ -14,10 +14,10 @@
 
 from .anet_pipeline import GetMatchMap, GetVideoLabel, LoadFeat
 from .augmentations import (CenterCrop, ColorJitter, GroupRandomFlip,
-                            GroupResize, Image2Array, JitterScale, MultiCrop,
-                            Normalization, PackOutput, RandomCrop, RandomFlip,
-                            RandomResizedCrop, Scale, TenCrop, ToArray,
-                            UniformCrop, RandomGamma, MultiCenterCrop,
+                            GroupResize, Image2Array, JitterScale, Letterbox,
+                            MultiCrop, Normalization, PackOutput, RandomCrop,
+                            RandomFlip, RandomResizedCrop, Scale, TenCrop,
+                            ToArray, UniformCrop, RandomGamma, MultiCenterCrop,
                             RandomBrightness, RandomHue, RandomSaturation, YowoAug)
 from .augmentations_ava import *
 from .compose import Compose
@@ -52,5 +52,6 @@ __all__ = [
     'RandomGamma', 'MultiCenterCrop', 'RandomBrightness', 'RandomHue',
     'RandomSaturation', 'UniformSampleFrames', 'PoseDecode', 'PoseCompact',
     'Resize', 'RandomResizedCrop_V2', 'Flip_V2', 'GeneratePoseTarget',
-    'FormatShape', 'Collect', 'RandomSaturation', 'SamplerUCF24', 'YowoAug'
+    'FormatShape', 'Collect', 'RandomSaturation', 'SamplerUCF24', 'YowoAug',
+    'Letterbox'
 ]
