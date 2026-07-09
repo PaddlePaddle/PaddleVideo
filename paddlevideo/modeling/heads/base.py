@@ -76,6 +76,8 @@ class BaseHead(nn.Layer):
             losses (dict): A dict containing field 'loss'(mandatory) and 'top1_acc', 'top5_acc'(optional).
 
         """
+        # top5 accuracy is undefined when there are fewer than 5 classes
+        if_top5 = if_top5 and scores.shape[-1] >= 5
         if len(labels) == 1:  #commonly case
             labels = labels[0]
             losses = dict()

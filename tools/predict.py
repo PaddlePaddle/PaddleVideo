@@ -49,6 +49,13 @@ def parse_args():
         help="whether input time test file")
     parser.add_argument("--model_file", type=str)
     parser.add_argument("--params_file", type=str)
+    parser.add_argument(
+        "--label_name_path",
+        type=str,
+        default=None,
+        help="path to a label list file (one 'index name' or 'name' per line, "
+        "ordered by training class index) to display class names instead of "
+        "numeric indices")
 
     # params for paddle predict
     parser.add_argument("-b", "--batch_size", type=int, default=1)
@@ -162,6 +169,20 @@ def main():
     model_name = cfg.model_name
     print(f"Inference model({model_name})...")
     InferenceHelper = build_inference_helper(cfg.INFERENCE)
+
+    # optionally load class names so results show names instead of indices
+    if args.label_name_path:
+        with open(args.label_name_path, "r") as f:
+            label_list = []
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                # support both "index name" and bare "name" formats
+                parts = line.split(maxsplit=1)
+                label_list.append(parts[1] if len(parts) == 2
+                                   and parts[0].isdigit() else line)
+        InferenceHelper.label_list = label_list
 
     inference_config, predictor = create_paddle_predictor(args, cfg)
 

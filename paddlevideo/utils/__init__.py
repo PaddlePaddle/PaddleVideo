@@ -21,4 +21,5 @@ from .dist_utils import get_dist_info, main_only
 from .save_load import save, load, load_ckpt, mkdir
 from .precise_bn import do_preciseBN
 from .profiler import add_profiler_step
+from .plot import plot_curve, compute_confusion_matrix, plot_confusion_matrix
 __all__ = ['Registry', 'build']

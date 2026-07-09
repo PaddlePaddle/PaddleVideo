@@ -21,7 +21,22 @@ from .base import BaseWeightedLoss
 
 @LOSSES.register()
 class CrossEntropyLoss(BaseWeightedLoss):
-    """Cross Entropy Loss."""
+    """Cross Entropy Loss.
+
+    Args:
+        class_weight (list, optional): per-class rescaling weight used to
+            counter class imbalance, e.g. inverse class frequency. Length
+            must match num_classes. Default: None (no reweighting).
+        loss_weight (float): Factor scalar multiplied on the loss.
+            Default: 1.0.
+    """
+    def __init__(self, class_weight=None, loss_weight=1.0):
+        super().__init__(loss_weight=loss_weight)
+        self.class_weight = None
+        if class_weight is not None:
+            self.class_weight = paddle.to_tensor(class_weight,
+                                                  dtype='float32')
+
     def _forward(self, score, labels, **kwargs):
         """Forward function.
         Args:
@@ -32,5 +47,7 @@ class CrossEntropyLoss(BaseWeightedLoss):
         Returns:
             loss (paddle.Tensor): The returned CrossEntropy loss.
         """
+        if self.class_weight is not None and 'weight' not in kwargs:
+            kwargs['weight'] = self.class_weight
         loss = F.cross_entropy(score, labels, **kwargs)
         return loss
